@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>КнигоМир | Сообщество книголюбов</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styleMain.css"
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="#" class="logo">
+                <i class="fas fa-book-open"></i>
+                КнигоМир
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active">Главная</a></li>
+                    <li><a href="#">Каталог</a></li>
+                    <li><a href="#">Форум</a></li>
+                    <li><a href="#">Рецензии</a></li>
+                    <li><a href="#">Топ книг</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn btn-outline">Войти</button>
+                <button class="btn">Регистрация</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Крупнейшее сообщество книголюбов</h1>
+            <p>Откройте для себя новые книги, делитесь впечатлениями и находите единомышленников</p>
+            <div class="search-container">
+                <input type="text" placeholder="Поиск книг, авторов, рецензий...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <div class="container">
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="books-count">0</div>
+                <div class="stat-text">Книг в каталоге</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="users-count">0</div>
+                <div class="stat-text">Пользователей</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="reviews-count">0</div>
+                <div class="stat-text">Рецензий</div>
+            </div>
+        </div>
+
+        <!-- Popular Books Section -->
+        <div class="section-header">
+            <h2>Популярные книги месяца</h2>
+        </div>
+        
+        <div class="carousel">
+            <button class="carousel-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+            <div class="carousel-container">
+                <div class="book-card">
+                    <div class="book-cover">
+                        <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=Мастер+и+Маргарита" alt="Мастер и Маргарита">
+                    </div>
+                    <div class="book-info">
+                        <div class="book-title">Мастер и Маргарита</div>
+                        <div class="book-author">Михаил Булгаков</div>
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <div class="rating-value">4.8</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="book-card">
+                    <div class="book-cover">
+                        <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=1984" alt="1984">
+                    </div>
+                    <div class="book-info">
+                        <div class="book-title">1984</div>
+                        <div class="book-author">Джордж Оруэлл</div>
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="rating-value">4.9</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="book-card">
+                    <div class="book-cover">
+                        <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=Гарри+Поттер" alt="Гарри Поттер">
+                    </div>
+                    <div class="book-info">
+                        <div class="book-title">Гарри Поттер и философский камень</div>
+                        <div class="book-author">Дж.К. Роулинг</div>
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <div class="rating-value">4.7</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="book-card">
+                    <div class="book-cover">
+                        <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=Преступление+и+наказание" alt="Преступление и наказание">
+                    </div>
+                    <div class="book-info">
+                        <div class="book-title">Преступление и наказание</div>
+                        <div class="book-author">Федор Достоевский</div>
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <div class="rating-value">4.8</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="book-card">
+                    <div class="book-cover">
+                        <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=Властелин+Колец" alt="Властелин колец">
+                    </div>
+                    <div class="book-info">
+                        <div class="book-title">Властелин колец</div>
+                        <div class="book-author">Дж.Р.Р. Толкин</div>
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="rating-value">4.9</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <!-- Latest Reviews Section -->
+        <div class="section-header">
+            <h2>Свежие рецензии</h2>
+        </div>
+        
+        <div class="reviews">
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="user-avatar">А</div>
+                    <div class="user-info">
+                        <h4>Александр Петров</h4>
+                        <p>2 дня назад</p>
+                    </div>
+                </div>
+                <div class="review-content">
+                    <p>"1984" заставил меня пересмотреть свое отношение к современным технологиям и приватности. Оруэлл предвидел наше будущее с пугающей точностью...</p>
+                </div>
+                <div>
+                    <a href="#" class="review-book">1984</a>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="user-avatar">М</div>
+                    <div class="user-info">
+                        <h4>Мария Иванова</h4>
+                        <p>5 дней назад</p>
+                    </div>
+                </div>
+                <div class="review-content">
+                    <p>"Мастер и Маргарита" — это шедевр, который невозможно описать словами. Булгаков создал не просто роман, а целую вселенную...</p>
+                </div>
+                <div>
+                    <a href="#" class="review-book">Мастер и Маргарита</a>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="user-avatar">Д</div>
+                    <div class="user-info">
+                        <h4>Дмитрий Соколов</h4>
+                        <p>1 неделю назад</p>
+                    </div>
+                </div>
+                <div class="review-content">
+                    <p>"Гарри Поттер" — это больше, чем просто книга о волшебстве. Это история о дружбе, преданности и выборе между добром и злом...</p>
+                </div>
+                <div>
+                    <a href="#" class="review-book">Гарри Поттер</a>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Forums Section -->
+        <div class="section-header">
+            <h2>Активные обсуждения</h2>
+        </div>
+        
+        <div class="forum-topics">
+            <div class="forum-card">
+                <a href="#" class="forum-title">Где найти хорошие книги в жанре научной фантастики?</a>
+                <div class="forum-meta">
+                    <span><i class="fas fa-user"></i> Анна К.</span>
+                    <span><i class="fas fa-clock"></i> Вчера</span>
+                </div>
+                <p class="forum-excerpt">Ищу рекомендации по современной научной фантастике. Особенно интересны авторы, пишущие в духе Айзека Азимова...</p>
+                <div class="forum-stats">
+                    <span><i class="fas fa-comments"></i> 24 ответа</span>
+                    <span><i class="fas fa-eye"></i> 156 просмотров</span>
+                </div>
+            </div>
+            <div class="forum-card">
+                <a href="#" class="forum-title">Обсуждение "Войны и мира" — почему эта книга до сих пор актуальна?</a>
+                <div class="forum-meta">
+                    <span><i class="fas fa-user"></i> Иван С.</span>
+                    <span><i class="fas fa-clock"></i> 3 дня назад</span>
+                </div>
+                <p class="forum-excerpt">Хочу понять, почему "Война и мир" считается вершиной мировой литературы. Что в ней особенного? Делитесь своими мыслями...</p>
+                <div class="forum-stats">
+                    <span><i class="fas fa-comments"></i> 37 ответов</span>
+                    <span><i class="fas fa-eye"></i> 289 просмотров</span>
+                </div>
+            </div>
+            <div class="forum-card">
+                <a href="#" class="forum-title">Как сохранить интерес к чтению в цифровую эпоху?</a>
+                <div class="forum-meta">
+                    <span><i class="fas fa-user"></i> Екатерина М.</span>
+                    <span><i class="fas fa-clock"></i> 5 дней назад</span>
+                </div>
+                <p class="forum-excerpt">Социальные сети и сериалы отнимают все время. Как вернуть себе любовь к чтению и находить время для книг? Делитесь лайфхаками...</p>
+                <div class="forum-stats">
+                    <span><i class="fas fa-comments"></i> 42 ответа</span>
+                    <span><i class="fas fa-eye"></i> 312 просмотров</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Random Book Section -->
+        <div class="random-book">
+            <h2>Случайная книга для вдохновения</h2>
+            <p>Иногда лучшие открытия случаются случайно. Нажмите кнопку, чтобы найти свою следующую любимую книгу</p>
+            <div class="book-preview">
+                <img src="https://placehold.co/250x350/2c3e50/ecf0f1?text=Сто+лет+одиночества" alt="Сто лет одиночества">
+                <div class="book-details">
+                    <h3>Сто лет одиночества</h3>
+                    <p>Габриэль Гарсиа Маркес</p>
+                    <div class="rating-display">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <span style="color: white; margin-left: 10px;">4.8</span>
+                    </div>
+                </div>
+                <button class="random-btn" id="random-book-btn">
+                    <i class="fas fa-sync-alt"></i> Показать другую книгу
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>КнигоМир</h3>
+                    <p>Крупнейшее сообщество книголюбов, объединяющее миллионы читателей по всему миру. Находим лучшие книги и делимся впечатлениями.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Навигация</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Главная</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Каталог книг</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Форум</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Топ книг</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> О нас</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Помощь</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> FAQ</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Как добавить книгу</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Написать рецензию</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Правила форума</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Связаться с нами</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 КнигоМир. Все права защищены. Создано для дипломного проекта.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Animated counters
+        function animateCounter(element, target) {
+            let current = 0;
+            const increment = target / 50;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current).toLocaleString();
+            }, 30);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize counters
+            animateCounter(document.getElementById('books-count'), 15842);
+            animateCounter(document.getElementById('users-count'), 78532);
+            animateCounter(document.getElementById('reviews-count'), 42689);
+            
+            // Carousel functionality
+            const carouselContainer = document.querySelector('.carousel-container');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            const bookCards = document.querySelectorAll('.book-card');
+            
+            let currentIndex = 0;
+            const cardWidth = bookCards[0].offsetWidth + 20; // including margin
+            
+            function updateCarousel() {
+                carouselContainer.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+            }
+            
+            nextBtn.addEventListener('click', () => {
+                if (currentIndex < bookCards.length - 3) {
+                    currentIndex++;
+                    updateCarousel();
+                }
+            });
+            
+            prevBtn.addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateCarousel();
+                }
+            });
+            
+            // Random book functionality
+            const randomBookBtn = document.getElementById('random-book-btn');
+            const randomBooks = [
+                {
+                    title: "Сто лет одиночества",
+                    author: "Габриэль Гарсиа Маркес",
+                    rating: "4.8",
+                    cover: "https://placehold.co/250x350/2c3e50/ecf0f1?text=Сто+лет+одиночества"
+                },
+                {
+                    title: "Маленький принц",
+                    author: "Антуан де Сент-Экзюпери",
+                    rating: "4.9",
+                    cover: "https://placehold.co/250x350/2c3e50/ecf0f1?text=Маленький+принц"
+                },
+                {
+                    title: "Алхимик",
+                    author: "Пауло Коэльо",
+                    rating: "4.6",
+                    cover: "https://placehold.co/250x350/2c3e50/ecf0f1?text=Алхимик"
+                },
+                {
+                    title: "Над пропастью во ржи",
+                    author: "Джером Д. Сэлинджер",
+                    rating: "4.5",
+                    cover: "https://placehold.co/250x350/2c3e50/ecf0f1?text=Над+пропастью+во+ржи"
+                },
+                {
+                    title: "Три товарища",
+                    author: "Эрих Мария Ремарк",
+                    rating: "4.7",
+                    cover: "https://placehold.co/250x350/2c3e50/ecf0f1?text=Три+товарища"
+                }
+            ];
+            
+            randomBookBtn.addEventListener('click', () => {
+                const randomIndex = Math.floor(Math.random() * randomBooks.length);
+                const book = randomBooks[randomIndex];
+                
+                document.querySelector('.book-preview img').src = book.cover;
+                document.querySelector('.book-details h3').textContent = book.title;
+                document.querySelector('.book-details p').textContent = book.author;
+                document.querySelector('.rating-display span').textContent = book.rating;
+            });
+        });
+    </script>
+</body>
+</html>

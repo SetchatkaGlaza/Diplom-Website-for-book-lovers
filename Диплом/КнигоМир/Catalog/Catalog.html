@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог книг | КнигоМир</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styleCatalog.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="#" class="logo">
+                <i class="fas fa-book-open"></i>
+                КнигоМир
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="#" class="active">Каталог</a></li>
+                    <li><a href="#">Форум</a></li>
+                    <li><a href="#">Рецензии</a></li>
+                    <li><a href="#">Топ книг</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn btn-outline">Войти</button>
+                <button class="btn">Регистрация</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Обширный каталог книг</h1>
+            <p>Найдите свою идеальную книгу среди тысяч произведений из разных жанров и эпох</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="catalog-container">
+            <!-- Filters Sidebar -->
+            <aside class="filters-sidebar">
+                <div class="filter-section">
+                    <h3><i class="fas fa-filter"></i> Фильтры</h3>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label" for="search-input">Быстрый поиск</label>
+                        <input type="text" id="search-input" class="filter-input" placeholder="Название, автор...">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Жанр</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="genre-fantasy" name="genre">
+                                <label for="genre-fantasy">Фэнтези</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="genre-scifi" name="genre">
+                                <label for="genre-scifi">Научная фантастика</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="genre-detective" name="genre">
+                                <label for="genre-detective">Детектив</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="genre-classic" name="genre">
+                                <label for="genre-classic">Классика</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="genre-romance" name="genre">
+                                <label for="genre-romance">Роман</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="genre-nonfiction" name="genre">
+                                <label for="genre-nonfiction">Нон-фикшн</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Год издания</label>
+                        <div class="range-container">
+                            <span class="range-value">1900</span>
+                            <input type="range" min="1900" max="2023" value="2023" class="filter-input">
+                            <span class="range-value">2023</span>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label" for="author-select">Автор</label>
+                        <select id="author-select" class="filter-input">
+                            <option value="">Любой автор</option>
+                            <option value="tolkien">Дж.Р.Р. Толкин</option>
+                            <option value="rowling">Дж.К. Роулинг</option>
+                            <option value="orwell">Джордж Оруэлл</option>
+                            <option value="dostoevsky">Ф.М. Достоевский</option>
+                            <option value="austen">Джейн Остин</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Рейтинг</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="rating-5" name="rating">
+                                <label for="rating-5">5 звезд</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="rating-4" name="rating">
+                                <label for="rating-4">4+ звезды</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="rating-3" name="rating">
+                                <label for="rating-3">3+ звезды</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Теги</label>
+                        <div class="tags-container">
+                            <span class="tag">антиутопия</span>
+                            <span class="tag">исторический</span>
+                            <span class="tag">приключения</span>
+                            <span class="tag">любовь</span>
+                            <span class="tag">триллер</span>
+                            <span class="tag">философия</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" style="width: 100%; margin-top: 20px;">
+                        <i class="fas fa-search"></i> Применить фильтры
+                    </button>
+                </div>
+            </aside>
+            
+            <!-- Books Content -->
+            <main>
+                <div class="books-controls">
+                    <div class="sort-controls">
+                        <span class="sort-label">Сортировать по:</span>
+                        <select class="filter-input" style="width: auto; padding: 6px 12px;">
+                            <option>Популярности</option>
+                            <option>Рейтингу</option>
+                            <option>Новизне</option>
+                            <option>Названию (А-Я)</option>
+                            <option>Названию (Я-А)</option>
+                        </select>
+                    </div>
+                    <div class="view-controls">
+                        <button class="view-btn active" id="grid-view">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button class="view-btn" id="list-view">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Grid View -->
+                <div class="books-grid" id="books-container">
+                    <!-- Book 1 -->
+                    <div class="book-card">
+                        <div class="book-cover">
+                            <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=Властелин+Колец" alt="Властелин колец">
+                        </div>
+                        <div class="book-info">
+                            <div class="book-title">Властелин колец</div>
+                            <div class="book-author">Дж.Р.Р. Толкин</div>
+                            <div class="book-meta">
+                                <span>Фэнтези</span>
+                                <span>1954</span>
+                            </div>
+                            <div class="book-rating">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="rating-value">4.9</div>
+                            </div>
+                            <div class="book-actions">
+                                <button class="btn btn-sm">Подробнее</button>
+                                <button class="btn btn-sm btn-outline"><i class="fas fa-heart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Book 2 -->
+                    <div class="book-card">
+                        <div class="book-cover">
+                            <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=1984" alt="1984">
+                        </div>
+                        <div class="book-info">
+                            <div class="book-title">1984</div>
+                            <div class="book-author">Джордж Оруэлл</div>
+                            <div class="book-meta">
+                                <span>Антиутопия</span>
+                                <span>1949</span>
+                            </div>
+                            <div class="book-rating">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <div class="rating-value">4.8</div>
+                            </div>
+                            <div class="book-actions">
+                                <button class="btn btn-sm">Подробнее</button>
+                                <button class="btn btn-sm btn-outline"><i class="fas fa-heart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Book 3 -->
+                    <div class="book-card">
+                        <div class="book-cover">
+                            <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=Гарри+Поттер" alt="Гарри Поттер">
+                        </div>
+                        <div class="book-info">
+                            <div class="book-title">Гарри Поттер и философский камень</div>
+                            <div class="book-author">Дж.К. Роулинг</div>
+                            <div class="book-meta">
+                                <span>Фэнтези</span>
+                                <span>1997</span>
+                            </div>
+                            <div class="book-rating">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <div class="rating-value">4.7</div>
+                            </div>
+                            <div class="book-actions">
+                                <button class="btn btn-sm">Подробнее</button>
+                                <button class="btn btn-sm btn-outline"><i class="fas fa-heart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Book 4 -->
+                    <div class="book-card">
+                        <div class="book-cover">
+                            <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=Мастер+и+Маргарита" alt="Мастер и Маргарита">
+                        </div>
+                        <div class="book-info">
+                            <div class="book-title">Мастер и Маргарита</div>
+                            <div class="book-author">Михаил Булгаков</div>
+                            <div class="book-meta">
+                                <span>Классика</span>
+                                <span>1967</span>
+                            </div>
+                            <div class="book-rating">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <div class="rating-value">4.8</div>
+                            </div>
+                            <div class="book-actions">
+                                <button class="btn btn-sm">Подробнее</button>
+                                <button class="btn btn-sm btn-outline"><i class="fas fa-heart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Book 5 -->
+                    <div class="book-card">
+                        <div class="book-cover">
+                            <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=Преступление+и+наказание" alt="Преступление и наказание">
+                        </div>
+                        <div class="book-info">
+                            <div class="book-title">Преступление и наказание</div>
+                            <div class="book-author">Федор Достоевский</div>
+                            <div class="book-meta">
+                                <span>Классика</span>
+                                <span>1866</span>
+                            </div>
+                            <div class="book-rating">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <div class="rating-value">4.8</div>
+                            </div>
+                            <div class="book-actions">
+                                <button class="btn btn-sm">Подробнее</button>
+                                <button class="btn btn-sm btn-outline"><i class="fas fa-heart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Book 6 -->
+                    <div class="book-card">
+                        <div class="book-cover">
+                            <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=Гордость+и+предубеждение" alt="Гордость и предубеждение">
+                        </div>
+                        <div class="book-info">
+                            <div class="book-title">Гордость и предубеждение</div>
+                            <div class="book-author">Джейн Остин</div>
+                            <div class="book-meta">
+                                <span>Классика</span>
+                                <span>1813</span>
+                            </div>
+                            <div class="book-rating">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <div class="rating-value">4.7</div>
+                            </div>
+                            <div class="book-actions">
+                                <button class="btn btn-sm">Подробнее</button>
+                                <button class="btn btn-sm btn-outline"><i class="fas fa-heart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Book 7 -->
+                    <div class="book-card">
+                        <div class="book-cover">
+                            <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=Три+Товарища" alt="Три товарища">
+                        </div>
+                        <div class="book-info">
+                            <div class="book-title">Три товарища</div>
+                            <div class="book-author">Эрих Мария Ремарк</div>
+                            <div class="book-meta">
+                                <span>Классика</span>
+                                <span>1936</span>
+                            </div>
+                            <div class="book-rating">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <div class="rating-value">4.8</div>
+                            </div>
+                            <div class="book-actions">
+                                <button class="btn btn-sm">Подробнее</button>
+                                <button class="btn btn-sm btn-outline"><i class="fas fa-heart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Book 8 -->
+                    <div class="book-card">
+                        <div class="book-cover">
+                            <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=Алхимик" alt="Алхимик">
+                        </div>
+                        <div class="book-info">
+                            <div class="book-title">Алхимик</div>
+                            <div class="book-author">Пауло Коэльо</div>
+                            <div class="book-meta">
+                                <span>Философия</span>
+                                <span>1988</span>
+                            </div>
+                            <div class="book-rating">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <div class="rating-value">4.6</div>
+                            </div>
+                            <div class="book-actions">
+                                <button class="btn btn-sm">Подробнее</button>
+                                <button class="btn btn-sm btn-outline"><i class="fas fa-heart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Book 9 -->
+                    <div class="book-card">
+                        <div class="book-cover">
+                            <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=Сто+лет+одиночества" alt="Сто лет одиночества">
+                        </div>
+                        <div class="book-info">
+                            <div class="book-title">Сто лет одиночества</div>
+                            <div class="book-author">Габриэль Гарсиа Маркес</div>
+                            <div class="book-meta">
+                                <span>Магический реализм</span>
+                                <span>1967</span>
+                            </div>
+                            <div class="book-rating">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <div class="rating-value">4.8</div>
+                            </div>
+                            <div class="book-actions">
+                                <button class="btn btn-sm">Подробнее</button>
+                                <button class="btn btn-sm btn-outline"><i class="fas fa-heart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Book 10 -->
+                    <div class="book-card">
+                        <div class="book-cover">
+                            <img src="https://placehold.co/220x300/2c3e50/ecf0f1?text=451+градус+по+Фаренгейту" alt="451 градус по Фаренгейту">
+                        </div>
+                        <div class="book-info">
+                            <div class="book-title">451 градус по Фаренгейту</div>
+                            <div class="book-author">Рэй Брэдбери</div>
+                            <div class="book-meta">
+                                <span>Антиутопия</span>
+                                <span>1953</span>
+                            </div>
+                            <div class="book-rating">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <div class="rating-value">4.7</div>
+                            </div>
+                            <div class="book-actions">
+                                <button class="btn btn-sm">Подробнее</button>
+                                <button class="btn btn-sm btn-outline"><i class="fas fa-heart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="page-btn">&laquo;</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <button class="page-btn">5</button>
+                    <button class="page-btn">&raquo;</button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>КнигоМир</h3>
+                    <p>Крупнейшее сообщество книголюбов, объединяющее миллионы читателей по всему миру. Находим лучшие книги и делимся впечатлениями.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Навигация</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html"><i class="fas fa-chevron-right"></i> Главная</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Каталог книг</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Форум</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Топ книг</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> О нас</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Помощь</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> FAQ</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Как добавить книгу</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Написать рецензию</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Правила форума</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Связаться с нами</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 КнигоМир. Все права защищены. Создано для дипломного проекта.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // View toggle functionality
+            const gridViewBtn = document.getElementById('grid-view');
+            const listViewBtn = document.getElementById('list-view');
+            const booksContainer = document.getElementById('books-container');
+            
+            gridViewBtn.addEventListener('click', () => {
+                gridViewBtn.classList.add('active');
+                listViewBtn.classList.remove('active');
+                booksContainer.className = 'books-grid';
+            });
+            
+            listViewBtn.addEventListener('click', () => {
+                listViewBtn.classList.add('active');
+                gridViewBtn.classList.remove('active');
+                booksContainer.className = 'books-list';
+                
+                // Convert grid items to list items
+                const bookCards = booksContainer.querySelectorAll('.book-card');
+                bookCards.forEach(card => {
+                    const cover = card.querySelector('.book-cover');
+                    const info = card.querySelector('.book-info');
+                    const title = info.querySelector('.book-title').textContent;
+                    const author = info.querySelector('.book-author').textContent;
+                    const meta = info.querySelector('.book-meta').innerHTML;
+                    const rating = info.querySelector('.book-rating').innerHTML;
+                    const actions = info.querySelector('.book-actions').innerHTML;
+                    
+                    card.className = 'book-list-item';
+                    card.innerHTML = `
+                        <div class="list-book-cover">
+                            ${cover.outerHTML}
+                        </div>
+                        <div class="list-book-info">
+                            <h3 class="list-book-title">${title}</h3>
+                            <div class="list-book-author">${author}</div>
+                            <div class="list-book-desc">
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                            </div>
+                            <div class="list-book-meta">
+                                ${meta}
+                            </div>
+                            <div class="book-rating">
+                                ${rating}
+                            </div>
+                            <div class="list-book-actions">
+                                ${actions}
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+            
+            // Tag selection functionality
+            const tags = document.querySelectorAll('.tag');
+            tags.forEach(tag => {
+                tag.addEventListener('click', () => {
+                    tag.classList.toggle('active');
+                });
+            });
+            
+            // Simulate filter application
+            const applyFiltersBtn = document.querySelector('.filters-sidebar .btn');
+            applyFiltersBtn.addEventListener('click', () => {
+                alert('Фильтры применены! В реальном приложении здесь были бы отфильтрованы результаты.');
+            });
+        });
+    </script>
+</body>
+</html>

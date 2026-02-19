@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форум | КнигоМир</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styleForum.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="#" class="logo">
+                <i class="fas fa-book-open"></i>
+                КнигоМир
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="catalog.html">Каталог</a></li>
+                    <li><a href="#" class="active">Форум</a></li>
+                    <li><a href="#">Рецензии</a></li>
+                    <li><a href="#">Топ книг</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn btn-outline">Войти</button>
+                <button class="btn">Регистрация</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Книжное сообщество</h1>
+            <p>Обсуждайте любимые книги, делитесь мнениями и находите единомышленников</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="forum-container">
+            <!-- Categories Sidebar -->
+            <aside class="categories-sidebar">
+                <div class="category-section active">
+                    <h3>
+                        Обсуждения
+                        <i class="fas fa-chevron-right"></i>
+                    </h3>
+                    <div class="subcategories">
+                        <div class="subcategory-item">
+                            <a href="#"><i class="fas fa-book"></i> Художественная литература</a>
+                        </div>
+                        <div class="subcategory-item">
+                            <a href="#"><i class="fas fa-dragon"></i> Фэнтези и фантастика</a>
+                        </div>
+                        <div class="subcategory-item">
+                            <a href="#"><i class="fas fa-brain"></i> Нон-фикшн</a>
+                        </div>
+                        <div class="subcategory-item">
+                            <a href="#"><i class="fas fa-heart"></i> Романы и любовные истории</a>
+                        </div>
+                        <div class="subcategory-item">
+                            <a href="#"><i class="fas fa-magic"></i> Мистика и ужасы</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="category-section active">
+                    <h3>
+                        Помощь и общение
+                        <i class="fas fa-chevron-right"></i>
+                    </h3>
+                    <div class="subcategories">
+                        <div class="subcategory-item">
+                            <a href="#"><i class="fas fa-search"></i> Поиск книги по описанию</a>
+                        </div>
+                        <div class="subcategory-item">
+                            <a href="#"><i class="fas fa-question-circle"></i> Вопросы по сайту</a>
+                        </div>
+                        <div class="subcategory-item">
+                            <a href="#"><i class="fas fa-comment-alt"></i> Флудильня</a>
+                        </div>
+                        <div class="subcategory-item">
+                            <a href="#"><i class="fas fa-bullhorn"></i> Анонсы мероприятий</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="category-section">
+                    <h3>
+                        Литературное творчество
+                        <i class="fas fa-chevron-right"></i>
+                    </h3>
+                    <div class="subcategories">
+                        <div class="subcategory-item">
+                            <a href="#"><i class="fas fa-feather-alt"></i> Поэзия</a>
+                        </div>
+                        <div class="subcategory-item">
+                            <a href="#"><i class="fas fa-pen"></i> Проза</a>
+                        </div>
+                        <div class="subcategory-item">
+                            <a href="#"><i class="fas fa-edit"></i> Критика и рецензии</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="number">15.2K</div>
+                        <div class="label">тем</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">89.7K</div>
+                        <div class="label">сообщений</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">4.3K</div>
+                        <div class="label">пользователей</div>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Forum Content -->
+            <main>
+                <!-- New Topic Form (Hidden by default) -->
+                <div class="new-topic-form" id="new-topic-form">
+                    <h2 class="form-title">Создать новую тему</h2>
+                    <form id="topic-form">
+                        <div class="form-group">
+                            <label for="topic-title" class="form-label">Заголовок темы</label>
+                            <input type="text" id="topic-title" class="form-control" placeholder="Введите заголовок обсуждения" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="topic-category" class="form-label">Категория</label>
+                            <select id="topic-category" class="form-control" required>
+                                <option value="">Выберите категорию</option>
+                                <option value="fiction">Художественная литература</option>
+                                <option value="fantasy">Фэнтези и фантастика</option>
+                                <option value="nonfiction">Нон-фикшн</option>
+                                <option value="romance">Романы и любовные истории</option>
+                                <option value="mystery">Мистика и ужасы</option>
+                                <option value="book-search">Поиск книги по описанию</option>
+                                <option value="site-help">Вопросы по сайту</option>
+                                <option value="offtopic">Флудильня</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="topic-content" class="form-label">Содержание темы</label>
+                            <div class="editor-toolbar">
+                                <button type="button" class="editor-btn" title="Жирный"><i class="fas fa-bold"></i></button>
+                                <button type="button" class="editor-btn" title="Курсив"><i class="fas fa-italic"></i></button>
+                                <button type="button" class="editor-btn" title="Цитата"><i class="fas fa-quote-right"></i></button>
+                                <button type="button" class="editor-btn" title="Ссылка"><i class="fas fa-link"></i></button>
+                                <button type="button" class="editor-btn" title="Список"><i class="fas fa-list"></i></button>
+                            </div>
+                            <textarea id="topic-content" class="form-control" placeholder="Введите текст вашего обсуждения..." required></textarea>
+                        </div>
+                        
+                        <div class="submit-controls">
+                            <button type="button" class="btn btn-outline" id="cancel-topic">Отмена</button>
+                            <button type="submit" class="btn">Опубликовать тему</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Forum Content -->
+                <div class="forum-content">
+                    <div class="forum-header">
+                        <h2>Активные обсуждения</h2>
+                        <button class="btn new-topic-btn" id="create-topic-btn">
+                            <i class="fas fa-plus"></i> Новая тема
+                        </button>
+                    </div>
+                    
+                    <div class="forum-controls">
+                        <div class="sort-controls">
+                            <span class="sort-label">Сортировать по:</span>
+                            <select class="form-control" style="width: auto; padding: 6px 12px;">
+                                <option>Последнему сообщению</option>
+                                <option>Количеству ответов</option>
+                                <option>Количеству просмотров</option>
+                                <option>Дате создания</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-filter"></i> Фильтры
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <table class="forum-table">
+                        <thead>
+                            <tr>
+                                <th>Тема</th>
+                                <th>Раздел</th>
+                                <th>Автор</th>
+                                <th class="stats-cell">Ответы</th>
+                                <th class="stats-cell">Просмотры</th>
+                                <th>Последнее сообщение</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Topic 1 - Hot -->
+                            <tr class="hot-topic">
+                                <td>
+                                    <div class="topic-title">
+                                        <div class="topic-icon">!</div>
+                                        <div class="topic-info">
+                                            <h3><a href="forum-topic.html">Где найти хорошие книги в жанре научной фантастики?</a></h3>
+                                            <div class="topic-meta">
+                                                <span><i class="fas fa-eye"></i> 423</span>
+                                                <span><i class="fas fa-clock"></i> 3 дня назад</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Фэнтези и фантастика</td>
+                                <td>
+                                    <div class="topic-author">
+                                        <div class="author-avatar">А</div>
+                                        <span>Александр</span>
+                                    </div>
+                                </td>
+                                <td class="stats-cell">56</td>
+                                <td class="stats-cell">1.2K</td>
+                                <td>
+                                    <div class="last-post">
+                                        <span>Сегодня, 14:30</span>
+                                        <a href="#">→</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Topic 2 -->
+                            <tr>
+                                <td>
+                                    <div class="topic-title">
+                                        <div class="topic-icon">2</div>
+                                        <div class="topic-info">
+                                            <h3><a href="forum-topic.html">Обсуждение "Войны и мира" — почему эта книга до сих пор актуальна?</a></h3>
+                                            <div class="topic-meta">
+                                                <span><i class="fas fa-eye"></i> 387</span>
+                                                <span><i class="fas fa-clock"></i> 5 дней назад</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Художественная литература</td>
+                                <td>
+                                    <div class="topic-author">
+                                        <div class="author-avatar">И</div>
+                                        <span>Иван</span>
+                                    </div>
+                                </td>
+                                <td class="stats-cell">48</td>
+                                <td class="stats-cell">956</td>
+                                <td>
+                                    <div class="last-post">
+                                        <span>Вчера, 22:15</span>
+                                        <a href="#">→</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Topic 3 -->
+                            <tr>
+                                <td>
+                                    <div class="topic-title">
+                                        <div class="topic-icon">3</div>
+                                        <div class="topic-info">
+                                            <h3><a href="forum-topic.html">Как сохранить интерес к чтению в цифровую эпоху?</a></h3>
+                                            <div class="topic-meta">
+                                                <span><i class="fas fa-eye"></i> 298</span>
+                                                <span><i class="fas fa-clock"></i> 1 неделю назад</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Флудильня</td>
+                                <td>
+                                    <div class="topic-author">
+                                        <div class="author-avatar">Е</div>
+                                        <span>Екатерина</span>
+                                    </div>
+                                </td>
+                                <td class="stats-cell">42</td>
+                                <td class="stats-cell">872</td>
+                                <td>
+                                    <div class="last-post">
+                                        <span>Вчера, 18:45</span>
+                                        <a href="#">→</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Topic 4 -->
+                            <tr>
+                                <td>
+                                    <div class="topic-title">
+                                        <div class="topic-icon">4</div>
+                                        <div class="topic-info">
+                                            <h3><a href="forum-topic.html">Помогите найти книгу по описанию: мальчик с синими волосами</a></h3>
+                                            <div class="topic-meta">
+                                                <span><i class="fas fa-eye"></i> 156</span>
+                                                <span><i class="fas fa-clock"></i> 2 недели назад</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Поиск книги по описанию</td>
+                                <td>
+                                    <div class="topic-author">
+                                        <div class="author-avatar">М</div>
+                                        <span>Мария</span>
+                                    </div>
+                                </td>
+                                <td class="stats-cell">37</td>
+                                <td class="stats-cell">654</td>
+                                <td>
+                                    <div class="last-post">
+                                        <span>2 дня назад</span>
+                                        <a href="#">→</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Topic 5 -->
+                            <tr>
+                                <td>
+                                    <div class="topic-title">
+                                        <div class="topic-icon">5</div>
+                                        <div class="topic-info">
+                                            <h3><a href="forum-topic.html">Расскажите о своих любимых нон-фикшн книгах</a></h3>
+                                            <div class="topic-meta">
+                                                <span><i class="fas fa-eye"></i> 245</span>
+                                                <span><i class="fas fa-clock"></i> 3 недели назад</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Нон-фикшн</td>
+                                <td>
+                                    <div class="topic-author">
+                                        <div class="author-avatar">Д</div>
+                                        <span>Дмитрий</span>
+                                    </div>
+                                </td>
+                                <td class="stats-cell">31</td>
+                                <td class="stats-cell">732</td>
+                                <td>
+                                    <div class="last-post">
+                                        <span>3 дня назад</span>
+                                        <a href="#">→</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Topic 6 -->
+                            <tr>
+                                <td>
+                                    <div class="topic-title">
+                                        <div class="topic-icon">6</div>
+                                        <div class="topic-info">
+                                            <h3><a href="forum-topic.html">Обсуждение "Три товарища" Ремарка</a></h3>
+                                            <div class="topic-meta">
+                                                <span><i class="fas fa-eye"></i> 189</span>
+                                                <span><i class="fas fa-clock"></i> 1 месяц назад</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Художественная литература</td>
+                                <td>
+                                    <div class="topic-author">
+                                        <div class="author-avatar">С</div>
+                                        <span>Сергей</span>
+                                    </div>
+                                </td>
+                                <td class="stats-cell">28</td>
+                                <td class="stats-cell">543</td>
+                                <td>
+                                    <div class="last-post">
+                                        <span>4 дня назад</span>
+                                        <a href="#">→</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Topic 7 -->
+                            <tr>
+                                <td>
+                                    <div class="topic-title">
+                                        <div class="topic-icon">7</div>
+                                        <div class="topic-info">
+                                            <h3><a href="forum-topic.html">Книги для начинающих читателей</a></h3>
+                                            <div class="topic-meta">
+                                                <span><i class="fas fa-eye"></i> 134</span>
+                                                <span><i class="fas fa-clock"></i> 1 месяц назад</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Художественная литература</td>
+                                <td>
+                                    <div class="topic-author">
+                                        <div class="author-avatar">О</div>
+                                        <span>Ольга</span>
+                                    </div>
+                                </td>
+                                <td class="stats-cell">24</td>
+                                <td class="stats-cell">487</td>
+                                <td>
+                                    <div class="last-post">
+                                        <span>5 дней назад</span>
+                                        <a href="#">→</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Topic 8 -->
+                            <tr>
+                                <td>
+                                    <div class="topic-title">
+                                        <div class="topic-icon">8</div>
+                                        <div class="topic-info">
+                                            <h3><a href="forum-topic.html">Проблемы с сайтом - не загружаются обложки</a></h3>
+                                            <div class="topic-meta">
+                                                <span><i class="fas fa-eye"></i> 98</span>
+                                                <span><i class="fas fa-clock"></i> 1 месяц назад</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Вопросы по сайту</td>
+                                <td>
+                                    <div class="topic-author">
+                                        <div class="author-avatar">П</div>
+                                        <span>Петр</span>
+                                    </div>
+                                </td>
+                                <td class="stats-cell">19</td>
+                                <td class="stats-cell">326</td>
+                                <td>
+                                    <div class="last-post">
+                                        <span>6 дней назад</span>
+                                        <a href="#">→</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="pagination">
+                        <button class="page-btn">&laquo;</button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">4</button>
+                        <button class="page-btn">5</button>
+                        <button class="page-btn">&raquo;</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>КнигоМир</h3>
+                    <p>Крупнейшее сообщество книголюбов, объединяющее миллионы читателей по всему миру. Находим лучшие книги и делимся впечатлениями.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Навигация</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html"><i class="fas fa-chevron-right"></i> Главная</a></li>
+                        <li><a href="catalog.html"><i class="fas fa-chevron-right"></i> Каталог книг</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Форум</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Топ книг</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> О нас</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Помощь</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> FAQ</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Как добавить книгу</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Написать рецензию</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Правила форума</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Связаться с нами</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 КнигоМир. Все права защищены. Создано для дипломного проекта.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Toggle category sections
+            const categoryHeaders = document.querySelectorAll('.category-section h3');
+            categoryHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const section = header.parentElement;
+                    section.classList.toggle('active');
+                    header.querySelector('i').classList.toggle('fa-chevron-down');
+                });
+            });
+            
+            // New topic form toggle
+            const createTopicBtn = document.getElementById('create-topic-btn');
+            const newTopicForm = document.getElementById('new-topic-form');
+            const cancelTopicBtn = document.getElementById('cancel-topic-btn');
+            
+            createTopicBtn.addEventListener('click', () => {
+                newTopicForm.style.display = 'block';
+                window.scrollTo(0, 0);
+            });
+            
+            document.getElementById('cancel-topic').addEventListener('click', () => {
+                newTopicForm.style.display = 'none';
+            });
+            
+            // Topic form submission
+            document.getElementById('topic-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const title = document.getElementById('topic-title').value;
+                const category = document.getElementById('topic-category').value;
+                const content = document.getElementById('topic-content').value;
+                
+                if (title && category && content) {
+                    alert('Тема успешно создана! В реальном приложении она была бы добавлена в базу данных.');
+                    document.getElementById('topic-form').reset();
+                    newTopicForm.style.display = 'none';
+                } else {
+                    alert('Пожалуйста, заполните все обязательные поля.');
+                }
+            });
+            
+            // Editor toolbar functionality
+            const editorBtns = document.querySelectorAll('.editor-btn');
+            editorBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btn.classList.toggle('active');
+                });
+            });
+            
+            // Simulate hot topic detection
+            const rows = document.querySelectorAll('.forum-table tbody tr');
+            rows.forEach((row, index) => {
+                if (index < 3) {
+                    row.classList.add('hot-topic');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

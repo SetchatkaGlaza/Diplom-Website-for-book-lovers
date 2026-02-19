@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Топ книг | КнигоМир</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styleTopBook.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="#" class="logo">
+                <i class="fas fa-book-open"></i>
+                КнигоМир
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="catalog.html">Каталог</a></li>
+                    <li><a href="forum.html">Форум</a></li>
+                    <li><a href="reviews.html">Рецензии</a></li>
+                    <li><a href="#" class="active">Топ книг</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn btn-outline">Войти</button>
+                <button class="btn">Регистрация</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Топ книг всех времен</h1>
+            <p>Рейтинги самых популярных, обсуждаемых и высокооцененных книг по версии нашего сообщества</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="top-books-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-chart-line"></i> Категории топа</h3>
+                    <div class="tabs">
+                        <button class="tab-btn active">
+                            <i class="fas fa-trophy"></i> Общий рейтинг
+                        </button>
+                        <button class="tab-btn">
+                            <i class="fas fa-fire"></i> Популярные сейчас
+                        </button>
+                        <button class="tab-btn">
+                            <i class="fas fa-star"></i> Самые обсуждаемые
+                        </button>
+                        <button class="tab-btn">
+                            <i class="fas fa-history"></i> Классика литературы
+                        </button>
+                        <button class="tab-btn">
+                            <i class="fas fa-crown"></i> Лучшие новинки
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-chart-bar"></i> Статистика</h3>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">4.8</div>
+                            <div class="stat-label">Средний рейтинг</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">15K</div>
+                            <div class="stat-label">Голосов</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">92%</div>
+                            <div class="stat-label">Рекомендуют</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">8.4K</div>
+                            <div class="stat-label">Рецензий</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-bar"></div>
+                        <div class="chart-bar"></div>
+                        <div class="chart-bar"></div>
+                        <div class="chart-bar"></div>
+                        <div class="chart-bar"></div>
+                    </div>
+                    <div class="legend">
+                        <div class="legend-color" style="background-color: var(--accent);"></div>
+                        <span>Распределение оценок</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-award"></i> Лидеры недели</h3>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--secondary);">
+                            <strong>1.</strong> Властелин колец
+                        </li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--secondary);">
+                            <strong>2.</strong> 1984
+                        </li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--secondary);">
+                            <strong>3.</strong> Мастер и Маргарита
+                        </li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid var(--secondary);">
+                            <strong>4.</strong> Преступление и наказание
+                        </li>
+                        <li style="padding: 10px 0;">
+                            <strong>5.</strong> Гарри Поттер
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-question-circle"></i> Как формируется рейтинг?</h3>
+                    <p style="font-size: 0.9rem; line-height: 1.5; color: var(--primary-light);">
+                        Рейтинг книг формируется на основе оценок пользователей, количества рецензий, добавлений в личные коллекции и активности обсуждений на форуме. Алгоритм учитывает как свежие оценки, так и исторические данные.
+                    </p>
+                </div>
+            </aside>
+            
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="content-header">
+                    <h2><i class="fas fa-crown"></i> Топ 100 книг по версии КнигоМира</h2>
+                    <div class="view-controls">
+                        <button class="view-btn active" title="Список">
+                            <i class="fas fa-list"></i>
+                        </button>
+                        <button class="view-btn" title="Сетка">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Top List -->
+                <div class="top-list">
+                    <div class="list-header">
+                        <div>Место</div>
+                        <div>Книга</div>
+                        <div>Автор</div>
+                        <div>Рейтинг</div>
+                        <div>Тренд</div>
+                    </div>
+                    <div class="list-body">
+                        <!-- Book 1 -->
+                        <div class="list-item">
+                            <div class="rank rank-1">1</div>
+                            <div class="book-cell">
+                                <div class="book-cover">
+                                    <img src="https://placehold.co/80x110/2c3e50/ecf0f1?text=Властелин+Колец" alt="Властелин колец">
+                                </div>
+                                <div class="book-info">
+                                    <h3>Властелин колец <span class="badge badge-popular">Популярная</span></h3>
+                                    <p>Дж.Р.Р. Толкин</p>
+                                </div>
+                            </div>
+                            <div>Фэнтези, Приключения</div>
+                            <div class="rating-cell">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="rating-value">4.9</div>
+                                <div class="votes">12.4K голосов</div>
+                            </div>
+                            <div class="trend trend-up">
+                                <i class="fas fa-arrow-up"></i> 2
+                            </div>
+                        </div>
+                        
+                        <!-- Book 2 -->
+                        <div class="list-item">
+                            <div class="rank rank-2">2</div>
+                            <div class="book-cell">
+                                <div class="book-cover">
+                                    <img src="https://placehold.co/80x110/2c3e50/ecf0f1?text=1984" alt="1984">
+                                </div>
+                                <div class="book-info">
+                                    <h3>1984</h3>
+                                    <p>Джордж Оруэлл</p>
+                                </div>
+                            </div>
+                            <div>Антиутопия, Классика</div>
+                            <div class="rating-cell">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <div class="rating-value">4.8</div>
+                                <div class="votes">10.8K голосов</div>
+                            </div>
+                            <div class="trend trend-down">
+                                <i class="fas fa-arrow-down"></i> 1
+                            </div>
+                        </div>
+                        
+                        <!-- Book 3 -->
+                        <div class="list-item">
+                            <div class="rank rank-3">3</div>
+                            <div class="book-cell">
+                                <div class="book-cover">
+                                    <img src="https://placehold.co/80x110/2c3e50/ecf0f1?text=Мастер+и+Маргарита" alt="Мастер и Маргарита">
+                                </div>
+                                <div class="book-info">
+                                    <h3>Мастер и Маргарита <span class="badge badge-classic">Классика</span></h3>
+                                    <p>Михаил Булгаков</p>
+                                </div>
+                            </div>
+                            <div>Классика, Философия</div>
+                            <div class="rating-cell">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <div class="rating-value">4.8</div>
+                                <div class="votes">9.7K голосов</div>
+                            </div>
+                            <div class="trend trend-up">
+                                <i class="fas fa-arrow-up"></i> 1
+                            </div>
+                        </div>
+                        
+                        <!-- Book 4 -->
+                        <div class="list-item">
+                            <div class="rank">4</div>
+                            <div class="book-cell">
+                                <div class="book-cover">
+                                    <img src="https://placehold.co/80x110/2c3e50/ecf0f1?text=Преступление+и+наказание" alt="Преступление и наказание">
+                                </div>
+                                <div class="book-info">
+                                    <h3>Преступление и наказание</h3>
+                                    <p>Федор Достоевский</p>
+                                </div>
+                            </div>
+                            <div>Классика, Психология</div>
+                            <div class="rating-cell">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <div class="rating-value">4.7</div>
+                                <div class="votes">8.9K голосов</div>
+                            </div>
+                            <div class="trend"></div>
+                        </div>
+                        
+                        <!-- Book 5 -->
+                        <div class="list-item">
+                            <div class="rank">5</div>
+                            <div class="book-cell">
+                                <div class="book-cover">
+                                    <img src="https://placehold.co/80x110/2c3e50/ecf0f1?text=Гарри+Поттер" alt="Гарри Поттер">
+                                </div>
+                                <div class="book-info">
+                                    <h3>Гарри Поттер и философский камень <span class="badge badge-new">Новинка</span></h3>
+                                    <p>Дж.К. Роулинг</p>
+                                </div>
+                            </div>
+                            <div>Фэнтези, Подростковая</div>
+                            <div class="rating-cell">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <div class="rating-value">4.7</div>
+                                <div class="votes">11.2K голосов</div>
+                            </div>
+                            <div class="trend trend-up">
+                                <i class="fas fa-arrow-up"></i> 3
+                            </div>
+                        </div>
+                        
+                        <!-- Book 6 -->
+                        <div class="list-item">
+                            <div class="rank">6</div>
+                            <div class="book-cell">
+                                <div class="book-cover">
+                                    <img src="https://placehold.co/80x110/2c3e50/ecf0f1?text=Алхимик" alt="Алхимик">
+                                </div>
+                                <div class="book-info">
+                                    <h3>Алхимик</h3>
+                                    <p>Пауло Коэльо</p>
+                                </div>
+                            </div>
+                            <div>Философия, Приключения</div>
+                            <div class="rating-cell">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <div class="rating-value">4.6</div>
+                                <div class="votes">7.8K голосов</div>
+                            </div>
+                            <div class="trend trend-up">
+                                <i class="fas fa-arrow-up"></i> 2
+                            </div>
+                        </div>
+                        
+                        <!-- Book 7 -->
+                        <div class="list-item">
+                            <div class="rank">7</div>
+                            <div class="book-cell">
+                                <div class="book-cover">
+                                    <img src="https://placehold.co/80x110/2c3e50/ecf0f1?text=Три+товарища" alt="Три товарища">
+                                </div>
+                                <div class="book-info">
+                                    <h3>Три товарища</h3>
+                                    <p>Эрих Мария Ремарк</p>
+                                </div>
+                            </div>
+                            <div>Классика, Роман</div>
+                            <div class="rating-cell">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <div class="rating-value">4.6</div>
+                                <div class="votes">6.5K голосов</div>
+                            </div>
+                            <div class="trend"></div>
+                        </div>
+                        
+                        <!-- Book 8 -->
+                        <div class="list-item">
+                            <div class="rank">8</div>
+                            <div class="book-cell">
+                                <div class="book-cover">
+                                    <img src="https://placehold.co/80x110/2c3e50/ecf0f1?text=Сто+лет+одиночества" alt="Сто лет одиночества">
+                                </div>
+                                <div class="book-info">
+                                    <h3>Сто лет одиночества</h3>
+                                    <p>Габриэль Гарсиа Маркес</p>
+                                </div>
+                            </div>
+                            <div>Магический реализм, Классика</div>
+                            <div class="rating-cell">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <div class="rating-value">4.5</div>
+                                <div class="votes">5.9K голосов</div>
+                            </div>
+                            <div class="trend trend-down">
+                                <i class="fas fa-arrow-down"></i> 2
+                            </div>
+                        </div>
+                        
+                        <!-- Book 9 -->
+                        <div class="list-item">
+                            <div class="rank">9</div>
+                            <div class="book-cell">
+                                <div class="book-cover">
+                                    <img src="https://placehold.co/80x110/2c3e50/ecf0f1?text=451+градус" alt="451 градус">
+                                </div>
+                                <div class="book-info">
+                                    <h3>451 градус по Фаренгейту</h3>
+                                    <p>Рэй Брэдбери</p>
+                                </div>
+                            </div>
+                            <div>Антиутопия, Фантастика</div>
+                            <div class="rating-cell">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <div class="rating-value">4.5</div>
+                                <div class="votes">5.4K голосов</div>
+                            </div>
+                            <div class="trend trend-up">
+                                <i class="fas fa-arrow-up"></i> 1
+                            </div>
+                        </div>
+                        
+                        <!-- Book 10 -->
+                        <div class="list-item">
+                            <div class="rank">10</div>
+                            <div class="book-cell">
+                                <div class="book-cover">
+                                    <img src="https://placehold.co/80x110/2c3e50/ecf0f1?text=Гордость+и+предубеждение" alt="Гордость и предубеждение">
+                                </div>
+                                <div class="book-info">
+                                    <h3>Гордость и предубеждение</h3>
+                                    <p>Джейн Остин</p>
+                                </div>
+                            </div>
+                            <div>Классика, Роман</div>
+                            <div class="rating-cell">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <div class="rating-value">4.4</div>
+                                <div class="votes">4.8K голосов</div>
+                            </div>
+                            <div class="trend"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="categories-section">
+                    <h2 class="section-title">Топ по жанрам</h2>
+                    <div class="categories-grid">
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-dragon"></i>
+                            </div>
+                            <div class="category-name">Фэнтези</div>
+                            <div class="category-count">42 книги</div>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <div class="category-name">Научная фантастика</div>
+                            <div class="category-count">38 книг</div>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="category-name">Классика</div>
+                            <div class="category-count">56 книг</div>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <div class="category-name">Романы</div>
+                            <div class="category-count">29 книг</div>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="category-name">Нон-фикшн</div>
+                            <div class="category-count">35 книг</div>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-magic"></i>
+                            </div>
+                            <div class="category-name">Мистика</div>
+                            <div class="category-count">24 книги</div>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-gavel"></i>
+                            </div>
+                            <div class="category-name">Детективы</div>
+                            <div class="category-count">31 книга</div>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <div class="category-name">Исторические</div>
+                            <div class="category-count">27 книг</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pagination">
+                    <button class="page-btn">&laquo;</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <button class="page-btn">5</button>
+                    <button class="page-btn">&raquo;</button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>КнигоМир</h3>
+                    <p>Крупнейшее сообщество книголюбов, объединяющее миллионы читателей по всему миру. Находим лучшие книги и делимся впечатлениями.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Навигация</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html"><i class="fas fa-chevron-right"></i> Главная</a></li>
+                        <li><a href="catalog.html"><i class="fas fa-chevron-right"></i> Каталог книг</a></li>
+                        <li><a href="forum.html"><i class="fas fa-chevron-right"></i> Форум</a></li>
+                        <li><a href="reviews.html"><i class="fas fa-chevron-right"></i> Рецензии</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Топ книг</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Помощь</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> FAQ</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Как добавить книгу</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Правила рейтинга</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Модерация контента</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Связаться с нами</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 КнигоМир. Все права защищены. Создано для дипломного проекта.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Tab switching
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // In a real application, this would load different content
+                    alert(`Вы выбрали категорию: ${btn.textContent.trim()}`);
+                });
+            });
+            
+            // View mode switching
+            const viewBtns = document.querySelectorAll('.view-btn');
+            viewBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    viewBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    if (btn.querySelector('i').classList.contains('fa-th-large')) {
+                        // Switch to grid view
+                        document.querySelector('.top-list').style.display = 'none';
+                        alert('Режим сетки будет реализован в полной версии');
+                    } else {
+                        // Switch to list view
+                        document.querySelector('.top-list').style.display = 'block';
+                    }
+                });
+            });
+            
+            // Chart animation
+            const chartBars = document.querySelectorAll('.chart-bar');
+            chartBars.forEach(bar => {
+                const height = bar.style.height;
+                bar.style.height = '0';
+                setTimeout(() => {
+                    bar.style.height = height;
+                }, 300);
+            });
+            
+            // Animate stats
+            const statValues = document.querySelectorAll('.stat-value');
+            statValues.forEach(stat => {
+                const target = parseFloat(stat.textContent);
+                let current = 0;
+                const increment = target / 30;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    
+                    if (stat.textContent.includes('%')) {
+                        stat.textContent = Math.floor(current) + '%';
+                    } else if (stat.textContent.includes('K')) {
+                        stat.textContent = (Math.floor(current * 10) / 10).toFixed(1) + 'K';
+                    } else {
+                        stat.textContent = Math.floor(current);
+                    }
+                }, 30);
+            });
+        });
+    </script>
+</body>
+</html>
