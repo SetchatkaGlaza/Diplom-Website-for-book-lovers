@@ -1,20 +1,20 @@
-// Загружаем переменные окружения
-require('dotenv').config();
 
-// Подключение к базе данных
-const sequelize = require('./config/database');
 
 // Подключение express
 const express = require('express');
 
 //Импортируем модели
-const User = require('./models/User');
+const { sequelize, User, Genre, Book, Review, UserBook, ReviewLike } = require('./models');
 
 // Создаем приложение
 const app = express();
 
 // Укащываем порт, на котором будет работать сервер
 const PORT = process.env.PORT || 3000;
+
+// Middleware для парсинга JSON
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Проверка подключения и синхронизация
 const startServer = async () => {
@@ -28,8 +28,11 @@ const startServer = async () => {
 
 // Обработка GET-запроса к главной странице
 app.get('/',  (req, res) => {
-    res.send('<h1>Сайт для книгоманов(БД подключена)</h1>');
-});
+    res.json({ 
+        message: 'Сайт для книгоманов работает!',
+        tables: ['Users', 'Genres', 'Books', 'Reviews', 'UserBooks', 'ReviewLikes']
+      });
+    });
 
 // Запуск сервера
 app.listen(PORT, () => {
