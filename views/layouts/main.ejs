@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title ? title + ' | ' : '' %>Книгоманы</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Подключаем шапку -->
+  <%- include('../partials/header') %>
+
+  <!-- Flash-сообщения -->
+  <% if (success_msg && success_msg.length > 0) { %>
+    <div class="alert alert-success">
+      <%= success_msg %>
+    </div>
+  <% } %>
+  
+  <% if (error_msg && error_msg.length > 0) { %>
+    <div class="alert alert-danger">
+      <%= error_msg %>
+    </div>
+  <% } %>
+
+  <!-- Основной контент -->
+  <main class="container">
+    <%- body %> 
+  </main>
+
+  <!-- Подключаем подвал -->
+  <%- include('../partials/footer') %>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>

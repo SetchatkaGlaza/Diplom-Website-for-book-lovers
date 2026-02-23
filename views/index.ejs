@@ -1,0 +1,32 @@
+
+<div class="hero">
+  <h1>Добро пожаловать в Книгоманы!</h1>
+  <p>Крупнейшее сообщество книголюбов. Найди свою следующую книгу.</p>
+</div>
+
+<div class="stats">
+  <div class="stat-item">
+    <span class="stat-number">0</span>
+    <span class="stat-label">книг в базе</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">0</span>
+    <span class="stat-label">пользователей</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">0</span>
+    <span class="stat-label">рецензий</span>
+  </div>
+</div>
+
+<% if (user) { %>
+  <div class="welcome-message">
+    <h2>С возвращением, <%= user.name %>!</h2>
+    <p>Рады снова видеть тебя в нашем книжном сообществе.</p>
+  </div>
+<% } else { %>
+  <div class="cta">
+    <a href="/auth/register" class="btn btn-large">Присоединиться</a>
+    <a href="/auth/login" class="btn btn-outline">Войти</a>
+  </div>
+<% } %>
