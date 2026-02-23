@@ -1,0 +1,25 @@
+<header class="header">
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo">📚 Книгоманы</a>
+      
+      <ul class="nav-menu">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/books">Каталог</a></li>
+        
+        <% if (user) { %>
+          <!-- Пользователь авторизован -->
+          <li><a href="/profile">Личный кабинет</a></li>
+          <li><a href="/auth/logout">Выйти</a></li>
+          <li class="user-info">
+            <span>Привет, <%= user.name %>!</span>
+          </li>
+        <% } else { %>
+          <!-- Гость -->
+          <li><a href="/auth/login">Вход</a></li>
+          <li><a href="/auth/register">Регистрация</a></li>
+        <% } %>
+      </ul>
+    </div>
+  </nav>
+</header>
