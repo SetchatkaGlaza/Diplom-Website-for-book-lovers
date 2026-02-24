@@ -54,4 +54,28 @@ const Book = sequelize.define('Book', {
   timestamps: true
 });
 
+/**
+ * Виртуальное поле для среднего рейтинга
+ * Не хранится в БД, а вычисляется при запросе
+ */
+Book.prototype.getAverageRating = async function() {
+  const reviews = await this.getReviews({
+    attributes: ['rating']
+  });
+  
+  if (reviews.length === 0) return 0;
+  
+  const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+  return (sum / reviews.length).toFixed(1); // округляем до 1 знака
+};
+
+/**
+ * Метод для увеличения просмотров
+ */
+Book.prototype.incrementViews = async function() {
+  this.views_count += 1;
+  await this.save();
+  return this.views_count;
+};
+
 module.exports = Book;

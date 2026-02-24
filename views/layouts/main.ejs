@@ -4,33 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title ? title + ' | ' : '' %>Книгоманы</title>
+  <!-- Font Awesome для красивых иконок -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <!-- Подключаем шапку -->
   <%- include('../partials/header') %>
 
-  <!-- Flash-сообщения -->
   <% if (success_msg && success_msg.length > 0) { %>
     <div class="alert alert-success">
+      <i class="fas fa-check-circle"></i>
       <%= success_msg %>
     </div>
   <% } %>
   
   <% if (error_msg && error_msg.length > 0) { %>
     <div class="alert alert-danger">
+      <i class="fas fa-exclamation-circle"></i>
       <%= error_msg %>
     </div>
   <% } %>
 
-  <!-- Основной контент -->
   <main class="container">
-    <%- body %> 
+    <%- body %>
   </main>
 
-  <!-- Подключаем подвал -->
   <%- include('../partials/footer') %>
-
   <script src="/js/script.js"></script>
 </body>
 </html>

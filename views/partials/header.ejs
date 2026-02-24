@@ -1,25 +1,41 @@
 <header class="header">
-  <nav class="navbar">
-    <div class="container">
-      <a href="/" class="logo">📚 Книгоманы</a>
+  <nav class="navbar container">
+    <a href="/" class="logo">
+      <i class="fas fa-book-open"></i>
+      <span>Книгоманы</span>
+    </a>
+    
+    <button class="mobile-menu-btn" id="mobile-menu-btn">
+      <i class="fas fa-bars"></i>
+    </button>
+    
+    <ul class="nav-menu" id="nav-menu">
+      <li><a href="/" class="nav-link"><i class="fas fa-home"></i> Главная</a></li>
+      <li><a href="/books" class="nav-link"><i class="fas fa-book"></i> Каталог</a></li>
       
-      <ul class="nav-menu">
-        <li><a href="/">Главная</a></li>
-        <li><a href="/books">Каталог</a></li>
-        
-        <% if (user) { %>
-          <!-- Пользователь авторизован -->
-          <li><a href="/profile">Личный кабинет</a></li>
-          <li><a href="/auth/logout">Выйти</a></li>
-          <li class="user-info">
-            <span>Привет, <%= user.name %>!</span>
-          </li>
-        <% } else { %>
-          <!-- Гость -->
-          <li><a href="/auth/login">Вход</a></li>
-          <li><a href="/auth/register">Регистрация</a></li>
-        <% } %>
-      </ul>
-    </div>
+      <% if (user) { %>
+        <li class="nav-item dropdown">
+          <a href="#" class="nav-link dropdown-toggle">
+            <img src="/images/avatars/<%= user.avatar %>" alt="<%= user.name %>" class="nav-avatar">
+            <span><%= user.name %></span>
+            <i class="fas fa-chevron-down"></i>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="/profile"><i class="fas fa-user"></i> Мой профиль</a></li>
+            <li><a href="/profile/books"><i class="fas fa-bookmark"></i> Мои книги</a></li>
+            <li><a href="/profile/reviews"><i class="fas fa-star"></i> Мои рецензии</a></li>
+            <% if (user.role === 'admin') { %>
+              <li class="dropdown-divider"></li>
+              <li><a href="/admin"><i class="fas fa-cog"></i> Админка</a></li>
+            <% } %>
+            <li class="dropdown-divider"></li>
+            <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Выйти</a></li>
+          </ul>
+        </li>
+      <% } else { %>
+        <li><a href="/auth/login" class="nav-link"><i class="fas fa-sign-in-alt"></i> Вход</a></li>
+        <li><a href="/auth/register" class="nav-link btn-nav">Регистрация</a></li>
+      <% } %>
+    </ul>
   </nav>
 </header>
