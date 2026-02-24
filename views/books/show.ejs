@@ -1,0 +1,229 @@
+<div class="book-page">
+  <div class="book-main">
+    <!-- Обложка -->
+    <div class="book-cover-large">
+      <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>">
+    </div>
+    
+    <!-- Информация о книге -->
+    <div class="book-details">
+      <h1 class="book-title"><%= book.title %></h1>
+      <h2 class="book-author"><%= book.author %></h2>
+      
+      <div class="book-meta">
+        <% if (book.genre) { %>
+          <span class="book-genre">Жанр: <%= book.genre.name %></span>
+        <% } %>
+        <% if (book.year) { %>
+          <span class="book-year">Год: <%= book.year %></span>
+        <% } %>
+        <% if (book.pages) { %>
+          <span class="book-pages">Страниц: <%= book.pages %></span>
+        <% } %>
+        <% if (book.publisher) { %>
+          <span class="book-publisher">Издательство: <%= book.publisher %></span>
+        <% } %>
+      </div>
+      
+      <!-- Рейтинг -->
+      <div class="book-rating-large">
+        <div class="rating-number">
+          <%= book.averageRating || '0.0' %>
+        </div>
+        <div class="rating-stars-large">
+          <% if (book.averageRating > 0) { %>
+            <% for(let i = 1; i <= 5; i++) { %>
+              <% if (i <= Math.floor(book.averageRating)) { %>
+                <span class="star filled">★</span>
+              <% } else if (i - 0.5 <= book.averageRating) { %>
+                <span class="star half">½</span>
+              <% } else { %>
+                <span class="star">☆</span>
+              <% } %>
+            <% } %>
+          <% } else { %>
+            <span class="no-rating">Нет оценок</span>
+          <% } %>
+        </div>
+      </div>
+      
+      <!-- Действия с книгой -->
+      <div class="book-actions">
+        <% if (user) { %>
+          <button class="btn btn-primary" id="want-to-read" data-status="want_to_read">
+            Хочу прочитать
+          </button>
+          <button class="btn btn-outline" id="reading" data-status="reading">
+            Читаю сейчас
+          </button>
+          <button class="btn btn-outline" id="read" data-status="read">
+            Прочитано
+          </button>
+        <% } else { %>
+          <a href="/auth/login" class="btn btn-primary">Войдите, чтобы добавить на полку</a>
+        <% } %>
+      </div>
+      
+      <!-- Текущий статус (если есть) -->
+      <% if (userBookStatus) { %>
+        <div class="book-status">
+          <% if (userBookStatus === 'want_to_read') { %>
+            Эта книга в вашем списке "Хочу прочитать"
+          <% } else if (userBookStatus === 'reading') { %>
+            Вы читаете эту книгу сейчас
+          <% } else if (userBookStatus === 'read') { %>
+            Вы уже прочитали эту книгу
+          <% } %>
+        </div>
+      <% } %>
+      
+      <!-- Аннотация -->
+      <% if (book.description) { %>
+        <div class="book-description">
+          <h3>Аннотация</h3>
+          <p><%= book.description %></p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+  
+  <!-- Блок рецензий -->
+  <div class="book-reviews">
+    <h3>Рецензии 
+      <% if (reviews.length > 0) { %>
+        (<%= reviews.length %>)
+      <% } %>
+    </h3>
+    
+    <% if (user && !userReview) { %>
+      <div class="write-review">
+        <a href="/books/<%= book.id %>/review/new" class="btn btn-primary">Написать рецензию</a>
+      </div>
+    <% } %>
+    
+    <% if (reviews.length > 0) { %>
+      <div class="reviews-list">
+        <% reviews.forEach(review => { %>
+          <div class="review-card" data-review-id="<%= review.id %>">
+            <div class="review-header">
+              <div class="reviewer-info">
+                <img src="/images/avatars/<%= review.user.avatar %>" alt="<%= review.user.name %>" class="reviewer-avatar">
+                <span class="reviewer-name"><%= review.user.name %></span>
+              </div>
+              <div class="review-rating">
+                <% for(let i = 1; i <= 5; i++) { %>
+                  <% if (i <= review.rating) { %>
+                    <span class="star-small filled">★</span>
+                  <% } else { %>
+                    <span class="star-small">☆</span>
+                  <% } %>
+                <% } %>
+              </div>
+              <span class="review-date">
+                <%= new Date(review.createdAt).toLocaleDateString('ru-RU') %>
+              </span>
+            </div>
+            <div class="review-content">
+              <p><%= review.content %></p>
+            </div>
+            <div class="review-footer">
+              <button class="btn-like" data-review-id="<%= review.id %>" data-type="like">
+                👍 <span class="likes-count"><%= review.likes_count || 0 %></span>
+              </button>
+              <button class="btn-dislike" data-review-id="<%= review.id %>" data-type="dislike">
+                👎 <span class="dislikes-count"><%= review.dislikes_count || 0 %></span>
+              </button>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="no-reviews">Пока нет рецензий. Будьте первым!</p>
+    <% } %>
+  </div>
+  
+  <!-- Похожие книги -->
+  <% if (similarBooks.length > 0) { %>
+    <div class="similar-books">
+      <h3>Похожие книги</h3>
+      <div class="books-grid">
+        <% similarBooks.forEach(book => { %>
+          <div class="book-card small">
+            <a href="/books/<%= book.id %>" class="book-link">
+              <div class="book-cover">
+                <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>">
+              </div>
+              <div class="book-info">
+                <h4 class="book-title"><%= book.title %></h4>
+                <p class="book-author"><%= book.author %></p>
+                <div class="book-rating">
+                  <% if (book.averageRating > 0) { %>
+                    <span class="rating-value"><%= book.averageRating %></span>
+                  <% } %>
+                </div>
+              </div>
+            </a>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<script>
+  // Обработка кнопок "Хочу прочитать" и т.д.
+  document.querySelectorAll('.book-actions .btn').forEach(button => {
+    button.addEventListener('click', async function() {
+      const status = this.dataset.status;
+      
+      try {
+        const response = await fetch('/api/user-books', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            book_id: <%= book.id %>,
+            status: status
+          })
+        });
+        
+        if (response.ok) {
+          location.reload(); // перезагружаем страницу
+        } else {
+          alert('Ошибка при сохранении');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+  });
+  
+  // Обработка лайков рецензий
+  document.querySelectorAll('.btn-like, .btn-dislike').forEach(button => {
+    button.addEventListener('click', async function() {
+      const reviewId = this.dataset.reviewId;
+      const type = this.dataset.type;
+      
+      try {
+        const response = await fetch('/api/reviews/' + reviewId + '/like', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ type: type })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Обновляем счётчики
+          const reviewCard = this.closest('.review-card');
+          reviewCard.querySelector('.likes-count').textContent = data.likes;
+          reviewCard.querySelector('.dislikes-count').textContent = data.dislikes;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+  });
+</script>

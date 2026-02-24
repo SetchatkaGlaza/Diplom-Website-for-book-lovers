@@ -14,4 +14,11 @@ const Genre = sequelize.define('Genre', {
   timestamps: true          // createdAt и updatedAt
 });
 
+/**
+ * Получить количество книг в жанре
+ */
+Genre.prototype.getBooksCount = async function() {
+  return await this.countBooks();
+};
+
 module.exports = Genre;

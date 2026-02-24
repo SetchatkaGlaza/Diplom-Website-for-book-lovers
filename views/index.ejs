@@ -1,32 +1,135 @@
-
 <div class="hero">
   <h1>Добро пожаловать в Книгоманы!</h1>
-  <p>Крупнейшее сообщество книголюбов. Найди свою следующую книгу.</p>
+  <p>Крупнейшее сообщество книголюбов. Найди свою следующую книгу вместе с тысячами читателей.</p>
+  
+  <div class="hero-search">
+    <form action="/books" method="GET" class="search-form">
+      <input type="text" name="search" placeholder="Поиск книг по названию или автору..." autocomplete="off">
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-search"></i> Найти
+      </button>
+    </form>
+  </div>
 </div>
 
 <div class="stats">
   <div class="stat-item">
-    <span class="stat-number">0</span>
+    <i class="fas fa-book"></i>
+    <span class="stat-number">1234</span>
     <span class="stat-label">книг в базе</span>
   </div>
   <div class="stat-item">
-    <span class="stat-number">0</span>
+    <i class="fas fa-users"></i>
+    <span class="stat-number">567</span>
     <span class="stat-label">пользователей</span>
   </div>
   <div class="stat-item">
-    <span class="stat-number">0</span>
+    <i class="fas fa-star"></i>
+    <span class="stat-number">890</span>
     <span class="stat-label">рецензий</span>
   </div>
 </div>
 
-<% if (user) { %>
-  <div class="welcome-message">
-    <h2>С возвращением, <%= user.name %>!</h2>
-    <p>Рады снова видеть тебя в нашем книжном сообществе.</p>
-  </div>
-<% } else { %>
-  <div class="cta">
-    <a href="/auth/register" class="btn btn-large">Присоединиться</a>
-    <a href="/auth/login" class="btn btn-outline">Войти</a>
-  </div>
-<% } %>
+<h2 class="section-title">Популярные книги</h2>
+<div class="books-grid" id="popular-books">
+  <!-- Сюда подгрузятся книги через JavaScript -->
+</div>
+
+<div class="cta-section">
+  <h2>Готовы поделиться впечатлениями?</h2>
+  <p>Присоединяйтесь к сообществу и начните писать рецензии уже сегодня!</p>
+  <% if (!user) { %>
+    <a href="/auth/register" class="btn btn-large btn-primary">
+      <i class="fas fa-user-plus"></i> Присоединиться
+    </a>
+  <% } %>
+</div>
+
+<script>
+  // Загружаем популярные книги
+  fetch('/books/popular?limit=6')
+    .then(response => response.json())
+    .then(books => {
+      const container = document.getElementById('popular-books');
+      container.innerHTML = '';
+      
+      books.forEach(book => {
+        const stars = '★'.repeat(Math.floor(book.averageRating)) + '☆'.repeat(5 - Math.floor(book.averageRating));
+        
+        container.innerHTML += `
+          <div class="book-card">
+            <a href="/books/${book.id}" class="book-link">
+              <div class="book-cover">
+                <img src="/images/covers/${book.cover_image}" alt="${book.title}">
+              </div>
+              <div class="book-info">
+                <h3 class="book-title">${book.title}</h3>
+                <p class="book-author">${book.author}</p>
+                <div class="book-meta">
+                  <span class="book-genre">${book.genre ? book.genre.name : 'Без жанра'}</span>
+                </div>
+                <div class="book-rating">
+                  <span class="rating-stars">${stars}</span>
+                  <span class="rating-value">${book.averageRating}</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        `;
+      });
+    })
+    .catch(error => console.error('Error loading popular books:', error));
+</script>
+
+<style>
+  .hero-search {
+    max-width: 600px;
+    margin: 2rem auto 0;
+  }
+  
+  .search-form {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 0.5rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  .search-form input {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+  }
+  
+  .search-form input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+  }
+  
+  .cta-section {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: var(--radius-lg);
+    margin: 3rem 0;
+    color: white;
+  }
+  
+  .cta-section h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .cta-section p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+  }
+</style>

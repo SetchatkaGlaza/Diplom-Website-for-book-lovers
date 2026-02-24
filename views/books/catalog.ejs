@@ -1,0 +1,177 @@
+<div class="catalog-header">
+  <h1>Каталог книг</h1>
+  <p class="books-count">Найдено книг: <%= totalBooks %></p>
+</div>
+
+<div class="catalog-layout">
+  <!-- Боковая панель с фильтрами -->
+  <aside class="filters-sidebar">
+    <h3>Фильтры</h3>
+    
+    <form action="/books" method="GET" id="filter-form">
+      <!-- Сохраняем параметры сортировки при отправке фильтров -->
+      <% if (sort) { %>
+        <input type="hidden" name="sort" value="<%= sort %>">
+      <% } %>
+      
+      <!-- Поиск по названию -->
+      <div class="filter-group">
+        <label for="search">Поиск по названию</label>
+        <input 
+          type="text" 
+          id="search" 
+          name="search" 
+          value="<%= filters.search || '' %>"
+          placeholder="Введите название..."
+        >
+      </div>
+      
+      <!-- Фильтр по жанру -->
+      <div class="filter-group">
+        <label for="genre">Жанр</label>
+        <select id="genre" name="genre">
+          <option value="">Все жанры</option>
+          <% genres.forEach(genre => { %>
+            <option 
+              value="<%= genre.id %>"
+              <%= filters.genre == genre.id ? 'selected' : '' %>
+            >
+              <%= genre.name %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+      
+      <!-- Фильтр по автору -->
+      <div class="filter-group">
+        <label for="author">Автор</label>
+        <input 
+          type="text" 
+          id="author" 
+          name="author" 
+          value="<%= filters.author || '' %>"
+          placeholder="Фамилия автора..."
+        >
+      </div>
+      
+      <!-- Фильтр по году (диапазон) -->
+      <div class="filter-group">
+        <label>Год издания</label>
+        <div class="range-inputs">
+          <input 
+            type="number" 
+            name="year_from" 
+            placeholder="От"
+            value="<%= filters.year_from || '' %>"
+            min="1000"
+            max="2026"
+          >
+          <input 
+            type="number" 
+            name="year_to" 
+            placeholder="До"
+            value="<%= filters.year_to || '' %>"
+            min="1000"
+            max="2026"
+          >
+        </div>
+      </div>
+      
+      <button type="submit" class="btn btn-primary btn-block">Применить фильтры</button>
+      
+      <% if (Object.keys(filters).length > 0) { %>
+        <a href="/books" class="btn btn-outline btn-block">Сбросить фильтры</a>
+      <% } %>
+    </form>
+  </aside>
+  
+  <!-- Основной контент - список книг -->
+  <main class="catalog-content">
+    <!-- Сортировка -->
+    <div class="sort-bar">
+      <label for="sort">Сортировать:</label>
+      <select id="sort" name="sort" form="filter-form">
+        <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Сначала новые</option>
+        <option value="popular" <%= sort === 'popular' ? 'selected' : '' %>>По популярности</option>
+        <option value="title_asc" <%= sort === 'title_asc' ? 'selected' : '' %>>По названию (А-Я)</option>
+        <option value="title_desc" <%= sort === 'title_desc' ? 'selected' : '' %>>По названию (Я-А)</option>
+        <option value="year_desc" <%= sort === 'year_desc' ? 'selected' : '' %>>По году (сначала новые)</option>
+        <option value="year_asc" <%= sort === 'year_asc' ? 'selected' : '' %>>По году (сначала старые)</option>
+      </select>
+    </div>
+    
+    <!-- Сетка книг -->
+    <% if (books.length > 0) { %>
+      <div class="books-grid">
+        <% books.forEach(book => { %>
+          <div class="book-card">
+            <a href="/books/<%= book.id %>" class="book-link">
+              <div class="book-cover">
+                <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>">
+              </div>
+              <div class="book-info">
+                <h3 class="book-title"><%= book.title %></h3>
+                <p class="book-author"><%= book.author %></p>
+                <div class="book-meta">
+                  <span class="book-genre"><%= book.genre ? book.genre.name : 'Без жанра' %></span>
+                  <span class="book-year"><%= book.year || 'Год не указан' %></span>
+                </div>
+                <div class="book-rating">
+                  <% if (book.averageRating > 0) { %>
+                    <span class="rating-stars">
+                      <% for(let i = 1; i <= 5; i++) { %>
+                        <% if (i <= Math.floor(book.averageRating)) { %>
+                          ★
+                        <% } else if (i - 0.5 <= book.averageRating) { %>
+                          ½
+                        <% } else { %>
+                          ☆
+                        <% } %>
+                      <% } %>
+                    </span>
+                    <span class="rating-value"><%= book.averageRating %></span>
+                  <% } else { %>
+                    <span class="rating-value no-rating">Нет оценок</span>
+                  <% } %>
+                </div>
+              </div>
+            </a>
+          </div>
+        <% }) %>
+      </div>
+      
+      <!-- Пагинация -->
+      <% if (totalPages > 1) { %>
+        <div class="pagination">
+          <% if (currentPage > 1) { %>
+            <a href="?<%= new URLSearchParams({...filters, page: currentPage - 1, sort}).toString() %>" class="page-link">← Предыдущая</a>
+          <% } %>
+          
+          <% for(let i = 1; i <= totalPages; i++) { %>
+            <% if (i === currentPage) { %>
+              <span class="page-link active"><%= i %></span>
+            <% } else { %>
+              <a href="?<%= new URLSearchParams({...filters, page: i, sort}).toString() %>" class="page-link"><%= i %></a>
+            <% } %>
+          <% } %>
+          
+          <% if (currentPage < totalPages) { %>
+            <a href="?<%= new URLSearchParams({...filters, page: currentPage + 1, sort}).toString() %>" class="page-link">Следующая →</a>
+          <% } %>
+        </div>
+      <% } %>
+      
+    <% } else { %>
+      <div class="no-books">
+        <p>Книги не найдены. Попробуйте изменить параметры поиска.</p>
+      </div>
+    <% } %>
+  </main>
+</div>
+
+<script>
+  // Автоматическая отправка формы при изменении сортировки
+  document.getElementById('sort').addEventListener('change', function() {
+    document.getElementById('filter-form').submit();
+  });
+</script>
