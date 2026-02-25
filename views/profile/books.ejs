@@ -1,0 +1,365 @@
+<div class="my-books">
+  <h1><i class="fas fa-books"></i> Мои книги</h1>
+  
+  <!-- Статистика -->
+  <div class="books-stats">
+    <a href="/profile/books?status=all" class="stat-tab <%= currentStatus === 'all' ? 'active' : '' %>">
+      <span class="stat-count"><%= counts.all %></span>
+      <span class="stat-label">Все книги</span>
+    </a>
+    <a href="/profile/books?status=read" class="stat-tab <%= currentStatus === 'read' ? 'active' : '' %>">
+      <span class="stat-count"><%= counts.read %></span>
+      <span class="stat-label">Прочитано</span>
+    </a>
+    <a href="/profile/books?status=reading" class="stat-tab <%= currentStatus === 'reading' ? 'active' : '' %>">
+      <span class="stat-count"><%= counts.reading %></span>
+      <span class="stat-label">Читаю сейчас</span>
+    </a>
+    <a href="/profile/books?status=want_to_read" class="stat-tab <%= currentStatus === 'want_to_read' ? 'active' : '' %>">
+      <span class="stat-count"><%= counts.want_to_read %></span>
+      <span class="stat-label">Хочу прочитать</span>
+    </a>
+  </div>
+  
+  <!-- Список книг -->
+  <% if (books.length > 0) { %>
+    <div class="books-grid-detailed">
+      <% books.forEach(item => { %>
+        <div class="book-detailed-card">
+          <div class="book-detailed-cover">
+            <img src="/images/covers/<%= item.book.cover_image %>" alt="<%= item.book.title %>">
+            <span class="book-detailed-status status-<%= item.status %>">
+              <% if (item.status === 'read') { %>
+                <i class="fas fa-check-circle"></i> Прочитано
+              <% } else if (item.status === 'reading') { %>
+                <i class="fas fa-book-open"></i> Читаю
+              <% } else { %>
+                <i class="fas fa-bookmark"></i> В планах
+              <% } %>
+            </span>
+          </div>
+          
+          <div class="book-detailed-info">
+            <h3><a href="/books/<%= item.book.id %>"><%= item.book.title %></a></h3>
+            <p class="book-detailed-author"><%= item.book.author %></p>
+            
+            <div class="book-detailed-meta">
+              <span class="book-genre"><%= item.book.genre ? item.book.genre.name : 'Без жанра' %></span>
+              <% if (item.book.year) { %>
+                <span class="book-year"><%= item.book.year %></span>
+              <% } %>
+            </div>
+            
+            <% if (item.book.averageRating > 0) { %>
+              <div class="book-detailed-rating">
+                <span class="rating-stars">
+                  <% for(let i = 1; i <= 5; i++) { %>
+                    <% if (i <= Math.floor(item.book.averageRating)) { %>
+                      <i class="fas fa-star"></i>
+                    <% } else if (i - 0.5 <= item.book.averageRating) { %>
+                      <i class="fas fa-star-half-alt"></i>
+                    <% } else { %>
+                      <i class="far fa-star"></i>
+                    <% } %>
+                  <% } %>
+                </span>
+                <span class="rating-value"><%= item.book.averageRating %></span>
+              </div>
+            <% } %>
+            
+            <!-- Информация о рецензии -->
+            <% if (item.book.userReview) { %>
+              <div class="user-review-info">
+                <p><strong>Ваша рецензия:</strong> <%= item.book.userReview.rating %> ★</p>
+                <p class="review-excerpt"><%= item.book.userReview.content.substring(0, 100) %>...</p>
+                <a href="/profile/reviews/<%= item.book.userReview.id %>/edit" class="btn-small">
+                  <i class="fas fa-edit"></i> Редактировать
+                </a>
+              </div>
+            <% } else if (item.status === 'read') { %>
+              <a href="/books/<%= item.book.id %>/review/new" class="btn-small btn-primary">
+                <i class="fas fa-pen"></i> Написать рецензию
+              </a>
+            <% } %>
+            
+            <!-- Действия с книгой -->
+            <div class="book-detailed-actions">
+              <select class="status-select" data-book-id="<%= item.book.id %>">
+                <option value="want_to_read" <%= item.status === 'want_to_read' ? 'selected' : '' %>>Хочу прочитать</option>
+                <option value="reading" <%= item.status === 'reading' ? 'selected' : '' %>>Читаю сейчас</option>
+                <option value="read" <%= item.status === 'read' ? 'selected' : '' %>>Прочитано</option>
+              </select>
+              
+              <form action="/profile/books/<%= item.book.id %>?_method=DELETE" method="POST" class="delete-form">
+                <button type="submit" class="btn-icon btn-danger" onclick="return confirm('Удалить книгу с полки?')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+    
+    <!-- Пагинация -->
+    <% if (totalPages > 1) { %>
+      <div class="pagination">
+        <% if (currentPage > 1) { %>
+          <a href="?status=<%= currentStatus %>&page=<%= currentPage - 1 %>" class="page-link">
+            <i class="fas fa-chevron-left"></i>
+          </a>
+        <% } %>
+        
+        <% for(let i = 1; i <= totalPages; i++) { %>
+          <% if (i === currentPage) { %>
+            <span class="page-link active"><%= i %></span>
+          <% } else { %>
+            <a href="?status=<%= currentStatus %>&page=<%= i %>" class="page-link"><%= i %></a>
+          <% } %>
+        <% } %>
+        
+        <% if (currentPage < totalPages) { %>
+          <a href="?status=<%= currentStatus %>&page=<%= currentPage + 1 %>" class="page-link">
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        <% } %>
+      </div>
+    <% } %>
+    
+  <% } else { %>
+    <div class="empty-state">
+      <i class="fas fa-books fa-4x"></i>
+      <h3>Здесь пока пусто</h3>
+      <p>Добавьте книги на полку из <a href="/books">каталога</a></p>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .my-books {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    color: white;
+  }
+  
+  .my-books h1 {
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .books-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .stat-tab {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align: center;
+    text-decoration: none;
+    color: white;
+    transition: var(--transition);
+  }
+  
+  .stat-tab:hover,
+  .stat-tab.active {
+    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    transform: translateY(-2px);
+  }
+  
+  .stat-count {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+  
+  .books-grid-detailed {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .book-detailed-card {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: var(--transition);
+  }
+  
+  .book-detailed-card:hover {
+    transform: translateX(10px);
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  .book-detailed-cover {
+    position: relative;
+    width: 120px;
+  }
+  
+  .book-detailed-cover img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  
+  .book-detailed-status {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  
+  .status-read { background: var(--success); }
+  .status-reading { background: var(--warning); color: var(--dark); }
+  .status-want_to_read { background: var(--primary); }
+  
+  .book-detailed-info h3 {
+    margin-bottom: 0.25rem;
+  }
+  
+  .book-detailed-info h3 a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .book-detailed-info h3 a:hover {
+    text-decoration: underline;
+  }
+  
+  .book-detailed-author {
+    opacity: 0.8;
+    margin-bottom: 0.5rem;
+  }
+  
+  .book-detailed-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+  }
+  
+  .book-detailed-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .user-review-info {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: var(--radius);
+    margin: 1rem 0;
+  }
+  
+  .review-excerpt {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin: 0.5rem 0;
+  }
+  
+  .book-detailed-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  
+  .status-select {
+    padding: 0.5rem;
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+  }
+  
+  .btn-small {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: var(--transition);
+  }
+  
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  
+  .btn-danger {
+    background: var(--danger);
+    color: white;
+  }
+  
+  .btn-danger:hover {
+    transform: scale(1.1);
+  }
+  
+  .delete-form {
+    display: inline;
+  }
+  
+  @media (max-width: 768px) {
+    .book-detailed-card {
+      grid-template-columns: 1fr;
+    }
+    
+    .book-detailed-cover {
+      width: 100px;
+      margin: 0 auto;
+    }
+  }
+</style>
+
+<script>
+  // Обновление статуса книги
+  document.querySelectorAll('.status-select').forEach(select => {
+    select.addEventListener('change', async function() {
+      const bookId = this.dataset.bookId;
+      const status = this.value;
+      
+      try {
+        const response = await fetch('/profile/books/status', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ book_id: bookId, status })
+        });
+        
+        if (response.ok) {
+          location.reload();
+        } else {
+          alert('Ошибка при обновлении статуса');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+  });
+</script>

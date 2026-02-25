@@ -1,0 +1,147 @@
+<div class="edit-review">
+  <h1><i class="fas fa-edit"></i> Редактирование рецензии</h1>
+  
+  <div class="review-book-header">
+    <img src="/images/covers/<%= review.book.cover_image %>" alt="<%= review.book.title %>" class="review-book-cover">
+    <div>
+      <h2><%= review.book.title %></h2>
+      <p class="review-book-author"><%= review.book.author %></p>
+    </div>
+  </div>
+  
+  <% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error.msg %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+  
+  <form action="/profile/reviews/<%= review.id %>/edit" method="POST" class="edit-review-form">
+    <div class="form-group">
+      <label>Ваша оценка</label>
+      <div class="rating-input">
+        <% for(let i = 1; i <= 5; i++) { %>
+          <input 
+            type="radio" 
+            name="rating" 
+            id="star<%= i %>" 
+            value="<%= i %>"
+            <%= (rating ? rating == i : review.rating == i) ? 'checked' : '' %>
+          >
+          <label for="star<%= i %>" class="star-label"><i class="fas fa-star"></i></label>
+        <% } %>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="content">Текст рецензии</label>
+      <textarea 
+        id="content" 
+        name="content" 
+        rows="10"
+        required
+        minlength="10"
+        placeholder="Напишите, что вы думаете об этой книге..."
+      ><%= content ? content : review.content %></textarea>
+      <small>Минимум 10 символов</small>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> Сохранить изменения
+      </button>
+      <a href="/profile/reviews" class="btn btn-outline">
+        <i class="fas fa-times"></i> Отмена
+      </a>
+    </div>
+  </form>
+</div>
+
+<style>
+  .edit-review {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    color: white;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .edit-review h1 {
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .review-book-header {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .review-book-cover {
+    width: 100px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  
+  .review-book-header h2 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+  
+  .rating-input input {
+    display: none;
+  }
+  
+  .star-label {
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  
+  .rating-input input:checked ~ .star-label,
+  .rating-input .star-label:hover,
+  .rating-input .star-label:hover ~ .star-label {
+    color: #fbbf24;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  @media (max-width: 768px) {
+    .review-book-header {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+  }
+</style>
