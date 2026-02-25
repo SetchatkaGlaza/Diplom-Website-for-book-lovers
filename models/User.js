@@ -27,6 +27,11 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     defaultValue: 'default-avatar.png',
   },
+  bio: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    defaultValue: '',
+  }
 }, {
   // Добавит поля createdAt и updatedAt автоматически
   timestamps: true,

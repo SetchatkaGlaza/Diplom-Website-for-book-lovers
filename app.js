@@ -4,6 +4,7 @@ const express = require('express');
 const session = require('express-session');
 const flash = require('connect-flash');
 const expressLayouts = require('express-ejs-layouts');
+const methodOverride = require('method-override');
 const sequelize = require('./config/database');
 
 // Импортируем все модели (чтобы Sequelize знал о них)
@@ -17,6 +18,7 @@ const ReviewLike = require('./models/ReviewLike');
 // Импортируем маршруты
 const authRoutes = require('./routes/auth');
 const bookRoutes = require('./routes/books');
+const profileRoutes = require('./routes/profile');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +32,7 @@ app.set('layout', 'layouts/main'); // основной макет по умол�
 // Middleware для обработки данных из форм
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(methodOverride('_method'));
 
 // Middleware для статических файлов
 app.use(express.static('public'));
@@ -60,6 +63,7 @@ app.use((req, res, next) => {
 // Подключаем маршруты
 app.use('/auth', authRoutes);
 app.use('/books', bookRoutes);
+app.use('/profile', profileRoutes);
 
 // Главная страница
 app.get('/', (req, res) => {

@@ -1,0 +1,257 @@
+<% 
+  // Устанавливаем значения по умолчанию, если переменные не переданы
+  const errors = locals.errors || [];
+  const name = locals.name || user.name;
+  const bio = locals.bio || user.bio || '';
+%>
+
+<div class="edit-profile">
+  <h1><i class="fas fa-edit"></i> Редактирование профиля</h1>
+  
+  <% if (errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error.msg %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+  
+  <div class="edit-layout">
+    <!-- Левая колонка - аватарка -->
+    <div class="edit-sidebar">
+      <div class="avatar-section">
+        <h3>Аватар</h3>
+        <div class="current-avatar">
+          <img src="/images/avatars/<%= user.avatar %>" alt="<%= user.name %>">
+        </div>
+        
+        <form action="/profile/avatar" method="POST" enctype="multipart/form-data" class="avatar-form">
+          <div class="file-input-wrapper">
+            <input type="file" name="avatar" id="avatar" accept="image/*" required>
+            <label for="avatar" class="btn btn-outline">
+              <i class="fas fa-upload"></i> Выбрать файл
+            </label>
+            <span class="file-name">Файл не выбран</span>
+          </div>
+          <p class="file-help">Максимальный размер: 5MB. Форматы: JPG, PNG, GIF, WEBP</p>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Загрузить
+          </button>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Правая колонка - основная информация -->
+    <div class="edit-main">
+      <div class="edit-section">
+        <h3>Основная информация</h3>
+        <form action="/profile/edit" method="POST" class="edit-form">
+          <div class="form-group">
+            <label for="name">Имя</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              value="<%= name ? name : user.name %>"
+              required
+              minlength="2"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label for="bio">О себе</label>
+            <textarea 
+              id="bio" 
+              name="bio" 
+              rows="5"
+              placeholder="Расскажите немного о себе..."
+            ><%= bio ? bio : (user.bio || '') %></textarea>
+            <small>Максимум 500 символов</small>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Сохранить изменения
+          </button>
+        </form>
+      </div>
+      
+      <div class="edit-section">
+        <h3>Смена пароля</h3>
+        <form action="/profile/change-password" method="POST" class="edit-form">
+          <div class="form-group">
+            <label for="current_password">Текущий пароль</label>
+            <input 
+              type="password" 
+              id="current_password" 
+              name="current_password" 
+              required
+            >
+          </div>
+          
+          <div class="form-group">
+            <label for="new_password">Новый пароль</label>
+            <input 
+              type="password" 
+              id="new_password" 
+              name="new_password" 
+              required
+              minlength="6"
+            >
+            <small>Минимум 6 символов</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="confirm_password">Подтверждение пароля</label>
+            <input 
+              type="password" 
+              id="confirm_password" 
+              name="confirm_password" 
+              required
+              minlength="6"
+            >
+          </div>
+          
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-key"></i> Изменить пароль
+          </button>
+        </form>
+      </div>
+      
+      <div class="edit-section">
+        <h3>Email</h3>
+        <p class="email-info">
+          <i class="fas fa-envelope"></i> <%= user.email %>
+        </p>
+        <p class="email-note">Email нельзя изменить самостоятельно. Для смены email обратитесь к администратору.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .edit-profile {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    color: white;
+  }
+  
+  .edit-profile h1 {
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .edit-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+  }
+  
+  .edit-sidebar {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+  }
+  
+  .edit-section {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .edit-section h3 {
+    margin-bottom: 1.5rem;
+    color: var(--accent);
+  }
+  
+  .avatar-section {
+    text-align: center;
+  }
+  
+  .current-avatar {
+    width: 200px;
+    height: 200px;
+    margin: 1rem auto;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid white;
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .current-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .avatar-form {
+    margin-top: 1.5rem;
+  }
+  
+  .file-input-wrapper {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+  
+  .file-input-wrapper input[type="file"] {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+  
+  .file-name {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+  
+  .file-help {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    margin-bottom: 1rem;
+  }
+  
+  .edit-form {
+    max-width: 500px;
+  }
+  
+  .email-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius);
+  }
+  
+  .email-note {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-top: 0.5rem;
+  }
+  
+  @media (max-width: 768px) {
+    .edit-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Отображение имени выбранного файла
+  document.getElementById('avatar').addEventListener('change', function(e) {
+    const fileName = e.target.files[0] ? e.target.files[0].name : 'Файл не выбран';
+    document.querySelector('.file-name').textContent = fileName;
+  });
+</script>

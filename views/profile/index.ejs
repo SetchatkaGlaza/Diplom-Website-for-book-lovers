@@ -1,0 +1,409 @@
+<div class="profile-header">
+  <div class="profile-cover">
+    <div class="profile-avatar-large">
+      <img src="/images/avatars/<%= user.avatar %>" alt="<%= user.name %>">
+    </div>
+  </div>
+  
+  <div class="profile-info">
+    <h1><%= user.name %></h1>
+    <p class="profile-meta">
+      <i class="fas fa-calendar-alt"></i> На сайте с <%= new Date(user.createdAt).toLocaleDateString('ru-RU') %>
+      <i class="fas fa-user-tag"></i> <%= user.role === 'admin' ? 'Администратор' : user.role === 'moderator' ? 'Модератор' : 'Читатель' %>
+    </p>
+    
+    <% if (user.bio) { %>
+      <div class="profile-bio">
+        <p><%= user.bio %></p>
+      </div>
+    <% } %>
+    
+    <a href="/profile/edit" class="btn btn-primary">
+      <i class="fas fa-edit"></i> Редактировать профиль
+    </a>
+  </div>
+</div>
+
+<div class="profile-stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon"><i class="fas fa-book-reader"></i></div>
+    <div class="stat-content">
+      <span class="stat-value"><%= stats.booksRead %></span>
+      <span class="stat-label">Прочитано</span>
+    </div>
+  </div>
+  
+  <div class="stat-card">
+    <div class="stat-icon"><i class="fas fa-bookmark"></i></div>
+    <div class="stat-content">
+      <span class="stat-value"><%= stats.booksWantToRead %></span>
+      <span class="stat-label">Хочу прочитать</span>
+    </div>
+  </div>
+  
+  <div class="stat-card">
+    <div class="stat-icon"><i class="fas fa-book-open"></i></div>
+    <div class="stat-content">
+      <span class="stat-value"><%= stats.booksReading %></span>
+      <span class="stat-label">Читаю сейчас</span>
+    </div>
+  </div>
+  
+  <div class="stat-card">
+    <div class="stat-icon"><i class="fas fa-star"></i></div>
+    <div class="stat-content">
+      <span class="stat-value"><%= stats.reviewsCount %></span>
+      <span class="stat-label">Рецензий</span>
+    </div>
+  </div>
+</div>
+
+<div class="profile-sections">
+  <div class="profile-section">
+    <div class="section-header">
+      <h2><i class="fas fa-clock"></i> Недавние рецензии</h2>
+      <a href="/profile/reviews" class="btn-link">Все рецензии <i class="fas fa-arrow-right"></i></a>
+    </div>
+    
+    <% if (recentReviews.length > 0) { %>
+      <div class="recent-reviews">
+        <% recentReviews.forEach(review => { %>
+          <div class="recent-review-card">
+            <div class="review-book-cover">
+              <img src="/images/covers/<%= review.book.cover_image %>" alt="<%= review.book.title %>">
+            </div>
+            <div class="review-content">
+              <h3><a href="/books/<%= review.book.id %>"><%= review.book.title %></a></h3>
+              <p class="review-meta">
+                <span class="review-rating">
+                  <% for(let i = 1; i <= 5; i++) { %>
+                    <% if (i <= review.rating) { %>
+                      <i class="fas fa-star"></i>
+                    <% } else { %>
+                      <i class="far fa-star"></i>
+                    <% } %>
+                  <% } %>
+                </span>
+                <span class="review-date"><%= new Date(review.createdAt).toLocaleDateString('ru-RU') %></span>
+              </p>
+              <p class="review-excerpt"><%= review.content.substring(0, 150) %>...</p>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="empty-state">Вы ещё не написали ни одной рецензии</p>
+    <% } %>
+  </div>
+  
+  <div class="profile-section">
+    <div class="section-header">
+      <h2><i class="fas fa-book"></i> Недавние книги</h2>
+      <a href="/profile/books" class="btn-link">Все книги <i class="fas fa-arrow-right"></i></a>
+    </div>
+    
+    <% if (recentBooks.length > 0) { %>
+      <div class="recent-books-grid">
+        <% recentBooks.forEach(ub => { %>
+          <div class="recent-book-card">
+            <a href="/books/<%= ub.book.id %>" class="book-link">
+              <div class="book-cover">
+                <img src="/images/covers/<%= ub.book.cover_image %>" alt="<%= ub.book.title %>">
+                <span class="book-status status-<%= ub.status %>">
+                  <% if (ub.status === 'read') { %>
+                    <i class="fas fa-check"></i> Прочитано
+                  <% } else if (ub.status === 'reading') { %>
+                    <i class="fas fa-book-open"></i> Читаю
+                  <% } else { %>
+                    <i class="fas fa-bookmark"></i> В планах
+                  <% } %>
+                </span>
+              </div>
+              <div class="book-info">
+                <h4><%= ub.book.title %></h4>
+                <p><%= ub.book.author %></p>
+              </div>
+            </a>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="empty-state">У вас пока нет книг на полках</p>
+    <% } %>
+  </div>
+</div>
+
+<style>
+  .profile-header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin: 2rem 0;
+  }
+  
+  .profile-cover {
+    height: 200px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    position: relative;
+  }
+  
+  .profile-avatar-large {
+    position: absolute;
+    bottom: -50px;
+    left: 2rem;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid white;
+    overflow: hidden;
+    background: white;
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .profile-avatar-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .profile-info {
+    padding: 4rem 2rem 2rem;
+    color: white;
+  }
+  
+  .profile-info h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .profile-meta {
+    display: flex;
+    gap: 1.5rem;
+    opacity: 0.8;
+    margin-bottom: 1rem;
+  }
+  
+  .profile-meta i {
+    margin-right: 0.5rem;
+  }
+  
+  .profile-bio {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: var(--radius);
+    margin: 1rem 0;
+  }
+  
+  .profile-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  
+  .stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+  }
+  
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+  
+  .stat-content {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+  
+  .stat-label {
+    opacity: 0.8;
+  }
+  
+  .profile-sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+  
+  .profile-section {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    color: white;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .section-header h2 {
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-link {
+    color: white;
+    text-decoration: none;
+    opacity: 0.8;
+    transition: var(--transition);
+  }
+  
+  .btn-link:hover {
+    opacity: 1;
+    transform: translateX(5px);
+  }
+  
+  .recent-reviews {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .recent-review-card {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius);
+  }
+  
+  .review-book-cover {
+    width: 60px;
+    height: 90px;
+    flex-shrink: 0;
+  }
+  
+  .review-book-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+  }
+  
+  .review-content h3 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .review-content h3 a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .review-content h3 a:hover {
+    text-decoration: underline;
+  }
+  
+  .review-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .review-rating i {
+    color: #fbbf24;
+  }
+  
+  .review-excerpt {
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+  
+  .recent-books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+  
+  .recent-book-card {
+    text-align: center;
+  }
+  
+  .book-cover {
+    position: relative;
+    margin-bottom: 0.5rem;
+  }
+  
+  .book-cover img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+  }
+  
+  .book-status {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  .status-read { background: var(--success); }
+  .status-reading { background: var(--warning); }
+  .status-want_to_read { background: var(--primary); }
+  
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    opacity: 0.6;
+  }
+  
+  @media (max-width: 768px) {
+    .profile-sections {
+      grid-template-columns: 1fr;
+    }
+    
+    .profile-avatar-large {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .profile-info {
+      text-align: center;
+    }
+    
+    .profile-meta {
+      justify-content: center;
+    }
+  }
+</style>
