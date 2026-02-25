@@ -1,0 +1,555 @@
+<div class="admin-reviews">
+  <div class="admin-header">
+    <h1><i class="fas fa-star"></i> Модерация рецензий</h1>
+    <div class="header-stats">
+      <div class="stat-badge">
+        <i class="fas fa-clock"></i>
+        <span><%= reviews.filter(r => !r.is_moderated).length %></span> на модерации
+      </div>
+    </div>
+  </div>
+  
+  <!-- Фильтры -->
+  <div class="moderation-filters">
+    <a href="/admin/reviews?status=all" class="filter-btn <%= status === 'all' ? 'active' : '' %>">
+      <i class="fas fa-list"></i> Все (<%= totalReviews %>)
+    </a>
+    <a href="/admin/reviews?status=pending" class="filter-btn <%= status === 'pending' ? 'active' : '' %>">
+      <i class="fas fa-clock"></i> На модерации
+    </a>
+    <a href="/admin/reviews?status=moderated" class="filter-btn <%= status === 'moderated' ? 'active' : '' %>">
+      <i class="fas fa-check-circle"></i> Одобренные
+    </a>
+  </div>
+  
+  <!-- Список рецензий -->
+  <div class="reviews-grid">
+    <% if (reviews && reviews.length > 0) { %>
+      <% reviews.forEach(review => { %>
+        <div class="review-moderation-card <%= !review.is_moderated ? 'pending' : 'approved' %>">
+          <div class="review-moderation-header">
+            <div class="review-user-info">
+              <img src="/images/avatars/<%= review.user ? (review.user.avatar || 'default-avatar.png') : 'default-avatar.png' %>" 
+                   alt="<%= review.user ? review.user.name : 'User' %>" 
+                   class="review-avatar"
+                   onerror="this.src='/images/avatars/default-avatar.png'">
+              <div class="review-user-details">
+                <span class="review-user-name"><%= review.user ? review.user.name : 'Пользователь' %></span>
+                <span class="review-user-id">ID: <%= review.user ? review.user.id : '—' %></span>
+              </div>
+            </div>
+            
+            <div class="review-book-info">
+              <img src="/images/covers/<%= review.book ? review.book.cover_image : 'default-book-cover.jpg' %>" 
+                   alt="<%= review.book ? review.book.title : 'Unknown' %>" 
+                   class="review-book-cover"
+                   onerror="this.src='/images/covers/default-book-cover.jpg'">
+              <div class="review-book-details">
+                <span class="review-book-title"><%= review.book ? review.book.title : 'Неизвестная книга' %></span>
+                <span class="review-book-author"><%= review.book ? review.book.author : '—' %></span>
+              </div>
+            </div>
+            
+            <div class="review-rating-box">
+              <div class="review-rating-stars">
+                <% for(let i = 1; i <= 5; i++) { %>
+                  <% if (i <= review.rating) { %>
+                    <i class="fas fa-star"></i>
+                  <% } else { %>
+                    <i class="far fa-star"></i>
+                  <% } %>
+                <% } %>
+              </div>
+              <span class="review-rating-value"><%= review.rating %>/5</span>
+            </div>
+          </div>
+          
+          <div class="review-content-box">
+            <p><%= review.content %></p>
+          </div>
+          
+          <div class="review-meta">
+            <div class="review-stats">
+              <div class="stat-item">
+                <i class="fas fa-thumbs-up"></i>
+                <span class="stat-value"><%= review.likes_count || 0 %></span>
+              </div>
+              <div class="stat-item">
+                <i class="fas fa-thumbs-down"></i>
+                <span class="stat-value"><%= review.dislikes_count || 0 %></span>
+              </div>
+              <div class="stat-item">
+                <i class="far fa-calendar-alt"></i>
+                <span class="stat-value"><%= new Date(review.createdAt).toLocaleDateString('ru-RU') %></span>
+              </div>
+            </div>
+            
+            <div class="review-actions">
+              <% if (!review.is_moderated) { %>
+                <form action="/admin/reviews/<%= review.id %>/approve" method="POST" class="inline-form">
+                  <button type="submit" class="btn-approve">
+                    <i class="fas fa-check"></i> Одобрить
+                  </button>
+                </form>
+              <% } %>
+              
+              <form action="/admin/reviews/<%= review.id %>?_method=DELETE" method="POST" class="inline-form">
+                <button type="submit" class="btn-reject" onclick="return confirm('Удалить рецензию?')">
+                  <i class="fas fa-trash"></i> Удалить
+                </button>
+              </form>
+            </div>
+          </div>
+          
+          <div class="review-status-badge <%= review.is_moderated ? 'approved' : 'pending' %>">
+            <i class="fas <%= review.is_moderated ? 'fa-check-circle' : 'fa-clock' %>"></i>
+            <%= review.is_moderated ? 'Одобрено' : 'Ожидает модерации' %>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="empty-state">
+        <i class="fas fa-star"></i>
+        <h3>Рецензии не найдены</h3>
+        <p>В этом разделе пока нет рецензий</p>
+      </div>
+    <% } %>
+  </div>
+  
+  <!-- Пагинация -->
+  <% if (totalPages > 1) { %>
+    <div class="table-pagination">
+      <% if (currentPage > 1) { %>
+        <a href="?page=<%= currentPage - 1 %><%= status !== 'all' ? '&status=' + status : '' %>" class="pagination-btn">
+          <i class="fas fa-chevron-left"></i>
+        </a>
+      <% } %>
+      
+      <% for(let i = 1; i <= totalPages; i++) { %>
+        <% if (i === currentPage) { %>
+          <span class="pagination-btn active"><%= i %></span>
+        <% } else { %>
+          <a href="?page=<%= i %><%= status !== 'all' ? '&status=' + status : '' %>" class="pagination-btn"><%= i %></a>
+        <% } %>
+      <% } %>
+      
+      <% if (currentPage < totalPages) { %>
+        <a href="?page=<%= currentPage + 1 %><%= status !== 'all' ? '&status=' + status : '' %>" class="pagination-btn">
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      <% } %>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .admin-reviews {
+    padding: 2rem;
+    color: white;
+  }
+  
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+  }
+  
+  .header-stats {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .stat-badge {
+    padding: 0.5rem 1rem;
+    background: rgba(245, 158, 11, 0.2);
+    border-radius: var(--radius-lg);
+    color: #f59e0b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .stat-badge i {
+    font-size: 1rem;
+  }
+  
+  .stat-badge span {
+    font-weight: 700;
+    font-size: 1.2rem;
+  }
+  
+  .moderation-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-wrap: wrap;
+  }
+  
+  .filter-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .filter-btn:hover,
+  .filter-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: transparent;
+  }
+  
+  .reviews-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .review-moderation-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .review-moderation-card:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--accent);
+  }
+  
+  .review-moderation-card.pending {
+    border-left: 4px solid #f59e0b;
+  }
+  
+  .review-moderation-card.approved {
+    border-left: 4px solid #10b981;
+  }
+  
+  .review-moderation-header {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .review-user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .review-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent);
+  }
+  
+  .review-user-details {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .review-user-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .review-user-id {
+    font-size: 0.75rem;
+    opacity: 0.5;
+    font-family: monospace;
+  }
+  
+  .review-book-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .review-book-cover {
+    width: 40px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+  }
+  
+  .review-book-details {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .review-book-title {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  
+  .review-book-author {
+    font-size: 0.8rem;
+    opacity: 0.6;
+  }
+  
+  .review-rating-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  
+  .review-rating-stars {
+    color: #fbbf24;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .review-rating-stars i.far {
+    opacity: 0.3;
+  }
+  
+  .review-rating-value {
+    font-weight: 600;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+  
+  .review-content-box {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    border-left: 3px solid var(--accent);
+  }
+  
+  .review-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .review-stats {
+    display: flex;
+    gap: 1.5rem;
+  }
+  
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+  }
+  
+  .stat-item i.fa-thumbs-up { color: #10b981; }
+  .stat-item i.fa-thumbs-down { color: #ef4444; }
+  .stat-item i.fa-calendar-alt { color: var(--accent); }
+  
+  .stat-value {
+    font-weight: 600;
+  }
+  
+  .review-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+  
+  .btn-approve {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+  }
+  
+  .btn-approve:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+  }
+  
+  .btn-reject {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-reject:hover {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+  }
+  
+  .review-status-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.35rem 1rem;
+    border-radius: var(--radius-lg);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .review-status-badge.pending {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+  }
+  
+  .review-status-badge.approved {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 4rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-lg);
+  }
+  
+  .empty-state i {
+    font-size: 4rem;
+    opacity: 0.3;
+    margin-bottom: 1rem;
+  }
+  
+  .empty-state h3 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .empty-state p {
+    opacity: 0.5;
+  }
+  
+  .inline-form {
+    display: inline;
+  }
+  
+  .table-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+  
+  .pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 0.75rem;
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .pagination-btn:hover,
+  .pagination-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+  
+  @media (max-width: 1200px) {
+    .review-moderation-header {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    .review-rating-box {
+      align-items: flex-start;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .admin-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .moderation-filters {
+      flex-direction: column;
+    }
+    
+    .filter-btn {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .review-meta {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .review-stats {
+      flex-wrap: wrap;
+    }
+    
+    .review-actions {
+      width: 100%;
+    }
+    
+    .btn-approve, .btn-reject {
+      flex: 1;
+      justify-content: center;
+    }
+  }
+</style>

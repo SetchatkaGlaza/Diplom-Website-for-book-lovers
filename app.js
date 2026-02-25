@@ -19,6 +19,7 @@ const ReviewLike = require('./models/ReviewLike');
 const authRoutes = require('./routes/auth');
 const bookRoutes = require('./routes/books');
 const profileRoutes = require('./routes/profile');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -64,6 +65,7 @@ app.use((req, res, next) => {
 app.use('/auth', authRoutes);
 app.use('/books', bookRoutes);
 app.use('/profile', profileRoutes);
+app.use('/admin', adminRoutes);
 
 // Главная страница
 app.get('/', (req, res) => {
