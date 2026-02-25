@@ -1,0 +1,494 @@
+<div class="admin-statistics">
+  <div class="admin-header">
+    <h1><i class="fas fa-chart-line"></i> Статистика</h1>
+    <div class="period-selector">
+      <a href="?period=day" class="period-btn <%= period === 'day' ? 'active' : '' %>">День</a>
+      <a href="?period=week" class="period-btn <%= period === 'week' ? 'active' : '' %>">Неделя</a>
+      <a href="?period=month" class="period-btn <%= period === 'month' ? 'active' : '' %>">Месяц</a>
+      <a href="?period=year" class="period-btn <%= period === 'year' ? 'active' : '' %>">Год</a>
+    </div>
+  </div>
+  
+  <!-- Основные показатели -->
+  <div class="stats-grid">
+    <div class="stat-card primary">
+      <div class="stat-icon"><i class="fas fa-users"></i></div>
+      <div class="stat-content">
+        <span class="stat-value"><%= totalUsers %></span>
+        <span class="stat-label">Всего пользователей</span>
+      </div>
+    </div>
+    
+    <div class="stat-card success">
+      <div class="stat-icon"><i class="fas fa-book"></i></div>
+      <div class="stat-content">
+        <span class="stat-value"><%= totalBooks %></span>
+        <span class="stat-label">Всего книг</span>
+      </div>
+    </div>
+    
+    <div class="stat-card warning">
+      <div class="stat-icon"><i class="fas fa-star"></i></div>
+      <div class="stat-content">
+        <span class="stat-value"><%= totalReviews %></span>
+        <span class="stat-label">Всего рецензий</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Таблицы с данными -->
+  <div class="stats-row">
+    <!-- Топ пользователей -->
+    <div class="stats-card">
+      <h3><i class="fas fa-trophy" style="color: #fbbf24;"></i> Топ активных пользователей</h3>
+      <div class="table-responsive">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Пользователь</th>
+              <th>Рецензий</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (topUsers && topUsers.length > 0) { %>
+              <% topUsers.forEach(item => { %>
+                <tr>
+                  <td>
+                    <div class="user-cell">
+                      <img src="/images/avatars/<%= item.user.avatar || 'default-avatar.png' %>" 
+                           alt="<%= item.user.name %>" 
+                           class="mini-avatar"
+                           onerror="this.src='/images/avatars/default-avatar.png'">
+                      <div class="user-info">
+                        <div class="user-name"><%= item.user.name %></div>
+                        <div class="user-email"><%= item.user.email %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-success"><%= item.dataValues.reviewsCount %></span></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="2" class="empty-message">Нет данных</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Топ книг по просмотрам -->
+    <div class="stats-card">
+      <h3><i class="fas fa-fire" style="color: #ef4444;"></i> Топ популярных книг</h3>
+      <div class="table-responsive">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Книга</th>
+              <th>Просмотров</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (topBooks && topBooks.length > 0) { %>
+              <% topBooks.forEach(book => { %>
+                <tr>
+                  <td>
+                    <div class="book-cell">
+                      <img src="/images/covers/<%= book.cover_image %>" 
+                           alt="<%= book.title %>" 
+                           class="mini-cover"
+                           onerror="this.src='/images/covers/default-book-cover.jpg'">
+                      <div class="book-info">
+                        <div class="book-title"><%= book.title %></div>
+                        <div class="book-author"><%= book.author %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-info"><%= book.views_count %></span></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="2" class="empty-message">Нет данных</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Топ книг по рейтингу -->
+  <div class="stats-card full-width">
+    <h3><i class="fas fa-star" style="color: #fbbf24;"></i> Топ книг по рейтингу</h3>
+    <div class="table-responsive">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Книга</th>
+            <th>Рейтинг</th>
+            <th>Рецензий</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (topRatedBooks && topRatedBooks.length > 0) { %>
+            <% topRatedBooks.forEach(book => { %>
+              <tr>
+                <td>
+                  <div class="book-cell">
+                    <img src="/images/covers/<%= book.cover_image %>" 
+                         alt="<%= book.title %>" 
+                         class="mini-cover"
+                         onerror="this.src='/images/covers/default-book-cover.jpg'">
+                    <div class="book-info">
+                      <div class="book-title"><%= book.title %></div>
+                      <div class="book-author"><%= book.author %></div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="rating-display">
+                    <% let avgRating = parseFloat(book.avg_rating).toFixed(1); %>
+                    <% for(let i = 1; i <= 5; i++) { %>
+                      <% if (i <= Math.floor(avgRating)) { %>
+                        <i class="fas fa-star" style="color: #fbbf24;"></i>
+                      <% } else if (i - 0.5 <= avgRating) { %>
+                        <i class="fas fa-star-half-alt" style="color: #fbbf24;"></i>
+                      <% } else { %>
+                        <i class="far fa-star" style="color: #fbbf24; opacity: 0.3;"></i>
+                      <% } %>
+                    <% } %>
+                    <span class="rating-value"><%= avgRating %></span>
+                  </div>
+                </td>
+                <td><span class="badge badge-purple"><%= book.reviews_count %></span></td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="3" class="empty-message">Нет данных</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+  .admin-statistics {
+    padding: 2rem;
+    color: white;
+  }
+  
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+  }
+  
+  .period-selector {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .period-btn {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .period-btn:hover,
+  .period-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    transition: all 0.3s ease;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+  }
+  
+  .stat-card.primary { border-left: 4px solid #3b82f6; }
+  .stat-card.success { border-left: 4px solid #10b981; }
+  .stat-card.warning { border-left: 4px solid #f59e0b; }
+  
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .stat-content {
+    flex: 1;
+  }
+  
+  .stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    background: linear-gradient(135deg, #fff, #e0e0e0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .stat-label {
+    opacity: 0.7;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .stats-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .stats-card:hover {
+    box-shadow: var(--shadow-xl);
+    border-color: var(--accent);
+  }
+  
+  .stats-card.full-width {
+    grid-column: 1 / -1;
+  }
+  
+  .stats-card h3 {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .stats-card h3 i {
+    color: var(--accent);
+  }
+  
+  /* Улучшенные стили для таблиц */
+  .table-responsive {
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+  
+  .modern-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+  }
+  
+  .modern-table thead tr {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  .modern-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.7);
+    border-bottom: 2px solid var(--accent);
+  }
+  
+  .modern-table td {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius);
+    transition: all 0.3s ease;
+  }
+  
+  .modern-table tr:hover td {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.01);
+  }
+  
+  .user-cell, .book-cell {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .user-info, .book-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .user-name {
+    font-weight: 600;
+    color: white;
+  }
+  
+  .user-email {
+    font-size: 0.75rem;
+    opacity: 0.6;
+  }
+  
+  .book-title {
+    font-weight: 600;
+    color: white;
+  }
+  
+  .book-author {
+    font-size: 0.75rem;
+    opacity: 0.6;
+  }
+  
+  .mini-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent);
+    transition: all 0.3s ease;
+  }
+  
+  .mini-avatar:hover {
+    transform: scale(1.5);
+    z-index: 10;
+  }
+  
+  .mini-cover {
+    width: 35px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+  }
+  
+  .mini-cover:hover {
+    transform: scale(2);
+    z-index: 10;
+  }
+  
+  /* Улучшенные бейджи для чисел */
+  .badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-lg);
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    min-width: 60px;
+  }
+  
+  .badge-success { 
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+  }
+  
+  .badge-info { 
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+  }
+  
+  .badge-purple { 
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
+  }
+  
+  .badge-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+  }
+  
+  .rating-display {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  .rating-display i {
+    font-size: 0.9rem;
+  }
+  
+  .rating-value {
+    margin-left: 0.5rem;
+    font-weight: 700;
+    color: #fbbf24;
+    font-size: 1.1rem;
+  }
+  
+  .empty-message {
+    text-align: center;
+    padding: 3rem;
+    opacity: 0.5;
+    font-style: italic;
+  }
+  
+  @media (max-width: 768px) {
+    .admin-header {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .stats-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .badge {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.85rem;
+      min-width: 40px;
+    }
+  }
+</style>

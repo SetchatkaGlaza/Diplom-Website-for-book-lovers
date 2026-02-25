@@ -1,0 +1,177 @@
+<div class="admin-book-form">
+  <div class="admin-header">
+    <h1><i class="fas fa-plus-circle"></i> Добавление книги</h1>
+    <a href="/admin/books" class="btn btn-outline">
+      <i class="fas fa-arrow-left"></i> Назад к списку
+    </a>
+  </div>
+  
+  <% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error.msg %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+  
+  <form action="/admin/books/add" method="POST" enctype="multipart/form-data" class="book-form">
+    <div class="form-grid">
+      <div class="form-main">
+        <div class="form-group">
+          <label for="title">Название *</label>
+          <input type="text" id="title" name="title" value="<%= formData ? formData.title : '' %>" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="author">Автор *</label>
+          <input type="text" id="author" name="author" value="<%= formData ? formData.author : '' %>" required>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="year">Год издания</label>
+            <input type="number" id="year" name="year" value="<%= formData ? formData.year : '' %>" min="1000" max="2026">
+          </div>
+          
+          <div class="form-group">
+            <label for="pages">Количество страниц</label>
+            <input type="number" id="pages" name="pages" value="<%= formData ? formData.pages : '' %>" min="1">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="publisher">Издательство</label>
+          <input type="text" id="publisher" name="publisher" value="<%= formData ? formData.publisher : '' %>">
+        </div>
+        
+        <div class="form-group">
+          <label for="genre_id">Жанр</label>
+          <select id="genre_id" name="genre_id">
+            <option value="">Без жанра</option>
+            <% genres.forEach(genre => { %>
+              <option value="<%= genre.id %>" <%= formData && formData.genre_id == genre.id ? 'selected' : '' %>>
+                <%= genre.name %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="isbn">ISBN</label>
+          <input type="text" id="isbn" name="isbn" value="<%= formData ? formData.isbn : '' %>">
+        </div>
+        
+        <div class="form-group">
+          <label for="description">Описание</label>
+          <textarea id="description" name="description" rows="8"><%= formData ? formData.description : '' %></textarea>
+        </div>
+      </div>
+      
+      <div class="form-sidebar">
+        <div class="form-group">
+          <label for="cover">Обложка книги</label>
+          <div class="cover-upload">
+            <input type="file" id="cover" name="cover" accept="image/*">
+            <div class="cover-preview">
+              <img src="/images/covers/default-book-cover.jpg" alt="Preview" id="cover-preview">
+            </div>
+          </div>
+          <small>Рекомендуемый размер: 300x450px. Максимум 5MB</small>
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-large">
+        <i class="fas fa-save"></i> Сохранить книгу
+      </button>
+    </div>
+  </form>
+</div>
+
+<style>
+  .admin-book-form {
+    padding: 2rem 0;
+    color: white;
+  }
+  
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+  }
+  
+  .book-form {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .cover-upload {
+    text-align: center;
+  }
+  
+  .cover-preview {
+    width: 100%;
+    height: 300px;
+    margin-top: 1rem;
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  
+  .cover-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+  .form-actions {
+    margin-top: 2rem;
+    text-align: center;
+  }
+  
+  @media (max-width: 768px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Превью загружаемой обложки
+  document.getElementById('cover').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('cover-preview').src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>

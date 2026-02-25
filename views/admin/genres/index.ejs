@@ -1,0 +1,360 @@
+<div class="admin-genres">
+  <div class="admin-header">
+    <h1><i class="fas fa-tags"></i> Управление жанрами</h1>
+  </div>
+  
+  <!-- Форма добавления жанра -->
+  <div class="add-genre-card">
+    <h3><i class="fas fa-plus-circle"></i> Добавить новый жанр</h3>
+    <form action="/admin/genres/add" method="POST" class="add-genre-form">
+      <div class="form-group">
+        <input type="text" name="name" placeholder="Введите название жанра..." required minlength="2">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Добавить жанр
+        </button>
+      </div>
+    </form>
+  </div>
+  
+  <!-- Список жанров -->
+  <div class="genres-grid">
+    <% if (genres && genres.length > 0) { %>
+      <% genres.forEach(genre => { %>
+        <div class="genre-card">
+          <div class="genre-card-header">
+            <span class="genre-id">#<%= genre.id %></span>
+            <div class="genre-actions">
+              <button class="genre-action-btn edit-genre" data-id="<%= genre.id %>" title="Редактировать">
+                <i class="fas fa-edit"></i>
+              </button>
+              <% if (genre.booksCount === 0) { %>
+                <form action="/admin/genres/<%= genre.id %>?_method=DELETE" method="POST" class="inline-form">
+                  <button type="submit" class="genre-action-btn delete" onclick="return confirm('Удалить жанр?')" title="Удалить">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+              <% } else { %>
+                <button class="genre-action-btn delete disabled" disabled title="Нельзя удалить жанр с книгами">
+                  <i class="fas fa-trash"></i>
+                </button>
+              <% } %>
+            </div>
+          </div>
+          
+          <div class="genre-card-body">
+            <!-- Отображение названия -->
+            <div class="genre-name-display" id="name-display-<%= genre.id %>">
+              <span class="genre-name"><%= genre.name %></span>
+            </div>
+            
+            <!-- Форма редактирования (скрыта по умолчанию) -->
+            <div class="genre-edit-form" id="edit-form-<%= genre.id %>" style="display: none;">
+              <form action="/admin/genres/<%= genre.id %>/edit" method="POST" class="edit-genre-form">
+                <input type="text" name="name" value="<%= genre.name %>" required minlength="2" autocomplete="off">
+                <div class="edit-actions">
+                  <button type="submit" class="btn-icon success" title="Сохранить">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <button type="button" class="btn-icon danger cancel-edit" data-id="<%= genre.id %>" title="Отмена">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          
+          <div class="genre-card-footer">
+            <div class="genre-stats">
+              <i class="fas fa-book"></i>
+              <span><%= genre.booksCount %> <%= genre.booksCount === 1 ? 'книга' : 
+                                                  genre.booksCount >= 2 && genre.booksCount <= 4 ? 'книги' : 'книг' %></span>
+            </div>
+            <div class="genre-date">
+              <i class="far fa-calendar-alt"></i>
+              <%= new Date(genre.createdAt).toLocaleDateString('ru-RU') %>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="empty-state">
+        <i class="fas fa-tags fa-4x"></i>
+        <h3>Жанры не найдены</h3>
+        <p>Добавьте первый жанр с помощью формы выше</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<style>
+  .admin-genres {
+    padding: 2rem;
+    color: white;
+  }
+  
+  .admin-header {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+  }
+  
+  .add-genre-card {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .add-genre-card h3 {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .add-genre-form .form-group {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .add-genre-form input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .add-genre-form input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+  }
+  
+  .genres-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .genre-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .genre-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--accent);
+  }
+  
+  .genre-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .genre-id {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    font-family: monospace;
+  }
+  
+  .genre-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .genre-action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+  
+  .genre-action-btn.edit-genre {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+  }
+  
+  .genre-action-btn.edit-genre:hover {
+    background: #f59e0b;
+    color: white;
+    transform: scale(1.1);
+  }
+  
+  .genre-action-btn.delete {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+  }
+  
+  .genre-action-btn.delete:hover:not(.disabled) {
+    background: #ef4444;
+    color: white;
+    transform: scale(1.1);
+  }
+  
+  .genre-action-btn.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  
+  .genre-card-body {
+    padding: 1.5rem;
+  }
+  
+  .genre-name-display {
+    text-align: center;
+  }
+  
+  .genre-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #fff, #e0e0e0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .edit-genre-form {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .edit-genre-form input {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid var(--accent);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+  }
+  
+  .edit-actions {
+    display: flex;
+    gap: 0.25rem;
+  }
+  
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn-icon.success {
+    background: #10b981;
+    color: white;
+  }
+  
+  .btn-icon.success:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px #10b981;
+  }
+  
+  .btn-icon.danger {
+    background: #ef4444;
+    color: white;
+  }
+  
+  .btn-icon.danger:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px #ef4444;
+  }
+  
+  .genre-card-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+  
+  .genre-stats i,
+  .genre-date i {
+    margin-right: 0.25rem;
+  }
+  
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+  }
+  
+  .empty-state i {
+    opacity: 0.3;
+    margin-bottom: 1rem;
+  }
+  
+  .empty-state h3 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .empty-state p {
+    opacity: 0.6;
+  }
+  
+  @media (max-width: 768px) {
+    .add-genre-form .form-group {
+      flex-direction: column;
+    }
+    
+    .genres-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Редактирование жанра
+  document.querySelectorAll('.edit-genre').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.dataset.id;
+      document.getElementById(`name-display-${id}`).style.display = 'none';
+      document.getElementById(`edit-form-${id}`).style.display = 'block';
+    });
+  });
+  
+  // Отмена редактирования
+  document.querySelectorAll('.cancel-edit').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.dataset.id;
+      document.getElementById(`name-display-${id}`).style.display = 'block';
+      document.getElementById(`edit-form-${id}`).style.display = 'none';
+    });
+  });
+</script>

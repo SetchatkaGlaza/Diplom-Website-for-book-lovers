@@ -1,0 +1,105 @@
+<div class="admin-book-form">
+  <div class="admin-header">
+    <h1><i class="fas fa-edit"></i> Редактирование книги</h1>
+    <a href="/admin/books" class="btn btn-outline">
+      <i class="fas fa-arrow-left"></i> Назад к списку
+    </a>
+  </div>
+  
+  <% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error.msg %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+  
+  <form action="/admin/books/<%= book.id %>/edit" method="POST" enctype="multipart/form-data" class="book-form">
+    <div class="form-grid">
+      <div class="form-main">
+        <div class="form-group">
+          <label for="title">Название *</label>
+          <input type="text" id="title" name="title" value="<%= book.title %>" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="author">Автор *</label>
+          <input type="text" id="author" name="author" value="<%= book.author %>" required>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="year">Год издания</label>
+            <input type="number" id="year" name="year" value="<%= book.year || '' %>" min="1000" max="2026">
+          </div>
+          
+          <div class="form-group">
+            <label for="pages">Количество страниц</label>
+            <input type="number" id="pages" name="pages" value="<%= book.pages || '' %>" min="1">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="publisher">Издательство</label>
+          <input type="text" id="publisher" name="publisher" value="<%= book.publisher || '' %>">
+        </div>
+        
+        <div class="form-group">
+          <label for="genre_id">Жанр</label>
+          <select id="genre_id" name="genre_id">
+            <option value="">Без жанра</option>
+            <% genres.forEach(genre => { %>
+              <option value="<%= genre.id %>" <%= book.genre_id == genre.id ? 'selected' : '' %>>
+                <%= genre.name %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="isbn">ISBN</label>
+          <input type="text" id="isbn" name="isbn" value="<%= book.isbn || '' %>">
+        </div>
+        
+        <div class="form-group">
+          <label for="description">Описание</label>
+          <textarea id="description" name="description" rows="8"><%= book.description || '' %></textarea>
+        </div>
+      </div>
+      
+      <div class="form-sidebar">
+        <div class="form-group">
+          <label for="cover">Обложка книги</label>
+          <div class="cover-upload">
+            <input type="file" id="cover" name="cover" accept="image/*">
+            <div class="cover-preview">
+              <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>" id="cover-preview">
+            </div>
+          </div>
+          <small>Оставьте пустым, чтобы сохранить текущую обложку</small>
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-large">
+        <i class="fas fa-save"></i> Сохранить изменения
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.getElementById('cover').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('cover-preview').src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>

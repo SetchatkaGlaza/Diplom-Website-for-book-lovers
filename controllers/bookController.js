@@ -42,8 +42,11 @@ exports.getCatalog = async (req, res) => {
     
     // Поиск по названию
     if (req.query.search) {
-      filters.title = { [Op.iLike]: `%${req.query.search}%` };
-    }
+  filters[Op.or] = [
+    { title: { [Op.iLike]: `%${req.query.search}%` } },
+    { author: { [Op.iLike]: `%${req.query.search}%` } }
+  ];
+}
     
     // Сортировка
     let order = [];

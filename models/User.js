@@ -31,7 +31,12 @@ const User = sequelize.define('User', {
     type: DataTypes.TEXT,
     allowNull: true,
     defaultValue: '',
-  }
+  },
+  isBlocked: {
+  type: DataTypes.BOOLEAN,
+  defaultValue: false,
+  allowNull: false
+}
 }, {
   // Добавит поля createdAt и updatedAt автоматически
   timestamps: true,

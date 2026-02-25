@@ -54,8 +54,8 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><path d="M20 20 L80 20 L80 80 L20 80 Z" fill="none" stroke="white" stroke-width="2"/><circle cx="50" cy="50" r="15" fill="none" stroke="white" stroke-width="2"/></svg>') repeat;
-  pointer-events: none;
+  background: linear-gradient(180deg, transparent 95%, rgba(0,0,0,0.1) 95%);
+background-size: 100% 25px; /* имитация линованной бумаги */
   z-index: -1;
 }
 
@@ -230,7 +230,6 @@ body::before {
 .hero {
   text-align: center;
   padding: 4rem 2rem;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
   border-radius: var(--radius-lg);
   margin: 2rem 0;
   color: white;
@@ -1136,4 +1135,845 @@ body::before {
   background: linear-gradient(135deg, var(--danger), #f87171);
   color: white;
   box-shadow: var(--shadow);
+}
+
+/* ===== КРАСИВЫЕ ТАБЛИЦЫ ===== */
+
+/* Контейнер для адаптивных таблиц */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Основная таблица */
+.modern-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: white;
+  font-size: 0.95rem;
+}
+
+/* Заголовки */
+.modern-table thead tr {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+}
+
+.modern-table th {
+  padding: 1rem 1.2rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+
+.modern-table th i {
+  margin-right: 0.5rem;
+  opacity: 0.8;
+}
+
+/* Ячейки */
+.modern-table td {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+  transition: background-color 0.2s ease;
+}
+
+/* Строки */
+.modern-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.modern-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+}
+
+.modern-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Чётные строки с легким фоном */
+.modern-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Ячейки с изображениями */
+.table-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.table-img:hover {
+  transform: scale(1.5);
+  border-color: var(--accent);
+}
+
+.table-cover {
+  width: 40px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease;
+}
+
+.table-cover:hover {
+  transform: scale(1.5);
+  z-index: 100;
+  position: relative;
+}
+
+/* Бейджи статусов */
+.badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.badge-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3);
+}
+
+.badge-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3);
+}
+
+.badge-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 2px 5px rgba(239, 68, 68, 0.3);
+}
+
+.badge-info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
+}
+
+.badge-purple {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  box-shadow: 0 2px 5px rgba(139, 92, 246, 0.3);
+}
+
+/* Кнопки действий */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  text-decoration: none;
+}
+
+.action-btn i {
+  font-size: 1rem;
+}
+
+.action-btn:hover {
+  transform: translateY(-3px) scale(1.1);
+  box-shadow: var(--shadow-lg);
+}
+
+.action-btn.view {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.action-btn.edit {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.action-btn.delete {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.action-btn.approve {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+/* Текст в ячейках */
+.truncate-text {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.truncate-text:hover {
+  white-space: normal;
+  overflow: visible;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  position: absolute;
+  z-index: 10;
+  max-width: 300px;
+}
+
+/* Рейтинг звёздами */
+.table-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #fbbf24;
+}
+
+.table-rating i {
+  font-size: 0.9rem;
+}
+
+.table-rating-value {
+  margin-left: 0.5rem;
+  font-weight: 600;
+  color: white;
+}
+
+/* Информация о пользователе */
+.user-info-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-info-cell img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-info-cell .user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-info-cell .user-name {
+  font-weight: 500;
+}
+
+.user-info-cell .user-email {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* Книжная информация */
+.book-info-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.book-info-cell img {
+  width: 36px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.book-info-cell .book-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.book-info-cell .book-title {
+  font-weight: 500;
+}
+
+.book-info-cell .book-author {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* Пагинация под таблицами */
+.table-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  padding: 1rem;
+}
+
+.pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 0.75rem;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pagination-btn:hover,
+.pagination-btn.active {
+  background: linear-gradient(135deg, var(--accent), var(--secondary));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.pagination-btn.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Поиск над таблицей */
+.table-search {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table-search input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 0.95rem;
+}
+
+.table-search input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.table-search button {
+  padding: 0.75rem 1.5rem;
+  white-space: nowrap;
+}
+
+/* Фильтры над таблицей */
+.table-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  min-width: 150px;
+  cursor: pointer;
+}
+
+.filter-select option {
+  background: var(--dark);
+}
+
+/* Статистика над таблицей */
+.table-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.stat-pill {
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-pill i {
+  color: var(--accent);
+}
+
+.stat-pill span {
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .modern-table th,
+  .modern-table td {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .table-search {
+    flex-direction: column;
+  }
+  
+  .table-filters {
+    flex-direction: column;
+  }
+  
+  .filter-select {
+    width: 100%;
+  }
+  
+  .user-info-cell .user-email,
+  .book-info-cell .book-author {
+    display: none;
+  }
+}
+/* Карточки рецензий */
+.review-moderation-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.review-moderation-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--accent);
+}
+
+.review-moderation-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--secondary));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.review-moderation-card:hover::before {
+  opacity: 1;
+}
+
+.review-moderation-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.review-moderation-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255,255,255,0.1);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+  min-width: 200px;
+}
+
+.review-moderation-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent);
+}
+
+.review-moderation-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-moderation-user-name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.review-moderation-user-id {
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.review-moderation-book {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  background: rgba(255,255,255,0.1);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+}
+
+.review-moderation-book-cover {
+  width: 35px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+}
+
+.review-moderation-book-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-moderation-book-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.review-moderation-book-author {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.review-moderation-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(255,255,255,0.1);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+}
+
+.review-moderation-rating i {
+  color: #fbbf24;
+  font-size: 0.9rem;
+}
+
+.review-moderation-rating i.far {
+  opacity: 0.3;
+}
+
+.review-moderation-date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.1);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.review-moderation-content {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin: 1rem 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  border-left: 4px solid var(--accent);
+}
+
+.review-moderation-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius);
+}
+
+.review-moderation-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.review-moderation-stat i.fa-thumbs-up { color: #10b981; }
+.review-moderation-stat i.fa-thumbs-down { color: #ef4444; }
+
+.review-moderation-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.review-moderation-status {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.35rem 1rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-pending {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+}
+
+.status-approved {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+}
+
+/* Кнопки для модерации */
+.btn-approve {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-approve:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+}
+
+.btn-reject {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-reject:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+}
+
+/* Фильтры для модерации */
+.moderation-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.filter-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.1);
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+  background: linear-gradient(135deg, var(--accent), var(--secondary));
+  transform: translateY(-2px);
+}
+
+.filter-btn i {
+  font-size: 1rem;
+}
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.legend-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.legend-value {
+  font-weight: 600;
+  margin-left: 0.25rem;
+  color: var(--accent);
+}
+/* Контейнер для графика */
+.chart-container {
+  position: relative;
+  height: 250px;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+/* Убедимся, что canvas видим */
+#rolesChart {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Основные стили для select */
+select, .filter-select, .role-select, .status-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg);
+  background: rgba(20, 30, 40, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px;
+}
+
+select:hover, .filter-select:hover, .role-select:hover, .status-select:hover {
+  border-color: var(--accent);
+  background-color: rgba(40, 50, 60, 0.9);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+}
+
+select:focus, .filter-select:focus, .role-select:focus, .status-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+/* Стили для option внутри select */
+select option, .filter-select option, .role-select option, .status-select option {
+  background: #1a2634;
+  color: white;
+  padding: 1rem;
+  font-size: 0.95rem;
+}
+
+/* Специальные стили для option при наведении */
+select option:hover, .filter-select option:hover,
+select option:focus, .filter-select option:focus,
+select option:checked, .filter-select option:checked {
+  background: linear-gradient(135deg, var(--accent), var(--secondary));
+  color: white;
+}
+
+/* Для Firefox */
+select option:checked {
+  background: linear-gradient(135deg, var(--accent), var(--secondary));
+  color: white;
+}
+
+/* Для Chrome/Safari */
+select::-webkit-scrollbar {
+  width: 8px;
+}
+
+select::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+select::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+select::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary);
+}
+
+/* Стили для select в админке */
+.admin-filters select {
+  min-width: 150px;
+}
+
+/* Компактные select для таблиц */
+.compact-select {
+  padding: 0.4rem 2rem 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  background-size: 14px;
+}
+
+/* Select в карточках */
+.card-select {
+  width: 100%;
+  margin-top: 0.5rem;
 }
