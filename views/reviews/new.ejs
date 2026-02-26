@@ -1,0 +1,260 @@
+<div class="new-review">
+  <div class="review-header">
+    <a href="/books/<%= book.id %>" class="back-link">
+      <i class="fas fa-arrow-left"></i> Вернуться к книге
+    </a>
+    <h1><i class="fas fa-pen"></i> Новая рецензия</h1>
+  </div>
+  
+  <div class="review-book-info">
+    <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>" class="review-book-cover">
+    <div>
+      <h2><%= book.title %></h2>
+      <p class="book-author"><%= book.author %></p>
+    </div>
+  </div>
+  
+  <% if (warning) { %>
+    <div class="alert alert-warning">
+      <i class="fas fa-exclamation-triangle"></i>
+      <%= warning %>
+    </div>
+  <% } %>
+  
+  <% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error.msg %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+  
+  <form action="/reviews/new/<%= book.id %>" method="POST" class="review-form">
+    <div class="form-group">
+      <label>Ваша оценка</label>
+      <div class="rating-input">
+        <% for(let i = 5; i >= 1; i--) { %>
+          <input 
+            type="radio" 
+            name="rating" 
+            id="star<%= i %>" 
+            value="<%= i %>"
+            <%= (rating == i) ? 'checked' : '' %>
+            required
+          >
+          <label for="star<%= i %>" class="star-label"><i class="fas fa-star"></i></label>
+        <% } %>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="content">Текст рецензии</label>
+      <textarea 
+        id="content" 
+        name="content" 
+        rows="12"
+        required
+        minlength="10"
+        maxlength="5000"
+        placeholder="Поделитесь своим мнением о книге... Что понравилось? Что не понравилось? Кому бы вы её порекомендовали?"
+      ><%= content ? content : '' %></textarea>
+      <div class="textarea-counter">
+        <span id="charCount">0</span>/5000 символов
+      </div>
+    </div>
+    
+    <div class="review-guidelines">
+      <h4><i class="fas fa-info-circle"></i> Правила написания рецензий</h4>
+      <ul>
+        <li>Рецензия должна быть написана по-русски</li>
+        <li>Минимальная длина — 10 символов</li>
+        <li>Запрещены оскорбления и нецензурная лексика</li>
+        <li>Рецензия проходит модерацию перед публикацией</li>
+        <li>Вы можете редактировать свою рецензию после публикации</li>
+      </ul>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-large">
+        <i class="fas fa-paper-plane"></i> Опубликовать рецензию
+      </button>
+      <a href="/books/<%= book.id %>" class="btn btn-outline">
+        <i class="fas fa-times"></i> Отмена
+      </a>
+    </div>
+  </form>
+</div>
+
+<style>
+  .new-review {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    color: white;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .review-header {
+    margin-bottom: 2rem;
+  }
+  
+  .back-link {
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+    transition: var(--transition);
+  }
+  
+  .back-link:hover {
+    opacity: 1;
+    transform: translateX(-5px);
+  }
+  
+  .review-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .review-book-info {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .review-book-cover {
+    width: 100px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  
+  .review-book-info h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+  }
+  
+  .alert-warning {
+    background: rgba(245, 158, 11, 0.2);
+    border: 1px solid #f59e0b;
+    color: #f59e0b;
+    padding: 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+  
+  .rating-input input {
+    display: none;
+  }
+  
+  .star-label {
+    font-size: 2.5rem;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  
+  .rating-input input:checked ~ .star-label,
+  .rating-input .star-label:hover,
+  .rating-input .star-label:hover ~ .star-label {
+    color: #fbbf24;
+    transform: scale(1.1);
+  }
+  
+  .textarea-counter {
+    text-align: right;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-top: 0.25rem;
+  }
+  
+  .review-guidelines {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .review-guidelines h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: var(--accent);
+  }
+  
+  .review-guidelines ul {
+    margin-left: 1.5rem;
+  }
+  
+  .review-guidelines li {
+    margin-bottom: 0.25rem;
+    opacity: 0.9;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  @media (max-width: 768px) {
+    .review-book-info {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<script>
+  // Счётчик символов
+  const textarea = document.getElementById('content');
+  const charCount = document.getElementById('charCount');
+  
+  if (textarea && charCount) {
+    textarea.addEventListener('input', function() {
+      const count = this.value.length;
+      charCount.textContent = count;
+      
+      if (count > 5000) {
+        charCount.style.color = '#ef4444';
+      } else {
+        charCount.style.color = 'inherit';
+      }
+    });
+    
+    // Инициализация
+    charCount.textContent = textarea.value.length;
+  }
+</script>

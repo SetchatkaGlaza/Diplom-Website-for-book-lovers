@@ -8,17 +8,13 @@ const methodOverride = require('method-override');
 const sequelize = require('./config/database');
 
 // Импортируем все модели (чтобы Sequelize знал о них)
-const User = require('./models/User');
-const Genre = require('./models/Genre');
-const Book = require('./models/Book');
-const Review = require('./models/Review');
-const UserBook = require('./models/UserBook');
-const ReviewLike = require('./models/ReviewLike');
+const { User, Genre, Book, Review, UserBook, ReviewLike } = require('./models');
 
 // Импортируем маршруты
 const authRoutes = require('./routes/auth');
 const bookRoutes = require('./routes/books');
 const profileRoutes = require('./routes/profile');
+const reviewRoutes = require('./routes/reviews');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
@@ -66,13 +62,37 @@ app.use('/auth', authRoutes);
 app.use('/books', bookRoutes);
 app.use('/profile', profileRoutes);
 app.use('/admin', adminRoutes);
+app.use('/reviews', reviewRoutes);
 
 // Главная страница
-app.get('/', (req, res) => {
-  res.render('index', { 
-    title: 'Главная',
-    layout: 'layouts/main'
-  });
+app.get('/', async (req, res) => {
+  try {
+    // Получаем реальную статистику из базы данных
+    const totalBooks = await Book.count();
+    const totalUsers = await User.count();
+    const totalReviews = await Review.count();
+    
+    res.render('index', { 
+      title: 'Главная',
+      layout: 'layouts/main',
+      stats: {
+        totalBooks,
+        totalUsers,
+        totalReviews
+      }
+    });
+  } catch (error) {
+    console.error('Ошибка при загрузке главной страницы:', error);
+    res.render('index', { 
+      title: 'Главная',
+      layout: 'layouts/main',
+      stats: {
+        totalBooks: 0,
+        totalUsers: 0,
+        totalReviews: 0
+      }
+    });
+  }
 });
 
 // Запуск сервера с синхронизацией БД

@@ -3,37 +3,29 @@
   <p>Крупнейшее сообщество книголюбов. Найди свою следующую книгу вместе с тысячами читателей.</p>
   
   <div class="hero-search">
-  <form action="/books" method="GET" class="search-form">
-    <div class="search-input-wrapper">
-      <i class="fas fa-search search-icon"></i>
-      <input 
-        type="text" 
-        name="search" 
-        placeholder="Поиск книг по названию или автору..." 
-        autocomplete="off"
-      >
-    </div>
-    <button type="submit" class="btn btn-primary btn-search">
-      <i class="fas fa-search"></i> Найти
-    </button>
-  </form>
-  <p class="search-hint">Например: "Война и мир" или "Толстой"</p>
+    <form action="/books" method="GET" class="search-form">
+      <input type="text" name="search" placeholder="Поиск книг по названию или автору..." autocomplete="off">
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-search"></i> Найти
+      </button>
+    </form>
+  </div>
 </div>
 
 <div class="stats">
   <div class="stat-item">
     <i class="fas fa-book"></i>
-    <span class="stat-number">1234</span>
+    <span class="stat-number" id="totalBooks"><%= stats.totalBooks || 0 %></span>
     <span class="stat-label">книг в базе</span>
   </div>
   <div class="stat-item">
     <i class="fas fa-users"></i>
-    <span class="stat-number">567</span>
+    <span class="stat-number" id="totalUsers"><%= stats.totalUsers || 0 %></span>
     <span class="stat-label">пользователей</span>
   </div>
   <div class="stat-item">
     <i class="fas fa-star"></i>
-    <span class="stat-number">890</span>
+    <span class="stat-number" id="totalReviews"><%= stats.totalReviews || 0 %></span>
     <span class="stat-label">рецензий</span>
   </div>
 </div>
@@ -43,19 +35,52 @@
   <!-- Сюда подгрузятся книги через JavaScript -->
 </div>
 
-<div class="cta-section">
-  <h2>Готовы поделиться впечатлениями?</h2>
-  <p>Присоединяйтесь к сообществу и начните писать рецензии уже сегодня!</p>
-  <% if (!user) { %>
+<!-- Блок для неавторизованных пользователей -->
+<% if (!user) { %>
+  <div class="cta-section">
+    <h2>Готовы поделиться впечатлениями?</h2>
+    <p>Присоединяйтесь к сообществу и начните писать рецензии уже сегодня!</p>
     <a href="/auth/register" class="btn btn-large btn-primary">
       <i class="fas fa-user-plus"></i> Присоединиться
     </a>
-  <% } %>
+  </div>
+<% } else { %>
+  <!-- Блок для авторизованных пользователей -->
+ <div class="welcome-back-section">
+  <h2>С возвращением, <%= user.name %>! 👋</h2>
+  <div class="quick-actions">
+    <a href="/profile/books" class="quick-action-card">
+      <i class="fas fa-bookmark"></i>
+      <span>Мои книги</span>
+    </a>
+    <a href="/profile/reviews" class="quick-action-card">
+      <i class="fas fa-star"></i>
+      <span>Мои рецензии</span>
+    </a>
+    <a href="/profile" class="quick-action-card">
+      <i class="fas fa-user"></i>
+      <span>Профиль</span>
+    </a>
+    <!-- Было /profile/edit, теперь /profile -->
+  </div>
+</div>
+<% } %>
+
+<!-- Блок случайной книги -->
+<div class="random-book-section">
+  <h2 class="section-title">Случайная книга</h2>
+  <div id="random-book" class="random-book-card">
+    <!-- Заглушка, загрузится через JS -->
+    <div class="loading">Загрузка...</div>
+  </div>
+  <button id="refresh-random" class="btn btn-outline">
+    <i class="fas fa-sync-alt"></i> Другую книгу
+  </button>
 </div>
 
 <script>
   // Загружаем популярные книги
-  fetch('/books/popular?limit=6')
+  fetch('/books/popular?limit=8')
     .then(response => response.json())
     .then(books => {
       const container = document.getElementById('popular-books');
@@ -87,11 +112,56 @@
       });
     })
     .catch(error => console.error('Error loading popular books:', error));
+  
+  // Функция загрузки случайной книги
+  function loadRandomBook() {
+    const container = document.getElementById('random-book');
+    container.innerHTML = '<div class="loading">Загрузка...</div>';
+    
+    fetch('/books/random')
+      .then(response => response.json())
+      .then(book => {
+        if (book) {
+          const stars = '★'.repeat(Math.floor(book.rating)) + '☆'.repeat(5 - Math.floor(book.rating));
+          
+          container.innerHTML = `
+            <a href="/books/${book.id}" class="random-book-link">
+              <div class="random-book-cover">
+                <img src="/images/covers/${book.cover}" alt="${book.title}">
+              </div>
+              <div class="random-book-info">
+                <h3>${book.title}</h3>
+                <p class="book-author">${book.author}</p>
+                <p class="book-genre">${book.genre}</p>
+                <div class="book-rating">
+                  <span class="rating-stars">${stars}</span>
+                  <span class="rating-value">${book.rating}</span>
+                </div>
+                <p class="book-description">${book.description || ''}</p>
+                <span class="read-more">Читать далее →</span>
+              </div>
+            </a>
+          `;
+        } else {
+          container.innerHTML = '<p class="no-books">Книги пока не добавлены</p>';
+        }
+      })
+      .catch(error => {
+        console.error('Error loading random book:', error);
+        container.innerHTML = '<p class="error">Ошибка загрузки</p>';
+      });
+  }
+  
+  // Загружаем случайную книгу при загрузке страницы
+  loadRandomBook();
+  
+  // Обработчик кнопки "Другую книгу"
+  document.getElementById('refresh-random')?.addEventListener('click', loadRandomBook);
 </script>
 
 <style>
   .hero-search {
-    max-width: 700px;
+    max-width: 600px;
     margin: 2rem auto 0;
   }
   
@@ -105,62 +175,152 @@
     -webkit-backdrop-filter: blur(10px);
   }
   
-  .search-input-wrapper {
+  .search-form input {
     flex: 1;
-    position: relative;
-  }
-  
-  .search-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 1rem;
-  }
-  
-  .search-input-wrapper input {
-    width: 100%;
-    padding: 1rem 1rem 1rem 2.8rem;
+    padding: 1rem;
     border: none;
     border-radius: var(--radius);
     background: rgba(255, 255, 255, 0.9);
     font-size: 1rem;
-    transition: all 0.3s ease;
   }
   
-  .search-input-wrapper input:focus {
+  .search-form input:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5);
-    background: white;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
   }
   
-  .search-input-wrapper input::placeholder {
-    color: #666;
-    font-style: italic;
+  .cta-section {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: var(--radius-lg);
+    margin: 3rem 0;
+    color: white;
   }
   
-  .btn-search {
-    padding: 1rem 2rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+  .cta-section h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
   }
   
-  .search-hint {
+  .cta-section p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+  }
+  
+  .welcome-back-section {
+    text-align: center;
+    padding: 3rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+    border-radius: var(--radius-lg);
+    margin: 3rem 0;
+    color: white;
+  }
+  
+  .welcome-back-section h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .quick-actions {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .quick-action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: white;
+    transition: var(--transition);
+    min-width: 120px;
+  }
+  
+  .quick-action-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .quick-action-card i {
+    font-size: 2rem;
+    color: var(--accent);
+  }
+  
+  .random-book-section {
+    margin: 3rem 0;
+    text-align: center;
+  }
+  
+  .random-book-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    min-height: 200px;
+  }
+  
+  .random-book-link {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 2rem;
+    text-decoration: none;
+    color: white;
     text-align: left;
-    margin-top: 0.5rem;
-    font-size: 0.8rem;
+  }
+  
+  .random-book-cover img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  
+  .random-book-info h3 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .book-description {
+    margin-top: 1rem;
+    opacity: 0.8;
+    line-height: 1.6;
+  }
+  
+  .read-more {
+    display: inline-block;
+    margin-top: 1rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  
+  .loading {
+    text-align: center;
+    padding: 3rem;
     opacity: 0.7;
-    padding-left: 1rem;
   }
   
   @media (max-width: 768px) {
-    .search-form {
-      flex-direction: column;
+    .random-book-link {
+      grid-template-columns: 1fr;
+      text-align: center;
     }
     
-    .btn-search {
-      width: 100%;
+    .random-book-cover {
+      max-width: 200px;
+      margin: 0 auto;
     }
   }
 </style>

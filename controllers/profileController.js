@@ -1,4 +1,4 @@
-const { User, Book, Review, UserBook, Genre } = require('../models');
+const { User, Book, Review, UserBook, Genre, ReviewLike } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const path = require('path');
@@ -18,7 +18,7 @@ exports.getProfile = async (req, res) => {
     
     // Получаем полную информацию о пользователе
     const user = await User.findByPk(userId, {
-      attributes: { exclude: ['password_hash'] } // не показываем пароль
+      attributes: { exclude: ['password_hash'] }
     });
     
     // Получаем статистику пользователя
@@ -39,7 +39,11 @@ exports.getProfile = async (req, res) => {
     
     const recentBooks = await UserBook.findAll({
       where: { user_id: userId },
-      include: [{ model: Book, as: 'book', include: [{ model: Genre, as: 'genre' }] }],
+      include: [{ 
+        model: Book, 
+        as: 'book', 
+        include: [{ model: Genre, as: 'genre' }] 
+      }],
       order: [['updatedAt', 'DESC']],
       limit: 5
     });
@@ -58,6 +62,7 @@ exports.getProfile = async (req, res) => {
     res.redirect('/');
   }
 };
+
 
 /**
  * 2. РЕДАКТИРОВАНИЕ ПРОФИЛЯ (форма)
