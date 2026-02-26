@@ -1,4 +1,4 @@
-const { Book, Genre, Review, User } = require('../models');
+const { Book, Genre, Review, User, UserBook } = require('../models');
 const { Op } = require('sequelize'); // Операторы для сложных запросов
 
 /**

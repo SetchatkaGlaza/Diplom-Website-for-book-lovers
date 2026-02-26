@@ -72,7 +72,7 @@
               <div class="user-review-info">
                 <p><strong>Ваша рецензия:</strong> <%= item.book.userReview.rating %> ★</p>
                 <p class="review-excerpt"><%= item.book.userReview.content.substring(0, 100) %>...</p>
-                <a href="/profile/reviews/<%= item.book.userReview.id %>/edit" class="btn-small">
+                <a href="/reviews/new/<%= item.book.id %>" class="btn-small btn-primary">
                   <i class="fas fa-edit"></i> Редактировать
                 </a>
               </div>

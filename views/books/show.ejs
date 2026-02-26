@@ -10,18 +10,18 @@
       <h1 class="book-title"><%= book.title %></h1>
       <h2 class="book-author"><%= book.author %></h2>
       
-      <div class="book-meta">
+      <div class="book-meta-large">
         <% if (book.genre) { %>
-          <span class="book-genre">Жанр: <%= book.genre.name %></span>
+          <span><i class="fas fa-tag"></i> <%= book.genre.name %></span>
         <% } %>
         <% if (book.year) { %>
-          <span class="book-year">Год: <%= book.year %></span>
+          <span><i class="fas fa-calendar"></i> <%= book.year %></span>
         <% } %>
         <% if (book.pages) { %>
-          <span class="book-pages">Страниц: <%= book.pages %></span>
+          <span><i class="fas fa-book"></i> <%= book.pages %> стр.</span>
         <% } %>
         <% if (book.publisher) { %>
-          <span class="book-publisher">Издательство: <%= book.publisher %></span>
+          <span><i class="fas fa-building"></i> <%= book.publisher %></span>
         <% } %>
       </div>
       
@@ -31,56 +31,80 @@
           <%= book.averageRating || '0.0' %>
         </div>
         <div class="rating-stars-large">
-          <% if (book.averageRating > 0) { %>
-            <% for(let i = 1; i <= 5; i++) { %>
-              <% if (i <= Math.floor(book.averageRating)) { %>
-                <span class="star filled">★</span>
-              <% } else if (i - 0.5 <= book.averageRating) { %>
-                <span class="star half">½</span>
-              <% } else { %>
-                <span class="star">☆</span>
-              <% } %>
+          <% for(let i = 1; i <= 5; i++) { %>
+            <% if (i <= Math.floor(book.averageRating)) { %>
+              <span class="star filled">★</span>
+            <% } else if (i - 0.5 <= book.averageRating) { %>
+              <span class="star half">½</span>
+            <% } else { %>
+              <span class="star">☆</span>
             <% } %>
-          <% } else { %>
-            <span class="no-rating">Нет оценок</span>
           <% } %>
+          <span class="rating-count">(<%= book.reviews ? book.reviews.length : 0 %> оценок)</span>
         </div>
       </div>
       
-      <!-- Действия с книгой -->
-      <div class="book-actions">
-        <% if (user) { %>
-          <button class="btn btn-primary" id="want-to-read" data-status="want_to_read">
-            Хочу прочитать
+      <!-- Действия с книгой (только для авторизованных) -->
+      <% if (user) { %>
+        <div class="book-actions">
+          <button class="btn <%= userBookStatus === 'want_to_read' ? 'btn-primary' : 'btn-outline' %>" 
+                  id="want-to-read" 
+                  data-status="want_to_read"
+                  data-book-id="<%= book.id %>">
+            <i class="fas fa-bookmark"></i>
+            <span>Хочу прочитать</span>
           </button>
-          <button class="btn btn-outline" id="reading" data-status="reading">
-            Читаю сейчас
+          
+          <button class="btn <%= userBookStatus === 'reading' ? 'btn-primary' : 'btn-outline' %>" 
+                  id="reading" 
+                  data-status="reading"
+                  data-book-id="<%= book.id %>">
+            <i class="fas fa-book-open"></i>
+            <span>Читаю сейчас</span>
           </button>
-          <button class="btn btn-outline" id="read" data-status="read">
-            Прочитано
+          
+          <button class="btn <%= userBookStatus === 'read' ? 'btn-primary' : 'btn-outline' %>" 
+                  id="read" 
+                  data-status="read"
+                  data-book-id="<%= book.id %>">
+            <i class="fas fa-check-circle"></i>
+            <span>Прочитано</span>
           </button>
-        <% } else { %>
-          <a href="/auth/login" class="btn btn-primary">Войдите, чтобы добавить на полку</a>
+        </div>
+        
+        <!-- Текущий статус -->
+        <% if (userBookStatus) { %>
+          <div class="book-status-message">
+            <i class="fas fa-info-circle"></i>
+            <% if (userBookStatus === 'want_to_read') { %>
+              Эта книга в вашем списке "Хочу прочитать"
+            <% } else if (userBookStatus === 'reading') { %>
+              Вы читаете эту книгу сейчас
+            <% } else if (userBookStatus === 'read') { %>
+              Вы уже прочитали эту книгу
+            <% } %>
+          </div>
         <% } %>
-      </div>
-      
-      <!-- Текущий статус (если есть) -->
-      <% if (userBookStatus) { %>
-        <div class="book-status">
-          <% if (userBookStatus === 'want_to_read') { %>
-            Эта книга в вашем списке "Хочу прочитать"
-          <% } else if (userBookStatus === 'reading') { %>
-            Вы читаете эту книгу сейчас
-          <% } else if (userBookStatus === 'read') { %>
-            Вы уже прочитали эту книгу
-          <% } %>
+        
+        <!-- Кнопка написания рецензии -->
+        <% if (!userReview) { %>
+          <div class="write-review-btn">
+            <a href="/reviews/new/<%= book.id %>" class="btn btn-primary btn-large">
+              <i class="fas fa-pen"></i> Написать рецензию
+            </a>
+          </div>
+        <% } %>
+        
+      <% } else { %>
+        <div class="login-to-action">
+          <p><i class="fas fa-lock"></i> <a href="/auth/login">Войдите</a>, чтобы добавить книгу на полку или написать рецензию</p>
         </div>
       <% } %>
       
       <!-- Аннотация -->
       <% if (book.description) { %>
         <div class="book-description">
-          <h3>Аннотация</h3>
+          <h3><i class="fas fa-align-left"></i> Аннотация</h3>
           <p><%= book.description %></p>
         </div>
       <% } %>
@@ -89,63 +113,108 @@
   
   <!-- Блок рецензий -->
   <div class="book-reviews">
-    <h3>Рецензии 
-      <% if (reviews.length > 0) { %>
-        (<%= reviews.length %>)
-      <% } %>
-    </h3>
-    
-    <% if (user && !userReview) { %>
-      <div class="write-review">
-        <a href="/books/<%= book.id %>/review/new" class="btn btn-primary">Написать рецензию</a>
-      </div>
-    <% } %>
-    
+  <h3><i class="fas fa-star"></i> Рецензии читателей 
     <% if (reviews.length > 0) { %>
-      <div class="reviews-list">
-        <% reviews.forEach(review => { %>
-          <div class="review-card" data-review-id="<%= review.id %>">
-            <div class="review-header">
-              <div class="reviewer-info">
-                <img src="/images/avatars/<%= review.user.avatar %>" alt="<%= review.user.name %>" class="reviewer-avatar">
+      <span class="reviews-count">(<%= reviews.length %>)</span>
+    <% } %>
+  </h3>
+  
+  <% if (reviews.length > 0) { %>
+    <div class="reviews-list">
+      <% reviews.forEach(review => { %>
+        <div class="review-card" data-review-id="<%= review.id %>">
+          <div class="review-header">
+            <div class="reviewer-info">
+              <img src="/images/avatars/<%= review.user.avatar %>" alt="<%= review.user.name %>" class="reviewer-avatar">
+              <div>
                 <span class="reviewer-name"><%= review.user.name %></span>
-              </div>
-              <div class="review-rating">
-                <% for(let i = 1; i <= 5; i++) { %>
-                  <% if (i <= review.rating) { %>
-                    <span class="star-small filled">★</span>
-                  <% } else { %>
-                    <span class="star-small">☆</span>
-                  <% } %>
+                <% if (!review.is_moderated) { %>
+                  <span class="review-badge pending">На модерации</span>
                 <% } %>
               </div>
-              <span class="review-date">
-                <%= new Date(review.createdAt).toLocaleDateString('ru-RU') %>
-              </span>
             </div>
-            <div class="review-content">
-              <p><%= review.content %></p>
+            <div class="review-rating">
+              <% for(let i = 1; i <= 5; i++) { %>
+                <% if (i <= review.rating) { %>
+                  <i class="fas fa-star"></i>
+                <% } else { %>
+                  <i class="far fa-star"></i>
+                <% } %>
+              <% } %>
             </div>
-            <div class="review-footer">
-              <button class="btn-like" data-review-id="<%= review.id %>" data-type="like">
-                👍 <span class="likes-count"><%= review.likes_count || 0 %></span>
-              </button>
-              <button class="btn-dislike" data-review-id="<%= review.id %>" data-type="dislike">
-                👎 <span class="dislikes-count"><%= review.dislikes_count || 0 %></span>
-              </button>
-            </div>
+            <span class="review-date">
+              <i class="far fa-calendar-alt"></i> <%= new Date(review.createdAt).toLocaleDateString('ru-RU') %>
+            </span>
           </div>
-        <% }) %>
-      </div>
-    <% } else { %>
-      <p class="no-reviews">Пока нет рецензий. Будьте первым!</p>
-    <% } %>
-  </div>
+          
+          <div class="review-content">
+            <p><%= review.content %></p>
+          </div>
+          
+          <% if (review.is_moderated) { %>
+            <div class="review-footer">
+              <button class="btn-like <%= review.userReaction === 'like' ? 'active' : '' %>" 
+                      data-review-id="<%= review.id %>" 
+                      data-type="like">
+                <i class="<%= review.userReaction === 'like' ? 'fas' : 'far' %> fa-thumbs-up"></i> 
+                <span class="likes-count"><%= review.likes_count || 0 %></span>
+              </button>
+              
+              <button class="btn-dislike <%= review.userReaction === 'dislike' ? 'active' : '' %>" 
+                      data-review-id="<%= review.id %>" 
+                      data-type="dislike">
+                <i class="<%= review.userReaction === 'dislike' ? 'fas' : 'far' %> fa-thumbs-down"></i> 
+                <span class="dislikes-count"><%= review.dislikes_count || 0 %></span>
+              </button>
+              
+              <% if (user && user.id === review.user_id) { %>
+                <div class="review-owner-actions">
+                  <a href="/reviews/<%= review.id %>/edit" class="btn-small">
+                    <i class="fas fa-edit"></i> Редактировать
+                  </a>
+                  <form action="/reviews/<%= review.id %>?_method=DELETE" method="POST" class="inline-form">
+                    <button type="submit" class="btn-small btn-danger" onclick="return confirm('Удалить рецензию?')">
+                      <i class="fas fa-trash"></i> Удалить
+                    </button>
+                  </form>
+                </div>
+              <% } %>
+            </div>
+          <% } else if (user && user.id === review.user_id) { %>
+            <div class="review-footer">
+              <p class="moderation-message"><i class="fas fa-clock"></i> Рецензия ожидает модерации</p>
+              <div class="review-owner-actions">
+                <a href="/reviews/<%= review.id %>/edit" class="btn-small">
+                  <i class="fas fa-edit"></i> Редактировать
+                </a>
+                <form action="/reviews/<%= review.id %>?_method=DELETE" method="POST" class="inline-form">
+                  <button type="submit" class="btn-small btn-danger" onclick="return confirm('Удалить рецензию?')">
+                    <i class="fas fa-trash"></i> Удалить
+                  </button>
+                </form>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="no-reviews">
+      <i class="fas fa-star fa-3x"></i>
+      <p>Пока нет рецензий. Будьте первым, кто поделится мнением!</p>
+      <% if (user) { %>
+        <a href="/reviews/new/<%= book.id %>" class="btn btn-primary">
+          <i class="fas fa-pen"></i> Написать рецензию
+        </a>
+      <% } %>
+    </div>
+  <% } %>
+</div>
   
   <!-- Похожие книги -->
-  <% if (similarBooks.length > 0) { %>
+  <% if (similarBooks && similarBooks.length > 0) { %>
     <div class="similar-books">
-      <h3>Похожие книги</h3>
+      <h3><i class="fas fa-bookmark"></i> Похожие книги</h3>
       <div class="books-grid">
         <% similarBooks.forEach(book => { %>
           <div class="book-card small">
@@ -158,7 +227,7 @@
                 <p class="book-author"><%= book.author %></p>
                 <div class="book-rating">
                   <% if (book.averageRating > 0) { %>
-                    <span class="rating-value"><%= book.averageRating %></span>
+                    <span class="rating-value"><%= book.averageRating %> ★</span>
                   <% } %>
                 </div>
               </div>
@@ -170,26 +239,399 @@
   <% } %>
 </div>
 
+<style>
+  .book-page {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    color: white;
+  }
+  
+  .book-main {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+  
+  .book-cover-large {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+  }
+  
+  .book-cover-large img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .book-details h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .book-details h2 {
+    font-size: 1.5rem;
+    opacity: 0.9;
+    margin-bottom: 1rem;
+    font-weight: 400;
+  }
+  
+  .book-meta-large {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .book-meta-large span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .book-rating-large {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .rating-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #fbbf24;
+  }
+  
+  .rating-stars-large {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 1.5rem;
+  }
+  
+  .rating-count {
+    font-size: 1rem;
+    opacity: 0.7;
+    margin-left: 0.5rem;
+  }
+  
+  .star {
+    color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .star.filled {
+    color: #fbbf24;
+  }
+  
+  .star.half {
+    position: relative;
+    color: #fbbf24;
+  }
+  
+  .book-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .book-status-message {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-left: 4px solid var(--success);
+  }
+  
+  .write-review-btn {
+    margin: 1.5rem 0;
+  }
+  
+  .login-to-action {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: var(--radius);
+    margin: 1.5rem 0;
+  }
+  
+  .login-to-action a {
+    color: white;
+    font-weight: 600;
+    text-decoration: underline;
+  }
+  
+  .book-description {
+    margin-top: 2rem;
+  }
+  
+  .book-description h3 {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .book-description p {
+    line-height: 1.8;
+    opacity: 0.9;
+  }
+  
+  .book-reviews {
+    margin-top: 3rem;
+  }
+  
+  .book-reviews h3 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .reviews-count {
+    font-size: 1.2rem;
+    opacity: 0.7;
+  }
+  
+  .reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .review-card {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: var(--transition);
+  }
+  
+  .review-card:hover {
+    transform: translateX(10px);
+    background: rgba(0, 0, 0, 0.4);
+  }
+  
+  .review-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .reviewer-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+  }
+  
+  .reviewer-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .reviewer-name {
+    font-weight: 600;
+  }
+  
+  .review-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+  }
+  
+  .review-badge.pending {
+    background: #f59e0b;
+    color: white;
+  }
+  
+  .review-rating {
+    display: flex;
+    gap: 0.25rem;
+    color: #fbbf24;
+  }
+  
+  .review-date {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  .review-content {
+    margin-bottom: 1rem;
+    line-height: 1.8;
+  }
+  
+  .review-footer {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .btn-like,
+  .btn-dislike {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    color: white;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-like:hover {
+    background: var(--success);
+  }
+  
+  .btn-dislike:hover {
+    background: var(--danger);
+  }
+  
+  .review-owner-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+  
+  .btn-small {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: white;
+    transition: var(--transition);
+  }
+  
+  .btn-small:hover {
+    transform: translateY(-2px);
+  }
+  
+  .btn-small.btn-danger {
+    background: var(--danger);
+  }
+  
+  .moderation-message {
+    color: #f59e0b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .no-reviews {
+    text-align: center;
+    padding: 3rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-lg);
+  }
+  
+  .no-reviews i {
+    opacity: 0.5;
+    margin-bottom: 1rem;
+  }
+  
+  .no-reviews p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+  }
+  
+  .inline-form {
+    display: inline;
+  }
+  
+  @media (max-width: 768px) {
+    .book-main {
+      grid-template-columns: 1fr;
+    }
+    
+    .book-cover-large {
+      max-width: 250px;
+      margin: 0 auto;
+    }
+    
+    .book-actions {
+      flex-direction: column;
+    }
+    
+    .review-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .review-owner-actions {
+      margin-left: 0;
+      width: 100%;
+    }
+    .btn-like.active,
+.btn-dislike.active {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-like.active {
+  background: var(--success);
+}
+
+.btn-dislike.active {
+  background: var(--danger);
+}
+  }
+</style>
+
 <script>
   // Обработка кнопок "Хочу прочитать" и т.д.
   document.querySelectorAll('.book-actions .btn').forEach(button => {
     button.addEventListener('click', async function() {
+      const bookId = this.dataset.bookId;
       const status = this.dataset.status;
       
       try {
-        const response = await fetch('/api/user-books', {
+        const response = await fetch('/profile/books/status', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            book_id: <%= book.id %>,
-            status: status
-          })
+          body: JSON.stringify({ book_id: bookId, status })
         });
         
         if (response.ok) {
-          location.reload(); // перезагружаем страницу
+          // Обновляем стили кнопок
+          document.querySelectorAll('.book-actions .btn').forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline');
+          });
+          
+          this.classList.remove('btn-outline');
+          this.classList.add('btn-primary');
+          
+          // Обновляем сообщение о статусе
+          location.reload(); // Простой способ - перезагрузить страницу
         } else {
           alert('Ошибка при сохранении');
         }
@@ -201,29 +643,61 @@
   
   // Обработка лайков рецензий
   document.querySelectorAll('.btn-like, .btn-dislike').forEach(button => {
-    button.addEventListener('click', async function() {
-      const reviewId = this.dataset.reviewId;
-      const type = this.dataset.type;
+  button.addEventListener('click', async function() {
+    const reviewId = this.dataset.reviewId;
+    const type = this.dataset.type;
+    
+    try {
+      const response = await fetch('/reviews/' + reviewId + '/rate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ type: type })
+      });
       
-      try {
-        const response = await fetch('/api/reviews/' + reviewId + '/like', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ type: type })
-        });
+      if (response.ok) {
+        const data = await response.json();
         
-        if (response.ok) {
-          const data = await response.json();
-          // Обновляем счётчики
-          const reviewCard = this.closest('.review-card');
-          reviewCard.querySelector('.likes-count').textContent = data.likes;
-          reviewCard.querySelector('.dislikes-count').textContent = data.dislikes;
+        // Находим карточку рецензии
+        const reviewCard = this.closest('.review-card');
+        
+        // Обновляем счётчики
+        reviewCard.querySelector('.likes-count').textContent = data.likes;
+        reviewCard.querySelector('.dislikes-count').textContent = data.dislikes;
+        
+        // Обновляем классы активных кнопок
+        const likeBtn = reviewCard.querySelector('.btn-like');
+        const dislikeBtn = reviewCard.querySelector('.btn-dislike');
+        
+        if (likeBtn) {
+          likeBtn.classList.remove('active');
+          const likeIcon = likeBtn.querySelector('i');
+          likeIcon.className = 'far fa-thumbs-up';
         }
-      } catch (error) {
-        console.error('Error:', error);
+        
+        if (dislikeBtn) {
+          dislikeBtn.classList.remove('active');
+          const dislikeIcon = dislikeBtn.querySelector('i');
+          dislikeIcon.className = 'far fa-thumbs-down';
+        }
+        
+        // Активируем нужную кнопку
+        if (data.userReaction === 'like') {
+          likeBtn.classList.add('active');
+          likeBtn.querySelector('i').className = 'fas fa-thumbs-up';
+        } else if (data.userReaction === 'dislike') {
+          dislikeBtn.classList.add('active');
+          dislikeBtn.querySelector('i').className = 'fas fa-thumbs-down';
+        }
+        
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Ошибка при оценке');
       }
-    });
+    } catch (error) {
+      console.error('Error:', error);
+    }
   });
+});
 </script>
