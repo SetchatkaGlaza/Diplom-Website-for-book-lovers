@@ -1,0 +1,472 @@
+<div class="message-detail-page">
+  <!-- Навигация -->
+  <div class="detail-nav">
+    <a href="/admin/messages" class="back-link">
+      <i class="fas fa-arrow-left"></i> К списку сообщений
+    </a>
+    
+    <div class="nav-buttons">
+      <% if (prevMessage) { %>
+        <a href="/admin/messages/<%= prevMessage.id %>" class="nav-btn" title="Предыдущее">
+          <i class="fas fa-chevron-left"></i>
+        </a>
+      <% } %>
+      
+      <% if (nextMessage) { %>
+        <a href="/admin/messages/<%= nextMessage.id %>" class="nav-btn" title="Следующее">
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Заголовок -->
+  <div class="detail-header">
+    <div class="header-left">
+      <h1><i class="fas fa-envelope-open"></i> Сообщение от <%= message.name %></h1>
+      <div class="message-statuses">
+        <% if (!message.is_read) { %>
+          <span class="status-badge unread">Новое</span>
+        <% } %>
+        
+        <% if (message.is_replied) { %>
+          <span class="status-badge replied">Отвечено</span>
+        <% } %>
+        
+        <% if (message.is_archived) { %>
+          <span class="status-badge archived">В архиве</span>
+        <% } %>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <% if (!message.is_archived) { %>
+        <form action="/admin/messages/<%= message.id %>/archive" method="POST" class="inline-form">
+          <button type="submit" class="btn btn-outline" onclick="return confirm('Переместить в архив?')">
+            <i class="fas fa-archive"></i> В архив
+          </button>
+        </form>
+      <% } else { %>
+        <form action="/admin/messages/<%= message.id %>/restore" method="POST" class="inline-form">
+          <button type="submit" class="btn btn-outline">
+            <i class="fas fa-trash-restore"></i> Восстановить
+          </button>
+        </form>
+      <% } %>
+      
+      <form action="/admin/messages/<%= message.id %>?_method=DELETE" method="POST" class="inline-form">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Удалить сообщение навсегда?')">
+          <i class="fas fa-trash"></i> Удалить
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Информация о сообщении -->
+  <div class="message-info-card">
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-user"></i> Отправитель
+        </div>
+        <div class="info-value">
+          <div class="sender-name"><%= message.name %></div>
+          <div class="sender-email">
+            <a href="mailto:<%= message.email %>"><%= message.email %></a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-calendar"></i> Дата и время
+        </div>
+        <div class="info-value">
+          <div class="date-main"><%= new Date(message.createdAt).toLocaleDateString('ru-RU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+          <div class="date-time"><%= new Date(message.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) %></div>
+        </div>
+      </div>
+      
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-tag"></i> Тема
+        </div>
+        <div class="info-value">
+          <%= message.subject || 'Новое сообщение с сайта' %>
+        </div>
+      </div>
+      
+      <% if (message.ip_address) { %>
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-network-wired"></i> IP адрес
+        </div>
+        <div class="info-value">
+          <%= message.ip_address %>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Текст сообщения -->
+  <div class="message-content-card">
+    <h3><i class="fas fa-comment"></i> Сообщение</h3>
+    <div class="message-text">
+      <%= message.message.replace(/\n/g, '<br>') %>
+    </div>
+  </div>
+
+  <!-- Ответ (если есть) -->
+  <% if (message.is_replied) { %>
+    <div class="reply-card">
+      <div class="reply-header">
+        <h3><i class="fas fa-reply"></i> Ваш ответ</h3>
+        <div class="reply-meta">
+          <% if (message.responder) { %>
+            <span class="replied-by">
+              <img src="/images/avatars/<%= message.responder.avatar %>" alt="<%= message.responder.name %>" class="replier-avatar">
+              <%= message.responder.name %>
+            </span>
+          <% } %>
+          <span class="reply-date">
+            <i class="far fa-clock"></i> 
+            <%= new Date(message.reply_date).toLocaleString('ru-RU') %>
+          </span>
+        </div>
+      </div>
+      <div class="reply-text">
+        <%= message.reply_message.replace(/\n/g, '<br>') %>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- Форма ответа -->
+  <div class="reply-form-card">
+    <h3><i class="fas fa-pen"></i> Написать ответ</h3>
+    
+    <form action="/admin/messages/<%= message.id %>/reply" method="POST" class="reply-form">
+      <div class="form-group">
+        <label for="reply_message">Текст ответа</label>
+        <textarea 
+          id="reply_message" 
+          name="reply_message" 
+          rows="6" 
+          placeholder="Напишите ответ пользователю..."
+          required
+          minlength="5"
+        ></textarea>
+        <small class="form-text">Ответ будет отправлен на email: <strong><%= message.email %></strong></small>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-large">
+          <i class="fas fa-paper-plane"></i> Отправить ответ
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Заметки администратора -->
+  <div class="notes-card">
+    <h3><i class="fas fa-sticky-note"></i> Заметки администратора</h3>
+    
+    <form action="/admin/messages/<%= message.id %>/note" method="POST" class="notes-form">
+      <div class="form-group">
+        <textarea 
+          name="admin_notes" 
+          rows="4" 
+          placeholder="Добавьте приватную заметку (видно только вам)..."
+        ><%= message.admin_notes || '' %></textarea>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="btn btn-outline">
+          <i class="fas fa-save"></i> Сохранить заметку
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .message-detail-page {
+    padding: 1.5rem;
+  }
+  
+  .detail-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .back-link {
+    color: white;
+    text-decoration: none;
+    opacity: 0.8;
+    transition: var(--transition);
+  }
+  
+  .back-link:hover {
+    opacity: 1;
+    transform: translateX(-5px);
+  }
+  
+  .nav-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-decoration: none;
+    transition: var(--transition);
+  }
+  
+  .nav-btn:hover {
+    background: var(--accent);
+    transform: scale(1.1);
+  }
+  
+  .detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+  }
+  
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .header-left h1 {
+    font-size: 1.5rem;
+    margin: 0;
+  }
+  
+  .message-statuses {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  .status-badge.unread {
+    background: #3b82f6;
+  }
+  
+  .status-badge.replied {
+    background: #10b981;
+  }
+  
+  .status-badge.archived {
+    background: #6b7280;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .message-info-card,
+  .message-content-card,
+  .reply-card,
+  .reply-form-card,
+  .notes-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .info-item {
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius);
+  }
+  
+  .info-label {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .info-label i {
+    width: 16px;
+  }
+  
+  .info-value {
+    font-size: 1.1rem;
+  }
+  
+  .sender-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  
+  .sender-email a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  
+  .sender-email a:hover {
+    text-decoration: underline;
+  }
+  
+  .date-main {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+  }
+  
+  .date-time {
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+  
+  .message-content-card h3,
+  .reply-card h3,
+  .reply-form-card h3,
+  .notes-card h3 {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent);
+  }
+  
+  .message-text,
+  .reply-text {
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius);
+    line-height: 1.8;
+    white-space: pre-wrap;
+  }
+  
+  .reply-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .reply-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .replied-by {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .replier-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .reply-date {
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+  
+  .reply-form textarea,
+  .notes-form textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+  
+  .reply-form textarea:focus,
+  .notes-form textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  .form-text {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+  
+  .form-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .btn-large {
+    padding: 0.75rem 2rem;
+  }
+  
+  .inline-form {
+    display: inline;
+  }
+  
+  @media (max-width: 768px) {
+    .detail-header {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .header-left {
+      justify-content: center;
+    }
+    
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .reply-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

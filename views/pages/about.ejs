@@ -1,0 +1,108 @@
+<div class="page-content">
+  <h1><i class="fas fa-info-circle"></i> О проекте</h1>
+  
+  <div class="about-section">
+    <div class="about-card">
+      <h2>Книгоманы — это...</h2>
+      <p>Сообщество людей, объединённых любовью к чтению. Мы создали этот сайт, чтобы каждый мог:</p>
+      <ul>
+        <li><i class="fas fa-check-circle"></i> Находить новые книги по жанрам и рекомендациям</li>
+        <li><i class="fas fa-check-circle"></i> Делиться мнениями и писать рецензии</li>
+        <li><i class="fas fa-check-circle"></i> Обсуждать прочитанное с единомышленниками</li>
+        <li><i class="fas fa-check-circle"></i> Вести личные полки с книгами</li>
+        <li><i class="fas fa-check-circle"></i> Открывать для себя неизвестные шедевры</li>
+      </ul>
+    </div>
+    
+    <div class="about-card">
+      <h2>Наша миссия</h2>
+      <p>Сделать чтение доступным и увлекательным для каждого. Мы верим, что хорошая книга может изменить жизнь, и хотим помочь людям находить те самые книги, которые оставят след в душе.</p>
+    </div>
+    
+    <div class="about-card">
+      <h2>Для кого этот сайт</h2>
+      <p>Для всех, кто любит читать — от школьников до пенсионеров, от любителей фэнтези до ценителей классики. Здесь каждый найдёт что-то для себя.</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .page-content {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    color: white;
+  }
+  
+  .page-content h1 {
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .about-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+  
+  .about-card {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: var(--transition);
+  }
+  
+  .about-card:hover {
+    transform: translateY(-5px);
+    background: rgba(0, 0, 0, 0.4);
+  }
+  
+  .about-card h2 {
+    color: var(--accent);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+  }
+  
+  .about-card ul {
+    list-style: none;
+    margin-top: 1rem;
+  }
+  
+  .about-card ul li {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .about-card ul li i {
+    color: var(--success);
+  }
+  
+  .author-info {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  
+  .author-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--accent);
+  }
+  
+  @media (max-width: 768px) {
+    .author-info {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+</style>

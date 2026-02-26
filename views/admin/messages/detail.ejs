@@ -1,0 +1,196 @@
+<div class="message-detail">
+  <div class="detail-header">
+    <a href="/admin/messages" class="back-link">
+      <i class="fas fa-arrow-left"></i> К списку сообщений
+    </a>
+    <h1><i class="fas fa-envelope-open"></i> Сообщение от <%= message.name %></h1>
+  </div>
+
+  <div class="message-info">
+    <div class="info-row">
+      <span class="info-label">Дата:</span>
+      <span class="info-value"><%= new Date(message.createdAt).toLocaleString('ru-RU') %></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Имя:</span>
+      <span class="info-value"><%= message.name %></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Email:</span>
+      <span class="info-value">
+        <a href="mailto:<%= message.email %>"><%= message.email %></a>
+      </span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Статус:</span>
+      <span class="info-value">
+        <% if (!message.is_read) { %>
+          <span class="badge unread">Не прочитано</span>
+        <% } else if (message.replied) { %>
+          <span class="badge replied">Отвечено</span>
+        <% } else { %>
+          <span class="badge read">Прочитано</span>
+        <% } %>
+      </span>
+    </div>
+  </div>
+
+  <div class="message-content">
+    <h3>Сообщение:</h3>
+    <div class="message-text">
+      <%= message.message.replace(/\n/g, '<br>') %>
+    </div>
+  </div>
+
+  <div class="message-actions">
+    <a href="mailto:<%= message.email %>?subject=Re: Ваше сообщение с сайта Книгоманы" class="btn btn-primary">
+      <i class="fas fa-reply"></i> Ответить
+    </a>
+    
+    <form action="/admin/messages/<%= message.id %>/replied" method="POST" class="inline-form">
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-check"></i> Отметить как отвеченное
+      </button>
+    </form>
+
+    <form action="/admin/messages/<%= message.id %>?_method=DELETE" method="POST" class="inline-form">
+      <button type="submit" class="btn btn-danger" onclick="return confirm('Удалить сообщение?')">
+        <i class="fas fa-trash"></i> Удалить
+      </button>
+    </form>
+  </div>
+
+  <div class="admin-notes">
+    <h3><i class="fas fa-sticky-note"></i> Заметки администратора</h3>
+    
+    <form action="/admin/messages/<%= message.id %>/note" method="POST" class="notes-form">
+      <textarea name="admin_notes" rows="5" placeholder="Добавьте заметку..."><%= message.admin_notes || '' %></textarea>
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> Сохранить заметку
+      </button>
+    </form>
+  </div>
+</div>
+
+<style>
+  .message-detail {
+    padding: 2rem;
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    margin: 2rem;
+  }
+  
+  .detail-header {
+    margin-bottom: 2rem;
+  }
+  
+  .back-link {
+    color: white;
+    text-decoration: none;
+    opacity: 0.8;
+    margin-bottom: 1rem;
+    display: inline-block;
+  }
+  
+  .back-link:hover {
+    opacity: 1;
+  }
+  
+  .message-info {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+  }
+  
+  .info-row {
+    display: flex;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .info-label {
+    width: 120px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  
+  .info-value {
+    flex: 1;
+  }
+  
+  .message-content {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+  }
+  
+  .message-content h3 {
+    margin-bottom: 1rem;
+  }
+  
+  .message-text {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    line-height: 1.8;
+    white-space: pre-wrap;
+  }
+  
+  .message-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .admin-notes {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+  }
+  
+  .notes-form textarea {
+    width: 100%;
+    padding: 1rem;
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    margin: 1rem 0;
+  }
+  
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+  }
+  
+  .badge.unread { background: #ef4444; }
+  .badge.replied { background: #10b981; }
+  .badge.read { background: #6b7280; }
+  
+  .inline-form {
+    display: inline;
+  }
+  
+  @media (max-width: 768px) {
+    .message-actions {
+      flex-direction: column;
+    }
+    
+    .info-row {
+      flex-direction: column;
+    }
+    
+    .info-label {
+      width: 100%;
+      margin-bottom: 0.25rem;
+    }
+  }
+</style>

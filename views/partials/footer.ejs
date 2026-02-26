@@ -5,9 +5,15 @@
         <h3><i class="fas fa-book-open"></i> Книгоманы</h3>
         <p>Крупнейшее сообщество книголюбов. Найди свою следующую книгу вместе с нами.</p>
         <div class="social-links">
-          <a href="#"><i class="fab fa-vk"></i></a>
-          <a href="#"><i class="fab fa-telegram"></i></a>
-          <a href="#"><i class="fab fa-github"></i></a>
+          <a href="https://t.me/setchatka_glaza" target="_blank" rel="noopener noreferrer" title="Telegram">
+            <i class="fab fa-telegram"></i>
+          </a>
+          <a href="https://vk.com/setchatka_glaza" target="_blank" rel="noopener noreferrer" title="VKontakte">
+            <i class="fab fa-vk"></i>
+          </a>
+          <a href="https://github.com/SetchatkaGlaza" target="_blank" rel="noopener noreferrer" title="GitHub">
+            <i class="fab fa-github"></i>
+          </a>
         </div>
       </div>
       
@@ -17,30 +23,34 @@
           <li><a href="/"><i class="fas fa-chevron-right"></i> Главная</a></li>
           <li><a href="/books"><i class="fas fa-chevron-right"></i> Каталог</a></li>
           <li><a href="/about"><i class="fas fa-chevron-right"></i> О проекте</a></li>
+          <li><a href="/faq"><i class="fas fa-chevron-right"></i> FAQ</a></li>
+          <li><a href="/rules"><i class="fas fa-chevron-right"></i> Правила</a></li>
+          <li><a href="/contact"><i class="fas fa-chevron-right"></i> Контакты</a></li>
         </ul>
       </div>
       
       <div class="footer-section">
         <h4>Помощь</h4>
         <ul>
-          <li><a href="/faq"><i class="fas fa-chevron-right"></i> FAQ</a></li>
-          <li><a href="/contact"><i class="fas fa-chevron-right"></i> Контакты</a></li>
-          <li><a href="/rules"><i class="fas fa-chevron-right"></i> Правила</a></li>
+          <li><a href="/faq#how-to"><i class="fas fa-chevron-right"></i> Как написать рецензию?</a></li>
+          <li><a href="/faq#moderation"><i class="fas fa-chevron-right"></i> Модерация</a></li>
+          <li><a href="/rules"><i class="fas fa-chevron-right"></i> Правила сайта</a></li>
+          <li><a href="/contact"><i class="fas fa-chevron-right"></i> Связаться с нами</a></li>
         </ul>
       </div>
       
       <div class="footer-section">
         <h4>Статистика</h4>
         <div class="footer-stats">
-          <div><i class="fas fa-book"></i> 1,234 книги</div>
-          <div><i class="fas fa-users"></i> 567 читателей</div>
-          <div><i class="fas fa-star"></i> 890 рецензий</div>
+          <div><i class="fas fa-book"></i> <span class="stat-counter"><%= footerStats.totalBooks.toLocaleString() %></span> книги</div>
+          <div><i class="fas fa-users"></i> <span class="stat-counter"><%= footerStats.totalUsers.toLocaleString() %></span> читателей</div>
+          <div><i class="fas fa-star"></i> <span class="stat-counter"><%= footerStats.totalReviews.toLocaleString() %></span> рецензий</div>
+        </div>
+        <div class="footer-copyright">
+          <p>&copy; 2026 Книгоманы</p>
+          <p>Дипломный проект Валерия Корепина</p>
         </div>
       </div>
-    </div>
-    
-    <div class="footer-bottom">
-      <p>&copy; 2026 Книгоманы. Дипломный проект Валерия Корепина.</p>
     </div>
   </div>
 </footer>
