@@ -1,225 +1,394 @@
 <div class="admin-statistics">
-  <div class="admin-header">
-    <h1><i class="fas fa-chart-line"></i> Статистика</h1>
-    <div class="period-selector">
-      <a href="?period=day" class="period-btn <%= period === 'day' ? 'active' : '' %>">День</a>
-      <a href="?period=week" class="period-btn <%= period === 'week' ? 'active' : '' %>">Неделя</a>
-      <a href="?period=month" class="period-btn <%= period === 'month' ? 'active' : '' %>">Месяц</a>
-      <a href="?period=year" class="period-btn <%= period === 'year' ? 'active' : '' %>">Год</a>
-    </div>
+  <!-- Заголовок -->
+  <div class="page-header">
+    <h1><i class="fas fa-chart-bar"></i> Статистика проекта</h1>
+    <p class="text-muted">Обновлено: <%= new Date().toLocaleString('ru-RU') %></p>
   </div>
   
-  <!-- Основные показатели -->
-  <div class="stats-grid">
+  <!-- Карточки с основной статистикой -->
+  <div class="stats-cards">
     <div class="stat-card primary">
-      <div class="stat-icon"><i class="fas fa-users"></i></div>
+      <div class="stat-icon">
+        <i class="fas fa-users"></i>
+      </div>
       <div class="stat-content">
-        <span class="stat-value"><%= totalUsers %></span>
-        <span class="stat-label">Всего пользователей</span>
+        <div class="stat-value"><%= stats.totalUsers.toLocaleString() %></div>
+        <div class="stat-label">Пользователей</div>
+        <div class="stat-today">+<%= stats.newUsersToday %> сегодня</div>
       </div>
     </div>
     
     <div class="stat-card success">
-      <div class="stat-icon"><i class="fas fa-book"></i></div>
+      <div class="stat-icon">
+        <i class="fas fa-book"></i>
+      </div>
       <div class="stat-content">
-        <span class="stat-value"><%= totalBooks %></span>
-        <span class="stat-label">Всего книг</span>
+        <div class="stat-value"><%= stats.totalBooks.toLocaleString() %></div>
+        <div class="stat-label">Книг</div>
+        <div class="stat-today">+<%= stats.newBooksToday %> сегодня</div>
       </div>
     </div>
     
     <div class="stat-card warning">
-      <div class="stat-icon"><i class="fas fa-star"></i></div>
-      <div class="stat-content">
-        <span class="stat-value"><%= totalReviews %></span>
-        <span class="stat-label">Всего рецензий</span>
+      <div class="stat-icon">
+        <i class="fas fa-star"></i>
       </div>
-    </div>
-  </div>
-  
-  <!-- Таблицы с данными -->
-  <div class="stats-row">
-    <!-- Топ пользователей -->
-    <div class="stats-card">
-      <h3><i class="fas fa-trophy" style="color: #fbbf24;"></i> Топ активных пользователей</h3>
-      <div class="table-responsive">
-        <table class="modern-table">
-          <thead>
-            <tr>
-              <th>Пользователь</th>
-              <th>Рецензий</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% if (topUsers && topUsers.length > 0) { %>
-              <% topUsers.forEach(item => { %>
-                <tr>
-                  <td>
-                    <div class="user-cell">
-                      <img src="/images/avatars/<%= item.user.avatar || 'default-avatar.png' %>" 
-                           alt="<%= item.user.name %>" 
-                           class="mini-avatar"
-                           onerror="this.src='/images/avatars/default-avatar.png'">
-                      <div class="user-info">
-                        <div class="user-name"><%= item.user.name %></div>
-                        <div class="user-email"><%= item.user.email %></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td><span class="badge badge-success"><%= item.dataValues.reviewsCount %></span></td>
-                </tr>
-              <% }) %>
-            <% } else { %>
-              <tr>
-                <td colspan="2" class="empty-message">Нет данных</td>
-              </tr>
-            <% } %>
-          </tbody>
-        </table>
+      <div class="stat-content">
+        <div class="stat-value"><%= stats.totalReviews.toLocaleString() %></div>
+        <div class="stat-label">Рецензий</div>
+        <div class="stat-today">+<%= stats.newReviewsToday %> сегодня</div>
       </div>
     </div>
     
-    <!-- Топ книг по просмотрам -->
-    <div class="stats-card">
-      <h3><i class="fas fa-fire" style="color: #ef4444;"></i> Топ популярных книг</h3>
-      <div class="table-responsive">
-        <table class="modern-table">
-          <thead>
-            <tr>
-              <th>Книга</th>
-              <th>Просмотров</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% if (topBooks && topBooks.length > 0) { %>
-              <% topBooks.forEach(book => { %>
-                <tr>
-                  <td>
-                    <div class="book-cell">
-                      <img src="/images/covers/<%= book.cover_image %>" 
-                           alt="<%= book.title %>" 
-                           class="mini-cover"
-                           onerror="this.src='/images/covers/default-book-cover.jpg'">
-                      <div class="book-info">
-                        <div class="book-title"><%= book.title %></div>
-                        <div class="book-author"><%= book.author %></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td><span class="badge badge-info"><%= book.views_count %></span></td>
-                </tr>
-              <% }) %>
-            <% } else { %>
-              <tr>
-                <td colspan="2" class="empty-message">Нет данных</td>
-              </tr>
-            <% } %>
-          </tbody>
-        </table>
+    <div class="stat-card info">
+      <div class="stat-icon">
+        <i class="fas fa-tags"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value"><%= stats.totalGenres.toLocaleString() %></div>
+        <div class="stat-label">Жанров</div>
       </div>
     </div>
   </div>
   
-  <!-- Топ книг по рейтингу -->
-  <div class="stats-card full-width">
-    <h3><i class="fas fa-star" style="color: #fbbf24;"></i> Топ книг по рейтингу</h3>
-    <div class="table-responsive">
-      <table class="modern-table">
+  <!-- Две колонки с таблицами -->
+  <div class="tables-row">
+    <!-- Левая колонка -->
+    <div class="table-container">
+      <div class="table-header">
+        <h2><i class="fas fa-fire"></i> Топ популярных книг</h2>
+        <span class="badge">по просмотрам</span>
+      </div>
+      
+      <table class="admin-table">
         <thead>
           <tr>
+            <th>#</th>
+            <th>Книга</th>
+            <th>Автор</th>
+            <th>Просмотры</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (topBooks && topBooks.length > 0) { %>
+            <% topBooks.forEach((book, index) => { %>
+              <tr>
+                <td><%= index + 1 %></td>
+                <td class="book-cell">
+                  <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>" class="table-cover">
+                  <a href="/books/<%= book.id %>" target="_blank"><%= book.title.length > 30 ? book.title.substring(0, 30) + '...' : book.title %></a>
+                </td>
+                <td><%= book.author.length > 20 ? book.author.substring(0, 20) + '...' : book.author %></td>
+                <td class="text-center"><strong><%= book.views_count.toLocaleString() %></strong></td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="4" class="text-center">Нет данных</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Правая колонка -->
+    <div class="table-container">
+      <div class="table-header">
+        <h2><i class="fas fa-star"></i> Топ книг по рейтингу</h2>
+        <span class="badge">минимум 3 оценки</span>
+      </div>
+      
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>#</th>
             <th>Книга</th>
             <th>Рейтинг</th>
-            <th>Рецензий</th>
+            <th>Оценок</th>
           </tr>
         </thead>
         <tbody>
           <% if (topRatedBooks && topRatedBooks.length > 0) { %>
-            <% topRatedBooks.forEach(book => { %>
+            <% topRatedBooks.forEach((book, index) => { %>
               <tr>
-                <td>
-                  <div class="book-cell">
-                    <img src="/images/covers/<%= book.cover_image %>" 
-                         alt="<%= book.title %>" 
-                         class="mini-cover"
-                         onerror="this.src='/images/covers/default-book-cover.jpg'">
-                    <div class="book-info">
-                      <div class="book-title"><%= book.title %></div>
-                      <div class="book-author"><%= book.author %></div>
-                    </div>
-                  </div>
+                <td><%= index + 1 %></td>
+                <td class="book-cell">
+                  <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>" class="table-cover">
+                  <a href="/books/<%= book.id %>" target="_blank"><%= book.title.length > 30 ? book.title.substring(0, 30) + '...' : book.title %></a>
                 </td>
-                <td>
-                  <div class="rating-display">
-                    <% let avgRating = parseFloat(book.avg_rating).toFixed(1); %>
-                    <% for(let i = 1; i <= 5; i++) { %>
-                      <% if (i <= Math.floor(avgRating)) { %>
-                        <i class="fas fa-star" style="color: #fbbf24;"></i>
-                      <% } else if (i - 0.5 <= avgRating) { %>
-                        <i class="fas fa-star-half-alt" style="color: #fbbf24;"></i>
-                      <% } else { %>
-                        <i class="far fa-star" style="color: #fbbf24; opacity: 0.3;"></i>
-                      <% } %>
-                    <% } %>
-                    <span class="rating-value"><%= avgRating %></span>
-                  </div>
+                <td class="text-center">
+                  <span class="rating-badge">
+                    <%= parseFloat(book.avg_rating).toFixed(1) %> ★
+                  </span>
                 </td>
-                <td><span class="badge badge-purple"><%= book.reviews_count %></span></td>
+                <td class="text-center"><%= book.reviews_count %></td>
               </tr>
             <% }) %>
           <% } else { %>
-            <tr>
-              <td colspan="3" class="empty-message">Нет данных</td>
-            </tr>
+            <tr><td colspan="4" class="text-center">Нет данных</td></tr>
           <% } %>
         </tbody>
       </table>
     </div>
   </div>
+  
+  <!-- Вторая строка таблиц -->
+  <div class="tables-row">
+    <!-- Левая колонка -->
+    <div class="table-container">
+      <div class="table-header">
+        <h2><i class="fas fa-users"></i> Топ активных пользователей</h2>
+        <span class="badge">по количеству рецензий</span>
+      </div>
+      
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Пользователь</th>
+            <th>Рецензий</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (topUsers && topUsers.length > 0) { %>
+            <% topUsers.forEach((user, index) => { %>
+              <tr>
+                <td><%= index + 1 %></td>
+                <td class="user-cell">
+                  <img src="/images/avatars/<%= user.avatar || 'default-avatar.png' %>" alt="<%= user.name %>" class="table-avatar">
+                  <a href="/profile/<%= user.id %>" target="_blank"><%= user.name %></a>
+                </td>
+                <td class="text-center"><strong><%= user.reviews_count %></strong></td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="3" class="text-center">Нет данных</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Правая колонка -->
+    <div class="table-container">
+      <div class="table-header">
+        <h2><i class="fas fa-chart-pie"></i> Популярные жанры</h2>
+        <span class="badge">по количеству книг</span>
+      </div>
+      
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Жанр</th>
+            <th>Книг</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (popularGenres && popularGenres.length > 0) { %>
+            <% popularGenres.forEach((genre, index) => { %>
+              <tr>
+                <td><%= index + 1 %></td>
+                <td><%= genre.name %></td>
+                <td class="text-center"><strong><%= genre.books_count %></strong></td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="3" class="text-center">Нет данных</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Кнопка обновления -->
+  <div class="actions-footer">
+    <a href="/admin/statistics" class="btn btn-primary">
+      <i class="fas fa-sync-alt"></i> Обновить данные
+    </a>
+  </div>
 </div>
 
 <style>
+  .admin-body {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  min-height: 100vh;
+}
+
+.admin-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  width: 260px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.admin-logo {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-logo i {
+  font-size: 2.5rem;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.admin-logo span {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  display: block;
+}
+
+.admin-logo small {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+.admin-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: all 0.3s;
+}
+
+.admin-nav-item i {
+  width: 20px;
+  font-size: 1.1rem;
+}
+
+.admin-nav-item:hover,
+.admin-nav-item.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: translateX(5px);
+}
+
+.admin-nav-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 1rem 0;
+}
+
+.admin-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  margin-top: 1rem;
+}
+
+.admin-user img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.admin-user div {
+  color: white;
+}
+
+.admin-user small {
+  opacity: 0.7;
+}
+
+.admin-main {
+  flex: 1;
+  margin-left: 260px;
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+.admin-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .admin-sidebar {
+    width: 100%;
+    position: relative;
+    height: auto;
+  }
+  
+  .admin-main {
+    margin-left: 0;
+  }
+  
+  .admin-wrapper {
+    flex-direction: column;
+  }
+}
+  
+  /* Общие стили для страницы статистики */
   .admin-statistics {
-    padding: 2rem;
+    padding: 1.5rem;
     color: white;
   }
   
-  .admin-header {
+  .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--radius-lg);
   }
   
-  .period-selector {
+  .page-header h1 {
     display: flex;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.8rem;
+    margin: 0;
   }
   
-  .period-btn {
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius);
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+  .page-header h1 i {
+    color: var(--accent);
   }
   
-  .period-btn:hover,
-  .period-btn.active {
-    background: linear-gradient(135deg, var(--accent), var(--secondary));
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
+  .text-muted {
+    opacity: 0.7;
+    font-size: 0.9rem;
+    margin: 0;
   }
   
-  .stats-grid {
+  /* Карточки статистики */
+  .stats-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
   }
@@ -229,32 +398,26 @@
     align-items: center;
     gap: 1rem;
     padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-lg);
-    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s;
   }
   
   .stat-card:hover {
     transform: translateY(-5px);
-    box-shadow: var(--shadow-xl);
   }
   
-  .stat-card.primary { border-left: 4px solid #3b82f6; }
-  .stat-card.success { border-left: 4px solid #10b981; }
-  .stat-card.warning { border-left: 4px solid #f59e0b; }
+  .stat-card.primary { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+  .stat-card.success { background: linear-gradient(135deg, #10b981, #059669); }
+  .stat-card.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  .stat-card.info { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
   
   .stat-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    background: rgba(255, 255, 255, 0.1);
+    font-size: 2.5rem;
+    opacity: 0.9;
   }
   
   .stat-content {
@@ -262,233 +425,178 @@
   }
   
   .stat-value {
-    display: block;
     font-size: 2rem;
     font-weight: 700;
     line-height: 1.2;
-    background: linear-gradient(135deg, #fff, #e0e0e0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
   }
   
   .stat-label {
-    opacity: 0.7;
     font-size: 0.9rem;
+    opacity: 0.9;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
   
-  .stats-row {
+  .stat-today {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-top: 0.25rem;
+  }
+  
+  /* Контейнеры для таблиц */
+  .tables-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
     margin-bottom: 1.5rem;
   }
   
-  .stats-card {
-    background: rgba(255, 255, 255, 0.05);
+  .table-container {
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
-    transition: all 0.3s ease;
+    transition: transform 0.3s;
   }
   
-  .stats-card:hover {
-    box-shadow: var(--shadow-xl);
-    border-color: var(--accent);
+  .table-container:hover {
+    transform: translateY(-3px);
   }
   
-  .stats-card.full-width {
-    grid-column: 1 / -1;
-  }
-  
-  .stats-card h3 {
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1.5rem;
+  }
+  
+  .table-header h2 {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 1.2rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    gap: 0.75rem;
+    font-size: 1.3rem;
+    margin: 0;
   }
   
-  .stats-card h3 i {
+  .table-header h2 i {
     color: var(--accent);
   }
   
-  /* Улучшенные стили для таблиц */
-  .table-responsive {
-    overflow-x: auto;
-    margin: 1rem 0;
-  }
-  
-  .modern-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px;
-  }
-  
-  .modern-table thead tr {
-    background: rgba(0, 0, 0, 0.3);
-  }
-  
-  .modern-table th {
-    padding: 1rem;
-    text-align: left;
-    font-weight: 600;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.7);
-    border-bottom: 2px solid var(--accent);
-  }
-  
-  .modern-table td {
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: var(--radius);
-    transition: all 0.3s ease;
-  }
-  
-  .modern-table tr:hover td {
-    background: rgba(255, 255, 255, 0.1);
-    transform: scale(1.01);
-  }
-  
-  .user-cell, .book-cell {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .user-info, .book-info {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .user-name {
-    font-weight: 600;
-    color: white;
-  }
-  
-  .user-email {
-    font-size: 0.75rem;
-    opacity: 0.6;
-  }
-  
-  .book-title {
-    font-weight: 600;
-    color: white;
-  }
-  
-  .book-author {
-    font-size: 0.75rem;
-    opacity: 0.6;
-  }
-  
-  .mini-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--accent);
-    transition: all 0.3s ease;
-  }
-  
-  .mini-avatar:hover {
-    transform: scale(1.5);
-    z-index: 10;
-  }
-  
-  .mini-cover {
-    width: 35px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
-  }
-  
-  .mini-cover:hover {
-    transform: scale(2);
-    z-index: 10;
-  }
-  
-  /* Улучшенные бейджи для чисел */
   .badge {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-lg);
-    font-size: 1rem;
-    font-weight: 700;
-    text-align: center;
-    min-width: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 500;
   }
   
-  .badge-success { 
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+  /* Таблицы */
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
   }
   
-  .badge-info { 
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
-    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
-  }
-  
-  .badge-purple { 
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-    color: white;
-    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
-  }
-  
-  .badge-warning {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: white;
-    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
-  }
-  
-  .rating-display {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-  
-  .rating-display i {
+  .admin-table th {
+    text-align: left;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+    opacity: 0.9;
     font-size: 0.9rem;
   }
   
-  .rating-value {
-    margin-left: 0.5rem;
-    font-weight: 700;
-    color: #fbbf24;
-    font-size: 1.1rem;
+  .admin-table td {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
   
-  .empty-message {
+  .admin-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .admin-table tr:hover td {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .text-center {
     text-align: center;
-    padding: 3rem;
-    opacity: 0.5;
-    font-style: italic;
+  }
+  
+  /* Ячейки с книгами и пользователями */
+  .book-cell, .user-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .table-cover {
+    width: 30px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .table-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .admin-table a {
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  .admin-table a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+  
+  .rating-badge {
+    display: inline-block;
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-weight: 600;
+  }
+  
+  .actions-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1rem;
+  }
+  
+  /* Адаптивность */
+  @media (max-width: 1024px) {
+    .tables-row {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
   }
   
   @media (max-width: 768px) {
-    .admin-header {
+    .page-header {
       flex-direction: column;
-      gap: 1rem;
+      align-items: flex-start;
+      gap: 0.5rem;
     }
     
-    .stats-row {
+    .stats-cards {
       grid-template-columns: 1fr;
     }
     
-    .badge {
-      padding: 0.25rem 0.5rem;
-      font-size: 0.85rem;
-      min-width: 40px;
+    .admin-table {
+      font-size: 0.9rem;
+    }
+    
+    .book-cell, .user-cell {
+      flex-direction: column;
+      align-items: flex-start;
     }
   }
 </style>

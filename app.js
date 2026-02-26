@@ -16,6 +16,8 @@ const bookRoutes = require('./routes/books');
 const profileRoutes = require('./routes/profile');
 const reviewRoutes = require('./routes/reviews');
 const adminRoutes = require('./routes/admin');
+const globalData = require('./middlewares/globalData');
+const pageRoutes = require('./routes/pages');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -58,11 +60,13 @@ app.use((req, res, next) => {
 });
 
 // Подключаем маршруты
+app.use(globalData);
 app.use('/auth', authRoutes);
 app.use('/books', bookRoutes);
 app.use('/profile', profileRoutes);
 app.use('/admin', adminRoutes);
 app.use('/reviews', reviewRoutes);
+app.use('/', pageRoutes);
 
 // Главная страница
 app.get('/', async (req, res) => {

@@ -1,0 +1,311 @@
+<div class="about-page">
+  <div class="about-hero">
+    <h1><i class="fas fa-book-open"></i> О проекте «Книгоманы»</h1>
+    <p>Крупнейшее сообщество книголюбов в рунете</p>
+  </div>
+  
+  <div class="about-content">
+    <div class="about-section">
+      <h2><i class="fas fa-rocket"></i> Наша миссия</h2>
+      <p>«Книгоманы» — это не просто каталог книг. Это живое сообщество людей, объединённых любовью к чтению. Мы создаём пространство, где каждый может:</p>
+      <ul>
+        <li><i class="fas fa-check-circle"></i> Найти свою следующую любимую книгу</li>
+        <li><i class="fas fa-check-circle"></i> Поделиться впечатлениями с другими читателями</li>
+        <li><i class="fas fa-check-circle"></i> Открыть для себя новые жанры и авторов</li>
+        <li><i class="fas fa-check-circle"></i> Обсудить прочитанное в дружеской атмосфере</li>
+      </ul>
+    </div>
+    
+    <div class="about-section">
+      <h2><i class="fas fa-chart-line"></i> Наша статистика</h2>
+      <div class="about-stats-grid">
+        <div class="about-stat-card">
+          <i class="fas fa-book"></i>
+          <span class="about-stat-value"><%= stats.totalBooks.toLocaleString() %></span>
+          <span class="about-stat-label">книг в каталоге</span>
+        </div>
+        <div class="about-stat-card">
+          <i class="fas fa-users"></i>
+          <span class="about-stat-value"><%= stats.totalUsers.toLocaleString() %></span>
+          <span class="about-stat-label">читателей</span>
+        </div>
+        <div class="about-stat-card">
+          <i class="fas fa-star"></i>
+          <span class="about-stat-value"><%= stats.totalReviews.toLocaleString() %></span>
+          <span class="about-stat-label">рецензий</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="about-section">
+      <h2><i class="fas fa-crown"></i> Самые активные читатели</h2>
+      <div class="top-users-grid">
+        <% if (topUsers.length > 0) { %>
+          <% topUsers.forEach(user => { %>
+            <div class="top-user-card">
+              <img src="/images/avatars/<%= user.avatar %>" alt="<%= user.name %>" class="top-user-avatar">
+              <div class="top-user-info">
+                <h4><%= user.name %></h4>
+                <p><i class="fas fa-star"></i> <%= user.reviewsCount %> рецензий</p>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p class="no-data">Пока нет активных пользователей</p>
+        <% } %>
+      </div>
+    </div>
+    
+    <div class="about-section">
+      <h2><i class="fas fa-clock"></i> Недавно добавленные книги</h2>
+      <div class="recent-books-grid">
+        <% if (recentBooks.length > 0) { %>
+          <% recentBooks.forEach(book => { %>
+            <div class="recent-book-card">
+              <a href="/books/<%= book.id %>">
+                <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>">
+                <h4><%= book.title %></h4>
+                <p><%= book.author %></p>
+              </a>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p class="no-data">Книги пока не добавлены</p>
+        <% } %>
+      </div>
+    </div>
+    
+    <div class="about-section">
+      <h2><i class="fas fa-code"></i> О разработке</h2>
+      <div class="dev-info">
+        <p><strong>Проект:</strong> Дипломный work</p>
+        <p><strong>Разработчик:</strong> Корепин Валерий Дмитриевич</p>
+        <p><strong>Группа:</strong> 09.02.07 Информационные системы и программирование</p>
+        <p><strong>Год:</strong> 2026</p>
+        <p><strong>Технологии:</strong> Node.js, Express, PostgreSQL, Sequelize, EJS, HTML5, CSS3, JavaScript</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .about-page {
+    color: white;
+    padding: 2rem 0;
+  }
+  
+  .about-hero {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
+    border-radius: var(--radius-lg);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .about-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+    animation: rotate 20s linear infinite;
+  }
+  
+  .about-hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  
+  .about-hero p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    position: relative;
+  }
+  
+  .about-content {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+  }
+  
+  .about-section {
+    margin-bottom: 3rem;
+  }
+  
+  .about-section h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent);
+  }
+  
+  .about-section ul {
+    list-style: none;
+  }
+  
+  .about-section ul li {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .about-section ul li i {
+    color: var(--success);
+  }
+  
+  .about-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .about-stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    text-align: center;
+    transition: var(--transition);
+  }
+  
+  .about-stat-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  .about-stat-card i {
+    font-size: 3rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  
+  .about-stat-value {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  
+  .about-stat-label {
+    opacity: 0.8;
+  }
+  
+  .top-users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  
+  .top-user-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius);
+    transition: var(--transition);
+  }
+  
+  .top-user-card:hover {
+    transform: translateX(5px);
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  .top-user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .top-user-info h4 {
+    margin-bottom: 0.25rem;
+  }
+  
+  .top-user-info p {
+    opacity: 0.8;
+    font-size: 0.9rem;
+  }
+  
+  .recent-books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .recent-book-card {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius);
+    transition: var(--transition);
+  }
+  
+  .recent-book-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  .recent-book-card a {
+    text-decoration: none;
+    color: white;
+  }
+  
+  .recent-book-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
+  }
+  
+  .recent-book-card h4 {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .recent-book-card p {
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
+  
+  .dev-info {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+  
+  .dev-info p {
+    margin-bottom: 0.5rem;
+  }
+  
+  .no-data {
+    opacity: 0.7;
+    font-style: italic;
+  }
+  
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  @media (max-width: 768px) {
+    .about-hero h1 {
+      font-size: 2rem;
+    }
+    
+    .about-section h2 {
+      font-size: 1.5rem;
+    }
+  }
+</style>

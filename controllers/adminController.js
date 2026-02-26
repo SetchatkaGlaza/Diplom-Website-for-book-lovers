@@ -806,72 +806,99 @@ exports.deleteReview = async (req, res) => {
 };
 
 /**
- * 18. СТАТИСТИКА (упрощённая версия)
+ * 18. СТАТИСТИКА (упрощённая и понятная)
  */
 exports.getStatistics = async (req, res) => {
   try {
-    const period = req.query.period || 'week';
-    
-    // Простая статистика
+    // ===== ОСНОВНАЯ СТАТИСТИКА =====
     const totalUsers = await User.count();
     const totalBooks = await Book.count();
     const totalReviews = await Review.count();
+    const totalGenres = await Genre.count();
     
-    // Топ пользователей по рецензиям (простой запрос)
-    const topUsers = await Review.findAll({
-      attributes: [
-        'user_id',
-        [sequelize.fn('COUNT', sequelize.col('Review.id')), 'reviewsCount']
-      ],
-      include: [
-        { 
-          model: User, 
-          as: 'user', 
-          attributes: ['id', 'name', 'avatar'] 
-        }
-      ],
-      group: ['user_id', 'user.id'],
-      order: [[sequelize.fn('COUNT', sequelize.col('Review.id')), 'DESC']],
-      limit: 10
+    // Статистика за сегодня
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const newUsersToday = await User.count({
+      where: { createdAt: { [Op.gte]: today } }
     });
     
-    // Топ книг по просмотрам
+    const newBooksToday = await Book.count({
+      where: { createdAt: { [Op.gte]: today } }
+    });
+    
+    const newReviewsToday = await Review.count({
+      where: { createdAt: { [Op.gte]: today } }
+    });
+    
+    // ===== ТОП ПОПУЛЯРНЫХ КНИГ (по просмотрам) =====
     const topBooks = await Book.findAll({
+      attributes: ['id', 'title', 'author', 'cover_image', 'views_count'],
       order: [['views_count', 'DESC']],
       limit: 10
     });
     
-    // Топ книг по рейтингу (упрощённый запрос)
+    // ===== ТОП КНИГ ПО РЕЙТИНГУ =====
     const topRatedBooks = await sequelize.query(`
       SELECT 
         b.id,
         b.title,
         b.author,
         b.cover_image,
-        COALESCE(AVG(r.rating), 0) as avg_rating,
+        AVG(r.rating) as avg_rating,
         COUNT(r.id) as reviews_count
       FROM "Books" b
-      LEFT JOIN "Reviews" r ON b.id = r.book_id
+      LEFT JOIN "Reviews" r ON b.id = r.book_id AND r.is_moderated = true
       GROUP BY b.id
-      HAVING COUNT(r.id) >= 1
+      HAVING COUNT(r.id) >= 3
       ORDER BY avg_rating DESC
       LIMIT 10
-    `, { 
-      type: sequelize.QueryTypes.SELECT 
-    });
+    `, { type: sequelize.QueryTypes.SELECT });
     
-    // Активность по дням (упрощённо)
-    const dailyStats = [];
+    // ===== ТОП АКТИВНЫХ ПОЛЬЗОВАТЕЛЕЙ =====
+    const topUsers = await sequelize.query(`
+      SELECT 
+        u.id,
+        u.name,
+        u.avatar,
+        COUNT(r.id) as reviews_count
+      FROM "Users" u
+      LEFT JOIN "Reviews" r ON u.id = r.user_id
+      GROUP BY u.id
+      ORDER BY reviews_count DESC
+      LIMIT 10
+    `, { type: sequelize.QueryTypes.SELECT });
+    
+    // ===== ПОПУЛЯРНЫЕ ЖАНРЫ =====
+    const popularGenres = await sequelize.query(`
+      SELECT 
+        g.id,
+        g.name,
+        COUNT(b.id) as books_count
+      FROM "Genres" g
+      LEFT JOIN "Books" b ON g.id = b.genre_id
+      GROUP BY g.id
+      ORDER BY books_count DESC
+      LIMIT 5
+    `, { type: sequelize.QueryTypes.SELECT });
     
     res.render('admin/statistics', {
       title: 'Статистика',
-      period,
-      totalUsers,
-      totalBooks,
-      totalReviews,
-      topUsers: topUsers.filter(item => item.user), // убираем записи без пользователя
+      layout: 'layouts/admin',
+      stats: {
+        totalUsers,
+        totalBooks,
+        totalReviews,
+        totalGenres,
+        newUsersToday,
+        newBooksToday,
+        newReviewsToday
+      },
       topBooks,
-      topRatedBooks
+      topRatedBooks,
+      topUsers,
+      popularGenres
     });
     
   } catch (error) {
