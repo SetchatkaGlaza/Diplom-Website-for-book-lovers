@@ -80,7 +80,7 @@
 
 <script>
   // Загружаем популярные книги
-  fetch('/books/popular?limit=8')
+  fetch('/books/popular?limit=5')
     .then(response => response.json())
     .then(books => {
       const container = document.getElementById('popular-books');

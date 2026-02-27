@@ -242,10 +242,10 @@ exports.postAddBook = async (req, res) => {
     
     // Обработка загрузки обложки
     let cover_image = 'default-book-cover.jpg';
-    
-    if (req.file) {
-      cover_image = req.file.filename;
-    }
+
+if (req.file) {
+  cover_image = req.file.filename;
+}
     
     // Создаём книгу
     await Book.create({
@@ -362,24 +362,35 @@ exports.postEditBook = async (req, res) => {
     };
     
     // Если загружена новая обложка
-    if (req.file) {
-      console.log('📸 Загружена новая обложка:', req.file.filename);
-      
-      // Удаляем старую обложку, если она не стандартная
-      if (book.cover_image && book.cover_image !== 'default-book-cover.jpg') {
-        const oldCoverPath = path.join(__dirname, '../public/images/covers', book.cover_image);
-        try {
-          if (fs.existsSync(oldCoverPath)) {
-            fs.unlinkSync(oldCoverPath);
-            console.log('🗑️ Удалена старая обложка:', book.cover_image);
-          }
-        } catch (err) {
-          console.log('Не удалось удалить старую обложку:', err.message);
+if (req.file) {
+  // Удаляем старую обложку, ТОЛЬКО если она не является заглушкой
+  const isDefaultCover = book.cover_image === 'default-book-cover.jpg' || 
+                         book.cover_image === 'default-book-cover.svg';
+  
+  if (book.cover_image && !isDefaultCover) {
+    const oldCoverPath = path.join(__dirname, '../public/images/covers', book.cover_image);
+    try {
+      // Проверяем существование файла перед удалением
+      try {
+        await fs.access(oldCoverPath);
+        await fs.unlink(oldCoverPath);
+        console.log(`✅ Удалён старый файл: ${book.cover_image}`);
+      } catch (err) {
+        if (err.code === 'ENOENT') {
+          console.log(`⚠️ Файл не найден (возможно уже удалён): ${book.cover_image}`);
+        } else {
+          console.log(`❌ Ошибка при удалении: ${err.message}`);
         }
       }
-      
-      updateData.cover_image = req.file.filename;
+    } catch (err) {
+      console.log(`⚠️ Не удалось проверить файл: ${err.message}`);
     }
+  } else if (isDefaultCover) {
+    console.log(`ℹ️ Пропускаем удаление заглушки: ${book.cover_image}`);
+  }
+  
+  updateData.cover_image = req.file.filename;
+}
     
     // Обновляем книгу
     await book.update(updateData);

@@ -86,6 +86,7 @@ const uploadImport = multer({
 // Дашборд
 router.get('/', requireAdmin, adminController.getDashboard);
 
+
 // ===== УПРАВЛЕНИЕ КНИГАМИ =====
 router.get('/books', requireAdmin, adminController.getBooks);
 router.get('/books/add', requireAdmin, adminController.getAddBook);
@@ -95,6 +96,7 @@ router.post('/books/:id/edit', requireAdmin, uploadCover.single('cover'), imageV
 router.delete('/books/:id', requireAdmin, adminController.deleteBook);
 
 // ===== ИМПОРТ КНИГ =====
+router.get('/import/example-genres', requireAdmin, importController.downloadExampleWithGenres);
 router.get('/import', requireAdmin, importController.getImportPage);
 router.post('/import', requireAdmin, uploadImport.single('file'), (err, req, res, next) => {
   // Обработка ошибок multer
