@@ -1,3 +1,4 @@
+// controllers/adminController.js
 const { User, Book, Genre, Review, UserBook, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
@@ -53,7 +54,7 @@ exports.getDashboard = async (req, res) => {
       group: ['role']
     });
     
-    // Преобразуем данные для графика (ГЛАВНОЕ ИСПРАВЛЕНИЕ)
+    // Преобразуем данные для графика
     const rolesStats = rolesStatsRaw.map(stat => ({
       role: stat.role,
       count: parseInt(stat.dataValues.count)
@@ -98,6 +99,8 @@ exports.getDashboard = async (req, res) => {
     
     res.render('admin/dashboard', {
       title: 'Админ-панель',
+      layout: 'layouts/admin',
+      currentPage: 'dashboard',
       stats,
       rolesStats: formattedRolesStats,
       recentUsers,
@@ -157,11 +160,14 @@ exports.getBooks = async (req, res) => {
     
     res.render('admin/books/index', {
       title: 'Управление книгами',
+      layout: 'layouts/admin',
+      currentPage: 'books',
       books: booksWithStats,
       search,
       currentPage: page,
       totalPages: Math.ceil(count / limit),
-      totalBooks: count
+      totalBooks: count,
+      user: req.session.user
     });
     
   } catch (error) {
@@ -180,9 +186,12 @@ exports.getAddBook = async (req, res) => {
     
     res.render('admin/books/add', {
       title: 'Добавление книги',
+      layout: 'layouts/admin',
+      currentPage: 'books',
       genres,
       errors: [],
-      formData: {}
+      formData: {},
+      user: req.session.user
     });
     
   } catch (error) {
@@ -221,9 +230,12 @@ exports.postAddBook = async (req, res) => {
       const genres = await Genre.findAll({ order: [['name', 'ASC']] });
       return res.render('admin/books/add', {
         title: 'Добавление книги',
+        layout: 'layouts/admin',
+        currentPage: 'books',
         genres,
         errors,
-        formData: req.body
+        formData: req.body,
+        user: req.session.user
       });
     }
     
@@ -277,9 +289,12 @@ exports.getEditBook = async (req, res) => {
     
     res.render('admin/books/edit', {
       title: 'Редактирование книги',
+      layout: 'layouts/admin',
+      currentPage: 'books',
       book,
       genres,
-      errors: [] 
+      errors: [],
+      user: req.session.user
     });
     
   } catch (error) {
@@ -327,9 +342,12 @@ exports.postEditBook = async (req, res) => {
       const genres = await Genre.findAll({ order: [['name', 'ASC']] });
       return res.render('admin/books/edit', {
         title: 'Редактирование книги',
+        layout: 'layouts/admin',
+        currentPage: 'books',
         book: { ...book.toJSON(), ...req.body },
         genres,
-        errors
+        errors,
+        user: req.session.user
       });
     }
     
@@ -468,16 +486,19 @@ exports.getUsers = async (req, res) => {
     });
     
     res.render('admin/users/index', {
-  title: 'Управление пользователями',
-  users: usersWithStats,
-  roleStats,
-  search,
-  currentRole: role,
-  currentPage: page,
-  totalPages: Math.ceil(count / limit),
-  totalUsers: count,
-  errors: [] 
-});
+      title: 'Управление пользователями',
+      layout: 'layouts/admin',
+      currentPage: 'users',
+      users: usersWithStats,
+      roleStats,
+      search,
+      currentRole: role,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      totalUsers: count,
+      errors: [],
+      user: req.session.user
+    });
     
   } catch (error) {
     console.error('Ошибка при загрузке пользователей:', error);
@@ -542,7 +563,7 @@ exports.toggleUserBlock = async (req, res) => {
     const user = await User.findByPk(userId);
     
     if (!user) {
-      req.flash('error', 'Пользователь не найден');
+      req.flash('error', 'Пользователь не найдена');
       return res.redirect('/admin/users');
     }
     
@@ -584,10 +605,13 @@ exports.getGenres = async (req, res) => {
     );
     
     res.render('admin/genres/index', {
-  title: 'Управление жанрами',
-  genres: genresWithStats,
-  errors: []
-});
+      title: 'Управление жанрами',
+      layout: 'layouts/admin',
+      currentPage: 'genres',
+      genres: genresWithStats,
+      errors: [],
+      user: req.session.user
+    });
     
   } catch (error) {
     console.error('Ошибка при загрузке жанров:', error);
@@ -737,14 +761,17 @@ exports.getReviews = async (req, res) => {
     });
     
     res.render('admin/reviews/index', {
-  title: 'Модерация рецензий',
-  reviews,
-  status,
-  currentPage: page,
-  totalPages: Math.ceil(count / limit),
-  totalReviews: count,
-  errors: [] 
-});
+      title: 'Модерация рецензий',
+      layout: 'layouts/admin',
+      currentPage: 'reviews',
+      reviews,
+      status,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      totalReviews: count,
+      errors: [],
+      user: req.session.user
+    });
     
   } catch (error) {
     console.error('Ошибка при загрузке рецензий:', error);
@@ -886,6 +913,7 @@ exports.getStatistics = async (req, res) => {
     res.render('admin/statistics', {
       title: 'Статистика',
       layout: 'layouts/admin',
+      currentPage: 'statistics',
       stats: {
         totalUsers,
         totalBooks,
@@ -898,7 +926,8 @@ exports.getStatistics = async (req, res) => {
       topBooks,
       topRatedBooks,
       topUsers,
-      popularGenres
+      popularGenres,
+      user: req.session.user
     });
     
   } catch (error) {

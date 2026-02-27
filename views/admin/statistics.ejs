@@ -2,10 +2,16 @@
   <!-- Заголовок -->
   <div class="page-header">
     <h1><i class="fas fa-chart-bar"></i> Статистика проекта</h1>
-    <p class="text-muted">Обновлено: <%= new Date().toLocaleString('ru-RU') %></p>
+    <div class="header-actions">
+      <span class="text-muted">Обновлено: <%= new Date().toLocaleString('ru-RU') %></span>
+      <a href="/admin" class="btn btn-outline btn-sm">
+        <i class="fas fa-arrow-left"></i> Назад в админку
+      </a>
+      <link rel="stylesheet" href="/css/admin.css">
+    </div>
   </div>
   
-  <!-- Карточки с основной статистикой -->
+  <!-- Карточки с основной статистикой и кнопками навигации -->
   <div class="stats-cards">
     <div class="stat-card primary">
       <div class="stat-icon">
@@ -16,6 +22,9 @@
         <div class="stat-label">Пользователей</div>
         <div class="stat-today">+<%= stats.newUsersToday %> сегодня</div>
       </div>
+      <a href="/admin/users" class="stat-card-btn" title="Управление пользователями">
+        <i class="fas fa-arrow-right"></i>
+      </a>
     </div>
     
     <div class="stat-card success">
@@ -27,6 +36,9 @@
         <div class="stat-label">Книг</div>
         <div class="stat-today">+<%= stats.newBooksToday %> сегодня</div>
       </div>
+      <a href="/admin/books" class="stat-card-btn" title="Управление книгами">
+        <i class="fas fa-arrow-right"></i>
+      </a>
     </div>
     
     <div class="stat-card warning">
@@ -38,6 +50,9 @@
         <div class="stat-label">Рецензий</div>
         <div class="stat-today">+<%= stats.newReviewsToday %> сегодня</div>
       </div>
+      <a href="/admin/reviews" class="stat-card-btn" title="Управление рецензиями">
+        <i class="fas fa-arrow-right"></i>
+      </a>
     </div>
     
     <div class="stat-card info">
@@ -48,16 +63,24 @@
         <div class="stat-value"><%= stats.totalGenres.toLocaleString() %></div>
         <div class="stat-label">Жанров</div>
       </div>
+      <a href="/admin/genres" class="stat-card-btn" title="Управление жанрами">
+        <i class="fas fa-arrow-right"></i>
+      </a>
     </div>
   </div>
   
   <!-- Две колонки с таблицами -->
   <div class="tables-row">
-    <!-- Левая колонка -->
+    <!-- Левая колонка - Топ популярных книг -->
     <div class="table-container">
       <div class="table-header">
-        <h2><i class="fas fa-fire"></i> Топ популярных книг</h2>
-        <span class="badge">по просмотрам</span>
+        <div>
+          <h2><i class="fas fa-fire"></i> Топ популярных книг</h2>
+          <span class="badge">по просмотрам</span>
+        </div>
+        <a href="/admin/books" class="btn btn-primary btn-sm">
+          <i class="fas fa-cog"></i> Управление книгами
+        </a>
       </div>
       
       <table class="admin-table">
@@ -67,6 +90,7 @@
             <th>Книга</th>
             <th>Автор</th>
             <th>Просмотры</th>
+            <th>Действия</th>
           </tr>
         </thead>
         <tbody>
@@ -80,63 +104,35 @@
                 </td>
                 <td><%= book.author.length > 20 ? book.author.substring(0, 20) + '...' : book.author %></td>
                 <td class="text-center"><strong><%= book.views_count.toLocaleString() %></strong></td>
+                <td class="actions-cell">
+                  <a href="/books/<%= book.id %>" class="action-btn" target="_blank" title="Просмотр">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <a href="/admin/books/<%= book.id %>/edit" class="action-btn" title="Редактировать">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                </td>
               </tr>
             <% }) %>
           <% } else { %>
-            <tr><td colspan="4" class="text-center">Нет данных</td></tr>
+            <tr><td colspan="5" class="text-center">Нет данных</td></tr>
           <% } %>
         </tbody>
       </table>
-    </div>
-    
-    <!-- Правая колонка -->
-    <div class="table-container">
-      <div class="table-header">
-        <h2><i class="fas fa-star"></i> Топ книг по рейтингу</h2>
-        <span class="badge">минимум 3 оценки</span>
-      </div>
       
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Книга</th>
-            <th>Рейтинг</th>
-            <th>Оценок</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (topRatedBooks && topRatedBooks.length > 0) { %>
-            <% topRatedBooks.forEach((book, index) => { %>
-              <tr>
-                <td><%= index + 1 %></td>
-                <td class="book-cell">
-                  <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>" class="table-cover">
-                  <a href="/books/<%= book.id %>" target="_blank"><%= book.title.length > 30 ? book.title.substring(0, 30) + '...' : book.title %></a>
-                </td>
-                <td class="text-center">
-                  <span class="rating-badge">
-                    <%= parseFloat(book.avg_rating).toFixed(1) %> ★
-                  </span>
-                </td>
-                <td class="text-center"><%= book.reviews_count %></td>
-              </tr>
-            <% }) %>
-          <% } else { %>
-            <tr><td colspan="4" class="text-center">Нет данных</td></tr>
-          <% } %>
-        </tbody>
-      </table>
+      <div class="table-footer">
+        <a href="/admin/books" class="btn-link">Все книги <i class="fas fa-arrow-right"></i></a>
+      </div>
     </div>
-  </div>
-  
-  <!-- Вторая строка таблиц -->
-  <div class="tables-row">
-    <!-- Левая колонка -->
     <div class="table-container">
       <div class="table-header">
-        <h2><i class="fas fa-users"></i> Топ активных пользователей</h2>
-        <span class="badge">по количеству рецензий</span>
+        <div>
+          <h2><i class="fas fa-users"></i> Топ активных пользователей</h2>
+          <span class="badge">по количеству рецензий</span>
+        </div>
+        <a href="/admin/users" class="btn btn-primary btn-sm">
+          <i class="fas fa-cog"></i> Управление пользователями
+        </a>
       </div>
       
       <table class="admin-table">
@@ -145,6 +141,7 @@
             <th>#</th>
             <th>Пользователь</th>
             <th>Рецензий</th>
+            <th>Действия</th>
           </tr>
         </thead>
         <tbody>
@@ -157,200 +154,53 @@
                   <a href="/profile/<%= user.id %>" target="_blank"><%= user.name %></a>
                 </td>
                 <td class="text-center"><strong><%= user.reviews_count %></strong></td>
+                <td class="actions-cell">
+                  <a href="/profile/<%= user.id %>" class="action-btn" target="_blank" title="Просмотр профиля">
+                    <i class="fas fa-user"></i>
+                  </a>
+                  <a href="/admin/users" class="action-btn" title="Управление пользователем">
+                    <i class="fas fa-cog"></i>
+                  </a>
+                </td>
               </tr>
             <% }) %>
           <% } else { %>
-            <tr><td colspan="3" class="text-center">Нет данных</td></tr>
+            <tr><td colspan="4" class="text-center">Нет данных</td></tr>
           <% } %>
         </tbody>
       </table>
-    </div>
-    
-    <!-- Правая колонка -->
-    <div class="table-container">
-      <div class="table-header">
-        <h2><i class="fas fa-chart-pie"></i> Популярные жанры</h2>
-        <span class="badge">по количеству книг</span>
-      </div>
       
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Жанр</th>
-            <th>Книг</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (popularGenres && popularGenres.length > 0) { %>
-            <% popularGenres.forEach((genre, index) => { %>
-              <tr>
-                <td><%= index + 1 %></td>
-                <td><%= genre.name %></td>
-                <td class="text-center"><strong><%= genre.books_count %></strong></td>
-              </tr>
-            <% }) %>
-          <% } else { %>
-            <tr><td colspan="3" class="text-center">Нет данных</td></tr>
-          <% } %>
-        </tbody>
-      </table>
+      <div class="table-footer">
+        <a href="/admin/users" class="btn-link">Все пользователи <i class="fas fa-arrow-right"></i></a>
+      </div>
     </div>
   </div>
   
-  <!-- Кнопка обновления -->
-  <div class="actions-footer">
-    <a href="/admin/statistics" class="btn btn-primary">
-      <i class="fas fa-sync-alt"></i> Обновить данные
+  <!-- Кнопки быстрого доступа -->
+  <div class="quick-actions-grid">
+    <a href="/admin/books/add" class="quick-action-card">
+      <i class="fas fa-plus-circle"></i>
+      <span>Добавить книгу</span>
+    </a>
+    <a href="/admin/reviews?status=pending" class="quick-action-card">
+      <i class="fas fa-clock"></i>
+      <span>Рецензии на модерации</span>
+    </a>
+    <a href="/admin/users" class="quick-action-card">
+      <i class="fas fa-user-plus"></i>
+      <span>Новые пользователи</span>
+    </a>
+    <a href="/admin/statistics" class="quick-action-card">
+      <i class="fas fa-sync-alt"></i>
+      <span>Обновить статистику</span>
     </a>
   </div>
 </div>
 
 <style>
-  .admin-body {
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  min-height: 100vh;
-}
-
-.admin-wrapper {
-  display: flex;
-  min-height: 100vh;
-}
-
-.admin-sidebar {
-  width: 260px;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  overflow-y: auto;
-}
-
-.admin-logo {
-  text-align: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.admin-logo i {
-  font-size: 2.5rem;
-  color: var(--accent);
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-.admin-logo span {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: white;
-  display: block;
-}
-
-.admin-logo small {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.8rem;
-}
-
-.admin-nav {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.admin-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-  border-radius: var(--radius);
-  transition: all 0.3s;
-}
-
-.admin-nav-item i {
-  width: 20px;
-  font-size: 1.1rem;
-}
-
-.admin-nav-item:hover,
-.admin-nav-item.active {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  transform: translateX(5px);
-}
-
-.admin-nav-divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 1rem 0;
-}
-
-.admin-user {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius);
-  margin-top: 1rem;
-}
-
-.admin-user img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.admin-user div {
-  color: white;
-}
-
-.admin-user small {
-  opacity: 0.7;
-}
-
-.admin-main {
-  flex: 1;
-  margin-left: 260px;
-  padding: 2rem;
-  min-height: 100vh;
-}
-
-.admin-content {
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-@media (max-width: 768px) {
-  .admin-sidebar {
-    width: 100%;
-    position: relative;
-    height: auto;
-  }
-  
-  .admin-main {
-    margin-left: 0;
-  }
-  
-  .admin-wrapper {
-    flex-direction: column;
-  }
-}
-  
-  /* Общие стили для страницы статистики */
+  /* Стили для страницы статистики */
   .admin-statistics {
-    padding: 1.5rem;
+    padding: 0;
     color: white;
   }
   
@@ -365,6 +215,8 @@
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--radius-lg);
+    flex-wrap: wrap;
+    gap: 1rem;
   }
   
   .page-header h1 {
@@ -379,16 +231,27 @@
     color: var(--accent);
   }
   
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
   .text-muted {
     opacity: 0.7;
     font-size: 0.9rem;
-    margin: 0;
   }
   
-  /* Карточки статистики */
+  .btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    border-radius: var(--radius);
+  }
+  
+  /* Карточки статистики с кнопками */
   .stats-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
   }
@@ -404,6 +267,8 @@
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: transform 0.3s;
+    position: relative;
+    overflow: hidden;
   }
   
   .stat-card:hover {
@@ -443,6 +308,24 @@
     margin-top: 0.25rem;
   }
   
+  .stat-card-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  
+  .stat-card-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+  }
+  
   /* Контейнеры для таблиц */
   .tables-row {
     display: grid;
@@ -470,6 +353,8 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
   
   .table-header h2 {
@@ -556,6 +441,31 @@
     text-decoration: underline;
   }
   
+  /* Ячейка с действиями */
+  .actions-cell {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+  
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  
+  .action-btn:hover {
+    background: var(--accent);
+    transform: scale(1.1);
+  }
+  
   .rating-badge {
     display: inline-block;
     background: rgba(251, 191, 36, 0.2);
@@ -565,10 +475,58 @@
     font-weight: 600;
   }
   
-  .actions-footer {
-    text-align: center;
+  .table-footer {
+    margin-top: 1rem;
+    text-align: right;
+  }
+  
+  .btn-link {
+    color: white;
+    text-decoration: none;
+    opacity: 0.8;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-link:hover {
+    opacity: 1;
+    transform: translateX(5px);
+  }
+  
+  /* Сетка быстрых действий */
+  .quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
     margin-top: 2rem;
-    padding: 1rem;
+  }
+  
+  .quick-action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  
+  .quick-action-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .quick-action-card i {
+    font-size: 2rem;
+    color: var(--accent);
   }
   
   /* Адаптивность */
@@ -583,7 +541,11 @@
     .page-header {
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.5rem;
+    }
+    
+    .header-actions {
+      width: 100%;
+      justify-content: space-between;
     }
     
     .stats-cards {
@@ -597,6 +559,20 @@
     .book-cell, .user-cell {
       flex-direction: column;
       align-items: flex-start;
+    }
+    
+    .actions-cell {
+      flex-wrap: wrap;
+    }
+    
+    .quick-actions-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .quick-actions-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>
