@@ -1,4 +1,44 @@
 const { Review, Book, User, UserBook, ReviewLike } = require('../models');
+const { Op } = require('sequelize');
+
+/**
+ * ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ: Обновление рейтинга книги
+ */
+async function updateBookRating(bookId) {
+  try {
+    const book = await Book.findByPk(bookId);
+    if (!book) return;
+    
+    // Получаем все одобренные рецензии для книги
+    const reviews = await Review.findAll({
+      where: {
+        book_id: bookId,
+        is_moderated: true
+      },
+      attributes: ['rating']
+    });
+    
+    const ratingsCount = reviews.length;
+    
+    if (ratingsCount === 0) {
+      // Если нет оценок, обнуляем рейтинг
+      await book.update({
+        ratings_count: 0
+      });
+      return;
+    }
+    
+    // Обновляем только количество оценок
+    // Средний рейтинг будем вычислять на лету через getRatingInfo()
+    await book.update({
+      ratings_count: ratingsCount
+    });
+    
+    console.log(`✅ Рейтинг книги ID ${bookId} обновлён: ${ratingsCount} оценок`);
+  } catch (error) {
+    console.error(`❌ Ошибка при обновлении рейтинга книги ${bookId}:`, error);
+  }
+}
 
 /**
  * 1. ФОРМА НАПИСАНИЯ РЕЦЕНЗИИ
@@ -41,13 +81,13 @@ exports.getNewReview = async (req, res) => {
     const warning = !userBook ? 'Вы не отметили эту книгу как прочитанную. Вы уверены, что хотите написать рецензию?' : null;
     
     res.render('reviews/new', {
-  title: `Рецензия на книгу: ${book.title}`,
-  book,
-  warning,
-  errors: [], 
-  rating: null,
-  content: ''
-});
+      title: `Рецензия на книгу: ${book.title}`,
+      book,
+      warning,
+      errors: [], 
+      rating: null,
+      content: ''
+    });
     
   } catch (error) {
     console.error('Ошибка при загрузке формы:', error);
@@ -90,15 +130,15 @@ exports.postNewReview = async (req, res) => {
     }
     
     if (errors.length > 0) {
-  const book = await Book.findByPk(bookId);
-  return res.render('reviews/new', {
-    title: `Рецензия на книгу: ${book.title}`,
-    book,
-    errors,
-    rating: rating || null,      
-    content: content || ''        
-  });
-}
+      const book = await Book.findByPk(bookId);
+      return res.render('reviews/new', {
+        title: `Рецензия на книгу: ${book.title}`,
+        book,
+        errors,
+        rating: rating || null,      
+        content: content || ''        
+      });
+    }
     
     // Если пользователь не отметил книгу как прочитанную, но всё равно пишет рецензию,
     // автоматически добавляем книгу в статус "read"
@@ -130,6 +170,10 @@ exports.postNewReview = async (req, res) => {
       is_moderated: false // Требуется модерация
     });
     
+    // Обновляем рейтинг книги (новая рецензия пока не учитывается, т.к. не одобрена)
+    // Но мы всё равно обновим, чтобы синхронизировать счётчик
+    await updateBookRating(bookId);
+    
     req.flash('success', 'Рецензия успешно отправлена на модерацию');
     res.redirect(`/books/${bookId}`);
     
@@ -160,7 +204,14 @@ exports.getEditReview = async (req, res) => {
     
     res.render('reviews/edit', {
       title: 'Редактирование рецензии',
-      review
+      review: {
+        ...review.toJSON(),
+        rating: review.rating,
+        content: review.content
+      },
+      errors: [],
+      rating: review.rating,
+      content: review.content
     });
     
   } catch (error) {
@@ -205,10 +256,12 @@ exports.postEditReview = async (req, res) => {
         title: 'Редактирование рецензии',
         review: { ...review.toJSON(), book },
         errors,
-        rating,
-        content
+        rating: rating || review.rating,
+        content: content || review.content
       });
     }
+    
+    const bookId = review.book_id;
     
     // Обновляем рецензию и отправляем на повторную модерацию
     await review.update({
@@ -216,6 +269,9 @@ exports.postEditReview = async (req, res) => {
       content: content.trim(),
       is_moderated: false
     });
+    
+    // Обновляем рейтинг книги (старая оценка убирается, новая пока не учитывается)
+    await updateBookRating(bookId);
     
     req.flash('success', 'Рецензия обновлена и отправлена на модерацию');
     res.redirect('/profile/reviews');
@@ -244,7 +300,12 @@ exports.deleteReview = async (req, res) => {
       return res.redirect('/profile/reviews');
     }
     
+    const bookId = review.book_id;
+    
     await review.destroy();
+    
+    // Обновляем рейтинг книги после удаления
+    await updateBookRating(bookId);
     
     req.flash('success', 'Рецензия удалена');
     res.redirect('/profile/reviews');
@@ -257,7 +318,7 @@ exports.deleteReview = async (req, res) => {
 };
 
 /**
- * 6. ОЦЕНКА ПОЛЕЗНОСТИ РЕЦЕНЗИИ (лайк/дизлайк) - новая версия
+ * 6. ОЦЕНКА ПОЛЕЗНОСТИ РЕЦЕНЗИИ (лайк/дизлайк)
  */
 exports.rateReview = async (req, res) => {
   try {
@@ -277,7 +338,6 @@ exports.rateReview = async (req, res) => {
     }
     
     // Ищем существующую реакцию пользователя на эту рецензию
-    const ReviewLike = require('../models/ReviewLike');
     const existingLike = await ReviewLike.findOne({
       where: {
         user_id: userId,
@@ -352,5 +412,105 @@ exports.rateReview = async (req, res) => {
   } catch (error) {
     console.error('Ошибка при оценке рецензии:', error);
     res.status(500).json({ error: 'Ошибка сервера' });
+  }
+};
+
+/**
+ * 7. ОДОБРЕНИЕ РЕЦЕНЗИИ (для админки)
+ */
+exports.approveReview = async (req, res) => {
+  try {
+    const reviewId = req.params.id;
+    
+    // Проверяем права доступа (админ или модератор)
+    if (!req.session.user || (req.session.user.role !== 'admin' && req.session.user.role !== 'moderator')) {
+      req.flash('error', 'Недостаточно прав');
+      return res.redirect('/admin/reviews');
+    }
+    
+    const review = await Review.findByPk(reviewId);
+    
+    if (!review) {
+      req.flash('error', 'Рецензия не найдена');
+      return res.redirect('/admin/reviews');
+    }
+    
+    await review.update({ is_moderated: true });
+    
+    // Обновляем рейтинг книги после одобрения
+    await updateBookRating(review.book_id);
+    
+    req.flash('success', 'Рецензия одобрена');
+    res.redirect('/admin/reviews');
+    
+  } catch (error) {
+    console.error('Ошибка при одобрении рецензии:', error);
+    req.flash('error', 'Произошла ошибка');
+    res.redirect('/admin/reviews');
+  }
+};
+
+/**
+ * 8. ОТКЛОНЕНИЕ РЕЦЕНЗИИ (для админки)
+ */
+exports.rejectReview = async (req, res) => {
+  try {
+    const reviewId = req.params.id;
+    
+    // Проверяем права доступа
+    if (!req.session.user || (req.session.user.role !== 'admin' && req.session.user.role !== 'moderator')) {
+      req.flash('error', 'Недостаточно прав');
+      return res.redirect('/admin/reviews');
+    }
+    
+    const review = await Review.findByPk(reviewId);
+    
+    if (!review) {
+      req.flash('error', 'Рецензия не найдена');
+      return res.redirect('/admin/reviews');
+    }
+    
+    const bookId = review.book_id;
+    await review.destroy();
+    
+    // Обновляем рейтинг книги после удаления
+    await updateBookRating(bookId);
+    
+    req.flash('success', 'Рецензия отклонена и удалена');
+    res.redirect('/admin/reviews');
+    
+  } catch (error) {
+    console.error('Ошибка при отклонении рецензии:', error);
+    req.flash('error', 'Произошла ошибка');
+    res.redirect('/admin/reviews');
+  }
+};
+
+/**
+ * 9. МАССОВОЕ ОБНОВЛЕНИЕ РЕЙТИНГОВ ВСЕХ КНИГ (для админки)
+ */
+exports.updateAllRatings = async (req, res) => {
+  try {
+    // Проверяем права доступа (только админ)
+    if (!req.session.user || req.session.user.role !== 'admin') {
+      req.flash('error', 'Недостаточно прав');
+      return res.redirect('/admin');
+    }
+    
+    const books = await Book.findAll();
+    let updatedCount = 0;
+    
+    for (const book of books) {
+      await updateBookRating(book.id);
+      updatedCount++;
+    }
+    
+    req.flash('success', `Обновлены рейтинги ${updatedCount} книг`);
+    res.redirect('/admin/statistics');
+    
+  } catch (error) {
+    console.error('Ошибка при массовом обновлении:', error);
+    req.flash('error', 'Произошла ошибка');
+    res.redirect('/admin');
   }
 };

@@ -17,6 +17,11 @@ const Book = sequelize.define('Book', {
       len: [2, 100]
     }
   },
+  ratings_count: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    allowNull: false
+  },
   description: {
     type: DataTypes.TEXT,   // TEXT может быть очень длинным
     allowNull: true         // может быть пустым
@@ -55,18 +60,50 @@ const Book = sequelize.define('Book', {
 });
 
 /**
- * Виртуальное поле для среднего рейтинга
- * Не хранится в БД, а вычисляется при запросе
+ * Получить средний рейтинг и количество оценок
  */
-Book.prototype.getAverageRating = async function() {
+Book.prototype.getRatingInfo = async function() {
   const reviews = await this.getReviews({
+    where: { is_moderated: true },
     attributes: ['rating']
   });
   
-  if (reviews.length === 0) return 0;
+  const count = reviews.length;
   
+  if (count === 0) {
+    return {
+      average: 0,
+      count: 0,
+      distribution: {
+        1: 0, 2: 0, 3: 0, 4: 0, 5: 0
+      }
+    };
+  }
+  
+  // Считаем сумму для среднего
   const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
-  return (sum / reviews.length).toFixed(1); // округляем до 1 знака
+  const average = (sum / count).toFixed(1);
+  
+  // Считаем распределение по звёздам
+  const distribution = {
+    1: reviews.filter(r => r.rating === 1).length,
+    2: reviews.filter(r => r.rating === 2).length,
+    3: reviews.filter(r => r.rating === 3).length,
+    4: reviews.filter(r => r.rating === 4).length,
+    5: reviews.filter(r => r.rating === 5).length
+  };
+  
+  return {
+    average: parseFloat(average),
+    count,
+    distribution
+  };
+};
+
+// Для обратной совместимости оставим старый метод
+Book.prototype.getAverageRating = async function() {
+  const info = await this.getRatingInfo();
+  return info.average;
 };
 
 /**

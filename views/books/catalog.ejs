@@ -117,23 +117,24 @@
                   <span class="book-year"><%= book.year || 'Год не указан' %></span>
                 </div>
                 <div class="book-rating">
-                  <% if (book.averageRating > 0) { %>
-                    <span class="rating-stars">
-                      <% for(let i = 1; i <= 5; i++) { %>
-                        <% if (i <= Math.floor(book.averageRating)) { %>
-                          ★
-                        <% } else if (i - 0.5 <= book.averageRating) { %>
-                          ½
-                        <% } else { %>
-                          ☆
-                        <% } %>
-                      <% } %>
-                    </span>
-                    <span class="rating-value"><%= book.averageRating %></span>
-                  <% } else { %>
-                    <span class="rating-value no-rating">Нет оценок</span>
-                  <% } %>
-                </div>
+  <% if (book.averageRating > 0) { %>
+    <span class="rating-stars">
+      <% for(let i = 1; i <= 5; i++) { %>
+        <% if (i <= Math.floor(book.averageRating)) { %>
+          ★
+        <% } else if (i - 0.5 <= book.averageRating) { %>
+          ½
+        <% } else { %>
+          ☆
+        <% } %>
+      <% } %>
+    </span>
+    <span class="rating-value"><%= book.averageRating %></span>
+    <span class="rating-count">(<%= book.ratingsCount %>)</span>
+  <% } else { %>
+    <span class="rating-value no-rating">Нет оценок</span>
+  <% } %>
+</div>
               </div>
             </a>
           </div>
