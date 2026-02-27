@@ -4,7 +4,6 @@
     <a href="/admin/books" class="btn btn-outline">
       <i class="fas fa-arrow-left"></i> Назад к списку
     </a>
-    <link rel="stylesheet" href="/css/admin.css">
   </div>
   
   <% if (errors && errors.length > 0) { %>
@@ -74,12 +73,35 @@
         <div class="form-group">
           <label for="cover">Обложка книги</label>
           <div class="cover-upload">
-            <input type="file" id="cover" name="cover" accept="image/*">
+            <input type="file" id="cover" name="cover" accept="image/jpeg,image/png,image/webp">
             <div class="cover-preview">
               <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>" id="cover-preview">
             </div>
           </div>
-          <small>Оставьте пустым, чтобы сохранить текущую обложку</small>
+          
+          <div class="cover-requirements">
+            <p><i class="fas fa-info-circle"></i> <strong>Требования к изображению:</strong></p>
+            <ul>
+              <li>Минимальный размер: 200x300 пикселей</li>
+              <li>Максимальный размер: 1000x1500 пикселей</li>
+              <li>Соотношение сторон: примерно 2:3 (как у книг)</li>
+              <li>Форматы: JPG, PNG, WEBP</li>
+              <li>Максимальный размер файла: 5 МБ</li>
+            </ul>
+          </div>
+          
+          <div class="cover-example">
+            <p><i class="fas fa-check-circle" style="color: #10b981;"></i> <strong>Пример правильного изображения:</strong></p>
+            <div style="display: flex; gap: 1rem; align-items: center; background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: var(--admin-radius);">
+              <div style="width: 60px; height: 90px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 4px;"></div>
+              <div>
+                <p style="margin: 0;">300x450 пикселей</p>
+                <p style="margin: 0; opacity: 0.7;">пропорции 2:3</p>
+              </div>
+            </div>
+          </div>
+          
+          <p class="cover-note"><i class="fas fa-info-circle"></i> Оставьте поле пустым, чтобы сохранить текущую обложку</p>
         </div>
       </div>
     </div>

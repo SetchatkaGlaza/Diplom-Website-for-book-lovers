@@ -4,11 +4,19 @@ const adminController = require('../controllers/adminController');
 const { requireAdmin, requireSuperAdmin } = require('../middlewares/authMiddleware');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+const importController = require('../controllers/importController');
+const imageValidator = require('../middlewares/imageValidator');
 
-// Настройка multer для загрузки обложек книг
-const storage = multer.diskStorage({
+// ===== НАСТРОЙКА ДЛЯ ОБЛОЖЕК (картинки) =====
+const coverStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/images/covers/');
+    const dir = 'public/images/covers';
+    // Создаём папку, если её нет
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -17,22 +25,63 @@ const storage = multer.diskStorage({
   }
 });
 
-const fileFilter = (req, file, cb) => {
+const coverFileFilter = (req, file, cb) => {
+  // Только изображения
   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-  if (allowedTypes.includes(file.mimetype)) {
+  const allowedExt = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+  const ext = path.extname(file.originalname).toLowerCase();
+  
+  if (allowedTypes.includes(file.mimetype) || allowedExt.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Неподдерживаемый формат файла'), false);
+    cb(new Error('Неподдерживаемый формат изображения. Используйте JPG, PNG, GIF или WEBP'), false);
   }
 };
 
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-  fileFilter: fileFilter
+const uploadCover = multer({
+  storage: coverStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB для картинок
+  fileFilter: coverFileFilter
 });
 
-// 📌 Все маршруты админки защищены requireAdmin
+// ===== НАСТРОЙКА ДЛЯ ИМПОРТА (CSV/JSON) =====
+const importStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const dir = 'uploads';
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+    cb(null, dir);
+  },
+  filename: function (req, file, cb) {
+    const timestamp = Date.now();
+    const originalName = file.originalname;
+    cb(null, `import-${timestamp}-${originalName}`);
+  }
+});
+
+const importFileFilter = (req, file, cb) => {
+  const allowedExtensions = ['.csv', '.json', '.txt'];
+  const ext = path.extname(file.originalname).toLowerCase();
+  
+  console.log('📁 Загружаемый файл:', file.originalname, 'Расширение:', ext);
+  
+  if (allowedExtensions.includes(ext)) {
+    console.log('✅ Расширение разрешено для импорта');
+    cb(null, true);
+  } else {
+    console.log('❌ Неподдерживаемое расширение для импорта:', ext);
+    cb(new Error('Неподдерживаемый тип файла. Используйте CSV или JSON'), false);
+  }
+};
+
+const uploadImport = multer({
+  storage: importStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB для файлов
+  fileFilter: importFileFilter
+});
+
+// ===== МАРШРУТЫ =====
 
 // Дашборд
 router.get('/', requireAdmin, adminController.getDashboard);
@@ -40,10 +89,25 @@ router.get('/', requireAdmin, adminController.getDashboard);
 // ===== УПРАВЛЕНИЕ КНИГАМИ =====
 router.get('/books', requireAdmin, adminController.getBooks);
 router.get('/books/add', requireAdmin, adminController.getAddBook);
-router.post('/books/add', requireAdmin, upload.single('cover'), adminController.postAddBook);
+router.post('/books/add', requireAdmin, uploadCover.single('cover'), imageValidator.validateBookCover, adminController.postAddBook);
 router.get('/books/:id/edit', requireAdmin, adminController.getEditBook);
-router.post('/books/:id/edit', requireAdmin, upload.single('cover'), adminController.postEditBook);
+router.post('/books/:id/edit', requireAdmin, uploadCover.single('cover'), imageValidator.validateBookCover, adminController.postEditBook);
 router.delete('/books/:id', requireAdmin, adminController.deleteBook);
+
+// ===== ИМПОРТ КНИГ =====
+router.get('/import', requireAdmin, importController.getImportPage);
+router.post('/import', requireAdmin, uploadImport.single('file'), (err, req, res, next) => {
+  // Обработка ошибок multer
+  if (err) {
+    console.error('❌ Ошибка при загрузке файла:', err);
+    req.flash('error', err.message || 'Ошибка при загрузке файла');
+    return res.redirect('/admin/import');
+  }
+  next();
+}, importController.importBooks);
+
+router.get('/import/result', requireAdmin, importController.showImportResult);
+router.get('/import/template', requireAdmin, importController.downloadTemplate);
 
 // ===== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ =====
 router.get('/users', requireAdmin, adminController.getUsers);

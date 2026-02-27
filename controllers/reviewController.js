@@ -1,5 +1,6 @@
 const { Review, Book, User, UserBook, ReviewLike } = require('../models');
 const { Op } = require('sequelize');
+const notificationService = require('../services/notificationService');
 
 /**
  * ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ: Обновление рейтинга книги
@@ -388,6 +389,11 @@ exports.rateReview = async (req, res) => {
       dislikes_count: dislikesCount
     });
     
+    //  ОТПРАВЛЯЕМ УВЕДОМЛЕНИЕ О ЛАЙКЕ
+    if (action !== 'removed' && review.user_id !== userId) {
+      await notificationService.reviewLiked(reviewId, userId, type);
+    }
+
     // Определяем текущий статус для пользователя
     let userReaction = null;
     if (existingLike) {

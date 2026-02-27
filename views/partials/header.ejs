@@ -36,6 +36,266 @@
         <li><a href="/auth/login" class="nav-link"><i class="fas fa-sign-in-alt"></i> Вход</a></li>
         <li><a href="/auth/register" class="nav-link btn-nav">Регистрация</a></li>
       <% } %>
+      <% if (user) { %>
+  <li class="nav-item notifications-dropdown">
+    <a href="#" class="nav-link notification-bell" id="notificationBell">
+      <i class="fas fa-bell"></i>
+      <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+    </a>
+    <div class="notifications-panel" id="notificationsPanel">
+      <div class="notifications-header">
+        <h3>Уведомления</h3>
+        <button class="mark-all-read" id="markAllRead">
+          <i class="fas fa-check-double"></i>
+        </button>
+      </div>
+      <div class="notifications-list" id="notificationsList">
+        <div class="loading">Загрузка...</div>
+      </div>
+      <div class="notifications-footer">
+        <a href="/notifications">Все уведомления</a>
+      </div>
+    </div>
+  </li>
+<% } %>
     </ul>
   </nav>
 </header>
+
+<script>
+  // Загрузка уведомлений
+  async function loadNotifications() {
+    try {
+      const response = await fetch('/notifications?limit=5', {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Ошибка загрузки');
+      }
+      
+      const data = await response.json();
+      
+      const badge = document.getElementById('notificationBadge');
+      if (badge) {
+        if (data.unread > 0) {
+          badge.style.display = 'inline';
+          badge.textContent = data.unread > 9 ? '9+' : data.unread;
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+      
+      const list = document.getElementById('notificationsList');
+      if (list) {
+        if (data.notifications && data.notifications.length > 0) {
+          list.innerHTML = data.notifications.map(n => `
+            <div class="notification-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}">
+              <div class="notification-icon">
+                <i class="fas ${getIconForType(n.type, n.data)}"></i>
+              </div>
+              <div class="notification-content">
+                <div class="notification-title">${escapeHtml(n.title)}</div>
+                <div class="notification-message">${escapeHtml(n.message.substring(0, 50))}${n.message.length > 50 ? '...' : ''}</div>
+                <div class="notification-time">${new Date(n.createdAt).toLocaleString('ru-RU')}</div>
+              </div>
+              <button class="notification-mark-read" onclick="markAsRead(${n.id})">
+                <i class="fas fa-check"></i>
+              </button>
+            </div>
+          `).join('');
+        } else {
+          list.innerHTML = '<div class="no-notifications">Нет уведомлений</div>';
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки уведомлений:', error);
+    }
+  }
+  
+  function getIconForType(type, data) {
+    const icons = {
+      review_moderated: data?.approved ? 'fa-check-circle' : 'fa-times-circle',
+      new_review: 'fa-star',
+      review_liked: data?.type === 'like' ? 'fa-thumbs-up' : 'fa-thumbs-down',
+      book_imported: 'fa-book',
+      system: 'fa-info-circle'
+    };
+    return icons[type] || 'fa-bell';
+  }
+  
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+  
+  async function markAsRead(id) {
+    try {
+      const response = await fetch(`/notifications/${id}/read`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        loadNotifications(); // Перезагружаем список
+      }
+    } catch (error) {
+      console.error('Ошибка:', error);
+    }
+  }
+  
+  // Загружаем уведомления при загрузке страницы
+  document.addEventListener('DOMContentLoaded', function() {
+    <% if (user) { %>
+      loadNotifications();
+      // Обновляем каждые 30 секунд
+      setInterval(loadNotifications, 30000);
+    <% } %>
+  });
+</script>
+
+<style>
+  .notifications-dropdown {
+    position: relative;
+  }
+  
+  .notification-bell {
+    position: relative;
+  }
+  
+  .notification-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--danger);
+    color: white;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+  }
+  
+  .notifications-panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 350px;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    color: var(--dark);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s;
+    z-index: 1000;
+  }
+  
+  .notifications-dropdown:hover .notifications-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--gray-light);
+  }
+  
+  .notifications-header h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+  
+  .mark-all-read {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--primary);
+  }
+  
+  .notifications-list {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .notification-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--gray-light);
+    transition: background 0.3s;
+  }
+  
+  .notification-item:hover {
+    background: var(--light);
+  }
+  
+  .notification-item.unread {
+    background: rgba(99, 102, 241, 0.1);
+  }
+  
+  .notification-icon {
+    font-size: 1.5rem;
+    color: var(--primary);
+  }
+  
+  .notification-content {
+    flex: 1;
+  }
+  
+  .notification-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  
+  .notification-message {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 0.25rem;
+  }
+  
+  .notification-time {
+    font-size: 0.8rem;
+    opacity: 0.6;
+  }
+  
+  .notification-mark-read {
+    background: none;
+    border: none;
+    color: var(--success);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .notification-item:hover .notification-mark-read {
+    opacity: 1;
+  }
+  
+  .no-notifications {
+    padding: 2rem;
+    text-align: center;
+    opacity: 0.6;
+  }
+  
+  .notifications-footer {
+    padding: 1rem;
+    text-align: center;
+    border-top: 1px solid var(--gray-light);
+  }
+  
+  .notifications-footer a {
+    color: var(--primary);
+    text-decoration: none;
+  }
+</style>

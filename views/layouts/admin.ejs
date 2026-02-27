@@ -6,220 +6,7 @@
   <title><%= title ? title + ' | ' : '' %>Админ-панель - Книгоманы</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
-  <style>
-    /* Дополнительные стили для админки */
-    .admin-body {
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-      min-height: 100vh;
-      margin: 0;
-      padding: 0;
-    }
-    
-    .admin-wrapper {
-      display: flex;
-      min-height: 100vh;
-    }
-    
-    .admin-sidebar {
-      width: 280px;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      overflow-y: auto;
-      z-index: 100;
-    }
-    
-    .admin-logo {
-      text-align: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .admin-logo i {
-      font-size: 2.5rem;
-      color: var(--accent);
-      display: block;
-      margin-bottom: 0.5rem;
-    }
-    
-    .admin-logo span {
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: white;
-      display: block;
-    }
-    
-    .admin-logo small {
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 0.8rem;
-    }
-    
-    .admin-nav {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-    
-    .admin-nav-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-      color: rgba(255, 255, 255, 0.8);
-      text-decoration: none;
-      border-radius: var(--radius);
-      transition: all 0.3s;
-    }
-    
-    .admin-nav-item i {
-      width: 20px;
-      font-size: 1.1rem;
-    }
-    
-    .admin-nav-item:hover,
-    .admin-nav-item.active {
-      background: rgba(255, 255, 255, 0.15);
-      color: white;
-      transform: translateX(5px);
-    }
-    
-    .admin-nav-item.active {
-      border-left: 3px solid var(--accent);
-    }
-    
-    .admin-nav-divider {
-      height: 1px;
-      background: rgba(255, 255, 255, 0.1);
-      margin: 1rem 0;
-    }
-    
-    .admin-user {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 1rem;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: var(--radius);
-      margin-top: 1rem;
-    }
-    
-    .admin-user img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--accent);
-    }
-    
-    .admin-user-info {
-      flex: 1;
-      color: white;
-    }
-    
-    .admin-user-info .name {
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-    
-    .admin-user-info .role {
-      font-size: 0.8rem;
-      opacity: 0.7;
-    }
-    
-    .admin-main {
-      flex: 1;
-      margin-left: 280px;
-      padding: 2rem;
-      min-height: 100vh;
-      width: calc(100% - 280px);
-    }
-    
-    .admin-content {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-    
-    /* Flash сообщения */
-    .alert {
-      padding: 1rem 1.5rem;
-      margin: 1rem 0;
-      border-radius: var(--radius-lg);
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      animation: slideIn 0.5s ease;
-    }
-    
-    .alert i {
-      font-size: 1.2rem;
-    }
-    
-    .alert-success {
-      background: linear-gradient(135deg, var(--success), #34d399);
-      color: white;
-      box-shadow: var(--shadow);
-    }
-    
-    .alert-danger {
-      background: linear-gradient(135deg, var(--danger), #f87171);
-      color: white;
-      box-shadow: var(--shadow);
-    }
-    
-    @keyframes slideIn {
-      from {
-        transform: translateX(-100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-    
-    /* Мобильная версия */
-    @media (max-width: 768px) {
-      .admin-sidebar {
-        width: 100%;
-        position: relative;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-      
-      .admin-main {
-        margin-left: 0;
-        width: 100%;
-        padding: 1rem;
-      }
-      
-      .admin-wrapper {
-        flex-direction: column;
-      }
-      
-      .admin-nav {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      
-      .admin-nav-item {
-        flex: 1 1 auto;
-        min-width: 120px;
-        justify-content: center;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="admin-body">
   <div class="admin-wrapper">
@@ -232,32 +19,40 @@
       </div>
       
       <nav class="admin-nav">
-        <a href="/admin" class="admin-nav-item <%= currentPage === 'dashboard' ? 'active' : '' %>">
-          <i class="fas fa-chart-pie"></i> Дашборд
-        </a>
-        <a href="/admin/statistics" class="admin-nav-item <%= currentPage === 'statistics' ? 'active' : '' %>">
-          <i class="fas fa-chart-bar"></i> Статистика
+        <a href="/admin" class="admin-nav-item">
+          <i class="fas fa-tachometer-alt"></i> Дашборд
         </a>
         
-        <div class="admin-nav-divider"></div>
+        <!-- Книги с подменю -->
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-title">
+            <i class="fas fa-book"></i> Книги
+          </div>
+          <a href="/admin/books" class="admin-nav-item sub-item">
+            <i class="fas fa-list"></i> Все книги
+          </a>
+          <a href="/admin/books/add" class="admin-nav-item sub-item">
+            <i class="fas fa-plus"></i> Добавить книгу
+          </a>
+          <a href="/admin/import" class="admin-nav-item sub-item">
+            <i class="fas fa-file-upload"></i> Импорт книг
+          </a>
+        </div>
         
-        <a href="/admin/books" class="admin-nav-item <%= currentPage === 'books' ? 'active' : '' %>">
-          <i class="fas fa-book"></i> Книги
-        </a>
-        <a href="/admin/books/add" class="admin-nav-item">
-          <i class="fas fa-plus-circle"></i> Добавить книгу
-        </a>
-        
-        <div class="admin-nav-divider"></div>
-        
-        <a href="/admin/users" class="admin-nav-item <%= currentPage === 'users' ? 'active' : '' %>">
+        <a href="/admin/users" class="admin-nav-item">
           <i class="fas fa-users"></i> Пользователи
         </a>
-        <a href="/admin/genres" class="admin-nav-item <%= currentPage === 'genres' ? 'active' : '' %>">
+        
+        <a href="/admin/genres" class="admin-nav-item">
           <i class="fas fa-tags"></i> Жанры
         </a>
-        <a href="/admin/reviews" class="admin-nav-item <%= currentPage === 'reviews' ? 'active' : '' %>">
+        
+        <a href="/admin/reviews" class="admin-nav-item">
           <i class="fas fa-star"></i> Рецензии
+        </a>
+        
+        <a href="/admin/statistics" class="admin-nav-item">
+          <i class="fas fa-chart-bar"></i> Статистика
         </a>
         
         <div class="admin-nav-divider"></div>
@@ -272,9 +67,9 @@
       
       <div class="admin-user">
         <img src="/images/avatars/<%= user.avatar %>" alt="<%= user.name %>">
-        <div class="admin-user-info">
-          <div class="name"><%= user.name %></div>
-          <div class="role"><%= user.role === 'admin' ? 'Администратор' : 'Модератор' %></div>
+        <div>
+          <div><%= user.name %></div>
+          <small><%= user.role === 'admin' ? 'Администратор' : 'Модератор' %></small>
         </div>
       </div>
     </aside>
@@ -300,22 +95,5 @@
       </div>
     </main>
   </div>
-  
-  <script>
-    // Подсветка активного пункта меню при скролле
-    document.addEventListener('DOMContentLoaded', function() {
-      const currentLocation = window.location.pathname;
-      const navItems = document.querySelectorAll('.admin-nav-item');
-      
-      navItems.forEach(item => {
-        const href = item.getAttribute('href');
-        if (href && currentLocation.startsWith(href) && href !== '/admin') {
-          item.classList.add('active');
-        } else if (href === '/admin' && currentLocation === '/admin') {
-          item.classList.add('active');
-        }
-      });
-    });
-  </script>
 </body>
 </html>

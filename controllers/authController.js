@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const { User, LoginAttempt } = require('../models');
 const { Op } = require('sequelize');
+const notificationService = require('../services/notificationService');
 
 const SALT_ROUNDS = 10;
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -317,6 +318,9 @@ exports.postRegister = async (req, res) => {
       isBlocked: false,
       email_verified: false
     });
+
+    // ОТПРАВЛЯЕМ ПРИВЕТСТВЕННОЕ УВЕДОМЛЕНИЕ
+    await notificationService.welcomeNewUser(newUser.id, newUser.name);
 
     // Сразу логиним
     req.session.user = {

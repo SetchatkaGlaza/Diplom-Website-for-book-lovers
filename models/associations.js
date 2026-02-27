@@ -5,7 +5,8 @@ const Review = require('./Review');
 const UserBook = require('./UserBook');
 const ReviewLike = require('./ReviewLike');
 const PasswordReset = require('./PasswordReset');
-const LoginAttempt = require('./LoginAttempt');   
+const LoginAttempt = require('./LoginAttempt');
+const Notification = require('./Notification'); 
 
 /**
  * Этот файл устанавливает связи между моделями
@@ -14,6 +15,18 @@ const LoginAttempt = require('./LoginAttempt');
 PasswordReset.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user',
+  onDelete: 'CASCADE'
+});
+
+Notification.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user',
+  onDelete: 'CASCADE'
+});
+
+User.hasMany(Notification, {
+  foreignKey: 'user_id',
+  as: 'notifications',
   onDelete: 'CASCADE'
 });
 
@@ -141,5 +154,6 @@ module.exports = {
   UserBook,
   ReviewLike,
   PasswordReset,
-  LoginAttempt
+  LoginAttempt,
+  Notification
 };
