@@ -1,20 +1,30 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const passwordController = require('../controllers/passwordController');
+const captchaController = require('../controllers/captchaController');
+const { requireGuest } = require('../middlewares/authMiddleware');
 
-// GET /auth/register - показать форму регистрации
-router.get('/register', authController.getRegister);
+// Каптча
+router.get('/captcha', captchaController.generateCaptcha);
 
-// POST /auth/register - обработать регистрацию
-router.post('/register', authController.postRegister);
+// Регистрация
+router.get('/register', requireGuest, authController.getRegister);
+router.post('/register', requireGuest, authController.postRegister);
 
-// GET /auth/login - показать форму входа
-router.get('/login', authController.getLogin);
+// Вход
+router.get('/login', requireGuest, authController.getLogin);
+router.post('/login', requireGuest, authController.postLogin);
 
-// POST /auth/login - обработать вход
-router.post('/login', authController.postLogin);
-
-// GET /auth/logout - выйти из системы
+// Выход
 router.get('/logout', authController.logout);
+
+// Восстановление пароля
+router.get('/forgot-password', requireGuest, passwordController.getForgotPassword);
+router.post('/forgot-password', requireGuest, passwordController.postForgotPassword);
+
+// Сброс пароля по токену
+router.get('/reset-password/:token', requireGuest, passwordController.getResetPassword);
+router.post('/reset-password/:token', requireGuest, passwordController.postResetPassword);
 
 module.exports = router;

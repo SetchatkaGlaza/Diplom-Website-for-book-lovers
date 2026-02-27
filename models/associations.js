@@ -4,13 +4,37 @@ const Book = require('./Book');
 const Review = require('./Review');
 const UserBook = require('./UserBook');
 const ReviewLike = require('./ReviewLike');
+const PasswordReset = require('./PasswordReset');
+const LoginAttempt = require('./LoginAttempt');   
 
 /**
  * Этот файл устанавливает связи между моделями
  * Важно: все модели уже должны быть импортированы!
  */
+PasswordReset.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user',
+  onDelete: 'CASCADE'
+});
 
-// Связи Book - Genre
+User.hasMany(PasswordReset, {
+  foreignKey: 'user_id',
+  as: 'passwordResets',
+  onDelete: 'CASCADE'
+});
+
+LoginAttempt.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user',
+  onDelete: 'CASCADE'
+});
+
+User.hasMany(LoginAttempt, {
+  foreignKey: 'user_id',
+  as: 'loginAttempts',
+  onDelete: 'CASCADE'
+});
+
 Book.belongsTo(Genre, {
   foreignKey: 'genre_id',
   as: 'genre'
@@ -21,7 +45,6 @@ Genre.hasMany(Book, {
   as: 'books'
 });
 
-// Связи Review - User - Book
 Review.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user',
@@ -46,7 +69,6 @@ Book.hasMany(Review, {
   onDelete: 'CASCADE'
 });
 
-// Связи UserBook (полки)
 UserBook.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user',
@@ -71,7 +93,6 @@ Book.hasMany(UserBook, {
   onDelete: 'CASCADE'
 });
 
-// Связи ReviewLike (лайки)
 ReviewLike.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user',
@@ -96,7 +117,6 @@ Review.hasMany(ReviewLike, {
   onDelete: 'CASCADE'
 });
 
-// Связи многие-ко-многим через ReviewLike
 User.belongsToMany(Review, {
   through: ReviewLike,
   foreignKey: 'user_id',
@@ -119,5 +139,7 @@ module.exports = {
   Book,
   Review,
   UserBook,
-  ReviewLike
+  ReviewLike,
+  PasswordReset,
+  LoginAttempt
 };

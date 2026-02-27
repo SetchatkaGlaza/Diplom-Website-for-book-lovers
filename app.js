@@ -1,4 +1,3 @@
-// app.js
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -6,8 +5,9 @@ const flash = require('connect-flash');
 const expressLayouts = require('express-ejs-layouts');
 const methodOverride = require('method-override');
 const sequelize = require('./config/database');
+const rateLimit = require('express-rate-limit');
 
-// Импортируем все модели (чтобы Sequelize знал о них)
+// Импортируем все модели
 const { User, Genre, Book, Review, UserBook, ReviewLike } = require('./models');
 
 // Импортируем маршруты
@@ -38,7 +38,7 @@ app.use(express.static('public'));
 
 // Настройка сессий
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'my-secret-key',
+  secret: process.env.SESSION_SECRET || 'house',
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -47,6 +47,14 @@ app.use(session({
     secure: false
   }
 }));
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 минут
+  max: 10, // максимум 10 запросов с одного IP
+  message: 'Слишком много запросов с вашего IP. Попробуйте через 15 минут.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Flash-сообщения
 app.use(flash());
@@ -62,6 +70,9 @@ app.use((req, res, next) => {
 // Подключаем маршруты
 app.use(globalData);
 app.use('/auth', authRoutes);
+app.use('/auth/login', authLimiter);
+app.use('/auth/register', authLimiter);
+app.use('/auth/forgot-password', authLimiter);
 app.use('/books', bookRoutes);
 app.use('/profile', profileRoutes);
 app.use('/admin', adminRoutes);
