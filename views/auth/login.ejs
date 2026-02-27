@@ -1,42 +1,533 @@
-<div class="auth-form">
-  <h1>Вход в систему</h1>
-  
-  <% if (errors && errors.length > 0) { %>
-    <div class="alert alert-danger">
-      <ul>
-        <% errors.forEach(error => { %>
-          <li><%= error.msg %></li>
-        <% }) %>
-      </ul>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-icon">
+        <i class="fas fa-book-open"></i>
+      </div>
+      <h1>Добро пожаловать!</h1>
+      <p>Войдите в свой аккаунт</p>
     </div>
-  <% } %>
-
-  <form action="/auth/login" method="POST">
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input 
-        type="email" 
-        id="email" 
-        name="email" 
-        value="<%= typeof email !== 'undefined' ? email : '' %>"
-        required
-      >
+    
+    <!-- Вывод ошибок -->
+    <% if (locals.errors && errors.length > 0) { %>
+      <div class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i>
+        <ul>
+          <% errors.forEach(error => { %>
+            <li><%= error.msg %></li>
+          <% }) %>
+        </ul>
+      </div>
+    <% } %>
+    
+    <!-- Вывод flash-сообщений -->
+    <% if (locals.error_msg && error_msg.length > 0) { %>
+      <div class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i>
+        <%= error_msg %>
+      </div>
+    <% } %>
+    
+    <% if (locals.success_msg && success_msg.length > 0) { %>
+      <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <%= success_msg %>
+      </div>
+    <% } %>
+    
+    <form action="/auth/login" method="POST" class="auth-form">
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">
+          <i class="fas fa-envelope"></i>
+          Email
+        </label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          placeholder="your@email.com"
+          value="<%= typeof email !== 'undefined' ? email : '' %>"
+          required
+          autocomplete="email"
+        >
+      </div>
+      
+      <!-- Пароль -->
+      <div class="form-group">
+        <label for="password">
+          <i class="fas fa-lock"></i>
+          Пароль
+        </label>
+        <div class="password-wrapper">
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            placeholder="••••••••"
+            required
+            autocomplete="current-password"
+          >
+          <button type="button" class="password-toggle" onclick="togglePassword('password')">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Каптча (показывается только если нужно) -->
+      <% if (locals.showCaptcha && showCaptcha) { %>
+        <div class="form-group captcha-group">
+          <label for="captcha">
+            <i class="fas fa-shield-alt"></i>
+            Проверочный код
+          </label>
+          <div class="captcha-container">
+            <img src="/auth/captcha" alt="CAPTCHA" class="captcha-image" id="captchaImage">
+            <button type="button" class="captcha-refresh" onclick="refreshCaptcha()">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+          </div>
+          <input 
+            type="text" 
+            id="captcha" 
+            name="captcha" 
+            placeholder="Введите код с картинки"
+            maxlength="6"
+            autocomplete="off"
+          >
+        </div>
+      <% } %>
+      
+      <!-- Дополнительные опции -->
+      <div class="form-options">
+        <label class="checkbox-label">
+          <input type="checkbox" name="remember">
+          <span>Запомнить меня</span>
+        </label>
+        <a href="/auth/forgot-password" class="forgot-link">Забыли пароль?</a>
+      </div>
+      
+      <!-- Кнопка входа -->
+      <button type="submit" class="btn btn-primary btn-block">
+        <i class="fas fa-sign-in-alt"></i>
+        Войти
+      </button>
+    </form>
+    
+    <!-- Ссылка на регистрацию -->
+    <div class="auth-footer">
+      <p>Нет аккаунта? <a href="/auth/register">Зарегистрироваться</a></p>
     </div>
-
-    <div class="form-group">
-      <label for="password">Пароль</label>
-      <input 
-        type="password" 
-        id="password" 
-        name="password" 
-        required
-      >
+    
+    <!-- Вход через соцсети (опционально) -->
+    <div class="auth-divider">
+      <span>или</span>
     </div>
-
-    <button type="submit" class="btn btn-primary">Войти</button>
-  </form>
-
-  <p class="auth-link">
-    Нет аккаунта? <a href="/auth/register">Зарегистрироваться</a>
-  </p>
+    
+    <div class="auth-social">
+      <p>Войти через социальные сети:</p>
+      <div class="social-buttons">
+        <a href="#" class="social-btn vk" onclick="alert('Вход через ВК будет добавлен позже'); return false;">
+          <i class="fab fa-vk"></i>
+        </a>
+        <a href="#" class="social-btn telegram" onclick="alert('Вход через Telegram будет добавлен позже'); return false;">
+          <i class="fab fa-telegram"></i>
+        </a>
+        <a href="#" class="social-btn github" onclick="alert('Вход через GitHub будет добавлен позже'); return false;">
+          <i class="fab fa-github"></i>
+        </a>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Скрипты -->
+<script>
+function togglePassword(fieldId) {
+  const field = document.getElementById(fieldId);
+  if (!field) return;
+  
+  const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
+  field.setAttribute('type', type);
+  
+  const btn = field.nextElementSibling;
+  if (btn) {
+    const icon = btn.querySelector('i');
+    if (icon) {
+      icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+    }
+  }
+}
+
+function refreshCaptcha() {
+  const img = document.getElementById('captchaImage');
+  if (img) {
+    img.src = '/auth/captcha?' + Date.now();
+  }
+}
+</script>
+
+<style>
+.auth-container {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-card {
+  max-width: 450px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 2.5rem;
+  color: white;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: white;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.auth-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #fff, #f0f0f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-header p {
+  opacity: 0.8;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.form-group label i {
+  color: #fbbf24;
+  font-size: 1rem;
+}
+
+.form-group input {
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s;
+  width: 100%;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #fbbf24;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 3rem;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: color 0.3s;
+  padding: 0.5rem;
+}
+
+.password-toggle:hover {
+  color: #fbbf24;
+}
+
+.captcha-container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.captcha-image {
+  flex: 1;
+  height: 60px;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  object-fit: cover;
+}
+
+.captcha-refresh {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.captcha-refresh:hover {
+  background: #fbbf24;
+  border-color: #fbbf24;
+  transform: rotate(180deg);
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #fbbf24;
+  margin: 0;
+}
+
+.forgot-link {
+  color: #fbbf24;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.forgot-link:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.btn-block {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-block:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.auth-footer a {
+  color: #fbbf24;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+.auth-divider {
+  position: relative;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 30px);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.auth-divider::before {
+  left: 0;
+}
+
+.auth-divider::after {
+  right: 0;
+}
+
+.auth-divider span {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.auth-social {
+  text-align: center;
+}
+
+.auth-social p {
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.social-btn {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s;
+  font-size: 1.2rem;
+}
+
+.social-btn.vk {
+  background: #4c75a3;
+}
+
+.social-btn.telegram {
+  background: #0088cc;
+}
+
+.social-btn.github {
+  background: #333;
+}
+
+.social-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.alert-danger {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid #ef4444;
+  color: #fee2e2;
+}
+
+.alert-success {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid #10b981;
+  color: #d1fae5;
+}
+
+.alert ul {
+  margin-left: 1.5rem;
+  margin-bottom: 0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 1rem;
+  }
+  
+  .auth-card {
+    padding: 1.5rem;
+  }
+  
+  .auth-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+</style>

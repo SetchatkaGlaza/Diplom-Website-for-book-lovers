@@ -36,6 +36,18 @@ const User = sequelize.define('User', {
   type: DataTypes.BOOLEAN,
   defaultValue: false,
   allowNull: false
+},
+blocked_until: {
+  type: DataTypes.DATE,
+  allowNull: true
+},
+email_verified: {
+  type: DataTypes.BOOLEAN,
+  defaultValue: false
+},
+email_verification_token: {
+  type: DataTypes.STRING,
+  allowNull: true
 }
 }, {
   // Добавит поля createdAt и updatedAt автоматически
