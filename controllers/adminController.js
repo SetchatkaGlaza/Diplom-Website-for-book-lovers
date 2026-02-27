@@ -4,6 +4,7 @@ const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs').promises;
+const notificationService = require('../services/notificationService');
 
 const SALT_ROUNDS = 10;
 
@@ -342,12 +343,9 @@ exports.postEditBook = async (req, res) => {
       const genres = await Genre.findAll({ order: [['name', 'ASC']] });
       return res.render('admin/books/edit', {
         title: 'Редактирование книги',
-        layout: 'layouts/admin',
-        currentPage: 'books',
         book: { ...book.toJSON(), ...req.body },
         genres,
-        errors,
-        user: req.session.user
+        errors
       });
     }
     
@@ -365,11 +363,16 @@ exports.postEditBook = async (req, res) => {
     
     // Если загружена новая обложка
     if (req.file) {
+      console.log('📸 Загружена новая обложка:', req.file.filename);
+      
       // Удаляем старую обложку, если она не стандартная
       if (book.cover_image && book.cover_image !== 'default-book-cover.jpg') {
         const oldCoverPath = path.join(__dirname, '../public/images/covers', book.cover_image);
         try {
-          await fs.unlink(oldCoverPath);
+          if (fs.existsSync(oldCoverPath)) {
+            fs.unlinkSync(oldCoverPath);
+            console.log('🗑️ Удалена старая обложка:', book.cover_image);
+          }
         } catch (err) {
           console.log('Не удалось удалить старую обложку:', err.message);
         }
@@ -385,7 +388,7 @@ exports.postEditBook = async (req, res) => {
     res.redirect('/admin/books');
     
   } catch (error) {
-    console.error('Ошибка при обновлении книги:', error);
+    console.error('❌ Ошибка при обновлении книги:', error);
     req.flash('error', 'Произошла ошибка при обновлении книги');
     res.redirect(`/admin/books/${req.params.id}/edit`);
   }
@@ -796,6 +799,9 @@ exports.approveReview = async (req, res) => {
     
     await review.update({ is_moderated: true });
     
+    //  ОТПРАВЛЯЕМ УВЕДОМЛЕНИЕ ОБ ОДОБРЕНИИ
+    await notificationService.reviewModerated(review.id, true);
+
     req.flash('success', 'Рецензия одобрена');
     res.redirect('/admin/reviews');
     
@@ -822,6 +828,8 @@ exports.deleteReview = async (req, res) => {
     
     await review.destroy();
     
+    await notificationService.reviewModerated(review.id, false);
+
     req.flash('success', 'Рецензия удалена');
     res.redirect('/admin/reviews');
     

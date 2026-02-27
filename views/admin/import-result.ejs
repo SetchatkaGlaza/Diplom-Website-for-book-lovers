@@ -1,0 +1,192 @@
+<div class="admin-import-result">
+  <div class="admin-header">
+    <h1><i class="fas fa-chart-bar"></i> Результат импорта</h1>
+    <a href="/admin/books" class="btn btn-outline">
+      <i class="fas fa-arrow-left"></i> К списку книг
+    </a>
+  </div>
+  
+  <% if (result) { %>
+    <div class="result-summary">
+      <div class="result-card total">
+        <div class="result-icon">
+          <i class="fas fa-file"></i>
+        </div>
+        <div class="result-content">
+          <div class="result-value"><%= result.total %></div>
+          <div class="result-label">Всего записей</div>
+        </div>
+      </div>
+      
+      <div class="result-card success">
+        <div class="result-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="result-content">
+          <div class="result-value"><%= result.success %></div>
+          <div class="result-label">Успешно</div>
+        </div>
+      </div>
+      
+      <div class="result-card error">
+        <div class="result-icon">
+          <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="result-content">
+          <div class="result-value"><%= result.errors %></div>
+          <div class="result-label">Ошибки</div>
+        </div>
+      </div>
+      
+      <div class="result-card skipped">
+        <div class="result-icon">
+          <i class="fas fa-step-forward"></i>
+        </div>
+        <div class="result-content">
+          <div class="result-value"><%= result.skipped %></div>
+          <div class="result-label">Пропущено</div>
+        </div>
+      </div>
+    </div>
+    
+    <% if (result.details && result.details.length > 0) { %>
+      <div class="result-details">
+        <h2>Детали импорта</h2>
+        
+        <div class="table-responsive">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Строка</th>
+                <th>Статус</th>
+                <th>Информация</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% result.details.forEach(detail => { %>
+                <tr>
+                  <td><%= detail.row %></td>
+                  <td>
+                    <% if (detail.success) { %>
+                      <span class="badge badge-success">✓ Успешно</span>
+                    <% } else { %>
+                      <span class="badge badge-danger">✗ Ошибка</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (detail.success) { %>
+                      Книга добавлена
+                    <% } else if (detail.errors) { %>
+                      <ul class="error-list">
+                        <% detail.errors.forEach(err => { %>
+                          <li><%= err %></li>
+                        <% }) %>
+                      </ul>
+                    <% } else if (detail.error) { %>
+                      <%= detail.error %>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } %>
+    
+    <div class="form-actions">
+      <a href="/admin/import" class="btn btn-primary btn-large">
+        <i class="fas fa-upload"></i> Импортировать ещё
+      </a>
+    </div>
+    
+  <% } else { %>
+    <div class="empty-state">
+      <i class="fas fa-info-circle fa-4x"></i>
+      <h2>Нет данных об импорте</h2>
+      <p>Запустите импорт, чтобы увидеть результаты</p>
+      <a href="/admin/import" class="btn btn-primary">
+        <i class="fas fa-arrow-left"></i> На страницу импорта
+      </a>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .admin-import-result {
+    padding: 0;
+    color: white;
+  }
+  
+  .result-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .result-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-radius: var(--admin-radius-lg);
+    background: var(--admin-card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--admin-card-border);
+  }
+  
+  .result-card.total { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+  .result-card.success { background: linear-gradient(135deg, #10b981, #059669); }
+  .result-card.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+  .result-card.skipped { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  
+  .result-icon {
+    font-size: 2.5rem;
+    opacity: 0.9;
+  }
+  
+  .result-content {
+    flex: 1;
+  }
+  
+  .result-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  
+  .result-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .result-details {
+    margin-top: 2rem;
+    background: var(--admin-card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--admin-card-border);
+    border-radius: var(--admin-radius-lg);
+    padding: 1.5rem;
+  }
+  
+  .result-details h2 {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .error-list {
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+  
+  .error-list li {
+    color: #fecaca;
+  }
+</style>

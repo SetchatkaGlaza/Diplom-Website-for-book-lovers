@@ -9,6 +9,7 @@ const UserBook = require('./UserBook');
 const ReviewLike = require('./ReviewLike');
 const LoginAttempt = require('./LoginAttempt');
 const PasswordReset = require('./PasswordReset');
+const Notification = require('./Notification');
 
 // Устанавливаем связи
 require('./associations');
@@ -23,5 +24,6 @@ module.exports = {
   UserBook,
   ReviewLike,
   LoginAttempt,
-  PasswordReset
+  PasswordReset,
+  Notification
 };

@@ -1,0 +1,310 @@
+<div class="admin-import">
+  <div class="admin-header">
+    <h1><i class="fas fa-file-upload"></i> Импорт книг</h1>
+    <div>
+      <a href="/admin/import/template?type=csv" class="btn btn-outline">
+        <i class="fas fa-download"></i> CSV шаблон
+      </a>
+      <a href="/admin/import/template?type=json" class="btn btn-outline">
+        <i class="fas fa-download"></i> JSON шаблон
+      </a>
+      <a href="/admin/books" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Назад
+      </a>
+    </div>
+  </div>
+  
+  <div class="import-container">
+    <div class="import-card">
+      <div class="import-icon">
+        <i class="fas fa-cloud-upload-alt"></i>
+      </div>
+      <h2>Загрузите файл с книгами</h2>
+      <p>Поддерживаемые форматы: CSV, JSON</p>
+      
+      <form action="/admin/import" method="POST" enctype="multipart/form-data" class="import-form">
+        <div class="form-group file-upload">
+          <input type="file" id="file" name="file" accept=".csv,.json" required>
+          <label for="file" class="file-label">
+            <i class="fas fa-folder-open"></i>
+            <span id="file-name">Выберите файл</span>
+          </label>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="delimiter">Разделитель (для CSV)</label>
+            <select id="delimiter" name="delimiter">
+              <option value=",">Запятая (,)</option>
+              <option value=";">Точка с запятой (;)</option>
+              <option value="\t">Табуляция</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="default_genre">Жанр по умолчанию</label>
+            <select id="default_genre" name="default_genre">
+              <option value="">Без жанра</option>
+              <% genres.forEach(genre => { %>
+                <option value="<%= genre.id %>"><%= genre.name %></option>
+              <% }) %>
+            </select>
+          </div>
+        </div>
+        
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" name="create_genres" checked>
+            <span>Создавать новые жанры автоматически</span>
+          </label>
+          
+          <label class="checkbox-label">
+            <input type="checkbox" name="skip_duplicates" checked>
+            <span>Пропускать дубликаты (по названию и автору)</span>
+          </label>
+        </div>
+        
+        <div class="mapping-section">
+          <h3>Соответствие полей</h3>
+          <p class="mapping-hint">Укажите названия столбцов в вашем файле</p>
+          
+          <div class="mapping-grid">
+            <div class="form-group">
+              <label>Название *</label>
+              <input type="text" name="field_title" value="title" placeholder="title">
+            </div>
+            
+            <div class="form-group">
+              <label>Автор *</label>
+              <input type="text" name="field_author" value="author" placeholder="author">
+            </div>
+            
+            <div class="form-group">
+              <label>Описание</label>
+              <input type="text" name="field_description" value="description" placeholder="description">
+            </div>
+            
+            <div class="form-group">
+              <label>Год</label>
+              <input type="text" name="field_year" value="year" placeholder="year">
+            </div>
+            
+            <div class="form-group">
+              <label>Страницы</label>
+              <input type="text" name="field_pages" value="pages" placeholder="pages">
+            </div>
+            
+            <div class="form-group">
+              <label>Издательство</label>
+              <input type="text" name="field_publisher" value="publisher" placeholder="publisher">
+            </div>
+            
+            <div class="form-group">
+              <label>ISBN</label>
+              <input type="text" name="field_isbn" value="isbn" placeholder="isbn">
+            </div>
+            
+            <div class="form-group">
+              <label>Жанр</label>
+              <input type="text" name="field_genre" value="genre" placeholder="genre">
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-large">
+            <i class="fas fa-upload"></i> Начать импорт
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <div class="import-info">
+      <h3><i class="fas fa-info-circle"></i> Информация</h3>
+      <ul>
+        <li>Максимальный размер файла: 10MB</li>
+        <li>Поддерживается UTF-8 кодировка</li>
+        <li>Обязательные поля: название, автор</li>
+        <li>Для CSV первая строка должна содержать заголовки</li>
+        <li>Для JSON ожидается массив объектов или объект с полем "books"</li>
+      </ul>
+      
+      <h3><i class="fas fa-eye"></i> Пример CSV</h3>
+      <pre>title,author,description,year,pages,publisher,isbn,genre
+Война и мир,Лев Толстой,Великий роман...,1869,1300,АСТ,978-5-17-123456-7,Роман</pre>
+      
+      <h3><i class="fas fa-eye"></i> Пример JSON</h3>
+      <pre>{
+  "books": [
+    {
+      "title": "Война и мир",
+      "author": "Лев Толстой",
+      "year": 1869
+    }
+  ]
+}</pre>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Отображение имени выбранного файла
+  document.getElementById('file').addEventListener('change', function(e) {
+    const fileName = e.target.files[0] ? e.target.files[0].name : 'Файл не выбран';
+    document.getElementById('file-name').textContent = fileName;
+  });
+</script>
+
+<style>
+  .admin-import {
+    padding: 0;
+    color: white;
+  }
+  
+  .import-container {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  
+  .import-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--admin-radius-lg);
+    padding: 2rem;
+  }
+  
+  .import-icon {
+    text-align: center;
+    font-size: 4rem;
+    color: var(--admin-warning);
+    margin-bottom: 1rem;
+  }
+  
+  .import-card h2 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .import-card p {
+    text-align: center;
+    opacity: 0.7;
+    margin-bottom: 2rem;
+  }
+  
+  .file-upload {
+    margin-bottom: 2rem;
+  }
+  
+  .file-upload input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    border: 0;
+  }
+  
+  .file-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    border: 2px dashed var(--admin-card-border);
+    border-radius: var(--admin-radius);
+    background: rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: var(--admin-transition);
+  }
+  
+  .file-label:hover {
+    border-color: var(--admin-warning);
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  .file-label i {
+    font-size: 2rem;
+    color: var(--admin-warning);
+  }
+  
+  .checkbox-group {
+    margin: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .mapping-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--admin-card-border);
+  }
+  
+  .mapping-section h3 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .mapping-hint {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-bottom: 1.5rem;
+  }
+  
+  .mapping-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .import-info {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--admin-radius-lg);
+    padding: 1.5rem;
+    height: fit-content;
+  }
+  
+  .import-info h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.5rem 0 1rem;
+    color: var(--admin-warning);
+  }
+  
+  .import-info h3:first-child {
+    margin-top: 0;
+  }
+  
+  .import-info ul {
+    margin-left: 1.5rem;
+  }
+  
+  .import-info li {
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+  }
+  
+  .import-info pre {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    border-radius: var(--admin-radius);
+    font-size: 0.85rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  
+  @media (max-width: 992px) {
+    .import-container {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
