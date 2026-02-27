@@ -153,7 +153,7 @@ exports.getBookById = async (req, res) => {
     await book.incrementViews();
     
     // Получаем средний рейтинг
-    const averageRating = await book.getAverageRating();
+    const ratingInfo = await book.getRatingInfo();
     
     // Получаем рецензии к книге с информацией о пользователях
     const reviews = await Review.findAll({
@@ -225,17 +225,18 @@ exports.getBookById = async (req, res) => {
     );
     
     res.render('books/show', {
-      title: book.title,
-      book: {
-        ...book.toJSON(),
-        averageRating
-      },
-      reviews,
-      similarBooks: similarBooksWithRating,
-      userBookStatus,
-      userReview,
-      user: req.session.user || null
-    });
+  title: book.title,
+  book: {
+    ...book.toJSON(),
+    averageRating: ratingInfo.average
+  },
+  ratingInfo,
+  reviews,
+  similarBooks: similarBooksWithRating,
+  userBookStatus,
+  userReview,
+  user: req.session.user || null
+});
     
   } catch (error) {
     console.error('Ошибка при загрузке книги:', error);
@@ -275,7 +276,7 @@ exports.searchBooks = async (req, res) => {
     // Добавляем рейтинг к результатам
     const booksWithRating = await Promise.all(
       books.map(async (book) => {
-        const rating = await book.getAverageRating();
+        const ratingInfo = await book.getRatingInfo();
         return {
           id: book.id,
           title: book.title,
@@ -316,14 +317,15 @@ exports.getPopularBooks = async (req, res) => {
     });
     
     const booksWithRating = await Promise.all(
-      books.map(async (book) => {
-        const rating = await book.getAverageRating();
-        return {
-          ...book.toJSON(),
-          averageRating: rating
-        };
-      })
-    );
+  books.map(async (book) => {
+    const ratingInfo = await book.getRatingInfo();
+    return {
+      ...book.toJSON(),
+      averageRating: ratingInfo.average,
+      ratingsCount: ratingInfo.count
+    };
+  })
+);
     
     res.json(booksWithRating);
     

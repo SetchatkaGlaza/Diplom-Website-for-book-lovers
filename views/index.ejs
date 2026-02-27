@@ -87,29 +87,34 @@
       container.innerHTML = '';
       
       books.forEach(book => {
-        const stars = '★'.repeat(Math.floor(book.averageRating)) + '☆'.repeat(5 - Math.floor(book.averageRating));
-        
-        container.innerHTML += `
-          <div class="book-card">
-            <a href="/books/${book.id}" class="book-link">
-              <div class="book-cover">
-                <img src="/images/covers/${book.cover_image}" alt="${book.title}">
-              </div>
-              <div class="book-info">
-                <h3 class="book-title">${book.title}</h3>
-                <p class="book-author">${book.author}</p>
-                <div class="book-meta">
-                  <span class="book-genre">${book.genre ? book.genre.name : 'Без жанра'}</span>
-                </div>
-                <div class="book-rating">
-                  <span class="rating-stars">${stars}</span>
-                  <span class="rating-value">${book.averageRating}</span>
-                </div>
-              </div>
-            </a>
+  const stars = '★'.repeat(Math.floor(book.averageRating)) + 
+                (book.averageRating % 1 >= 0.5 ? '½' : '') + 
+                '☆'.repeat(5 - Math.ceil(book.averageRating));
+  
+  container.innerHTML += `
+    <div class="book-card">
+      <a href="/books/${book.id}" class="book-link">
+        <div class="book-cover">
+          <img src="/images/covers/${book.cover_image}" alt="${book.title}">
+        </div>
+        <div class="book-info">
+          <h3 class="book-title">${book.title}</h3>
+          <p class="book-author">${book.author}</p>
+          <div class="book-meta">
+            <span class="book-genre">${book.genre ? book.genre.name : 'Без жанра'}</span>
           </div>
-        `;
-      });
+          <div class="book-rating">
+            ${book.averageRating > 0 ? `
+              <span class="rating-stars">${stars}</span>
+              <span class="rating-value">${book.averageRating}</span>
+              <span class="rating-count">(${book.ratingsCount})</span>
+            ` : '<span class="rating-value no-rating">Нет оценок</span>'}
+          </div>
+        </div>
+      </a>
+    </div>
+  `;
+});
     })
     .catch(error => console.error('Error loading popular books:', error));
   

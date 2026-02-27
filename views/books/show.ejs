@@ -25,23 +25,57 @@
         <% } %>
       </div>
       
-      <!-- Рейтинг -->
-      <div class="book-rating-large">
-        <div class="rating-number">
-          <%= book.averageRating || '0.0' %>
-        </div>
-        <div class="rating-stars-large">
-          <% for(let i = 1; i <= 5; i++) { %>
-            <% if (i <= Math.floor(book.averageRating)) { %>
-              <span class="star filled">★</span>
-            <% } else if (i - 0.5 <= book.averageRating) { %>
-              <span class="star half">½</span>
-            <% } else { %>
-              <span class="star">☆</span>
+      <!-- НОВЫЙ БЛОК С РЕЙТИНГОМ -->
+      <div class="book-rating-section">
+        <div class="rating-main">
+          <div class="rating-number">
+            <%= ratingInfo.average %>
+            <small>/5</small>
+          </div>
+          <div class="rating-stars-large">
+            <% for(let i = 1; i <= 5; i++) { %>
+              <% if (i <= Math.floor(ratingInfo.average)) { %>
+                <i class="fas fa-star"></i>
+              <% } else if (i - 0.5 <= ratingInfo.average) { %>
+                <i class="fas fa-star-half-alt"></i>
+              <% } else { %>
+                <i class="far fa-star"></i>
+              <% } %>
             <% } %>
-          <% } %>
-          <span class="rating-count">(<%= book.reviews ? book.reviews.length : 0 %> оценок)</span>
+          </div>
+          <div class="rating-count">
+            <%= ratingInfo.count %> 
+            <% if (ratingInfo.count === 1) { %>
+              оценка
+            <% } else if (ratingInfo.count >= 2 && ratingInfo.count <= 4) { %>
+              оценки
+            <% } else { %>
+              оценок
+            <% } %>
+          </div>
         </div>
+        
+        <% if (ratingInfo.count > 0) { %>
+          <div class="rating-distribution">
+            <% for(let star = 5; star >= 1; star--) { %>
+              <% 
+                const percent = (ratingInfo.distribution[star] / ratingInfo.count * 100).toFixed(1);
+                const barWidth = percent + '%';
+              %>
+              <div class="rating-row">
+                <div class="rating-label">
+                  <%= star %> <i class="fas fa-star"></i>
+                </div>
+                <div class="rating-bar-container">
+                  <div class="rating-bar" style="width: <%= barWidth %>"></div>
+                </div>
+                <div class="rating-value">
+                  <%= ratingInfo.distribution[star] %> (<%= percent %>%)
+                </div>
+              </div>
+            <% } %>
+          </div>
+        <% } %>
       </div>
       
       <!-- Действия с книгой (только для авторизованных) -->
@@ -113,61 +147,76 @@
   
   <!-- Блок рецензий -->
   <div class="book-reviews">
-  <h3><i class="fas fa-star"></i> Рецензии читателей 
+    <h3><i class="fas fa-star"></i> Рецензии читателей 
+      <% if (reviews.length > 0) { %>
+        <span class="reviews-count">(<%= reviews.length %>)</span>
+      <% } %>
+    </h3>
+    
     <% if (reviews.length > 0) { %>
-      <span class="reviews-count">(<%= reviews.length %>)</span>
-    <% } %>
-  </h3>
-  
-  <% if (reviews.length > 0) { %>
-    <div class="reviews-list">
-      <% reviews.forEach(review => { %>
-        <div class="review-card" data-review-id="<%= review.id %>">
-          <div class="review-header">
-            <div class="reviewer-info">
-              <img src="/images/avatars/<%= review.user.avatar %>" alt="<%= review.user.name %>" class="reviewer-avatar">
-              <div>
-                <span class="reviewer-name"><%= review.user.name %></span>
-                <% if (!review.is_moderated) { %>
-                  <span class="review-badge pending">На модерации</span>
+      <div class="reviews-list">
+        <% reviews.forEach(review => { %>
+          <div class="review-card" data-review-id="<%= review.id %>">
+            <div class="review-header">
+              <div class="reviewer-info">
+                <img src="/images/avatars/<%= review.user.avatar %>" alt="<%= review.user.name %>" class="reviewer-avatar">
+                <div>
+                  <span class="reviewer-name"><%= review.user.name %></span>
+                  <% if (!review.is_moderated) { %>
+                    <span class="review-badge pending">На модерации</span>
+                  <% } %>
+                </div>
+              </div>
+              <div class="review-rating">
+                <% for(let i = 1; i <= 5; i++) { %>
+                  <% if (i <= review.rating) { %>
+                    <i class="fas fa-star"></i>
+                  <% } else { %>
+                    <i class="far fa-star"></i>
+                  <% } %>
                 <% } %>
               </div>
+              <span class="review-date">
+                <i class="far fa-calendar-alt"></i> <%= new Date(review.createdAt).toLocaleDateString('ru-RU') %>
+              </span>
             </div>
-            <div class="review-rating">
-              <% for(let i = 1; i <= 5; i++) { %>
-                <% if (i <= review.rating) { %>
-                  <i class="fas fa-star"></i>
-                <% } else { %>
-                  <i class="far fa-star"></i>
+            
+            <div class="review-content">
+              <p><%= review.content %></p>
+            </div>
+            
+            <% if (review.is_moderated) { %>
+              <div class="review-footer">
+                <button class="btn-like <%= review.userReaction === 'like' ? 'active' : '' %>" 
+                        data-review-id="<%= review.id %>" 
+                        data-type="like">
+                  <i class="<%= review.userReaction === 'like' ? 'fas' : 'far' %> fa-thumbs-up"></i> 
+                  <span class="likes-count"><%= review.likes_count || 0 %></span>
+                </button>
+                
+                <button class="btn-dislike <%= review.userReaction === 'dislike' ? 'active' : '' %>" 
+                        data-review-id="<%= review.id %>" 
+                        data-type="dislike">
+                  <i class="<%= review.userReaction === 'dislike' ? 'fas' : 'far' %> fa-thumbs-down"></i> 
+                  <span class="dislikes-count"><%= review.dislikes_count || 0 %></span>
+                </button>
+                
+                <% if (user && user.id === review.user_id) { %>
+                  <div class="review-owner-actions">
+                    <a href="/reviews/<%= review.id %>/edit" class="btn-small">
+                      <i class="fas fa-edit"></i> Редактировать
+                    </a>
+                    <form action="/reviews/<%= review.id %>?_method=DELETE" method="POST" class="inline-form">
+                      <button type="submit" class="btn-small btn-danger" onclick="return confirm('Удалить рецензию?')">
+                        <i class="fas fa-trash"></i> Удалить
+                      </button>
+                    </form>
+                  </div>
                 <% } %>
-              <% } %>
-            </div>
-            <span class="review-date">
-              <i class="far fa-calendar-alt"></i> <%= new Date(review.createdAt).toLocaleDateString('ru-RU') %>
-            </span>
-          </div>
-          
-          <div class="review-content">
-            <p><%= review.content %></p>
-          </div>
-          
-          <% if (review.is_moderated) { %>
-            <div class="review-footer">
-              <button class="btn-like <%= review.userReaction === 'like' ? 'active' : '' %>" 
-                      data-review-id="<%= review.id %>" 
-                      data-type="like">
-                <i class="<%= review.userReaction === 'like' ? 'fas' : 'far' %> fa-thumbs-up"></i> 
-                <span class="likes-count"><%= review.likes_count || 0 %></span>
-              </button>
-              
-              <button class="btn-dislike <%= review.userReaction === 'dislike' ? 'active' : '' %>" 
-                      data-review-id="<%= review.id %>" 
-                      data-type="dislike">
-                <i class="<%= review.userReaction === 'dislike' ? 'fas' : 'far' %> fa-thumbs-down"></i> 
-                <span class="dislikes-count"><%= review.dislikes_count || 0 %></span>
-              </button>
-              
-              <% if (user && user.id === review.user_id) { %>
+              </div>
+            <% } else if (user && user.id === review.user_id) { %>
+              <div class="review-footer">
+                <p class="moderation-message"><i class="fas fa-clock"></i> Рецензия ожидает модерации</p>
                 <div class="review-owner-actions">
                   <a href="/reviews/<%= review.id %>/edit" class="btn-small">
                     <i class="fas fa-edit"></i> Редактировать
@@ -178,38 +227,23 @@
                     </button>
                   </form>
                 </div>
-              <% } %>
-            </div>
-          <% } else if (user && user.id === review.user_id) { %>
-            <div class="review-footer">
-              <p class="moderation-message"><i class="fas fa-clock"></i> Рецензия ожидает модерации</p>
-              <div class="review-owner-actions">
-                <a href="/reviews/<%= review.id %>/edit" class="btn-small">
-                  <i class="fas fa-edit"></i> Редактировать
-                </a>
-                <form action="/reviews/<%= review.id %>?_method=DELETE" method="POST" class="inline-form">
-                  <button type="submit" class="btn-small btn-danger" onclick="return confirm('Удалить рецензию?')">
-                    <i class="fas fa-trash"></i> Удалить
-                  </button>
-                </form>
               </div>
-            </div>
-          <% } %>
-        </div>
-      <% }) %>
-    </div>
-  <% } else { %>
-    <div class="no-reviews">
-      <i class="fas fa-star fa-3x"></i>
-      <p>Пока нет рецензий. Будьте первым, кто поделится мнением!</p>
-      <% if (user) { %>
-        <a href="/reviews/new/<%= book.id %>" class="btn btn-primary">
-          <i class="fas fa-pen"></i> Написать рецензию
-        </a>
-      <% } %>
-    </div>
-  <% } %>
-</div>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="no-reviews">
+        <i class="fas fa-star fa-3x"></i>
+        <p>Пока нет рецензий. Будьте первым, кто поделится мнением!</p>
+        <% if (user) { %>
+          <a href="/reviews/new/<%= book.id %>" class="btn btn-primary">
+            <i class="fas fa-pen"></i> Написать рецензию
+          </a>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
   
   <!-- Похожие книги -->
   <% if (similarBooks && similarBooks.length > 0) { %>
@@ -240,6 +274,7 @@
 </div>
 
 <style>
+  /* ===== ОСНОВНЫЕ СТИЛИ СТРАНИЦЫ ===== */
   .book-page {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
@@ -298,45 +333,92 @@
     gap: 0.5rem;
   }
   
-  .book-rating-large {
-    display: flex;
-    align-items: center;
+  /* ===== НОВЫЙ БЛОК С РЕЙТИНГОМ ===== */
+  .book-rating-section {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
     gap: 2rem;
-    margin-bottom: 2rem;
+    align-items: center;
+  }
+  
+  .rating-main {
+    text-align: center;
+    min-width: 150px;
   }
   
   .rating-number {
-    font-size: 3rem;
+    font-size: 3.5rem;
     font-weight: 700;
     color: #fbbf24;
+    line-height: 1;
+  }
+  
+  .rating-number small {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.5);
   }
   
   .rating-stars-large {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+    color: #fbbf24;
+    margin: 0.5rem 0;
   }
   
   .rating-count {
-    font-size: 1rem;
-    opacity: 0.7;
-    margin-left: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
   }
   
-  .star {
-    color: rgba(255, 255, 255, 0.3);
+  .rating-distribution {
+    flex: 1;
   }
   
-  .star.filled {
+  .rating-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .rating-label {
+    width: 40px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  .rating-label i {
     color: #fbbf24;
+    font-size: 0.8rem;
   }
   
-  .star.half {
-    position: relative;
-    color: #fbbf24;
+  .rating-bar-container {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
   }
   
+  .rating-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    border-radius: 4px;
+    transition: width 0.3s;
+  }
+  
+  .rating-value {
+    width: 80px;
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+  
+  /* ===== ДЕЙСТВИЯ С КНИГОЙ ===== */
   .book-actions {
     display: flex;
     gap: 1rem;
@@ -372,6 +454,7 @@
     text-decoration: underline;
   }
   
+  /* ===== АННОТАЦИЯ ===== */
   .book-description {
     margin-top: 2rem;
   }
@@ -388,6 +471,7 @@
     opacity: 0.9;
   }
   
+  /* ===== РЕЦЕНЗИИ ===== */
   .book-reviews {
     margin-top: 3rem;
   }
@@ -511,6 +595,16 @@
     background: var(--danger);
   }
   
+  .btn-like.active {
+    background: var(--success);
+    border-color: var(--success);
+  }
+  
+  .btn-dislike.active {
+    background: var(--danger);
+    border-color: var(--danger);
+  }
+  
   .review-owner-actions {
     display: flex;
     gap: 0.5rem;
@@ -565,6 +659,38 @@
     display: inline;
   }
   
+  /* ===== ПОХОЖИЕ КНИГИ ===== */
+  .similar-books {
+    margin-top: 3rem;
+  }
+  
+  .similar-books h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .book-card.small .book-cover {
+    height: 180px;
+  }
+  
+  .book-card.small .book-title {
+    font-size: 0.9rem;
+  }
+  
+  .book-card.small .book-author {
+    font-size: 0.8rem;
+  }
+  
+  /* ===== АДАПТИВНОСТЬ ===== */
   @media (max-width: 768px) {
     .book-main {
       grid-template-columns: 1fr;
@@ -588,19 +714,19 @@
       margin-left: 0;
       width: 100%;
     }
-    .btn-like.active,
-.btn-dislike.active {
-  background: var(--primary);
-  border-color: var(--primary);
-}
-
-.btn-like.active {
-  background: var(--success);
-}
-
-.btn-dislike.active {
-  background: var(--danger);
-}
+    
+    .book-rating-section {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    .rating-row {
+      flex-wrap: wrap;
+    }
+    
+    .rating-value {
+      width: auto;
+    }
   }
 </style>
 
@@ -643,61 +769,61 @@
   
   // Обработка лайков рецензий
   document.querySelectorAll('.btn-like, .btn-dislike').forEach(button => {
-  button.addEventListener('click', async function() {
-    const reviewId = this.dataset.reviewId;
-    const type = this.dataset.type;
-    
-    try {
-      const response = await fetch('/reviews/' + reviewId + '/rate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ type: type })
-      });
+    button.addEventListener('click', async function() {
+      const reviewId = this.dataset.reviewId;
+      const type = this.dataset.type;
       
-      if (response.ok) {
-        const data = await response.json();
+      try {
+        const response = await fetch('/reviews/' + reviewId + '/rate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ type: type })
+        });
         
-        // Находим карточку рецензии
-        const reviewCard = this.closest('.review-card');
-        
-        // Обновляем счётчики
-        reviewCard.querySelector('.likes-count').textContent = data.likes;
-        reviewCard.querySelector('.dislikes-count').textContent = data.dislikes;
-        
-        // Обновляем классы активных кнопок
-        const likeBtn = reviewCard.querySelector('.btn-like');
-        const dislikeBtn = reviewCard.querySelector('.btn-dislike');
-        
-        if (likeBtn) {
-          likeBtn.classList.remove('active');
-          const likeIcon = likeBtn.querySelector('i');
-          likeIcon.className = 'far fa-thumbs-up';
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Находим карточку рецензии
+          const reviewCard = this.closest('.review-card');
+          
+          // Обновляем счётчики
+          reviewCard.querySelector('.likes-count').textContent = data.likes;
+          reviewCard.querySelector('.dislikes-count').textContent = data.dislikes;
+          
+          // Обновляем классы активных кнопок
+          const likeBtn = reviewCard.querySelector('.btn-like');
+          const dislikeBtn = reviewCard.querySelector('.btn-dislike');
+          
+          if (likeBtn) {
+            likeBtn.classList.remove('active');
+            const likeIcon = likeBtn.querySelector('i');
+            likeIcon.className = 'far fa-thumbs-up';
+          }
+          
+          if (dislikeBtn) {
+            dislikeBtn.classList.remove('active');
+            const dislikeIcon = dislikeBtn.querySelector('i');
+            dislikeIcon.className = 'far fa-thumbs-down';
+          }
+          
+          // Активируем нужную кнопку
+          if (data.userReaction === 'like') {
+            likeBtn.classList.add('active');
+            likeBtn.querySelector('i').className = 'fas fa-thumbs-up';
+          } else if (data.userReaction === 'dislike') {
+            dislikeBtn.classList.add('active');
+            dislikeBtn.querySelector('i').className = 'fas fa-thumbs-down';
+          }
+          
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Ошибка при оценке');
         }
-        
-        if (dislikeBtn) {
-          dislikeBtn.classList.remove('active');
-          const dislikeIcon = dislikeBtn.querySelector('i');
-          dislikeIcon.className = 'far fa-thumbs-down';
-        }
-        
-        // Активируем нужную кнопку
-        if (data.userReaction === 'like') {
-          likeBtn.classList.add('active');
-          likeBtn.querySelector('i').className = 'fas fa-thumbs-up';
-        } else if (data.userReaction === 'dislike') {
-          dislikeBtn.classList.add('active');
-          dislikeBtn.querySelector('i').className = 'fas fa-thumbs-down';
-        }
-        
-      } else {
-        const error = await response.json();
-        alert(error.error || 'Ошибка при оценке');
+      } catch (error) {
+        console.error('Error:', error);
       }
-    } catch (error) {
-      console.error('Error:', error);
-    }
+    });
   });
-});
 </script>
