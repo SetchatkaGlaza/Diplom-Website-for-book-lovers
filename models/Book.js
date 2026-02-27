@@ -48,7 +48,8 @@ const Book = sequelize.define('Book', {
   },
   cover_image: {
     type: DataTypes.STRING,
-    defaultValue: 'default-book-cover.jpg' // если нет обложки
+    defaultValue: 'default-book-cover.jpg', // если нет обложки
+    allowNull: false
   },
   views_count: {
     type: DataTypes.INTEGER,

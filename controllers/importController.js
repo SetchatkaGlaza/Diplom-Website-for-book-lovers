@@ -3,6 +3,7 @@ const path = require('path');
 const csv = require('csv-parser');
 const { Book, Genre } = require('../models');
 const notificationService = require('../services/notificationService');
+const { Op } = require('sequelize');
 
 /**
  * Страница импорта книг
@@ -25,7 +26,83 @@ exports.getImportPage = async (req, res) => {
 };
 
 /**
- * Обработка импорта из CSV
+ * Обработка импорта из JSON файла
+ */
+async function processJsonFile(filePath) {
+  const fileContent = fs.readFileSync(filePath, 'utf8');
+  const jsonData = JSON.parse(fileContent);
+  
+  // Поддерживаем разные форматы JSON
+  if (Array.isArray(jsonData)) {
+    return jsonData;
+  } else if (jsonData.books && Array.isArray(jsonData.books)) {
+    return jsonData.books;
+  } else {
+    throw new Error('Неверный формат JSON. Ожидается массив книг или объект с полем "books"');
+  }
+}
+
+/**
+ * Обработка импорта из CSV файла
+ */
+async function processCsvFile(filePath, delimiter) {
+  return new Promise((resolve, reject) => {
+    const results = [];
+    fs.createReadStream(filePath)
+      .pipe(csv({
+        separator: delimiter || ',',
+        mapHeaders: ({ header }) => header.trim().toLowerCase(),
+        mapValues: ({ value }) => value.trim()
+      }))
+      .on('data', (data) => results.push(data))
+      .on('end', () => resolve(results))
+      .on('error', reject);
+  });
+}
+
+/**
+ * Получение ID жанра по названию
+ */
+async function getGenreId(genreName, createIfNotExists = false, defaultGenreId = null) {
+  if (!genreName || genreName.trim() === '') {
+    return defaultGenreId;
+  }
+  
+  const cleanName = genreName.trim();
+  console.log(`   🔍 Поиск жанра: "${cleanName}"`);
+  
+  // Ищем точное совпадение (регистронезависимо)
+  const genre = await Genre.findOne({
+    where: {
+      name: {
+        [Op.iLike]: cleanName
+      }
+    }
+  });
+  
+  if (genre) {
+    console.log(`   ✅ Жанр найден: ${genre.name} (ID: ${genre.id})`);
+    return genre.id;
+  }
+  
+  // Если жанр не найден и разрешено создавать
+  if (createIfNotExists) {
+    console.log(`   ➕ Создаём новый жанр: "${cleanName}"`);
+    const newGenre = await Genre.create({ 
+      name: cleanName,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    console.log(`   ✅ Создан жанр ID: ${newGenre.id}`);
+    return newGenre.id;
+  }
+  
+  console.log(`   ❌ Жанр не найден и создание запрещено`);
+  return defaultGenreId;
+}
+
+/**
+ * Импорт книг
  */
 exports.importBooks = async (req, res) => {
   try {
@@ -35,40 +112,64 @@ exports.importBooks = async (req, res) => {
     }
     
     const filePath = req.file.path;
-    const results = [];
-    const errors = [];
-    const skipped = [];
+    let results = [];
     
-    // Определяем тип файла по расширению
+    console.log('\n📁 ===== НАЧАЛО ИМПОРТА =====');
+    console.log(`📁 Файл: ${req.file.originalname}`);
+    console.log(`📁 Размер: ${req.file.size} байт`);
+    
+    // Определяем тип файла
     const ext = path.extname(req.file.originalname).toLowerCase();
+    console.log(`📁 Расширение: ${ext}`);
     
-    if (ext === '.csv') {
-      // Парсим CSV
-      await new Promise((resolve, reject) => {
-        fs.createReadStream(filePath)
-          .pipe(csv({
-            separator: req.body.delimiter || ',',
-            headers: true
-          }))
-          .on('data', (data) => results.push(data))
-          .on('end', resolve)
-          .on('error', reject);
-      });
-    } else if (ext === '.json') {
-      // Парсим JSON
-      const fileContent = fs.readFileSync(filePath, 'utf8');
-      const jsonData = JSON.parse(fileContent);
-      
-      if (Array.isArray(jsonData)) {
-        results.push(...jsonData);
-      } else if (jsonData.books && Array.isArray(jsonData.books)) {
-        results.push(...jsonData.books);
+    try {
+      if (ext === '.json') {
+        results = await processJsonFile(filePath);
+      } else if (ext === '.csv') {
+        results = await processCsvFile(filePath, req.body.delimiter);
       } else {
-        throw new Error('Неверный формат JSON. Ожидается массив книг');
+        throw new Error('Неподдерживаемый формат файла. Используйте CSV или JSON');
       }
-    } else {
-      throw new Error('Неподдерживаемый формат файла. Используйте CSV или JSON');
+    } catch (parseError) {
+      console.error('❌ Ошибка парсинга файла:', parseError);
+      fs.unlinkSync(filePath);
+      req.flash('error', 'Ошибка при чтении файла: ' + parseError.message);
+      return res.redirect('/admin/import');
     }
+    
+    console.log(`📊 Найдено записей: ${results.length}`);
+    
+    if (results.length === 0) {
+      fs.unlinkSync(filePath);
+      req.flash('error', 'Файл не содержит данных');
+      return res.redirect('/admin/import');
+    }
+    
+    // Показываем первую запись для примера
+    console.log('\n📝 Пример первой записи:');
+    console.log(JSON.stringify(results[0], null, 2));
+    
+    // Получаем настройки из формы
+    const fieldMapping = {
+      title: req.body.field_title || 'title',
+      author: req.body.field_author || 'author',
+      description: req.body.field_description || 'description',
+      year: req.body.field_year || 'year',
+      pages: req.body.field_pages || 'pages',
+      publisher: req.body.field_publisher || 'publisher',
+      isbn: req.body.field_isbn || 'isbn',
+      genre: req.body.field_genre || 'genre'
+    };
+    
+    const createGenres = req.body.create_genres === 'on';
+    const skipDuplicates = req.body.skip_duplicates === 'on';
+    const defaultGenreId = req.body.default_genre || null;
+    
+    console.log('\n⚙️ Настройки импорта:');
+    console.log(`   - Маппинг полей:`, fieldMapping);
+    console.log(`   - Создавать жанры: ${createGenres}`);
+    console.log(`   - Пропускать дубликаты: ${skipDuplicates}`);
+    console.log(`   - Жанр по умолчанию ID: ${defaultGenreId}`);
     
     // Статистика импорта
     const stats = {
@@ -85,88 +186,114 @@ exports.importBooks = async (req, res) => {
       const bookData = {};
       const rowErrors = [];
       
+      console.log(`\n📖 [${i + 1}/${results.length}] Обработка записи...`);
+      
       try {
-        // Маппинг полей (можно настроить через форму)
-        const mapping = {
-          title: req.body.field_title || 'title',
-          author: req.body.field_author || 'author',
-          description: req.body.field_description || 'description',
-          year: req.body.field_year || 'year',
-          pages: req.body.field_pages || 'pages',
-          publisher: req.body.field_publisher || 'publisher',
-          isbn: req.body.field_isbn || 'isbn',
-          genre: req.body.field_genre || 'genre'
-        };
+        // === НАЗВАНИЕ (обязательное) ===
+        const titleKey = fieldMapping.title.toLowerCase();
+        const titleValue = row[titleKey] || row[Object.keys(row).find(k => k.toLowerCase() === titleKey)];
         
-        // Проверяем обязательные поля
-        if (!row[mapping.title]) {
+        if (!titleValue) {
           rowErrors.push('Отсутствует название');
+          console.log(`   ❌ Нет названия`);
         } else {
-          bookData.title = row[mapping.title].trim();
+          bookData.title = titleValue.toString().trim();
+          console.log(`   ✅ Название: ${bookData.title.substring(0, 50)}${bookData.title.length > 50 ? '...' : ''}`);
         }
         
-        if (!row[mapping.author]) {
+        // === АВТОР (обязательное) ===
+        const authorKey = fieldMapping.author.toLowerCase();
+        const authorValue = row[authorKey] || row[Object.keys(row).find(k => k.toLowerCase() === authorKey)];
+        
+        if (!authorValue) {
           rowErrors.push('Отсутствует автор');
+          console.log(`   ❌ Нет автора`);
         } else {
-          bookData.author = row[mapping.author].trim();
+          bookData.author = authorValue.toString().trim();
+          console.log(`   ✅ Автор: ${bookData.author.substring(0, 30)}${bookData.author.length > 30 ? '...' : ''}`);
         }
         
-        // Опциональные поля
-        if (row[mapping.description]) {
-          bookData.description = row[mapping.description].trim();
+        // === ОПИСАНИЕ ===
+        const descKey = fieldMapping.description.toLowerCase();
+        const descValue = row[descKey] || row[Object.keys(row).find(k => k.toLowerCase() === descKey)];
+        if (descValue) {
+          bookData.description = descValue.toString().trim();
         }
         
-        if (row[mapping.year]) {
-          const year = parseInt(row[mapping.year]);
+        // === ГОД ===
+        const yearKey = fieldMapping.year.toLowerCase();
+        const yearValue = row[yearKey] || row[Object.keys(row).find(k => k.toLowerCase() === yearKey)];
+        if (yearValue) {
+          const year = parseInt(yearValue);
           if (!isNaN(year) && year > 1000 && year < 2100) {
             bookData.year = year;
           } else {
-            rowErrors.push('Некорректный год');
+            rowErrors.push(`Некорректный год: ${yearValue}`);
           }
         }
         
-        if (row[mapping.pages]) {
-          const pages = parseInt(row[mapping.pages]);
+        // === СТРАНИЦЫ ===
+        const pagesKey = fieldMapping.pages.toLowerCase();
+        const pagesValue = row[pagesKey] || row[Object.keys(row).find(k => k.toLowerCase() === pagesKey)];
+        if (pagesValue) {
+          const pages = parseInt(pagesValue);
           if (!isNaN(pages) && pages > 0) {
             bookData.pages = pages;
           } else {
-            rowErrors.push('Некорректное количество страниц');
+            rowErrors.push(`Некорректное количество страниц: ${pagesValue}`);
           }
         }
         
-        if (row[mapping.publisher]) {
-          bookData.publisher = row[mapping.publisher].trim();
+        // === ИЗДАТЕЛЬСТВО ===
+        const publisherKey = fieldMapping.publisher.toLowerCase();
+        const publisherValue = row[publisherKey] || row[Object.keys(row).find(k => k.toLowerCase() === publisherKey)];
+        if (publisherValue) {
+          bookData.publisher = publisherValue.toString().trim();
         }
         
-        if (row[mapping.isbn]) {
-          bookData.isbn = row[mapping.isbn].trim();
+        // === ISBN ===
+        const isbnKey = fieldMapping.isbn.toLowerCase();
+        const isbnValue = row[isbnKey] || row[Object.keys(row).find(k => k.toLowerCase() === isbnKey)];
+        if (isbnValue) {
+          bookData.isbn = isbnValue.toString().trim();
         }
         
-        // Обработка жанра
-        if (row[mapping.genre] && req.body.default_genre) {
-          // Используем жанр из файла или дефолтный
-          const genreName = row[mapping.genre].trim();
-          let genre = await Genre.findOne({ where: { name: genreName } });
-          
-          if (!genre) {
-            if (req.body.create_genres === 'on') {
-              // Создаём новый жанр
-              genre = await Genre.create({ name: genreName });
-            } else {
-              // Используем дефолтный
-              genre = await Genre.findByPk(req.body.default_genre);
-            }
+        // === ЖАНР (САМОЕ ВАЖНОЕ) ===
+        const genreKey = fieldMapping.genre.toLowerCase();
+        const genreValue = row[genreKey] || row[Object.keys(row).find(k => k.toLowerCase() === genreKey)];
+        
+        if (genreValue) {
+          console.log(`   🏷️ Значение жанра из файла: "${genreValue}"`);
+          const genreId = await getGenreId(genreValue, createGenres, defaultGenreId);
+          if (genreId) {
+            bookData.genre_id = genreId;
+            console.log(`   ✅ Жанр установлен: ID ${genreId}`);
+          } else {
+            console.log(`   ⚠️ Жанр не установлен`);
           }
-          
-          if (genre) {
-            bookData.genre_id = genre.id;
+        } else {
+          console.log(`   ℹ️ Жанр не указан в файле`);
+          if (defaultGenreId) {
+            bookData.genre_id = defaultGenreId;
+            console.log(`   ℹ️ Используем жанр по умолчанию: ID ${defaultGenreId}`);
           }
-        } else if (req.body.default_genre) {
-          bookData.genre_id = req.body.default_genre;
         }
         
-        // Проверяем дубликаты (по названию и автору)
-        if (req.body.skip_duplicates === 'on') {
+        // Если есть ошибки, пропускаем
+        if (rowErrors.length > 0) {
+          console.log(`   ❌ Ошибки:`, rowErrors);
+          stats.errors++;
+          stats.details.push({
+            row: i + 1,
+            success: false,
+            errors: rowErrors,
+            data: { ...row }
+          });
+          continue;
+        }
+        
+        // Проверка дубликатов
+        if (skipDuplicates) {
           const existing = await Book.findOne({
             where: {
               title: bookData.title,
@@ -175,56 +302,76 @@ exports.importBooks = async (req, res) => {
           });
           
           if (existing) {
-            skipped.push({ row: i + 1, title: bookData.title, reason: 'дубликат' });
+            console.log(`   ⏭️ Найден дубликат, пропускаем`);
             stats.skipped++;
+            stats.details.push({
+              row: i + 1,
+              success: false,
+              error: 'Дубликат',
+              data: { ...row }
+            });
             continue;
           }
         }
         
-        // Если есть ошибки, пропускаем
-        if (rowErrors.length > 0) {
-          errors.push({ row: i + 1, errors: rowErrors, data: bookData });
-          stats.errors++;
-          stats.details.push({ row: i + 1, success: false, errors: rowErrors });
-          continue;
-        }
+        // Добавляем обязательные поля
+        bookData.cover_image = 'default-book-cover.jpg';
+        bookData.views_count = 0;
         
-        // Создаём книгу
-        await Book.create({
-          ...bookData,
-          cover_image: 'default-book-cover.jpg',
-          views_count: 0
+        console.log(`   💾 Сохраняем книгу:`, {
+          title: bookData.title,
+          author: bookData.author,
+          genre_id: bookData.genre_id || 'не указан'
         });
         
+        // Создаём книгу
+        await Book.create(bookData);
+        
+        console.log(`   ✅ Книга успешно создана`);
         stats.success++;
-        stats.details.push({ row: i + 1, success: true });
+        stats.details.push({
+          row: i + 1,
+          success: true,
+          data: { 
+            title: bookData.title,
+            author: bookData.author,
+            genre_id: bookData.genre_id
+          }
+        });
         
       } catch (error) {
-        console.error(`Ошибка при обработке строки ${i + 1}:`, error);
-        errors.push({ row: i + 1, error: error.message });
+        console.error(`   ❌ Ошибка:`, error.message);
         stats.errors++;
-        stats.details.push({ row: i + 1, success: false, error: error.message });
+        stats.details.push({
+          row: i + 1,
+          success: false,
+          error: error.message,
+          data: { ...row }
+        });
       }
     }
     
     // Удаляем временный файл
     fs.unlinkSync(filePath);
     
+    console.log('\n📊 ===== ИТОГИ ИМПОРТА =====');
+    console.log(`   Всего записей: ${stats.total}`);
+    console.log(`   ✅ Успешно: ${stats.success}`);
+    console.log(`   ❌ Ошибок: ${stats.errors}`);
+    console.log(`   ⏭️ Пропущено: ${stats.skipped}`);
     
-
-    // Отправляем уведомление администратору
+    // Отправляем уведомление
     await notificationService.booksImported(req.session.user.id, stats);
     
-    // Сохраняем результат в сессии для отображения
+    // Сохраняем результат в сессии
     req.session.importResult = stats;
     
     req.flash('success', `Импорт завершён. Добавлено: ${stats.success}, ошибок: ${stats.errors}, пропущено: ${stats.skipped}`);
     res.redirect('/admin/import/result');
     
   } catch (error) {
-    console.error('Ошибка при импорте:', error);
+    console.error('❌ Критическая ошибка при импорте:', error);
     
-    // Удаляем временный файл в случае ошибки
     if (req.file && req.file.path) {
       try { fs.unlinkSync(req.file.path); } catch (e) {}
     }
@@ -262,18 +409,16 @@ exports.downloadTemplate = (req, res) => {
     const type = req.query.type || 'csv';
     
     if (type === 'csv') {
-      // Создаём CSV шаблон
       const headers = ['title', 'author', 'description', 'year', 'pages', 'publisher', 'isbn', 'genre'];
       const sample = ['Война и мир', 'Лев Толстой', 'Великий роман...', '1869', '1300', 'АСТ', '978-5-17-123456-7', 'Роман'];
       
       const csv = headers.join(',') + '\n' + sample.join(',');
       
-      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
       res.setHeader('Content-Disposition', 'attachment; filename=books_template.csv');
       res.send(csv);
       
     } else if (type === 'json') {
-      // Создаём JSON шаблон
       const template = {
         books: [
           {
@@ -289,13 +434,80 @@ exports.downloadTemplate = (req, res) => {
         ]
       };
       
-      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.setHeader('Content-Disposition', 'attachment; filename=books_template.json');
       res.send(JSON.stringify(template, null, 2));
     }
     
   } catch (error) {
     console.error('Ошибка при скачивании шаблона:', error);
+    res.redirect('/admin/import');
+  }
+};
+
+/**
+ * Скачать пример с жанрами
+ */
+exports.downloadExampleWithGenres = async (req, res) => {
+  try {
+    // Получаем реальные жанры из БД
+    const genres = await Genre.findAll({ limit: 10 });
+    const genreNames = genres.map(g => g.name);
+    
+    const examples = [
+      {
+        title: 'Война и мир',
+        author: 'Лев Толстой',
+        description: 'Великий роман-эпопея',
+        year: '1869',
+        pages: '1300',
+        publisher: 'АСТ',
+        isbn: '978-5-17-123456-7',
+        genre: genreNames[0] || 'Роман'
+      },
+      {
+        title: 'Преступление и наказание',
+        author: 'Фёдор Достоевский',
+        description: 'Философский роман',
+        year: '1866',
+        pages: '672',
+        publisher: 'Эксмо',
+        isbn: '978-5-04-123456-8',
+        genre: genreNames[0] || 'Роман'
+      },
+      {
+        title: '1984',
+        author: 'Джордж Оруэлл',
+        description: 'Антиутопия',
+        year: '1949',
+        pages: '320',
+        publisher: 'Азбука',
+        isbn: '978-5-389-12345-6',
+        genre: genreNames[1] || 'Фантастика'
+      }
+    ];
+    
+    const headers = ['title', 'author', 'description', 'year', 'pages', 'publisher', 'isbn', 'genre'];
+    const csvRows = [];
+    
+    csvRows.push(headers.join(','));
+    
+    examples.forEach(book => {
+      const values = headers.map(header => {
+        const value = book[header] || '';
+        return value.includes(',') ? `"${value}"` : value;
+      });
+      csvRows.push(values.join(','));
+    });
+    
+    const csv = csvRows.join('\n');
+    
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename=books_example_with_genres.csv');
+    res.send(csv);
+    
+  } catch (error) {
+    console.error('Ошибка при скачивании примера:', error);
     res.redirect('/admin/import');
   }
 };

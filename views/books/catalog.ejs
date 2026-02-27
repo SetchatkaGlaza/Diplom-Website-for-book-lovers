@@ -145,7 +145,7 @@
       <% if (totalPages > 1) { %>
         <div class="pagination">
           <% if (currentPage > 1) { %>
-            <a href="?<%= new URLSearchParams({...filters, page: currentPage - 1, sort}).toString() %>" class="page-link">← Предыдущая</a>
+            <a href="?<%= new URLSearchParams({...filters, page: currentPage - 1, sort}).toString() %>" class="page-link">←</a>
           <% } %>
           
           <% for(let i = 1; i <= totalPages; i++) { %>
@@ -157,7 +157,7 @@
           <% } %>
           
           <% if (currentPage < totalPages) { %>
-            <a href="?<%= new URLSearchParams({...filters, page: currentPage + 1, sort}).toString() %>" class="page-link">Следующая →</a>
+            <a href="?<%= new URLSearchParams({...filters, page: currentPage + 1, sort}).toString() %>" class="page-link">→</a>
           <% } %>
         </div>
       <% } %>
