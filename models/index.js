@@ -10,6 +10,11 @@ const ReviewLike = require('./ReviewLike');
 const LoginAttempt = require('./LoginAttempt');
 const PasswordReset = require('./PasswordReset');
 const Notification = require('./Notification');
+const ForumCategory = require('./ForumCategory');
+const ForumTopic = require('./ForumTopic');
+const ForumPost = require('./ForumPost');
+const ForumPostLike = require('./ForumPostLike');
+const ForumSubscription = require('./ForumSubscription');
 
 // Устанавливаем связи
 require('./associations');
@@ -25,5 +30,10 @@ module.exports = {
   ReviewLike,
   LoginAttempt,
   PasswordReset,
-  Notification
+  Notification,
+  ForumCategory,
+  ForumTopic,
+  ForumPost,
+  ForumPostLike,
+  ForumSubscription
 };

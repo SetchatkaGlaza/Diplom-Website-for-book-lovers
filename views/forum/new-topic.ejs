@@ -1,0 +1,189 @@
+<div class="forum-new-topic">
+  <div class="page-header">
+    <h1><i class="fas fa-plus-circle"></i> Создать новую тему</h1>
+    <a href="/forum" class="btn btn-outline">
+      <i class="fas fa-arrow-left"></i> Вернуться к форуму
+    </a>
+  </div>
+  
+  <% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error.msg %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+  
+  <form action="/forum/new" method="POST" class="topic-form">
+    <div class="form-group">
+      <label for="category_id">
+        <i class="fas fa-folder"></i> Категория
+      </label>
+      <select id="category_id" name="category_id" required>
+        <option value="">-- Выберите категорию --</option>
+        <% categories.forEach(category => { %>
+          <option value="<%= category.id %>" <%= formData && formData.category_id == category.id ? 'selected' : '' %>>
+            <%= category.name %>
+          </option>
+        <% }) %>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label for="title">
+        <i class="fas fa-heading"></i> Заголовок темы
+      </label>
+      <input 
+        type="text" 
+        id="title" 
+        name="title" 
+        value="<%= formData ? formData.title : '' %>"
+        placeholder="Кратко опишите суть обсуждения"
+        required
+        minlength="5"
+        maxlength="200"
+      >
+      <small>Минимум 5 символов, максимум 200</small>
+    </div>
+    
+    <div class="form-group">
+      <label for="content">
+        <i class="fas fa-align-left"></i> Сообщение
+      </label>
+      <textarea 
+        id="content" 
+        name="content" 
+        rows="10"
+        placeholder="Напишите ваше сообщение..."
+        required
+        minlength="10"
+      ><%= formData ? formData.content : '' %></textarea>
+      <small>Минимум 10 символов</small>
+    </div>
+    
+    <div class="form-info">
+      <i class="fas fa-info-circle"></i>
+      <p>Ваша тема будет опубликована после проверки модератором. Обычно это занимает не более 24 часов.</p>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-large">
+        <i class="fas fa-paper-plane"></i> Создать тему
+      </button>
+      <a href="/forum" class="btn btn-outline">
+        <i class="fas fa-times"></i> Отмена
+      </a>
+    </div>
+  </form>
+</div>
+
+<style>
+  .forum-new-topic {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    color: white;
+  }
+  
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .page-header h1 {
+    margin: 0;
+  }
+  
+  .topic-form {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .form-group label i {
+    color: var(--accent);
+  }
+  
+  .form-group select,
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius);
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+  
+  .form-group select:focus,
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  .form-group small {
+    display: block;
+    margin-top: 0.25rem;
+    opacity: 0.7;
+    font-size: 0.85rem;
+  }
+  
+  .form-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid #f59e0b;
+    border-radius: var(--radius);
+    margin: 1.5rem 0;
+  }
+  
+  .form-info i {
+    font-size: 1.5rem;
+    color: #f59e0b;
+  }
+  
+  .form-info p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+  
+  @media (max-width: 768px) {
+    .form-actions {
+      flex-direction: column;
+    }
+  }
+</style>

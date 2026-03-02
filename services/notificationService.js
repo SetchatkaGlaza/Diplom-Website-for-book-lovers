@@ -270,6 +270,93 @@ class NotificationService {
       console.error('❌ Ошибка при создании уведомления об импорте:', error);
     }
   }
+  /**
+ * Уведомление о новом ответе в теме
+ */
+async forumNewReply(userId, topic, post, replierName) {
+  try {
+    const title = '📝 Новый ответ в теме';
+    const message = `Пользователь ${replierName} ответил в теме "${topic.title}"`;
+    
+    await this.create(
+      userId,
+      'forum_reply',
+      title,
+      message,
+      `/forum/topic/${topic.id}#post-${post.id}`,
+      { topic_id: topic.id, post_id: post.id, replier: replierName }
+    );
+  } catch (error) {
+    console.error('Ошибка при создании уведомления о новом ответе:', error);
+  }
+}
+
+/**
+ * Уведомление о лайке сообщения
+ */
+async forumPostLiked(userId, topic, post, likerName) {
+  try {
+    const title = '❤️ Лайк на сообщение';
+    const message = `Пользователь ${likerName} оценил ваше сообщение в теме "${topic.title}"`;
+    
+    await this.create(
+      userId,
+      'forum_like',
+      title,
+      message,
+      `/forum/topic/${topic.id}#post-${post.id}`,
+      { topic_id: topic.id, post_id: post.id, liker: likerName }
+    );
+  } catch (error) {
+    console.error('Ошибка при создании уведомления о лайке:', error);
+  }
+}
+
+/**
+ * Уведомление о модерации темы
+ */
+async forumTopicModerated(userId, topic, approved, reason = null) {
+  try {
+    const title = approved ? '✅ Тема одобрена' : '❌ Тема отклонена';
+    const message = approved 
+      ? `Ваша тема "${topic.title}" прошла модерацию и опубликована.`
+      : `Ваша тема "${topic.title}" не прошла модерацию. ${reason ? 'Причина: ' + reason : ''}`;
+    
+    await this.create(
+      userId,
+      'forum_moderated',
+      title,
+      message,
+      approved ? `/forum/topic/${topic.id}` : null,
+      { topic_id: topic.id, approved, reason }
+    );
+  } catch (error) {
+    console.error('Ошибка при создании уведомления о модерации темы:', error);
+  }
+}
+
+/**
+ * Уведомление о модерации сообщения
+ */
+async forumPostModerated(userId, topic, post, approved, reason = null) {
+  try {
+    const title = approved ? '✅ Сообщение одобрено' : '❌ Сообщение отклонено';
+    const message = approved 
+      ? `Ваше сообщение в теме "${topic.title}" прошло модерацию.`
+      : `Ваше сообщение в теме "${topic.title}" не прошло модерацию. ${reason ? 'Причина: ' + reason : ''}`;
+    
+    await this.create(
+      userId,
+      'forum_moderated',
+      title,
+      message,
+      approved ? `/forum/topic/${topic.id}#post-${post.id}` : null,
+      { topic_id: topic.id, post_id: post.id, approved, reason }
+    );
+  } catch (error) {
+    console.error('Ошибка при создании уведомления о модерации сообщения:', error);
+  }
+}
 }
 
 module.exports = new NotificationService();

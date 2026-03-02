@@ -1,0 +1,240 @@
+<div class="forum-search">
+  <div class="page-header">
+    <h1><i class="fas fa-search"></i> Поиск по форуму</h1>
+    <a href="/forum" class="btn btn-outline">
+      <i class="fas fa-arrow-left"></i> Вернуться к форуму
+    </a>
+  </div>
+  
+  <form action="/forum/search" method="GET" class="search-form">
+    <div class="search-input-group">
+      <input 
+        type="text" 
+        name="q" 
+        placeholder="Введите поисковый запрос..." 
+        value="<%= query || '' %>"
+        required
+        minlength="3"
+      >
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-search"></i> Найти
+      </button>
+    </div>
+    <small>Минимум 3 символа</small>
+  </form>
+  
+  <% if (query) { %>
+    <div class="search-results">
+      <h2>Результаты поиска по запросу "<%= query %>"</h2>
+      
+      <% if (topics && topics.length > 0) { %>
+        <div class="results-section">
+          <h3><i class="fas fa-comments"></i> Найдено тем: <%= topics.length %></h3>
+          <div class="results-list">
+            <% topics.forEach(topic => { %>
+              <div class="result-item">
+                <div class="result-icon">
+                  <i class="fas fa-comment"></i>
+                </div>
+                <div class="result-content">
+                  <h4><a href="/forum/topic/<%= topic.id %>"><%= topic.title %></a></h4>
+                  <p class="result-meta">
+                    Категория: <a href="/forum/category/<%= topic.category.id %>"><%= topic.category.name %></a> • 
+                    Автор: <a href="/profile/<%= topic.user.id %>"><%= topic.user.name %></a> • 
+                    <%= topic.replies_count %> ответов • 
+                    <%= topic.views %> просмотров
+                  </p>
+                  <p class="result-excerpt"><%= topic.content.substring(0, 200) %>...</p>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+      
+      <% if (posts && posts.length > 0) { %>
+        <div class="results-section">
+          <h3><i class="fas fa-reply"></i> Найдено сообщений: <%= posts.length %></h3>
+          <div class="results-list">
+            <% posts.forEach(post => { %>
+              <div class="result-item">
+                <div class="result-icon">
+                  <i class="fas fa-reply"></i>
+                </div>
+                <div class="result-content">
+                  <h4>
+                    <a href="/forum/topic/<%= post.topic.id %>#post-<%= post.id %>">
+                      Сообщение в теме "<%= post.topic.title %>"
+                    </a>
+                  </h4>
+                  <p class="result-meta">
+                    Категория: <a href="/forum/category/<%= post.topic.category.id %>"><%= post.topic.category.name %></a> • 
+                    Автор: <a href="/profile/<%= post.user.id %>"><%= post.user.name %></a> • 
+                    <%= new Date(post.createdAt).toLocaleString('ru-RU') %>
+                  </p>
+                  <p class="result-excerpt"><%= post.content.substring(0, 200) %>...</p>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+      
+      <% if ((!topics || topics.length === 0) && (!posts || posts.length === 0)) { %>
+        <div class="no-results">
+          <i class="fas fa-search fa-4x"></i>
+          <h3>Ничего не найдено</h3>
+          <p>Попробуйте изменить поисковый запрос</p>
+        </div>
+      <% } %>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .forum-search {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    color: white;
+  }
+  
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .search-form {
+    max-width: 600px;
+    margin: 2rem auto;
+  }
+  
+  .search-input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .search-input-group input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius);
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 1rem;
+  }
+  
+  .search-input-group input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  
+  .search-form small {
+    display: block;
+    text-align: center;
+    opacity: 0.7;
+  }
+  
+  .search-results {
+    margin-top: 3rem;
+  }
+  
+  .search-results h2 {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .results-section {
+    margin-bottom: 2rem;
+  }
+  
+  .results-section h3 {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent);
+  }
+  
+  .result-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
+    transition: var(--transition);
+  }
+  
+  .result-item:hover {
+    background: rgba(0, 0, 0, 0.3);
+    transform: translateX(5px);
+  }
+  
+  .result-icon {
+    font-size: 1.5rem;
+    color: var(--accent);
+  }
+  
+  .result-content {
+    flex: 1;
+  }
+  
+  .result-content h4 {
+    margin: 0 0 0.5rem;
+  }
+  
+  .result-content h4 a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .result-content h4 a:hover {
+    color: var(--accent);
+  }
+  
+  .result-meta {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 0.5rem;
+  }
+  
+  .result-meta a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  
+  .result-meta a:hover {
+    text-decoration: underline;
+  }
+  
+  .result-excerpt {
+    opacity: 0.7;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  
+  .no-results {
+    text-align: center;
+    padding: 3rem;
+  }
+  
+  .no-results i {
+    opacity: 0.3;
+    margin-bottom: 1rem;
+  }
+  
+  .no-results h3 {
+    margin-bottom: 0.5rem;
+  }
+</style>
