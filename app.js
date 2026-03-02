@@ -19,6 +19,8 @@ const adminRoutes = require('./routes/admin');
 const globalData = require('./middlewares/globalData');
 const pageRoutes = require('./routes/pages');
 const notificationRoutes = require('./routes/notifications');
+const forumRoutes = require('./routes/forum');
+const adminForumRoutes = require('./routes/adminForum');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -79,6 +81,8 @@ app.use('/profile', profileRoutes);
 app.use('/admin', adminRoutes);
 app.use('/reviews', reviewRoutes);
 app.use('/notifications', notificationRoutes);
+app.use('/forum', forumRoutes);
+app.use('/admin/forum', adminForumRoutes);
 app.use('/', pageRoutes);
 
 // Главная страница

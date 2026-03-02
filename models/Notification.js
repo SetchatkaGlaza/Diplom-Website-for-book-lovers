@@ -16,16 +16,18 @@ const Notification = sequelize.define('Notification', {
     }
   },
   type: {
-    type: DataTypes.ENUM(
-      'review_moderated',
-      'new_review',
-      'review_liked',
-      'book_imported',
-      'system',
-      'welcome'
-    ),
-    defaultValue: 'system'
-  },
+  type: DataTypes.ENUM(
+    'review_moderated',
+    'new_review',
+    'review_liked',
+    'book_imported',
+    'system',
+    'forum_reply',      // <-- добавить
+    'forum_like',       // <-- добавить
+    'forum_moderated'   // <-- добавить
+  ),
+  allowNull: false
+},
   title: {
     type: DataTypes.STRING,
     allowNull: false

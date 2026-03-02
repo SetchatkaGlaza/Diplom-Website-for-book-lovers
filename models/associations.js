@@ -6,7 +6,12 @@ const UserBook = require('./UserBook');
 const ReviewLike = require('./ReviewLike');
 const PasswordReset = require('./PasswordReset');
 const LoginAttempt = require('./LoginAttempt');
-const Notification = require('./Notification'); 
+const Notification = require('./Notification');
+const ForumCategory = require('./ForumCategory');
+const ForumTopic = require('./ForumTopic');
+const ForumPost = require('./ForumPost');
+const ForumPostLike = require('./ForumPostLike');
+const ForumSubscription = require('./ForumSubscription');
 
 /**
  * Этот файл устанавливает связи между моделями
@@ -16,6 +21,111 @@ PasswordReset.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user',
   onDelete: 'CASCADE'
+});
+
+ForumCategory.hasMany(ForumTopic, {
+  foreignKey: 'category_id',
+  as: 'topics',
+  onDelete: 'CASCADE'
+});
+
+ForumTopic.belongsTo(ForumCategory, {
+  foreignKey: 'category_id',
+  as: 'category'
+});
+
+// Пользователь - Темы
+User.hasMany(ForumTopic, {
+  foreignKey: 'user_id',
+  as: 'forumTopics',
+  onDelete: 'CASCADE'
+});
+
+ForumTopic.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+// Пользователь - Последний ответ в теме
+ForumTopic.belongsTo(User, {
+  foreignKey: 'last_reply_user_id',
+  as: 'lastReplyUser'
+});
+
+// Тема - Сообщения
+ForumTopic.hasMany(ForumPost, {
+  foreignKey: 'topic_id',
+  as: 'posts',
+  onDelete: 'CASCADE'
+});
+
+ForumPost.belongsTo(ForumTopic, {
+  foreignKey: 'topic_id',
+  as: 'topic'
+});
+
+// Пользователь - Сообщения
+User.hasMany(ForumPost, {
+  foreignKey: 'user_id',
+  as: 'forumPosts',
+  onDelete: 'CASCADE'
+});
+
+ForumPost.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+// Кто редактировал сообщение
+ForumPost.belongsTo(User, {
+  foreignKey: 'edited_by',
+  as: 'editor'
+});
+
+// Лайки сообщений
+ForumPost.hasMany(ForumPostLike, {
+  foreignKey: 'post_id',
+  as: 'likes',
+  onDelete: 'CASCADE'
+});
+
+ForumPostLike.belongsTo(ForumPost, {
+  foreignKey: 'post_id',
+  as: 'post'
+});
+
+User.hasMany(ForumPostLike, {
+  foreignKey: 'user_id',
+  as: 'forumPostLikes',
+  onDelete: 'CASCADE'
+});
+
+ForumPostLike.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+// Подписки на темы
+ForumTopic.hasMany(ForumSubscription, {
+  foreignKey: 'topic_id',
+  as: 'subscriptions',
+  onDelete: 'CASCADE'
+});
+
+ForumSubscription.belongsTo(ForumTopic, {
+  foreignKey: 'topic_id',
+  as: 'topic'
+});
+
+User.hasMany(ForumSubscription, {
+  foreignKey: 'user_id',
+  as: 'forumSubscriptions',
+  onDelete: 'CASCADE'
+});
+
+ForumSubscription.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
 });
 
 Notification.belongsTo(User, {
@@ -155,5 +265,10 @@ module.exports = {
   ReviewLike,
   PasswordReset,
   LoginAttempt,
-  Notification
+  Notification,
+  ForumCategory,
+  ForumTopic,
+  ForumPost,
+  ForumPostLike,
+  ForumSubscription
 };

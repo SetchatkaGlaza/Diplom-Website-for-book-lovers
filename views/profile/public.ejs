@@ -1,0 +1,481 @@
+<div class="public-profile">
+  <!-- Шапка профиля -->
+  <div class="profile-header">
+    <div class="profile-cover">
+      <div class="profile-avatar-wrapper">
+        <img src="/images/avatars/<%= profileUser.avatar %>" alt="<%= profileUser.name %>" class="profile-avatar">
+      </div>
+    </div>
+    
+    <div class="profile-info">
+      <h1 class="profile-name"><%= profileUser.name %></h1>
+      
+      <div class="profile-meta">
+        <span class="meta-item">
+          <i class="fas fa-calendar-alt"></i>
+          На сайте с <%= new Date(profileUser.createdAt).toLocaleDateString('ru-RU', { year: 'numeric', month: 'long' }) %>
+        </span>
+        
+        <span class="meta-item">
+          <i class="fas fa-user-tag"></i>
+          <% if (profileUser.role === 'admin') { %>
+            <span class="role-badge admin">Администратор</span>
+          <% } else if (profileUser.role === 'moderator') { %>
+            <span class="role-badge moderator">Модератор</span>
+          <% } else { %>
+            <span class="role-badge user">Читатель</span>
+          <% } %>
+        </span>
+      </div>
+      
+      <% if (profileUser.bio) { %>
+        <div class="profile-bio">
+          <p><%= profileUser.bio %></p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+  
+  <!-- Статистика -->
+  <div class="profile-stats">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-book-reader"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value"><%= stats.booksRead %></span>
+        <span class="stat-label">Прочитано книг</span>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-star"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value"><%= stats.reviewsCount %></span>
+        <span class="stat-label">Написано рецензий</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Последние рецензии -->
+  <div class="profile-section">
+    <h2 class="section-title">
+      <i class="fas fa-star"></i>
+      Последние рецензии <%= profileUser.name %>
+    </h2>
+    
+    <% if (recentReviews && recentReviews.length > 0) { %>
+      <div class="reviews-grid">
+        <% recentReviews.forEach(review => { %>
+          <div class="review-card">
+            <div class="review-book">
+              <img src="/images/covers/<%= review.book.cover_image %>" alt="<%= review.book.title %>" class="review-book-cover">
+              <div class="review-book-info">
+                <h3>
+                  <a href="/books/<%= review.book.id %>"><%= review.book.title %></a>
+                </h3>
+                <p class="review-book-author"><%= review.book.author %></p>
+              </div>
+            </div>
+            
+            <div class="review-rating">
+              <% for(let i = 1; i <= 5; i++) { %>
+                <% if (i <= review.rating) { %>
+                  <i class="fas fa-star"></i>
+                <% } else { %>
+                  <i class="far fa-star"></i>
+                <% } %>
+              <% } %>
+            </div>
+            
+            <div class="review-content">
+              <p><%= review.content.length > 200 ? review.content.substring(0, 200) + '...' : review.content %></p>
+            </div>
+            
+            <div class="review-footer">
+              <span class="review-date">
+                <i class="far fa-calendar-alt"></i>
+                <%= new Date(review.createdAt).toLocaleDateString('ru-RU') %>
+              </span>
+              <a href="/books/<%= review.book.id %>" class="read-more-btn">
+                Читать рецензию <i class="fas fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+      
+      <% if (stats.reviewsCount > 5) { %>
+        <div class="view-all">
+          <a href="/profile/<%= profileUser.id %>/reviews" class="btn btn-outline">
+            Все рецензии <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      <% } %>
+      
+    <% } else { %>
+      <div class="empty-state">
+        <i class="fas fa-star fa-4x"></i>
+        <h3>Пользователь пока не написал рецензий</h3>
+      </div>
+    <% } %>
+  </div>
+  
+  <!-- Кнопка назад -->
+  <div class="back-button">
+    <a href="javascript:history.back()" class="btn btn-outline">
+      <i class="fas fa-arrow-left"></i> Вернуться назад
+    </a>
+  </div>
+</div>
+
+<style>
+  .public-profile {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    padding: 2rem;
+    margin: 2rem 0;
+    color: white;
+  }
+  
+  /* Шапка профиля */
+  .profile-header {
+    margin-bottom: 2rem;
+  }
+  
+  .profile-cover {
+    height: 200px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px 16px 0 0;
+    position: relative;
+    margin-bottom: 60px;
+  }
+  
+  .profile-avatar-wrapper {
+    position: absolute;
+    bottom: -50px;
+    left: 2rem;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid white;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+  
+  .profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .profile-info {
+    padding: 1rem 2rem 1rem 160px;
+  }
+  
+  .profile-name {
+    font-size: 2.2rem;
+    margin: 0 0 0.5rem;
+    background: linear-gradient(135deg, #fff, #e0e0e0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .profile-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+  }
+  
+  .meta-item i {
+    color: #fbbf24;
+  }
+  
+  .role-badge {
+    display: inline-block;
+    padding: 0.25rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  
+  .role-badge.admin {
+    background: #ef4444;
+    color: white;
+  }
+  
+  .role-badge.moderator {
+    background: #f59e0b;
+    color: white;
+  }
+  
+  .role-badge.user {
+    background: #3b82f6;
+    color: white;
+  }
+  
+  .profile-bio {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    border-left: 4px solid #fbbf24;
+    margin-top: 1rem;
+  }
+  
+  .profile-bio p {
+    margin: 0;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  /* Статистика */
+  .profile-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+    background: rgba(0, 0, 0, 0.3);
+    border-color: #fbbf24;
+  }
+  
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #000;
+  }
+  
+  .stat-content {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  
+  .stat-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+  
+  /* Секции */
+  .profile-section {
+    margin-bottom: 2rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #fbbf24;
+    border-bottom: 2px solid rgba(251, 191, 36, 0.3);
+    padding-bottom: 0.5rem;
+  }
+  
+  .section-title i {
+    font-size: 1.3rem;
+  }
+  
+  /* Рецензии */
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .review-card {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .review-card:hover {
+    transform: translateY(-5px);
+    background: rgba(0, 0, 0, 0.3);
+    border-color: #fbbf24;
+  }
+  
+  .review-book {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .review-book-cover {
+    width: 60px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  .review-book-info h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1.1rem;
+  }
+  
+  .review-book-info h3 a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .review-book-info h3 a:hover {
+    color: #fbbf24;
+  }
+  
+  .review-book-author {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin: 0;
+  }
+  
+  .review-rating {
+    margin-bottom: 0.75rem;
+    color: #fbbf24;
+  }
+  
+  .review-rating i {
+    margin-right: 0.2rem;
+  }
+  
+  .review-content {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .review-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .review-date {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  
+  .read-more-btn {
+    color: #fbbf24;
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.3s;
+  }
+  
+  .read-more-btn:hover {
+    gap: 0.5rem;
+  }
+  
+  /* Пустое состояние */
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+  }
+  
+  .empty-state i {
+    opacity: 0.3;
+    margin-bottom: 1rem;
+    color: #fbbf24;
+  }
+  
+  .empty-state h3 {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  /* Кнопка назад */
+  .back-button {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .view-all {
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+  
+  /* Адаптивность */
+  @media (max-width: 768px) {
+    .profile-avatar-wrapper {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .profile-info {
+      padding: 80px 1rem 1rem;
+      text-align: center;
+    }
+    
+    .profile-meta {
+      justify-content: center;
+    }
+    
+    .profile-stats {
+      grid-template-columns: 1fr;
+    }
+    
+    .reviews-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .review-book {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+  }
+</style>

@@ -1,0 +1,618 @@
+<div class="forum-category">
+  <!-- Хлебные крошки -->
+  <div class="breadcrumbs">
+    <a href="/forum">Форум</a>
+    <i class="fas fa-chevron-right"></i>
+    <span><%= category.name %></span>
+  </div>
+  
+  <!-- Заголовок категории -->
+  <div class="category-header">
+    <div class="category-title-wrapper">
+      <div class="category-icon-large">
+        <i class="fas <%= category.icon %>"></i>
+      </div>
+      <div>
+        <h1 class="category-name"><%= category.name %></h1>
+        <% if (category.description) { %>
+          <p class="category-description"><%= category.description %></p>
+        <% } %>
+      </div>
+    </div>
+    
+    <div class="category-actions">
+      <a href="/forum/search?category=<%= category.id %>" class="btn btn-outline">
+        <i class="fas fa-search"></i> Поиск
+      </a>
+      <% if (user) { %>
+        <a href="/forum/new?category=<%= category.id %>" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Новая тема
+        </a>
+      <% } %>
+    </div>
+  </div>
+  
+  <!-- Статистика категории -->
+  <div class="category-stats">
+    <div class="stat-item">
+      <span class="stat-value"><%= totalTopics %></span>
+      <span class="stat-label">тем</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value"><%= pinnedTopics.length %></span>
+      <span class="stat-label">закреплено</span>
+    </div>
+  </div>
+  
+  <!-- Закреплённые темы -->
+  <% if (pinnedTopics && pinnedTopics.length > 0) { %>
+    <div class="pinned-section">
+      <h2 class="section-title pinned-title">
+        <i class="fas fa-thumbtack"></i>
+        Закреплённые темы
+      </h2>
+      
+      <div class="topics-list">
+        <% pinnedTopics.forEach(topic => { %>
+          <div class="topic-card pinned">
+            <div class="topic-icon">
+              <i class="fas fa-thumbtack"></i>
+            </div>
+            
+            <div class="topic-content">
+              <h3 class="topic-title">
+                <a href="/forum/topic/<%= topic.id %>"><%= topic.title %></a>
+              </h3>
+              
+              <div class="topic-meta">
+                <div class="topic-author">
+                  <img src="/images/avatars/<%= topic.user.avatar %>" alt="<%= topic.user.name %>" class="mini-avatar">
+                  <a href="/profile/<%= topic.user.id %>" class="author-link"><%= topic.user.name %></a>
+                </div>
+                
+                <div class="topic-stats">
+                  <span title="Просмотры">
+                    <i class="fas fa-eye"></i> <%= topic.views %>
+                  </span>
+                  <span title="Ответы">
+                    <i class="fas fa-reply"></i> <%= topic.replies_count %>
+                  </span>
+                </div>
+                
+                <div class="topic-last-reply">
+                  <i class="fas fa-clock"></i>
+                  <%= new Date(topic.last_reply_at).toLocaleString('ru-RU', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  }) %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  <% } %>
+  
+  <!-- Обычные темы -->
+  <div class="topics-section">
+    <h2 class="section-title">
+      <i class="fas fa-comments"></i>
+      Темы
+    </h2>
+    
+    <% if (topics && topics.length > 0) { %>
+      <div class="topics-list">
+        <% topics.forEach(topic => { %>
+          <div class="topic-card">
+            <div class="topic-icon">
+              <i class="fas fa-comment"></i>
+            </div>
+            
+            <div class="topic-content">
+              <h3 class="topic-title">
+                <a href="/forum/topic/<%= topic.id %>"><%= topic.title %></a>
+              </h3>
+              
+              <div class="topic-meta">
+                <div class="topic-author">
+                  <img src="/images/avatars/<%= topic.user.avatar %>" alt="<%= topic.user.name %>" class="mini-avatar">
+                  <a href="/profile/<%= topic.user.id %>" class="author-link"><%= topic.user.name %></a>
+                </div>
+                
+                <div class="topic-stats">
+                  <span title="Просмотры">
+                    <i class="fas fa-eye"></i> <%= topic.views %>
+                  </span>
+                  <span title="Ответы">
+                    <i class="fas fa-reply"></i> <%= topic.replies_count %>
+                  </span>
+                </div>
+                
+                <div class="topic-last-reply">
+                  <i class="fas fa-clock"></i>
+                  <%= new Date(topic.last_reply_at).toLocaleString('ru-RU', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  }) %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+      
+      <!-- Пагинация -->
+      <% if (totalPages > 1) { %>
+        <div class="pagination">
+          <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %>" class="page-link">
+              <i class="fas fa-chevron-left"></i>
+            </a>
+          <% } %>
+          
+          <% for(let i = 1; i <= totalPages; i++) { %>
+            <% if (i === currentPage) { %>
+              <span class="page-link active"><%= i %></span>
+            <% } else { %>
+              <a href="?page=<%= i %>" class="page-link"><%= i %></a>
+            <% } %>
+          <% } %>
+          
+          <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %>" class="page-link">
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          <% } %>
+        </div>
+      <% } %>
+      
+    <% } else { %>
+      <div class="empty-state">
+        <i class="fas fa-comments fa-4x"></i>
+        <h3>В этой категории пока нет тем</h3>
+        <% if (user) { %>
+          <p>Будьте первым, кто создаст обсуждение!</p>
+          <a href="/forum/new?category=<%= category.id %>" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Создать тему
+          </a>
+        <% } else { %>
+          <p><a href="/auth/login" class="login-link">Войдите</a>, чтобы создать тему</p>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<style>
+  /* ===== ОСНОВНЫЕ СТИЛИ ===== */
+  .forum-category {
+    background: linear-gradient(145deg, rgba(30, 30, 40, 0.9), rgba(20, 20, 30, 0.95));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 2rem;
+    margin: 2rem 0;
+    color: #fff;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* ===== ХЛЕБНЫЕ КРОШКИ ===== */
+  .breadcrumbs {
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0.75rem 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 50px;
+    display: inline-block;
+  }
+  
+  .breadcrumbs a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s;
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+  }
+  
+  .breadcrumbs a:hover {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.1);
+  }
+  
+  .breadcrumbs i {
+    margin: 0 0.5rem;
+    font-size: 0.7rem;
+    color: #fbbf24;
+  }
+  
+  .breadcrumbs span {
+    color: #fbbf24;
+    font-weight: 500;
+  }
+  
+  /* ===== ЗАГОЛОВОК КАТЕГОРИИ ===== */
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid rgba(251, 191, 36, 0.3);
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  
+  .category-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .category-icon-large {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #000;
+    box-shadow: 0 10px 20px rgba(251, 191, 36, 0.3);
+  }
+  
+  .category-name {
+    font-size: 2.2rem;
+    margin: 0 0 0.5rem;
+    background: linear-gradient(135deg, #fff, #e0e0e0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .category-description {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    max-width: 600px;
+    line-height: 1.6;
+  }
+  
+  .category-actions {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  /* ===== СТАТИСТИКА КАТЕГОРИИ ===== */
+  .category-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fbbf24;
+  }
+  
+  .stat-label {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  /* ===== ЗАГОЛОВКИ СЕКЦИЙ ===== */
+  .section-title {
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #fbbf24;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(251, 191, 36, 0.2);
+  }
+  
+  .section-title i {
+    font-size: 1.2rem;
+  }
+  
+  .pinned-title {
+    color: #f59e0b;
+  }
+  
+  /* ===== СПИСОК ТЕМ ===== */
+  .topics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .topic-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    transition: all 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .topic-card:hover {
+    background: rgba(0, 0, 0, 0.3);
+    transform: translateX(5px);
+    border-color: rgba(251, 191, 36, 0.3);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .topic-card.pinned {
+    background: rgba(251, 191, 36, 0.1);
+    border-left: 4px solid #fbbf24;
+  }
+  
+  .topic-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(251, 191, 36, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fbbf24;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  
+  .topic-content {
+    flex: 1;
+    min-width: 0; /* Важно для правильного переноса текста */
+  }
+  
+  .topic-title {
+    margin: 0 0 0.75rem;
+    font-size: 1.2rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .topic-title a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  .topic-title a:hover {
+    color: #fbbf24;
+  }
+  
+  .topic-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    flex-wrap: wrap;
+  }
+  
+  .topic-author {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .mini-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fbbf24;
+  }
+  
+  .author-link {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  .author-link:hover {
+    color: #fbbf24;
+  }
+  
+  .topic-stats {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .topic-stats span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  
+  .topic-stats i {
+    color: #fbbf24;
+  }
+  
+  .topic-last-reply {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .topic-last-reply i {
+    color: #fbbf24;
+  }
+  
+  /* ===== ПАГИНАЦИЯ ===== */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 45px;
+    height: 45px;
+    padding: 0 0.5rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 500;
+  }
+  
+  .page-link:hover {
+    background: #fbbf24;
+    color: #000;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(251, 191, 36, 0.4);
+  }
+  
+  .page-link.active {
+    background: #fbbf24;
+    color: #000;
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* ===== ПУСТОЕ СОСТОЯНИЕ ===== */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+  }
+  
+  .empty-state i {
+    opacity: 0.3;
+    margin-bottom: 1rem;
+    color: #fbbf24;
+  }
+  
+  .empty-state h3 {
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .empty-state p {
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 1.5rem;
+  }
+  
+  .login-link {
+    color: #fbbf24;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  
+  .login-link:hover {
+    text-decoration: underline;
+  }
+  
+  /* ===== АДАПТИВНОСТЬ ===== */
+  @media (max-width: 992px) {
+    .category-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .category-actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .forum-category {
+      padding: 1.5rem;
+    }
+    
+    .category-title-wrapper {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .category-name {
+      font-size: 1.8rem;
+    }
+    
+    .topic-card {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .topic-meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    
+    .topic-stats {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .category-stats {
+      justify-content: space-around;
+    }
+    
+    .pagination {
+      gap: 0.25rem;
+    }
+    
+    .page-link {
+      min-width: 40px;
+      height: 40px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .category-actions {
+      flex-direction: column;
+    }
+    
+    .category-actions .btn {
+      width: 100%;
+    }
+    
+    .topic-meta {
+      font-size: 0.85rem;
+    }
+    
+    .topic-stats {
+      flex-wrap: wrap;
+    }
+  }
+</style>
