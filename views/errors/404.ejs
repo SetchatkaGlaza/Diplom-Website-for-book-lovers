@@ -1,0 +1,284 @@
+<div class="error-container">
+  <div class="error-content">
+    <div class="error-number">404</div>
+    
+    <h1 class="error-title">
+      <i class="fas fa-compass"></i>
+      Страница не найдена
+    </h1>
+    
+    <div class="error-message">
+      <p>Кажется, вы забрели не туда... Эта страница не существует или была удалена.</p>
+      <p>Но не расстраивайтесь! У нас ещё много интересных книг и обсуждений!</p>
+    </div>
+    
+    <div class="error-actions">
+      <a href="/" class="btn btn-primary">
+        <i class="fas fa-home"></i>
+        На главную
+      </a>
+      
+      <a href="/books" class="btn btn-outline">
+        <i class="fas fa-book"></i>
+        В каталог книг
+      </a>
+      
+      <a href="/forum" class="btn btn-outline">
+        <i class="fas fa-comments"></i>
+        На форум
+      </a>
+    </div>
+    
+    <div class="error-help">
+      <p>Или попробуйте найти то, что искали:</p>
+      <form action="/books" method="GET" class="error-search">
+        <input type="text" name="search" placeholder="Поиск книг..." autocomplete="off">
+        <button type="submit">
+          <i class="fas fa-search"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+  
+  <div class="error-illustration">
+    <div class="bookshelf">
+      <div class="book"></div>
+      <div class="book"></div>
+      <div class="book"></div>
+      <div class="book"></div>
+      <div class="book"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .error-container {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px;
+    margin: 2rem 0;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .error-content {
+    max-width: 600px;
+    text-align: center;
+    z-index: 2;
+    position: relative;
+  }
+  
+  .error-number {
+    font-size: 12rem;
+    font-weight: 900;
+    line-height: 1;
+    background: linear-gradient(135deg, #fbbf24, #ef4444);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+    text-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  
+  .error-title {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .error-title i {
+    color: #fbbf24;
+  }
+  
+  .error-message {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2rem;
+    line-height: 1.8;
+  }
+  
+  .error-message p {
+    margin: 0.5rem 0;
+  }
+  
+  .error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
+  }
+  
+  .btn {
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #000;
+    box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(251, 191, 36, 0.5);
+  }
+  
+  .btn-outline {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .btn-outline:hover {
+    background: rgba(251, 191, 36, 0.1);
+    border-color: #fbbf24;
+    transform: translateY(-3px);
+  }
+  
+  .error-help {
+    text-align: center;
+  }
+  
+  .error-help p {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1rem;
+  }
+  
+  .error-search {
+    display: flex;
+    max-width: 400px;
+    margin: 0 auto;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  
+  .error-search:focus-within {
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+  }
+  
+  .error-search input {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 1rem;
+  }
+  
+  .error-search input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .error-search input:focus {
+    outline: none;
+  }
+  
+  .error-search button {
+    padding: 0 1.5rem;
+    border: none;
+    background: #fbbf24;
+    color: #000;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1.2rem;
+  }
+  
+  .error-search button:hover {
+    background: #f59e0b;
+  }
+  
+  .error-illustration {
+    position: absolute;
+    bottom: -50px;
+    right: -50px;
+    opacity: 0.1;
+    z-index: 1;
+  }
+  
+  .bookshelf {
+    display: flex;
+    gap: 20px;
+    transform: rotate(10deg);
+  }
+  
+  .book {
+    width: 60px;
+    height: 200px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    border-radius: 4px 10px 10px 4px;
+    transform: skewY(-10deg);
+    box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  .book:nth-child(2) {
+    height: 180px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+  }
+  
+  .book:nth-child(3) {
+    height: 220px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+  }
+  
+  .book:nth-child(4) {
+    height: 190px;
+    background: linear-gradient(135deg, #10b981, #059669);
+  }
+  
+  .book:nth-child(5) {
+    height: 210px;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  }
+  
+  @media (max-width: 768px) {
+    .error-number {
+      font-size: 8rem;
+    }
+    
+    .error-title {
+      font-size: 1.8rem;
+    }
+    
+    .error-message {
+      font-size: 1rem;
+    }
+    
+    .error-actions {
+      flex-direction: column;
+    }
+    
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

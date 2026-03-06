@@ -21,6 +21,7 @@ const pageRoutes = require('./routes/pages');
 const notificationRoutes = require('./routes/notifications');
 const forumRoutes = require('./routes/forum');
 const adminForumRoutes = require('./routes/adminForum');
+const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -70,8 +71,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// Подключаем маршруты
+// Глобальные данные (статистика для подвала и т.д.)
 app.use(globalData);
+
+// ===== ПОДКЛЮЧАЕМ ВСЕ МАРШРУТЫ =====
 app.use('/auth', authRoutes);
 app.use('/auth/login', authLimiter);
 app.use('/auth/register', authLimiter);
@@ -83,9 +86,9 @@ app.use('/reviews', reviewRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/forum', forumRoutes);
 app.use('/admin/forum', adminForumRoutes);
-app.use('/', pageRoutes);
+app.use('/', pageRoutes); // Статические страницы (about, faq, rules, contact)
 
-// Главная страница
+// ===== ГЛАВНАЯ СТРАНИЦА =====
 app.get('/', async (req, res) => {
   try {
     // Получаем реальную статистику из базы данных
@@ -115,6 +118,10 @@ app.get('/', async (req, res) => {
     });
   }
 });
+
+// ===== ОБРАБОТКА ОШИБОК (ДОЛЖНА БЫТЬ В САМОМ КОНЦЕ) =====
+app.use(errorHandler.notFound);
+app.use(errorHandler.errorHandler);
 
 // Запуск сервера с синхронизацией БД
 const startServer = async () => {
