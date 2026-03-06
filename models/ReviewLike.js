@@ -13,7 +13,8 @@ const ReviewLike = sequelize.define('ReviewLike', {
     references: {
       model: 'Users',
       key: 'id'
-    }
+    },
+    onDelete: 'CASCADE'
   },
   review_id: {
     type: DataTypes.INTEGER,
@@ -21,7 +22,8 @@ const ReviewLike = sequelize.define('ReviewLike', {
     references: {
       model: 'Reviews',
       key: 'id'
-    }
+    },
+    onDelete: 'CASCADE'
   },
   type: {
     type: DataTypes.ENUM('like', 'dislike'),
@@ -29,9 +31,10 @@ const ReviewLike = sequelize.define('ReviewLike', {
   }
 }, {
   timestamps: true,
-  // Составной уникальный индекс: один пользователь - один лайк/дизлайк на рецензию
+  tableName: 'ReviewLikes',
   indexes: [
     {
+      name: 'review_likes_unique_user_review',
       unique: true,
       fields: ['user_id', 'review_id']
     }
