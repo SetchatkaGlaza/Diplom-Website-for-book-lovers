@@ -4,6 +4,7 @@
     <div class="header-actions">
       <a href="/admin/forum/moderation" class="btn btn-primary"><i class="fas fa-shield-alt"></i> Модерация</a>
       <a href="/admin/forum/topics" class="btn btn-outline"><i class="fas fa-list-ul"></i> Все топики</a>
+      <a href="/admin/forum/appeals" class="btn btn-outline"><i class="fas fa-inbox"></i> Обращения</a>
       <a href="/admin/forum/categories" class="btn btn-outline"><i class="fas fa-folder"></i> Категории</a>
     </div>
   </header>
@@ -43,6 +44,7 @@
         <li><span>Закреплённые темы</span><strong><%= stats.pinnedTopics %></strong></li>
         <li><span>Закрытые темы</span><strong><%= stats.lockedTopics %></strong></li>
         <li><span>Всего на модерации</span><strong><%= stats.pendingTopics + stats.pendingPosts %></strong></li>
+        <li><span>Новых обращений</span><strong><%= stats.appealsPending %></strong></li>
       </ul>
     </div>
 
@@ -52,6 +54,7 @@
         <a class="quick-action" href="/admin/forum/moderation?tab=topics"><i class="fas fa-check-double"></i> Проверить темы</a>
         <a class="quick-action" href="/admin/forum/moderation?tab=posts"><i class="fas fa-comment-medical"></i> Проверить сообщения</a>
         <a class="quick-action" href="/admin/forum/topics"><i class="fas fa-thumbtack"></i> Управлять топиками</a>
+        <a class="quick-action" href="/admin/forum/appeals?status=appealed"><i class="fas fa-envelope-open-text"></i> Разобрать обращения</a>
         <a class="quick-action" href="/admin/forum/categories"><i class="fas fa-layer-group"></i> Настроить категории</a>
         <a class="quick-action" href="/forum" target="_blank"><i class="fas fa-external-link-alt"></i> Открыть форум</a>
       </div>

@@ -1,0 +1,22 @@
+<div class="forum-page">
+  <div class="container">
+    <div class="auth-form-container" style="max-width:900px; margin: 2rem auto;">
+      <h1><i class="fas fa-envelope-open-text"></i> Обращение по удалённому сообщению</h1>
+      <p><strong>Топик:</strong> <a href="/forum/topic/<%= moderationCase.topic_id %>"><%= moderationCase.topic ? moderationCase.topic.title : 'Перейти к топику' %></a></p>
+      <p><strong>Причина удаления от модератора:</strong> <%= moderationCase.delete_reason %></p>
+
+      <div class="form-group">
+        <label>Удалённый текст:</label>
+        <div class="content-preview"><%= moderationCase.content %></div>
+      </div>
+
+      <form action="/forum/post-moderation/<%= moderationCase.id %>/appeal" method="POST">
+        <div class="form-group">
+          <label for="explanation">Ваше объяснение для администратора</label>
+          <textarea id="explanation" name="explanation" rows="6" required placeholder="Опишите контекст и почему сообщение стоит восстановить"><%= moderationCase.user_explanation || '' %></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Отправить обращение</button>
+      </form>
+    </div>
+  </div>
+</div>

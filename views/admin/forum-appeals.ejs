@@ -1,0 +1,54 @@
+<div class="forum-admin-page">
+  <header class="admin-header">
+    <h1><i class="fas fa-inbox"></i> Форум: обращения по удалениям</h1>
+    <div class="header-actions">
+      <a href="/admin/forum" class="btn btn-outline"><i class="fas fa-chart-line"></i> Обзор</a>
+      <a href="/admin/forum/topics" class="btn btn-outline"><i class="fas fa-list-ul"></i> Все топики</a>
+    </div>
+  </header>
+
+  <section class="admin-card moderation-toolbar">
+    <div class="tab-switcher">
+      <a class="tab-pill <%= currentStatus === 'appealed' ? 'active' : '' %>" href="/admin/forum/appeals?status=appealed">Новые обращения</a>
+      <a class="tab-pill <%= currentStatus === 'deleted' ? 'active' : '' %>" href="/admin/forum/appeals?status=deleted">Без обращения</a>
+      <a class="tab-pill <%= currentStatus === 'restored' ? 'active' : '' %>" href="/admin/forum/appeals?status=restored">Восстановленные</a>
+      <a class="tab-pill <%= currentStatus === 'kept' ? 'active' : '' %>" href="/admin/forum/appeals?status=kept">Оставлены удалёнными</a>
+    </div>
+  </section>
+
+  <section class="admin-card">
+    <% if (cases.length) { %>
+      <div class="moderation-list">
+        <% cases.forEach(item => { %>
+          <article class="moderation-item">
+            <h3>
+              <a href="/forum/topic/<%= item.topic_id %>" target="_blank"><%= item.topic ? item.topic.title : 'Топик удалён' %></a>
+            </h3>
+            <p class="item-meta">
+              <span><strong>Автор:</strong> <%= item.user ? item.user.name : '—' %></span>
+              <span><strong>Удалил:</strong> <%= item.moderator ? item.moderator.name : '—' %></span>
+              <span><strong>Дата:</strong> <%= new Date(item.createdAt).toLocaleString('ru-RU') %></span>
+            </p>
+            <div class="content-preview"><strong>Причина удаления:</strong> <%= item.delete_reason %></div>
+            <div class="content-preview"><strong>Удалённый текст:</strong><br><%= item.content %></div>
+            <% if (item.user_explanation) { %>
+              <div class="content-preview"><strong>Объяснение автора:</strong><br><%= item.user_explanation %></div>
+            <% } %>
+
+            <% if (item.status === 'appealed') { %>
+              <form action="/admin/forum/appeals/<%= item.id %>/resolve" method="POST" class="reject-form-inline">
+                <input type="text" name="comment" placeholder="Комментарий админа (необязательно)">
+                <button class="btn btn-success" type="submit" name="action" value="restore"><i class="fas fa-undo"></i> Восстановить</button>
+                <button class="btn btn-danger" type="submit" name="action" value="keep"><i class="fas fa-ban"></i> Оставить удалённым</button>
+              </form>
+            <% } else if (item.resolution_comment) { %>
+              <div class="content-preview"><strong>Решение:</strong> <%= item.resolution_comment %></div>
+            <% } %>
+          </article>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="muted">По выбранному статусу обращений нет.</p>
+    <% } %>
+  </section>
+</div>

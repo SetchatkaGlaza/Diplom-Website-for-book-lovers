@@ -5,6 +5,7 @@ const {
   ForumPost, 
   ForumPostLike, 
   ForumSubscription,
+  ForumPostModeration,
   User 
 } = require('../models');
 const { Op } = require('sequelize');
@@ -702,6 +703,78 @@ exports.search = async (req, res) => {
   } catch (error) {
     console.error('Ошибка при поиске:', error);
     req.flash('error', 'Произошла ошибка при поиске');
+    res.redirect('/forum');
+  }
+};
+
+exports.getPostAppealForm = async (req, res) => {
+  try {
+    const caseId = req.params.id;
+    const userId = req.session.user.id;
+
+    const moderationCase = await ForumPostModeration.findOne({
+      where: { id: caseId, user_id: userId },
+      include: [{ model: ForumTopic, as: 'topic', attributes: ['id', 'title'] }]
+    });
+
+    if (!moderationCase) {
+      req.flash('error', 'Обращение не найдено');
+      return res.redirect('/forum');
+    }
+
+    if (moderationCase.status !== 'deleted' && moderationCase.status !== 'appealed') {
+      req.flash('error', 'По этому сообщению обращение уже обработано');
+      return res.redirect(`/forum/topic/${moderationCase.topic_id}`);
+    }
+
+    res.render('forum/post-appeal', {
+      title: 'Обращение по удалённому сообщению',
+      moderationCase,
+      user: req.session.user,
+      layout: 'layouts/main'
+    });
+  } catch (error) {
+    console.error('Ошибка при загрузке формы обращения:', error);
+    req.flash('error', 'Не удалось открыть форму обращения');
+    res.redirect('/forum');
+  }
+};
+
+exports.postPostAppealForm = async (req, res) => {
+  try {
+    const caseId = req.params.id;
+    const userId = req.session.user.id;
+    const explanation = (req.body.explanation || '').trim();
+
+    if (explanation.length < 10) {
+      req.flash('error', 'Опишите ситуацию подробнее (минимум 10 символов)');
+      return res.redirect(`/forum/post-moderation/${caseId}/appeal`);
+    }
+
+    const moderationCase = await ForumPostModeration.findOne({
+      where: { id: caseId, user_id: userId }
+    });
+
+    if (!moderationCase) {
+      req.flash('error', 'Обращение не найдено');
+      return res.redirect('/forum');
+    }
+
+    if (moderationCase.status !== 'deleted' && moderationCase.status !== 'appealed') {
+      req.flash('error', 'По этому сообщению обращение уже обработано');
+      return res.redirect(`/forum/topic/${moderationCase.topic_id}`);
+    }
+
+    await moderationCase.update({
+      user_explanation: explanation,
+      status: 'appealed'
+    });
+
+    req.flash('success', 'Обращение отправлено администратору');
+    res.redirect(`/forum/topic/${moderationCase.topic_id}`);
+  } catch (error) {
+    console.error('Ошибка при отправке обращения:', error);
+    req.flash('error', 'Не удалось отправить обращение');
     res.redirect('/forum');
   }
 };
