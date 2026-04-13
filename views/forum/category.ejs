@@ -32,18 +32,6 @@
     </div>
   </div>
   
-  <!-- Статистика категории -->
-  <div class="category-stats">
-    <div class="stat-item">
-      <span class="stat-value"><%= totalTopics %></span>
-      <span class="stat-label">тем</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-value"><%= pinnedTopics.length %></span>
-      <span class="stat-label">закреплено</span>
-    </div>
-  </div>
-  
   <!-- Закреплённые темы -->
   <% if (pinnedTopics && pinnedTopics.length > 0) { %>
     <div class="pinned-section">
@@ -287,34 +275,6 @@
   .category-actions {
     display: flex;
     gap: 1rem;
-  }
-  
-  /* ===== СТАТИСТИКА КАТЕГОРИИ ===== */
-  .category-stats {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 2rem;
-    padding: 1rem 1.5rem;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 16px;
-    flex-wrap: wrap;
-  }
-  
-  .stat-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .stat-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #fbbf24;
-  }
-  
-  .stat-label {
-    font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.7);
   }
   
   /* ===== ЗАГОЛОВКИ СЕКЦИЙ ===== */
@@ -582,10 +542,6 @@
     .topic-stats {
       width: 100%;
       justify-content: space-between;
-    }
-    
-    .category-stats {
-      justify-content: space-around;
     }
     
     .pagination {

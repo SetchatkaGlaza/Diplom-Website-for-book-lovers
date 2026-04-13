@@ -117,60 +117,38 @@ exports.getModerationQueue = async (req, res) => {
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     const limit = 15;
     const offset = (page - 1) * limit;
-    const tab = req.query.tab === 'posts' ? 'posts' : 'topics';
     const search = (req.query.q || '').trim();
 
     const topicWhere = { is_moderated: false };
-    const postWhere = { is_moderated: false };
 
     if (search) {
       topicWhere[Op.or] = [
         { title: { [Op.iLike]: `%${search}%` } },
         { content: { [Op.iLike]: `%${search}%` } }
       ];
-      postWhere.content = { [Op.iLike]: `%${search}%` };
     }
 
-    const [{ count: topicsCount, rows: pendingTopics }, { count: postsCount, rows: pendingPosts }] = await Promise.all([
-      ForumTopic.findAndCountAll({
-        where: topicWhere,
-        include: [
-          { model: User, as: 'user', attributes: ['id', 'name', 'email', 'avatar'] },
-          { model: ForumCategory, as: 'category', attributes: ['id', 'name'] }
-        ],
-        order: [['createdAt', 'DESC']],
-        limit: tab === 'topics' ? limit : 5,
-        offset: tab === 'topics' ? offset : 0
-      }),
-      ForumPost.findAndCountAll({
-        where: postWhere,
-        include: [
-          { model: User, as: 'user', attributes: ['id', 'name', 'avatar'] },
-          {
-            model: ForumTopic,
-            as: 'topic',
-            attributes: ['id', 'title', 'category_id'],
-            include: [{ model: ForumCategory, as: 'category', attributes: ['id', 'name'] }]
-          }
-        ],
-        order: [['createdAt', 'DESC']],
-        limit: tab === 'posts' ? limit : 10,
-        offset: tab === 'posts' ? offset : 0
-      })
-    ]);
+    const { count: topicsCount, rows: pendingTopics } = await ForumTopic.findAndCountAll({
+      where: topicWhere,
+      include: [
+        { model: User, as: 'user', attributes: ['id', 'name', 'email', 'avatar'] },
+        { model: ForumCategory, as: 'category', attributes: ['id', 'name'] }
+      ],
+      order: [['createdAt', 'DESC']],
+      limit,
+      offset
+    });
 
     res.render('admin/forum-moderation', {
       title: 'Форум — модерация',
       pendingTopics,
-      pendingPosts,
-      filters: { tab, search },
+      filters: { search },
       stats: {
         topicsPending: topicsCount,
-        postsPending: postsCount,
-        totalPending: topicsCount + postsCount
+        totalPending: topicsCount
       },
       currentPage: page,
-      totalPages: Math.max(1, Math.ceil((tab === 'posts' ? postsCount : topicsCount) / limit)),
+      totalPages: Math.max(1, Math.ceil(topicsCount / limit)),
       user: req.session.user,
       layout: 'layouts/admin',
       path: '/admin/forum/moderation'
@@ -605,8 +583,39 @@ exports.toggleTopicPin = async (req, res) => {
       return res.redirect('/admin/forum/moderation');
     }
 
-    await topic.update({ is_pinned: !topic.is_pinned });
-    req.flash('success', topic.is_pinned ? 'Тема закреплена' : 'Тема откреплена');
+    const willPin = !topic.is_pinned;
+
+    if (willPin) {
+      const [pinnedCount, unpinnedCount] = await Promise.all([
+        ForumTopic.count({
+          where: {
+            category_id: topic.category_id,
+            is_moderated: true,
+            is_pinned: true
+          }
+        }),
+        ForumTopic.count({
+          where: {
+            category_id: topic.category_id,
+            is_moderated: true,
+            is_pinned: false
+          }
+        })
+      ]);
+
+      if (pinnedCount >= 3) {
+        req.flash('error', 'В одной категории можно закрепить максимум 3 темы');
+        return res.redirect(req.get('referer') || '/admin/forum/topics');
+      }
+
+      if (unpinnedCount <= 1) {
+        req.flash('error', 'В категории должна оставаться минимум 1 обычная тема');
+        return res.redirect(req.get('referer') || '/admin/forum/topics');
+      }
+    }
+
+    await topic.update({ is_pinned: willPin });
+    req.flash('success', willPin ? 'Тема закреплена' : 'Тема откреплена');
     const referer = req.get('referer');
     const fallback = '/admin/forum/topics';
     res.redirect(referer && referer.includes('/admin/forum') ? referer : fallback);

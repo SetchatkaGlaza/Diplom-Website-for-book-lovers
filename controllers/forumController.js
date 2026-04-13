@@ -456,6 +456,15 @@ exports.likePost = async (req, res) => {
     if (!post) {
       return res.status(404).json({ error: 'Сообщение не найдено' });
     }
+
+    const topic = await ForumTopic.findByPk(post.topic_id);
+    if (!topic) {
+      return res.status(404).json({ error: 'Топик не найден' });
+    }
+
+    if (topic.is_locked) {
+      return res.status(403).json({ error: 'Тема закрыта. Реакции отключены.' });
+    }
     
     // Проверяем, ставил ли пользователь уже лайк
     const existingLike = await ForumPostLike.findOne({
@@ -492,7 +501,6 @@ exports.likePost = async (req, res) => {
       
       // Уведомляем автора поста о лайке (только если это не сам автор)
       if (post.user_id !== userId) {
-        const topic = await ForumTopic.findByPk(post.topic_id);
         const liker = await User.findByPk(userId, { attributes: ['name'] });
         
         await notificationService.forumPostLiked(

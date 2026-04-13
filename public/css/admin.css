@@ -1533,3 +1533,10 @@
   background: rgba(17, 24, 39, 0.95);
   padding: 1.25rem;
 }
+
+.forum-admin-modern .admin-card,
+.forum-admin-modern .admin-header {
+  background: linear-gradient(160deg, rgba(26, 35, 58, 0.88), rgba(17, 24, 39, 0.92));
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 16px 30px rgba(2, 6, 23, 0.25);
+}

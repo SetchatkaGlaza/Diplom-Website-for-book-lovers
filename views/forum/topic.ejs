@@ -38,11 +38,13 @@
         </div>
       </div>
 
-      <% if (user) { %>
+      <% if (user && !topic.is_locked) { %>
         <button class="subscribe-btn <%= isSubscribed ? 'subscribed' : '' %>" id="subscribeBtn" data-topic-id="<%= topic.id %>">
           <i class="fas <%= isSubscribed ? 'fa-bell' : 'fa-bell-slash' %>"></i>
           <span><%= isSubscribed ? 'Вы подписаны' : 'Подписаться' %></span>
         </button>
+      <% } else if (topic.is_locked) { %>
+        <span class="post-badge author-badge"><i class="fas fa-lock"></i> Тема закрыта администратором</span>
       <% } %>
     </div>
   </div>
@@ -92,12 +94,12 @@
           <div class="post-footer">
             <button class="action-btn like-btn <%= userLikes.includes(post.id) ? 'liked' : '' %>"
                     data-post-id="<%= post.id %>"
-                    <%= !user ? 'disabled' : '' %>>
+                    <%= (!user || topic.is_locked) ? 'disabled' : '' %>>
               <i class="fas fa-heart"></i>
               <span class="likes-count" data-likes-full="<%= post.likes_count %>"><%= post.likes_count %></span>
             </button>
 
-            <% if (user) { %>
+            <% if (user && !topic.is_locked) { %>
               <button class="action-btn quote-btn" data-post-id="<%= post.id %>" data-author="<%= post.user.name %>">
                 <i class="fas fa-quote-right"></i>
                 <span>Цитировать</span>
@@ -135,7 +137,7 @@
   <% } %>
 
   <!-- Форма ответа -->
-  <% if (user) { %>
+  <% if (user && !topic.is_locked) { %>
     <div class="reply-section" id="reply-section">
       <h3 class="reply-title">
         <i class="fas fa-reply"></i>
@@ -169,6 +171,11 @@
           </button>
         </div>
       </form>
+    </div>
+  <% } else if (topic.is_locked) { %>
+    <div class="login-prompt">
+      <i class="fas fa-lock"></i>
+      <p>Тема закрыта: новые ответы и реакции отключены.</p>
     </div>
   <% } else { %>
     <div class="login-prompt">

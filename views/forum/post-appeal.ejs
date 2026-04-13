@@ -1,6 +1,6 @@
 <div class="forum-page">
   <div class="container">
-    <div class="auth-form-container" style="max-width:900px; margin: 2rem auto;">
+    <div class="auth-form-container appeal-card" style="max-width:900px; margin: 2rem auto;">
       <h1><i class="fas fa-envelope-open-text"></i> Обращение по удалённому сообщению</h1>
       <p><strong>Топик:</strong> <a href="/forum/topic/<%= moderationCase.topic_id %>"><%= moderationCase.topic ? moderationCase.topic.title : 'Перейти к топику' %></a></p>
       <p><strong>Причина удаления от модератора:</strong> <%= moderationCase.delete_reason %></p>
@@ -20,3 +20,24 @@
     </div>
   </div>
 </div>
+
+<style>
+  .appeal-card {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 18px;
+    background: linear-gradient(145deg, rgba(35,35,50,0.9), rgba(20,20,35,0.95));
+    box-shadow: 0 20px 35px rgba(0, 0, 0, 0.35);
+  }
+
+  .appeal-card h1 {
+    margin-bottom: 1rem;
+  }
+
+  .appeal-card .content-preview {
+    background: rgba(0,0,0,.25);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px;
+    padding: 1rem;
+    white-space: pre-wrap;
+  }
+</style>
