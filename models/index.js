@@ -15,6 +15,7 @@ const ForumTopic = require('./ForumTopic');
 const ForumPost = require('./ForumPost');
 const ForumPostLike = require('./ForumPostLike');
 const ForumSubscription = require('./ForumSubscription');
+const ForumPostModeration = require('./ForumPostModeration');
 
 // Устанавливаем связи
 require('./associations');
@@ -35,5 +36,6 @@ module.exports = {
   ForumTopic,
   ForumPost,
   ForumPostLike,
-  ForumSubscription
+  ForumSubscription,
+  ForumPostModeration
 };

@@ -12,6 +12,7 @@ const ForumTopic = require('./ForumTopic');
 const ForumPost = require('./ForumPost');
 const ForumPostLike = require('./ForumPostLike');
 const ForumSubscription = require('./ForumSubscription');
+const ForumPostModeration = require('./ForumPostModeration');
 
 /**
  * Этот файл устанавливает связи между моделями
@@ -126,6 +127,38 @@ User.hasMany(ForumSubscription, {
 ForumSubscription.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user'
+});
+
+ForumTopic.hasMany(ForumPostModeration, {
+  foreignKey: 'topic_id',
+  as: 'moderationCases',
+  onDelete: 'CASCADE'
+});
+
+ForumPostModeration.belongsTo(ForumTopic, {
+  foreignKey: 'topic_id',
+  as: 'topic'
+});
+
+User.hasMany(ForumPostModeration, {
+  foreignKey: 'user_id',
+  as: 'forumPostModerations',
+  onDelete: 'CASCADE'
+});
+
+ForumPostModeration.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+ForumPostModeration.belongsTo(User, {
+  foreignKey: 'moderator_id',
+  as: 'moderator'
+});
+
+ForumPostModeration.belongsTo(User, {
+  foreignKey: 'reviewed_by',
+  as: 'reviewer'
 });
 
 Notification.belongsTo(User, {
@@ -270,5 +303,6 @@ module.exports = {
   ForumTopic,
   ForumPost,
   ForumPostLike,
-  ForumSubscription
+  ForumSubscription,
+  ForumPostModeration
 };

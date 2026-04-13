@@ -1,4 +1,4 @@
-const { ForumCategory, ForumTopic, ForumPost, User } = require('../models');
+const { ForumCategory, ForumTopic, ForumPost, ForumPostModeration, User } = require('../models');
 const { Op } = require('sequelize');
 const notificationService = require('../services/notificationService');
 
@@ -50,7 +50,8 @@ exports.getDashboard = async (req, res) => {
       lockedTopics,
       pinnedTopics,
       recentTopics,
-      recentPosts
+      recentPosts,
+      appealsPending
     ] = await Promise.all([
       ForumCategory.count(),
       ForumCategory.count({ where: { is_active: true } }),
@@ -80,7 +81,8 @@ exports.getDashboard = async (req, res) => {
         ],
         order: [['createdAt', 'DESC']],
         limit: 5
-      })
+      }),
+      ForumPostModeration.count({ where: { status: 'appealed' } })
     ]);
 
     res.render('admin/forum-dashboard', {
@@ -93,6 +95,7 @@ exports.getDashboard = async (req, res) => {
         pendingTopics,
         totalPosts,
         pendingPosts,
+        appealsPending,
         lockedTopics,
         pinnedTopics
       },
@@ -388,7 +391,17 @@ exports.rejectPost = async (req, res) => {
       return res.redirect('/admin/forum/moderation?tab=posts');
     }
 
-    await notificationService.forumPostModerated(post.user_id, post.topic, post, false, reason);
+    const moderationCase = await ForumPostModeration.create({
+      original_post_id: post.id,
+      topic_id: post.topic_id,
+      user_id: post.user_id,
+      content: post.content,
+      delete_reason: reason,
+      moderator_id: req.session.user.id,
+      status: 'deleted'
+    });
+
+    await notificationService.forumPostModerated(post.user_id, post.topic, post, false, reason, moderationCase.id);
     await post.destroy();
     await refreshTopicReplyStats(post.topic_id);
 
@@ -429,7 +442,24 @@ exports.deleteTopicPost = async (req, res) => {
       return res.redirect(`/admin/forum/topic/${post.topic_id}/posts`);
     }
 
-    await notificationService.forumPostModerated(post.user_id, post.topic, post, false, `${reason}. Если не согласны — напишите через форму обратной связи.`);
+    const moderationCase = await ForumPostModeration.create({
+      original_post_id: post.id,
+      topic_id: post.topic_id,
+      user_id: post.user_id,
+      content: post.content,
+      delete_reason: reason,
+      moderator_id: req.session.user.id,
+      status: 'deleted'
+    });
+
+    await notificationService.forumPostModerated(
+      post.user_id,
+      post.topic,
+      post,
+      false,
+      `${reason}. Если не согласны — отправьте объяснение модератору.`,
+      moderationCase.id
+    );
     await post.destroy();
     await refreshTopicReplyStats(post.topic_id);
 
@@ -439,6 +469,107 @@ exports.deleteTopicPost = async (req, res) => {
     console.error('Ошибка при удалении сообщения в топике:', error);
     req.flash('error', 'Не удалось удалить сообщение');
     res.redirect('/admin/forum/topics');
+  }
+};
+
+exports.getAppeals = async (req, res) => {
+  try {
+    const status = req.query.status || 'appealed';
+    const where = ['deleted', 'appealed', 'restored', 'kept'].includes(status) ? { status } : {};
+
+    const cases = await ForumPostModeration.findAll({
+      where,
+      include: [
+        { model: User, as: 'user', attributes: ['id', 'name', 'email'] },
+        { model: User, as: 'moderator', attributes: ['id', 'name'] },
+        { model: User, as: 'reviewer', attributes: ['id', 'name'] },
+        { model: ForumTopic, as: 'topic', attributes: ['id', 'title'] }
+      ],
+      order: [['updatedAt', 'DESC']]
+    });
+
+    res.render('admin/forum-appeals', {
+      title: 'Форум — обращения по удалённым сообщениям',
+      cases,
+      currentStatus: status,
+      user: req.session.user,
+      layout: 'layouts/admin',
+      path: '/admin/forum/appeals'
+    });
+  } catch (error) {
+    console.error('Ошибка при загрузке обращений:', error);
+    req.flash('error', 'Не удалось загрузить обращения');
+    res.redirect('/admin/forum');
+  }
+};
+
+exports.resolveAppeal = async (req, res) => {
+  try {
+    const caseId = req.params.id;
+    const action = req.body.action;
+    const comment = (req.body.comment || '').trim();
+
+    const moderationCase = await ForumPostModeration.findByPk(caseId, {
+      include: [{ model: ForumTopic, as: 'topic' }]
+    });
+
+    if (!moderationCase) {
+      req.flash('error', 'Обращение не найдено');
+      return res.redirect('/admin/forum/appeals');
+    }
+
+    if (action !== 'restore' && action !== 'keep') {
+      req.flash('error', 'Неизвестное действие');
+      return res.redirect('/admin/forum/appeals');
+    }
+
+    if (action === 'restore') {
+      const restoredPost = await ForumPost.create({
+        topic_id: moderationCase.topic_id,
+        user_id: moderationCase.user_id,
+        content: moderationCase.content,
+        is_moderated: true
+      });
+
+      await refreshTopicReplyStats(moderationCase.topic_id);
+
+      await moderationCase.update({
+        status: 'restored',
+        reviewed_by: req.session.user.id,
+        reviewed_at: new Date(),
+        resolution_comment: comment || `Сообщение восстановлено (#${restoredPost.id})`
+      });
+
+      await notificationService.create(
+        moderationCase.user_id,
+        'forum_moderated',
+        '✅ Сообщение восстановлено',
+        `Ваше обращение рассмотрено. Сообщение в теме "${moderationCase.topic?.title || 'форум'}" восстановлено.`,
+        `/forum/topic/${moderationCase.topic_id}`
+      );
+    } else {
+      await moderationCase.update({
+        status: 'kept',
+        reviewed_by: req.session.user.id,
+        reviewed_at: new Date(),
+        resolution_comment: comment || 'Решение об удалении оставлено в силе'
+      });
+
+      await notificationService.create(
+        moderationCase.user_id,
+        'forum_moderated',
+        'ℹ️ Обращение рассмотрено',
+        `Ваше обращение рассмотрено. Решение модератора по сообщению оставлено без изменений.`,
+        `/forum/topic/${moderationCase.topic_id}`
+      );
+    }
+
+    req.flash('success', 'Обращение обработано');
+    res.redirect('/admin/forum/appeals?status=appealed');
+  } catch (error) {
+    console.error('Ошибка при обработке обращения:', error);
+    req.flash('error', 'Не удалось обработать обращение');
+    res.redirect('/admin/forum/appeals');
   }
 };
 

@@ -338,20 +338,26 @@ async forumTopicModerated(userId, topic, approved, reason = null) {
 /**
  * Уведомление о модерации сообщения
  */
-async forumPostModerated(userId, topic, post, approved, reason = null) {
+async forumPostModerated(userId, topic, post, approved, reason = null, moderationCaseId = null) {
   try {
     const title = approved ? '✅ Сообщение одобрено' : '❌ Сообщение отклонено';
     const message = approved 
       ? `Ваше сообщение в теме "${topic.title}" прошло модерацию.`
       : `Ваше сообщение в теме "${topic.title}" не прошло модерацию. ${reason ? 'Причина: ' + reason : ''}`;
     
+    const link = approved
+      ? `/forum/topic/${topic.id}#post-${post.id}`
+      : moderationCaseId
+        ? `/forum/post-moderation/${moderationCaseId}/appeal`
+        : null;
+
     await this.create(
       userId,
       'forum_moderated',
       title,
       message,
-      approved ? `/forum/topic/${topic.id}#post-${post.id}` : null,
-      { topic_id: topic.id, post_id: post.id, approved, reason }
+      link,
+      { topic_id: topic.id, post_id: post.id, approved, reason, moderation_case_id: moderationCaseId }
     );
   } catch (error) {
     console.error('Ошибка при создании уведомления о модерации сообщения:', error);
