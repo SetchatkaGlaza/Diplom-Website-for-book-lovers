@@ -1,54 +1,732 @@
-<div class="forum-admin-page forum-admin-modern">
-  <header class="admin-header">
-    <h1><i class="fas fa-inbox"></i> Форум: обращения по удалениям</h1>
-    <div class="header-actions">
-      <a href="/admin/forum" class="btn btn-outline"><i class="fas fa-chart-line"></i> Обзор</a>
-      <a href="/admin/forum/topics" class="btn btn-outline"><i class="fas fa-list-ul"></i> Все топики</a>
-    </div>
-  </header>
 
-  <section class="admin-card moderation-toolbar">
-    <div class="tab-switcher">
-      <a class="tab-pill <%= currentStatus === 'appealed' ? 'active' : '' %>" href="/admin/forum/appeals?status=appealed">Новые обращения</a>
-      <a class="tab-pill <%= currentStatus === 'deleted' ? 'active' : '' %>" href="/admin/forum/appeals?status=deleted">Без обращения</a>
-      <a class="tab-pill <%= currentStatus === 'restored' ? 'active' : '' %>" href="/admin/forum/appeals?status=restored">Восстановленные</a>
-      <a class="tab-pill <%= currentStatus === 'kept' ? 'active' : '' %>" href="/admin/forum/appeals?status=kept">Оставлены удалёнными</a>
-    </div>
-  </section>
 
-  <section class="admin-card">
-    <% if (cases.length) { %>
-      <div class="moderation-list">
-        <% cases.forEach(item => { %>
-          <article class="moderation-item">
-            <h3>
-              <a href="/forum/topic/<%= item.topic_id %>" target="_blank"><%= item.topic ? item.topic.title : 'Топик удалён' %></a>
-            </h3>
-            <p class="item-meta">
-              <span><strong>Автор:</strong> <%= item.user ? item.user.name : '—' %></span>
-              <span><strong>Удалил:</strong> <%= item.moderator ? item.moderator.name : '—' %></span>
-              <span><strong>Дата:</strong> <%= new Date(item.createdAt).toLocaleString('ru-RU') %></span>
-            </p>
-            <div class="content-preview"><strong>Причина удаления:</strong> <%= item.delete_reason %></div>
-            <div class="content-preview"><strong>Удалённый текст:</strong><br><%= item.content %></div>
-            <% if (item.user_explanation) { %>
-              <div class="content-preview"><strong>Объяснение автора:</strong><br><%= item.user_explanation %></div>
-            <% } %>
-
-            <% if (item.status === 'appealed') { %>
-              <form action="/admin/forum/appeals/<%= item.id %>/resolve" method="POST" class="reject-form-inline">
-                <input type="text" name="comment" placeholder="Комментарий админа (необязательно)">
-                <button class="btn btn-success" type="submit" name="action" value="restore"><i class="fas fa-undo"></i> Восстановить</button>
-                <button class="btn btn-danger" type="submit" name="action" value="keep"><i class="fas fa-ban"></i> Оставить удалённым</button>
-              </form>
-            <% } else if (item.resolution_comment) { %>
-              <div class="content-preview"><strong>Решение:</strong> <%= item.resolution_comment %></div>
-            <% } %>
-          </article>
-        <% }) %>
+<div class="forum-appeals-page">
+  <!-- Герой-секция -->
+  <div class="appeals-hero">
+    <div class="appeals-hero-content">
+      <div class="hero-icon">
+        <i class="fas fa-gavel"></i>
       </div>
+      <h1 class="hero-title">Модерация обращений</h1>
+      <p class="hero-description">
+        Управление апелляциями пользователей на удалённые сообщения
+      </p>
+    </div>
+    
+    <!-- Кнопки действий -->
+    <div class="hero-actions">
+      <a href="/admin/forum" class="btn-action btn-overview">
+        <i class="fas fa-chart-line"></i>
+        <span>Обзор форума</span>
+      </a>
+      <a href="/admin/forum/topics" class="btn-action btn-topics">
+        <i class="fas fa-list-ul"></i>
+        <span>Все топики</span>
+      </a>
+    </div>
+  </div>
+  
+  <!-- Вкладки статусов -->
+  <div class="status-tabs">
+    <a href="/admin/forum/appeals?status=appealed" 
+       class="tab-item <%= currentStatus === 'appealed' ? 'active' : '' %>">
+      <i class="fas fa-envelope-open-text"></i>
+      <span>Новые обращения</span>
+      <span class="tab-badge"><%= cases.filter(c => c.status === 'appealed').length %></span>
+    </a>
+    <a href="/admin/forum/appeals?status=deleted" 
+       class="tab-item <%= currentStatus === 'deleted' ? 'active' : '' %>">
+      <i class="fas fa-trash-alt"></i>
+      <span>Без обращения</span>
+      <span class="tab-badge"><%= cases.filter(c => c.status === 'deleted').length %></span>
+    </a>
+    <a href="/admin/forum/appeals?status=restored" 
+       class="tab-item <%= currentStatus === 'restored' ? 'active' : '' %>">
+      <i class="fas fa-undo-alt"></i>
+      <span>Восстановленные</span>
+      <span class="tab-badge"><%= cases.filter(c => c.status === 'restored').length %></span>
+    </a>
+    <a href="/admin/forum/appeals?status=kept" 
+       class="tab-item <%= currentStatus === 'kept' ? 'active' : '' %>">
+      <i class="fas fa-ban"></i>
+      <span>Оставлены удалёнными</span>
+      <span class="tab-badge"><%= cases.filter(c => c.status === 'kept').length %></span>
+    </a>
+  </div>
+  
+  <!-- Список обращений -->
+  <div class="appeals-list">
+    <% if (cases && cases.length > 0) { %>
+      <% cases.forEach(item => { %>
+        <div class="appeal-card" data-appeal-id="<%= item.id %>">
+          <!-- Заголовок карточки -->
+          <div class="appeal-card-header">
+            <div class="topic-info">
+              <div class="topic-icon">
+                <i class="fas fa-comment-dots"></i>
+              </div>
+              <div class="topic-details">
+                <h3 class="topic-title">
+                  <a href="/forum/topic/<%= item.topic_id %>" target="_blank" rel="noopener">
+                    <%= item.topic ? item.topic.title : 'Топик удалён' %>
+                    <i class="fas fa-external-link-alt"></i>
+                  </a>
+                </h3>
+                <div class="topic-meta">
+                  <span class="meta-author">
+                    <i class="fas fa-user"></i>
+                    Автор: <strong><%= item.user ? item.user.name : '—' %></strong>
+                  </span>
+                  <span class="meta-moderator">
+                    <i class="fas fa-user-shield"></i>
+                    Удалил: <strong><%= item.moderator ? item.moderator.name : '—' %></strong>
+                  </span>
+                  <span class="meta-date">
+                    <i class="fas fa-calendar-alt"></i>
+                    <%= new Date(item.createdAt).toLocaleString('ru-RU') %>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="status-badge status-<%= item.status %>">
+              <% if (item.status === 'appealed') { %>
+                <i class="fas fa-envelope-open-text"></i> Ожидает решения
+              <% } else if (item.status === 'deleted') { %>
+                <i class="fas fa-trash-alt"></i> Удалено
+              <% } else if (item.status === 'restored') { %>
+                <i class="fas fa-check-circle"></i> Восстановлено
+              <% } else if (item.status === 'kept') { %>
+                <i class="fas fa-ban"></i> Оставлено удалённым
+              <% } %>
+            </div>
+          </div>
+          
+          <!-- Причина удаления -->
+          <div class="appeal-section">
+            <div class="section-label">
+              <i class="fas fa-exclamation-triangle"></i>
+              Причина удаления
+            </div>
+            <div class="section-content reason-content">
+              <%= item.delete_reason %>
+            </div>
+          </div>
+          
+          <!-- Удалённый текст -->
+          <div class="appeal-section">
+            <div class="section-label">
+              <i class="fas fa-trash-alt"></i>
+              Удалённый текст
+            </div>
+            <div class="section-content deleted-content">
+              <%= item.content.replace(/\n/g, '<br>') %>
+            </div>
+          </div>
+          
+          <!-- Объяснение автора (если есть) -->
+          <% if (item.user_explanation) { %>
+            <div class="appeal-section highlight">
+              <div class="section-label">
+                <i class="fas fa-pen-fancy"></i>
+                Объяснение автора
+              </div>
+              <div class="section-content explanation-content">
+                <i class="fas fa-quote-left quote-icon"></i>
+                <%= item.user_explanation.replace(/\n/g, '<br>') %>
+              </div>
+            </div>
+          <% } %>
+          
+          <!-- Решение (если уже принято) -->
+          <% if (item.resolution_comment) { %>
+            <div class="appeal-section resolution">
+              <div class="section-label">
+                <i class="fas fa-gavel"></i>
+                Решение администратора
+              </div>
+              <div class="section-content resolution-content">
+                <i class="fas fa-comment-dots"></i>
+                <%= item.resolution_comment %>
+              </div>
+            </div>
+          <% } %>
+          
+          <!-- Форма действий для необработанных -->
+          <% if (item.status === 'appealed') { %>
+            <form action="/admin/forum/appeals/<%= item.id %>/resolve" method="POST" class="action-form">
+              <div class="action-input-group">
+                <div class="input-wrapper">
+                  <i class="fas fa-comment"></i>
+                  <input type="text" name="comment" placeholder="Комментарий для пользователя (необязательно)" autocomplete="off">
+                </div>
+                <div class="action-buttons">
+                  <button type="submit" name="action" value="restore" class="btn-restore">
+                    <i class="fas fa-undo-alt"></i>
+                    <span>Восстановить</span>
+                  </button>
+                  <button type="submit" name="action" value="keep" class="btn-keep">
+                    <i class="fas fa-ban"></i>
+                    <span>Оставить удалённым</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          <% } %>
+        </div>
+      <% }) %>
     <% } else { %>
-      <p class="muted">По выбранному статусу обращений нет.</p>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-inbox"></i>
+        </div>
+        <h3 class="empty-title">Нет обращений</h3>
+        <p class="empty-description">По выбранному статусу обращений не найдено</p>
+      </div>
     <% } %>
-  </section>
+  </div>
 </div>
+
+<style>
+  /* ===== ОСНОВНЫЕ ПЕРЕМЕННЫЕ ===== */
+  .forum-appeals-page {
+    padding: 2rem;
+    color: white;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  /* ===== ГЕРОЙ-СЕКЦИЯ ===== */
+  .appeals-hero {
+    background: linear-gradient(145deg, rgba(30, 30, 45, 0.9), rgba(20, 20, 35, 0.95));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 28px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  
+  .appeals-hero-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .hero-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #000;
+    box-shadow: 0 10px 25px rgba(251, 191, 36, 0.3);
+  }
+  
+  .hero-title {
+    font-size: 1.8rem;
+    margin: 0 0 0.25rem;
+    background: linear-gradient(135deg, #fff, #fbbf24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .hero-description {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .btn-overview {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+  }
+  
+  .btn-overview:hover {
+    background: #3b82f6;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+  }
+  
+  .btn-topics {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+  }
+  
+  .btn-topics:hover {
+    background: #fbbf24;
+    color: #000;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3);
+  }
+  
+  /* ===== ВКЛАДКИ ===== */
+  .status-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.5rem;
+    border-radius: 60px;
+    backdrop-filter: blur(10px);
+  }
+  
+  .tab-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .tab-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+  
+  .tab-item.active {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #000;
+    box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3);
+  }
+  
+  .tab-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.2rem 0.6rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .tab-item.active .tab-badge {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  /* ===== СПИСОК ОБРАЩЕНИЙ ===== */
+  .appeals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .appeal-card {
+    background: linear-gradient(145deg, rgba(25, 25, 35, 0.95), rgba(15, 15, 25, 0.98));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+  }
+  
+  .appeal-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(251, 191, 36, 0.3);
+  }
+  
+  /* Заголовок карточки */
+  .appeal-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .topic-info {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .topic-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(251, 191, 36, 0.15);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #fbbf24;
+  }
+  
+  .topic-details h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+  }
+  
+  .topic-details h3 a {
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .topic-details h3 a:hover {
+    color: #fbbf24;
+  }
+  
+  .topic-details h3 a i {
+    font-size: 0.8rem;
+    opacity: 0.6;
+  }
+  
+  .topic-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    flex-wrap: wrap;
+  }
+  
+  .topic-meta i {
+    margin-right: 0.3rem;
+    color: #fbbf24;
+  }
+  
+  /* Бейдж статуса */
+  .status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .status-badge.status-appealed {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+  
+  .status-badge.status-deleted {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  
+  .status-badge.status-restored {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  
+  .status-badge.status-kept {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+  
+  /* Секции карточки */
+  .appeal-section {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .appeal-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  
+  .appeal-section.highlight {
+    background: rgba(251, 191, 36, 0.05);
+    margin: 1rem -0.5rem;
+    padding: 1rem;
+    border-radius: 16px;
+    border-left: 3px solid #fbbf24;
+  }
+  
+  .appeal-section.resolution {
+    background: rgba(16, 185, 129, 0.05);
+    margin: 1rem -0.5rem;
+    padding: 1rem;
+    border-radius: 16px;
+    border-left: 3px solid #10b981;
+  }
+  
+  .section-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .section-label i {
+    color: #fbbf24;
+  }
+  
+  .section-content {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .deleted-content {
+    background: rgba(239, 68, 68, 0.05);
+    padding: 1rem;
+    border-radius: 12px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  
+  .explanation-content {
+    position: relative;
+    padding-left: 1.5rem;
+    font-style: italic;
+  }
+  
+  .quote-icon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #fbbf24;
+    opacity: 0.5;
+  }
+  
+  .resolution-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #10b981;
+  }
+  
+  .reason-content {
+    background: rgba(245, 158, 11, 0.05);
+    padding: 0.75rem;
+    border-radius: 12px;
+  }
+  
+  /* Форма действий */
+  .action-form {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .action-input-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .input-wrapper {
+    flex: 1;
+    position: relative;
+  }
+  
+  .input-wrapper i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.4);
+  }
+  
+  .input-wrapper input {
+    width: 100%;
+    padding: 0.85rem 1rem 0.85rem 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+  }
+  
+  .input-wrapper input:focus {
+    outline: none;
+    border-color: #fbbf24;
+    background: rgba(0, 0, 0, 0.5);
+  }
+  
+  .input-wrapper input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 0.75rem;
+  }
+  
+  .btn-restore,
+  .btn-keep {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+  }
+  
+  .btn-restore {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+  }
+  
+  .btn-restore:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(16, 185, 129, 0.5);
+  }
+  
+  .btn-keep {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
+  }
+  
+  .btn-keep:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(239, 68, 68, 0.5);
+  }
+  
+  /* Пустое состояние */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(145deg, rgba(25, 25, 35, 0.95), rgba(15, 15, 25, 0.98));
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .empty-icon {
+    font-size: 4rem;
+    color: rgba(255, 255, 255, 0.2);
+    margin-bottom: 1rem;
+  }
+  
+  .empty-title {
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem;
+  }
+  
+  .empty-description {
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 1.5rem;
+  }
+  
+  .btn-empty-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    border-radius: 50px;
+    color: #000;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  
+  .btn-empty-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(251, 191, 36, 0.4);
+  }
+  
+  /* Адаптивность */
+  @media (max-width: 992px) {
+    .forum-appeals-page {
+      padding: 1rem;
+    }
+    
+    .appeals-hero {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .appeals-hero-content {
+      flex-direction: column;
+    }
+    
+    .hero-actions {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .status-tabs {
+      justify-content: center;
+    }
+    
+    .action-input-group {
+      flex-direction: column;
+    }
+    
+    .input-wrapper {
+      width: 100%;
+    }
+    
+    .action-buttons {
+      width: 100%;
+      justify-content: stretch;
+    }
+    
+    .btn-restore,
+    .btn-keep {
+      flex: 1;
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .appeal-card-header {
+      flex-direction: column;
+    }
+    
+    .topic-meta {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .status-badge {
+      align-self: flex-start;
+    }
+  }
+</style>
