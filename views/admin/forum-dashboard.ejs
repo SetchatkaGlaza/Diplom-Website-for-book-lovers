@@ -31,8 +31,8 @@
       <div class="stat-content"><div class="stat-value"><%= stats.totalPosts %></div><div class="stat-label">Всего сообщений</div></div>
     </article>
     <article class="stat-card warning">
-      <i class="fas fa-hourglass-half stat-icon"></i>
-      <div class="stat-content"><div class="stat-value"><%= stats.pendingPosts %></div><div class="stat-label">Сообщений на модерации</div></div>
+      <i class="fas fa-envelope-open-text stat-icon"></i>
+      <div class="stat-content"><div class="stat-value"><%= stats.appealsPending %></div><div class="stat-label">Новых обращений</div></div>
     </article>
   </section>
 
@@ -43,7 +43,7 @@
         <li><span>Одобренные темы</span><strong><%= stats.moderatedTopics %></strong></li>
         <li><span>Закреплённые темы</span><strong><%= stats.pinnedTopics %></strong></li>
         <li><span>Закрытые темы</span><strong><%= stats.lockedTopics %></strong></li>
-        <li><span>Всего на модерации</span><strong><%= stats.pendingTopics + stats.pendingPosts %></strong></li>
+        <li><span>Тем на проверке</span><strong><%= stats.pendingTopics %></strong></li>
         <li><span>Новых обращений</span><strong><%= stats.appealsPending %></strong></li>
       </ul>
     </div>
@@ -51,8 +51,7 @@
     <div class="admin-card">
       <h2><i class="fas fa-compass"></i> Быстрые действия</h2>
       <div class="quick-actions">
-        <a class="quick-action" href="/admin/forum/moderation?tab=topics"><i class="fas fa-check-double"></i> Проверить темы</a>
-        <a class="quick-action" href="/admin/forum/moderation?tab=posts"><i class="fas fa-comment-medical"></i> Проверить сообщения</a>
+        <a class="quick-action" href="/admin/forum/moderation"><i class="fas fa-check-double"></i> Проверить темы</a>
         <a class="quick-action" href="/admin/forum/topics"><i class="fas fa-thumbtack"></i> Управлять топиками</a>
         <a class="quick-action" href="/admin/forum/appeals?status=appealed"><i class="fas fa-envelope-open-text"></i> Разобрать обращения</a>
         <a class="quick-action" href="/admin/forum/categories"><i class="fas fa-layer-group"></i> Настроить категории</a>

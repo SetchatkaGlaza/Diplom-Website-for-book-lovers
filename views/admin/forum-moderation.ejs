@@ -1,6 +1,6 @@
-<div class="forum-admin-page">
+<div class="forum-admin-page forum-admin-modern">
   <header class="admin-header">
-    <h1><i class="fas fa-shield-alt"></i> Форум: модерация</h1>
+    <h1><i class="fas fa-shield-alt"></i> Форум: модерация новых тем</h1>
     <div class="header-actions">
       <a href="/admin/forum" class="btn btn-outline"><i class="fas fa-chart-line"></i> Обзор</a>
       <a href="/admin/forum/topics" class="btn btn-outline"><i class="fas fa-list-ul"></i> Все топики</a>
@@ -11,95 +11,53 @@
 
   <section class="admin-card moderation-toolbar">
     <form method="GET" action="/admin/forum/moderation" class="moderation-filter-form">
-      <div class="tab-switcher">
-        <a href="/admin/forum/moderation?tab=topics" class="tab-pill <%= filters.tab === 'topics' ? 'active' : '' %>">Темы (<%= stats.topicsPending %>)</a>
-        <a href="/admin/forum/moderation?tab=posts" class="tab-pill <%= filters.tab === 'posts' ? 'active' : '' %>">Сообщения (<%= stats.postsPending %>)</a>
-      </div>
-      <input type="hidden" name="tab" value="<%= filters.tab %>">
       <div class="toolbar-row">
-        <input type="search" name="q" value="<%= filters.search %>" placeholder="Поиск по содержимому...">
+        <input type="search" name="q" value="<%= filters.search %>" placeholder="Поиск по новым темам...">
         <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i> Найти</button>
-        <a class="btn btn-outline" href="/admin/forum/moderation?tab=<%= filters.tab %>"><i class="fas fa-undo"></i> Сбросить</a>
+        <a class="btn btn-outline" href="/admin/forum/moderation"><i class="fas fa-undo"></i> Сбросить</a>
       </div>
+      <p class="muted" style="margin-top:.75rem;">На этом этапе модерируются только новые темы. Проверка сообщений вынесена в страницу топика и обращения.</p>
     </form>
   </section>
 
-  <% if (filters.tab === 'topics') { %>
-    <section class="admin-card">
-      <h2>Темы на модерации</h2>
-      <% if (pendingTopics.length) { %>
-        <div class="moderation-list">
-          <% pendingTopics.forEach(topic => { %>
-            <article class="moderation-item">
-              <div class="moderation-main">
-                <h3><%= topic.title %></h3>
-                <p class="item-meta">
-                  <span><strong>Автор:</strong> <%= topic.user ? topic.user.name : 'Неизвестно' %></span>
-                  <span><strong>Категория:</strong> <%= topic.category ? topic.category.name : '—' %></span>
-                  <span><strong>Дата:</strong> <%= new Date(topic.createdAt).toLocaleString('ru-RU') %></span>
-                </p>
-                <div class="content-preview"><%= topic.content.substring(0, 350) %><%= topic.content.length > 350 ? '...' : '' %></div>
-              </div>
-              <div class="moderation-actions">
-                <a href="/admin/forum/topic/<%= topic.id %>/posts" class="btn btn-outline"><i class="fas fa-list"></i> Сообщения</a>
-                <form action="/admin/forum/topic/<%= topic.id %>/approve?page=<%= currentPage %>" method="POST">
-                  <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Одобрить</button>
-                </form>
-                <form action="/admin/forum/topic/<%= topic.id %>/lock" method="POST">
-                  <button type="submit" class="btn btn-outline"><i class="fas fa-lock"></i> <%= topic.is_locked ? 'Открыть' : 'Закрыть' %></button>
-                </form>
-                <form action="/admin/forum/topic/<%= topic.id %>/pin" method="POST">
-                  <button type="submit" class="btn btn-outline"><i class="fas fa-thumbtack"></i> <%= topic.is_pinned ? 'Открепить' : 'Закрепить' %></button>
-                </form>
-              </div>
-              <form action="/admin/forum/topic/<%= topic.id %>/reject" method="POST" class="reject-form-inline">
-                <input type="text" name="reason" required placeholder="Причина отклонения темы">
-                <button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Отклонить</button>
+  <section class="admin-card">
+    <h2>Темы на модерации (<%= stats.topicsPending %>)</h2>
+    <% if (pendingTopics.length) { %>
+      <div class="moderation-list">
+        <% pendingTopics.forEach(topic => { %>
+          <article class="moderation-item">
+            <div class="moderation-main">
+              <h3><%= topic.title %></h3>
+              <p class="item-meta">
+                <span><strong>Автор:</strong> <%= topic.user ? topic.user.name : 'Неизвестно' %></span>
+                <span><strong>Категория:</strong> <%= topic.category ? topic.category.name : '—' %></span>
+                <span><strong>Дата:</strong> <%= new Date(topic.createdAt).toLocaleString('ru-RU') %></span>
+              </p>
+              <div class="content-preview"><%= topic.content.substring(0, 350) %><%= topic.content.length > 350 ? '...' : '' %></div>
+            </div>
+            <div class="moderation-actions">
+              <a href="/admin/forum/topic/<%= topic.id %>/posts" class="btn btn-outline"><i class="fas fa-list"></i> Сообщения</a>
+              <form action="/admin/forum/topic/<%= topic.id %>/approve?page=<%= currentPage %>" method="POST">
+                <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Одобрить</button>
               </form>
-            </article>
-          <% }) %>
-        </div>
-      <% } else { %>
-        <p class="muted">Нет тем, ожидающих модерации.</p>
-      <% } %>
-    </section>
-  <% } else { %>
-    <section class="admin-card">
-      <h2>Сообщения на модерации</h2>
-      <% if (pendingPosts.length) { %>
-        <div class="moderation-list">
-          <% pendingPosts.forEach(post => { %>
-            <article class="moderation-item">
-              <div class="moderation-main">
-                <h3>
-                  <a href="/forum/topic/<%= post.topic ? post.topic.id : '' %>" target="_blank">
-                    <%= post.topic ? post.topic.title : 'Тема удалена' %>
-                  </a>
-                </h3>
-                <p class="item-meta">
-                  <span><strong>Автор:</strong> <%= post.user ? post.user.name : 'Неизвестно' %></span>
-                  <span><strong>Категория:</strong> <%= post.topic && post.topic.category ? post.topic.category.name : '—' %></span>
-                  <span><strong>Дата:</strong> <%= new Date(post.createdAt).toLocaleString('ru-RU') %></span>
-                </p>
-                <div class="content-preview"><%= post.content.substring(0, 350) %><%= post.content.length > 350 ? '...' : '' %></div>
-              </div>
-              <div class="moderation-actions">
-                <form action="/admin/forum/post/<%= post.id %>/approve" method="POST">
-                  <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Одобрить</button>
-                </form>
-              </div>
-              <form action="/admin/forum/post/<%= post.id %>/reject" method="POST" class="reject-form-inline">
-                <input type="text" name="reason" required placeholder="Причина отклонения сообщения">
-                <button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Отклонить</button>
+              <form action="/admin/forum/topic/<%= topic.id %>/lock" method="POST">
+                <button type="submit" class="btn btn-outline"><i class="fas fa-lock"></i> <%= topic.is_locked ? 'Открыть' : 'Закрыть' %></button>
               </form>
-            </article>
-          <% }) %>
-        </div>
-      <% } else { %>
-        <p class="muted">Нет сообщений, ожидающих модерации.</p>
-      <% } %>
-    </section>
-  <% } %>
+              <form action="/admin/forum/topic/<%= topic.id %>/pin" method="POST">
+                <button type="submit" class="btn btn-outline"><i class="fas fa-thumbtack"></i> <%= topic.is_pinned ? 'Открепить' : 'Закрепить' %></button>
+              </form>
+            </div>
+            <form action="/admin/forum/topic/<%= topic.id %>/reject" method="POST" class="reject-form-inline">
+              <input type="text" name="reason" required placeholder="Причина отклонения темы">
+              <button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Отклонить</button>
+            </form>
+          </article>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="muted">Нет тем, ожидающих модерации.</p>
+    <% } %>
+  </section>
 
   <% if (totalPages > 1) { %>
     <nav class="pagination">
@@ -107,7 +65,7 @@
         <% if (i === currentPage) { %>
           <span class="page-link active"><%= i %></span>
         <% } else { %>
-          <a class="page-link" href="/admin/forum/moderation?tab=<%= filters.tab %>&page=<%= i %>&q=<%= encodeURIComponent(filters.search || '') %>"><%= i %></a>
+          <a class="page-link" href="/admin/forum/moderation?page=<%= i %>&q=<%= encodeURIComponent(filters.search || '') %>"><%= i %></a>
         <% } %>
       <% } %>
     </nav>
