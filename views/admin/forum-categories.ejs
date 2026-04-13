@@ -1,57 +1,48 @@
-<div class="admin-forum-categories">
-  <div class="admin-header">
-    <h1><i class="fas fa-folder"></i> Управление категориями форума</h1>
-    <a href="/admin/forum/moderation" class="btn btn-outline">
-      <i class="fas fa-arrow-left"></i> Назад к модерации
-    </a>
-  </div>
-  
-  <!-- Форма создания категории -->
-  <div class="create-category">
-    <h2>Создать новую категорию</h2>
+<div class="forum-admin-page">
+  <header class="admin-header">
+    <h1><i class="fas fa-folder-open"></i> Форум: категории</h1>
+    <div class="header-actions">
+      <a href="/admin/forum" class="btn btn-outline"><i class="fas fa-chart-line"></i> Обзор</a>
+      <a href="/admin/forum/moderation" class="btn btn-outline"><i class="fas fa-shield-alt"></i> Модерация</a>
+    </div>
+  </header>
+
+  <section class="admin-card">
+    <h2>Создать категорию</h2>
     <form action="/admin/forum/categories" method="POST" class="category-form">
       <div class="form-row">
         <div class="form-group">
           <label for="name">Название</label>
-          <input type="text" id="name" name="name" required>
+          <input id="name" name="name" type="text" minlength="3" required>
         </div>
-        
         <div class="form-group">
-          <label for="icon">Иконка (Font Awesome)</label>
-          <input type="text" id="icon" name="icon" value="fa-comments" placeholder="fa-comments">
+          <label for="icon">Иконка (fa-...)</label>
+          <input id="icon" name="icon" type="text" value="fa-comments">
         </div>
-        
         <div class="form-group">
-          <label for="sort_order">Порядок сортировки</label>
-          <input type="number" id="sort_order" name="sort_order" value="0">
+          <label for="sort_order">Порядок</label>
+          <input id="sort_order" name="sort_order" type="number" value="0">
         </div>
       </div>
-      
       <div class="form-group">
         <label for="description">Описание</label>
         <textarea id="description" name="description" rows="3"></textarea>
       </div>
-      
-      <button type="submit" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Создать категорию
-      </button>
+      <button class="btn btn-primary" type="submit"><i class="fas fa-plus"></i> Добавить</button>
     </form>
-  </div>
-  
-  <!-- Список категорий -->
-  <div class="categories-list">
+  </section>
+
+  <section class="admin-card">
     <h2>Существующие категории</h2>
-    
-    <% if (categories && categories.length > 0) { %>
+    <% if (categories.length) { %>
       <div class="table-responsive">
         <table class="modern-table">
           <thead>
             <tr>
               <th>Порядок</th>
-              <th>Иконка</th>
-              <th>Название</th>
-              <th>Описание</th>
-              <th>Тем</th>
+              <th>Категория</th>
+              <th>Темы</th>
+              <th>Одобрено</th>
               <th>Статус</th>
               <th>Действия</th>
             </tr>
@@ -60,10 +51,12 @@
             <% categories.forEach(category => { %>
               <tr>
                 <td><%= category.sort_order %></td>
-                <td><i class="fas <%= category.icon %>"></i></td>
-                <td><%= category.name %></td>
-                <td><%= category.description || '-' %></td>
-                <td><%= category.topics ? category.topics.length : 0 %></td>
+                <td>
+                  <strong><i class="fas <%= category.icon %>"></i> <%= category.name %></strong>
+                  <div class="muted"><%= category.description || 'Без описания' %></div>
+                </td>
+                <td><%= category.topicsCount %></td>
+                <td><%= category.moderatedTopicsCount %></td>
                 <td>
                   <% if (category.is_active) { %>
                     <span class="badge badge-success">Активна</span>
@@ -73,12 +66,12 @@
                 </td>
                 <td>
                   <div class="action-buttons">
-                    <button class="action-btn edit" onclick="editCategory(<%= category.id %>, '<%= category.name %>', '<%= category.description || '' %>', '<%= category.icon %>', <%= category.sort_order %>, <%= category.is_active %>)">
+                    <button class="action-btn edit" onclick='openEditModal(<%- JSON.stringify(category) %>)'>
                       <i class="fas fa-edit"></i>
                     </button>
-                    <% if (category.topics && category.topics.length === 0) { %>
+                    <% if (!category.topicsCount) { %>
                       <form action="/admin/forum/categories/<%= category.id %>?_method=DELETE" method="POST" class="inline-form">
-                        <button type="submit" class="action-btn delete" onclick="return confirm('Удалить категорию?')">
+                        <button class="action-btn delete" type="submit" onclick="return confirm('Удалить категорию без тем?')">
                           <i class="fas fa-trash"></i>
                         </button>
                       </form>
@@ -91,155 +84,66 @@
         </table>
       </div>
     <% } else { %>
-      <p class="empty-state">Категории не созданы</p>
+      <p class="muted">Пока нет категорий форума.</p>
     <% } %>
-  </div>
-  
-  <!-- Модальное окно редактирования -->
-  <div id="editModal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <h2>Редактировать категорию</h2>
-      <form id="editForm" action="" method="POST" class="category-form">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="edit-name">Название</label>
-            <input type="text" id="edit-name" name="name" required>
-          </div>
-          
-          <div class="form-group">
-            <label for="edit-icon">Иконка</label>
-            <input type="text" id="edit-icon" name="icon" required>
-          </div>
-          
-          <div class="form-group">
-            <label for="edit-sort_order">Порядок</label>
-            <input type="number" id="edit-sort_order" name="sort_order" required>
-          </div>
-        </div>
-        
+  </section>
+</div>
+
+<div id="editCategoryModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h2>Редактировать категорию</h2>
+    <form id="editCategoryForm" method="POST" class="category-form">
+      <div class="form-row">
         <div class="form-group">
-          <label for="edit-description">Описание</label>
-          <textarea id="edit-description" name="description" rows="3"></textarea>
+          <label for="edit-name">Название</label>
+          <input id="edit-name" name="name" type="text" minlength="3" required>
         </div>
-        
         <div class="form-group">
-          <label class="checkbox-label">
-            <input type="checkbox" id="edit-is_active" name="is_active">
-            <span>Категория активна</span>
-          </label>
+          <label for="edit-icon">Иконка</label>
+          <input id="edit-icon" name="icon" type="text" required>
         </div>
-        
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Сохранить</button>
-          <button type="button" class="btn btn-outline" onclick="closeModal()">Отмена</button>
+        <div class="form-group">
+          <label for="edit-sort_order">Порядок</label>
+          <input id="edit-sort_order" name="sort_order" type="number" required>
         </div>
-      </form>
-    </div>
+      </div>
+      <div class="form-group">
+        <label for="edit-description">Описание</label>
+        <textarea id="edit-description" name="description" rows="3"></textarea>
+      </div>
+      <label class="checkbox-label">
+        <input id="edit-is_active" name="is_active" type="checkbox">
+        <span>Категория активна</span>
+      </label>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Сохранить</button>
+        <button class="btn btn-outline" type="button" onclick="closeEditModal()">Отмена</button>
+      </div>
+    </form>
   </div>
 </div>
 
 <script>
-  function editCategory(id, name, description, icon, sortOrder, isActive) {
-    document.getElementById('edit-name').value = name;
-    document.getElementById('edit-description').value = description;
-    document.getElementById('edit-icon').value = icon;
-    document.getElementById('edit-sort_order').value = sortOrder;
-    document.getElementById('edit-is_active').checked = isActive;
-    
-    document.getElementById('editForm').action = `/admin/forum/categories/${id}`;
-    document.getElementById('editModal').style.display = 'flex';
-  }
-  
-  function closeModal() {
-    document.getElementById('editModal').style.display = 'none';
-  }
-  
-  // Закрытие по клику вне модального окна
-  window.onclick = function(event) {
-    const modal = document.getElementById('editModal');
-    if (event.target === modal) {
-      modal.style.display = 'none';
-    }
-  }
-</script>
+  const modal = document.getElementById('editCategoryModal');
+  const editForm = document.getElementById('editCategoryForm');
 
-<style>
-  .admin-forum-categories {
-    padding: 2rem 0;
-    color: white;
+  function openEditModal(category) {
+    document.getElementById('edit-name').value = category.name || '';
+    document.getElementById('edit-icon').value = category.icon || 'fa-comments';
+    document.getElementById('edit-sort_order').value = category.sort_order || 0;
+    document.getElementById('edit-description').value = category.description || '';
+    document.getElementById('edit-is_active').checked = Boolean(category.is_active);
+    editForm.action = `/admin/forum/categories/${category.id}`;
+    modal.style.display = 'flex';
   }
-  
-  .create-category {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    margin-bottom: 2rem;
+
+  function closeEditModal() {
+    modal.style.display = 'none';
   }
-  
-  .create-category h2 {
-    margin-bottom: 1.5rem;
-  }
-  
-  .category-form {
-    max-width: 800px;
-  }
-  
-  .form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .categories-list {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-  }
-  
-  .categories-list h2 {
-    margin-bottom: 1.5rem;
-  }
-  
-  .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    background: rgba(30, 30, 30, 0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-lg);
-    padding: 2rem;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  
-  .modal-content h2 {
-    margin-bottom: 1.5rem;
-  }
-  
-  .form-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
-  }
-</style>
+
+  window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      closeEditModal();
+    }
+  });
+</script>
