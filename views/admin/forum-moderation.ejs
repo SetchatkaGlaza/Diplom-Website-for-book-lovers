@@ -3,6 +3,7 @@
     <h1><i class="fas fa-shield-alt"></i> Форум: модерация</h1>
     <div class="header-actions">
       <a href="/admin/forum" class="btn btn-outline"><i class="fas fa-chart-line"></i> Обзор</a>
+      <a href="/admin/forum/topics" class="btn btn-outline"><i class="fas fa-list-ul"></i> Все топики</a>
       <a href="/admin/forum/categories" class="btn btn-outline"><i class="fas fa-folder"></i> Категории</a>
     </div>
   </header>
@@ -39,6 +40,7 @@
                 <div class="content-preview"><%= topic.content.substring(0, 350) %><%= topic.content.length > 350 ? '...' : '' %></div>
               </div>
               <div class="moderation-actions">
+                <a href="/admin/forum/topic/<%= topic.id %>/posts" class="btn btn-outline"><i class="fas fa-list"></i> Сообщения</a>
                 <form action="/admin/forum/topic/<%= topic.id %>/approve?page=<%= currentPage %>" method="POST">
                   <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Одобрить</button>
                 </form>
