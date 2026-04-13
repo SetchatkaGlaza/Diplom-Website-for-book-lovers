@@ -77,10 +77,10 @@
                 </a>
               </div>
             <% } else if (item.status === 'read') { %>
-              <a href="/books/<%= item.book.id %>/review/new" class="btn-small btn-primary">
-                <i class="fas fa-pen"></i> Написать рецензию
-              </a>
-            <% } %>
+  <a href="/reviews/new/<%= item.book.id %>" class="btn-small btn-primary">
+    <i class="fas fa-pen"></i> Написать рецензию
+  </a>
+<% } %>
             
             <!-- Действия с книгой -->
             <div class="book-detailed-actions">
