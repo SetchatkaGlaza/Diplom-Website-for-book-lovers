@@ -1,0 +1,53 @@
+<div class="forum-admin-page">
+  <header class="admin-header">
+    <h1><i class="fas fa-comments"></i> Сообщения топика</h1>
+    <div class="header-actions">
+      <a href="/admin/forum/topics" class="btn btn-outline"><i class="fas fa-arrow-left"></i> К списку топиков</a>
+      <a href="/forum/topic/<%= topic.id %>" class="btn btn-outline" target="_blank"><i class="fas fa-external-link-alt"></i> Открыть на сайте</a>
+    </div>
+  </header>
+
+  <section class="admin-card">
+    <h2><%= topic.title %></h2>
+    <p class="item-meta">
+      <span><strong>Категория:</strong> <%= topic.category ? topic.category.name : '—' %></span>
+      <span><strong>Автор:</strong> <%= topic.user ? topic.user.name : '—' %></span>
+      <span><strong>Статус:</strong> <%= topic.is_locked ? 'Закрыт' : 'Открыт' %>, <%= topic.is_pinned ? 'Закреплён' : 'Обычный' %></span>
+    </p>
+
+    <div class="moderation-actions">
+      <form action="/admin/forum/topic/<%= topic.id %>/pin" method="POST">
+        <button class="btn btn-outline" type="submit"><i class="fas fa-thumbtack"></i> <%= topic.is_pinned ? 'Открепить' : 'Закрепить' %></button>
+      </form>
+      <form action="/admin/forum/topic/<%= topic.id %>/lock" method="POST">
+        <button class="btn btn-outline" type="submit"><i class="fas fa-lock"></i> <%= topic.is_locked ? 'Открыть' : 'Закрыть' %></button>
+      </form>
+    </div>
+  </section>
+
+  <section class="admin-card">
+    <h2>Все сообщения (<%= posts.length %>)</h2>
+    <% if (posts.length) { %>
+      <div class="moderation-list">
+        <% posts.forEach((post, index) => { %>
+          <article class="moderation-item">
+            <p class="item-meta">
+              <span><strong>#<%= index + 1 %></strong></span>
+              <span><strong>Автор:</strong> <%= post.user ? post.user.name : 'Неизвестно' %></span>
+              <span><strong>Email:</strong> <%= post.user ? post.user.email : '—' %></span>
+              <span><strong>Дата:</strong> <%= new Date(post.createdAt).toLocaleString('ru-RU') %></span>
+            </p>
+            <div class="content-preview"><%= post.content %></div>
+
+            <form action="/admin/forum/post/<%= post.id %>/delete" method="POST" class="reject-form-inline" onsubmit="return confirm('Удалить это сообщение?')">
+              <input type="text" name="reason" required placeholder="Причина удаления (обязательно)">
+              <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Удалить сообщение</button>
+            </form>
+          </article>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="muted">В топике нет сообщений.</p>
+    <% } %>
+  </section>
+</div>
