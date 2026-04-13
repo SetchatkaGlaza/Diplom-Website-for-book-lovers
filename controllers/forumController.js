@@ -368,15 +368,14 @@ exports.postNewTopic = async (req, res) => {
 };
 
 /**
- * ОТВЕТ В ТЕМЕ (БЕЗ МОДЕРАЦИИ)
+ * ОТВЕТ В ТЕМЕ
  */
 exports.postReply = async (req, res) => {
   try {
     const topicId = req.params.id;
-    const { content } = req.body;
+    let { content } = req.body;
     const userId = req.session.user.id;
     
-    // Проверяем существование темы
     const topic = await ForumTopic.findByPk(topicId);
     
     if (!topic) {
@@ -389,29 +388,29 @@ exports.postReply = async (req, res) => {
       return res.redirect(`/forum/topic/${topicId}`);
     }
     
-    // Валидация
     if (!content || content.trim().length < 2) {
       req.flash('error', 'Сообщение не может быть пустым');
       return res.redirect(`/forum/topic/${topicId}`);
     }
     
-    // Создаём сообщение (СРАЗУ ОДОБРЕНО, без модерации)
+    // Сохраняем как есть, с переносами строк
+    // Не заменяем \n на <br> - это сделаем только при отображении
+    content = content.trim();
+    
     const post = await ForumPost.create({
       topic_id: topicId,
       user_id: userId,
-      content: content.trim(),
-      is_moderated: true, // СРАЗУ true!
+      content: content,  // Сохраняем с \n
+      is_moderated: true,
       ip_address: req.ip
     });
     
-    // Обновляем тему
     await topic.update({
       last_reply_at: new Date(),
       last_reply_user_id: userId,
       replies_count: topic.replies_count + 1
     });
     
-    // Уведомляем подписчиков
     const subscribers = await ForumSubscription.findAll({
       where: { topic_id: topicId },
       include: [{ model: User, as: 'user' }]
