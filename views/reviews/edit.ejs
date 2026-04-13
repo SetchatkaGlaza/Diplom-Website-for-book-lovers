@@ -1,0 +1,542 @@
+<div class="edit-review">
+  <div class="review-header">
+    <a href="/books/<%= review.book.id %>" class="back-link">
+      <i class="fas fa-arrow-left"></i> Вернуться к книге
+    </a>
+    <h1><i class="fas fa-edit"></i> Редактирование рецензии</h1>
+  </div>
+  
+  <div class="review-book-info">
+    <img src="/images/covers/<%= review.book.cover_image %>" alt="<%= review.book.title %>" class="review-book-cover">
+    <div>
+      <h2><%= review.book.title %></h2>
+      <p class="book-author"><%= review.book.author %></p>
+    </div>
+  </div>
+  
+  <div class="alert alert-info">
+    <i class="fas fa-info-circle"></i>
+    После редактирования рецензия будет отправлена на повторную модерацию.
+  </div>
+  
+  <% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error.msg %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+  
+  <form action="/reviews/<%= review.id %>/edit" method="POST" class="review-form">
+    <div class="form-group">
+      <label>Ваша оценка <span class="required">*</span></label>
+      <div class="rating-input">
+        <% for(let i = 5; i >= 1; i--) { %>
+          <input 
+            type="radio" 
+            name="rating" 
+            id="star<%= i %>" 
+            value="<%= i %>"
+            <%= (review.rating == i) ? 'checked' : '' %>
+            required
+          >
+          <label for="star<%= i %>" class="star-label" title="<%= i %> звезд">
+            <i class="fas fa-star"></i>
+          </label>
+        <% } %>
+      </div>
+    </div>
+    
+    <!-- БЛОК: Подсказки по оценкам -->
+    <div class="rating-guide">
+      <h4><i class="fas fa-info-circle"></i> Что означают оценки:</h4>
+      <div class="rating-guide-items">
+        <div class="rating-guide-item">
+          <span class="rating-guide-stars">★★★★★</span>
+          <span class="rating-guide-text">Шедевр, обязателен к прочтению</span>
+        </div>
+        <div class="rating-guide-item">
+          <span class="rating-guide-stars">★★★★☆</span>
+          <span class="rating-guide-text">Отличная книга, очень понравилась</span>
+        </div>
+        <div class="rating-guide-item">
+          <span class="rating-guide-stars">★★★☆☆</span>
+          <span class="rating-guide-text">Хорошая книга, но не без недостатков</span>
+        </div>
+        <div class="rating-guide-item">
+          <span class="rating-guide-stars">★★☆☆☆</span>
+          <span class="rating-guide-text">Средняя книга, могло быть лучше</span>
+        </div>
+        <div class="rating-guide-item">
+          <span class="rating-guide-stars">★☆☆☆☆</span>
+          <span class="rating-guide-text">Не понравилось, зря потратил время</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="content">Текст рецензии <span class="required">*</span></label>
+      <textarea 
+        id="content" 
+        name="content" 
+        rows="12"
+        required
+        minlength="10"
+        maxlength="5000"
+        placeholder="Поделитесь своим мнением о книге... Что понравилось? Что не понравилось? Кому бы вы её порекомендовали?"
+      ><%= review.content %></textarea>
+      <div class="textarea-counter">
+        <span id="charCount">0</span>/5000 символов
+        <span id="charWarning" class="char-warning" style="display: none;"> (минимум 10)</span>
+      </div>
+    </div>
+    
+    <div class="review-guidelines">
+      <h4><i class="fas fa-info-circle"></i> Правила написания рецензий</h4>
+      <ul>
+        <li><i class="fas fa-check-circle"></i> Рецензия должна быть написана по-русски</li>
+        <li><i class="fas fa-check-circle"></i> Минимальная длина — 10 символов</li>
+        <li><i class="fas fa-check-circle"></i> Запрещены оскорбления и нецензурная лексика</li>
+        <li><i class="fas fa-check-circle"></i> Рецензия проходит модерацию перед публикацией</li>
+        <li><i class="fas fa-check-circle"></i> Вы можете редактировать свою рецензию после публикации</li>
+      </ul>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-large">
+        <i class="fas fa-save"></i> Сохранить изменения
+      </button>
+      <a href="/books/<%= review.book.id %>" class="btn btn-outline">
+        <i class="fas fa-times"></i> Отмена
+      </a>
+    </div>
+  </form>
+</div>
+
+<style>
+  .edit-review {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    color: white;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .review-header {
+    margin-bottom: 2rem;
+  }
+  
+  .back-link {
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+    transition: var(--transition);
+  }
+  
+  .back-link:hover {
+    opacity: 1;
+    transform: translateX(-5px);
+  }
+  
+  .review-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 2rem;
+    margin: 0;
+  }
+  
+  .review-header h1 i {
+    color: var(--accent);
+  }
+  
+  .review-book-info {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .review-book-cover {
+    width: 100px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .review-book-info h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+  }
+  
+  .book-author {
+    opacity: 0.8;
+    font-size: 1.1rem;
+  }
+  
+  .required {
+    color: #ef4444;
+    margin-left: 0.25rem;
+  }
+  
+  .alert-info {
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid #3b82f6;
+    color: #3b82f6;
+    padding: 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .alert-info i {
+    font-size: 1.2rem;
+  }
+  
+  .alert-danger {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    padding: 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+  }
+  
+  .alert-danger ul {
+    margin: 0 0 0 1.5rem;
+  }
+  
+  .alert-danger li {
+    margin-bottom: 0.25rem;
+  }
+  
+  /* Стили для выбора оценки */
+  .rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+  }
+  
+  .rating-input input {
+    display: none;
+  }
+  
+  .star-label {
+    font-size: 2.5rem;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .rating-input input:checked ~ .star-label,
+  .rating-input .star-label:hover,
+  .rating-input .star-label:hover ~ .star-label {
+    color: #fbbf24;
+    transform: scale(1.1);
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+  }
+  
+  /* Подсказки по оценкам */
+  .rating-guide {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border-left: 4px solid var(--accent);
+  }
+  
+  .rating-guide h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+    color: var(--accent);
+    font-size: 1.1rem;
+  }
+  
+  .rating-guide h4 i {
+    font-size: 1.2rem;
+  }
+  
+  .rating-guide-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .rating-guide-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius);
+    transition: transform 0.2s;
+  }
+  
+  .rating-guide-item:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .rating-guide-stars {
+    color: #fbbf24;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+  
+  .rating-guide-text {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    line-height: 1.4;
+  }
+  
+  /* Стили для текстового поля */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 1.1rem;
+  }
+  
+  .form-group textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+    line-height: 1.6;
+    resize: vertical;
+    transition: all 0.3s;
+  }
+  
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+  }
+  
+  .form-group textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+  }
+  
+  .textarea-counter {
+    text-align: right;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .char-warning {
+    color: #f59e0b;
+  }
+  
+  /* Стили для правил */
+  .review-guidelines {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .review-guidelines h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: var(--accent);
+    font-size: 1.1rem;
+  }
+  
+  .review-guidelines ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .review-guidelines li {
+    margin-bottom: 0.75rem;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .review-guidelines li i {
+    color: var(--success);
+    font-size: 0.9rem;
+  }
+  
+  /* Стили для кнопок */
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    color: white;
+    box-shadow: var(--shadow);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .btn-outline {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+  }
+  
+  .btn-outline:hover {
+    border-color: white;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+  }
+  
+  /* Адаптивность */
+  @media (max-width: 768px) {
+    .edit-review {
+      padding: 1.5rem;
+    }
+    
+    .review-book-info {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .review-book-cover {
+      width: 120px;
+      height: 180px;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+    
+    .rating-guide-items {
+      grid-template-columns: 1fr;
+    }
+    
+    .rating-guide-item {
+      flex-direction: row;
+      justify-content: space-between;
+      text-align: left;
+      gap: 1rem;
+    }
+    
+    .rating-guide-stars {
+      margin-bottom: 0;
+    }
+  }
+</style>
+
+<script>
+  // Счётчик символов
+  const textarea = document.getElementById('content');
+  const charCount = document.getElementById('charCount');
+  const charWarning = document.getElementById('charWarning');
+  
+  if (textarea && charCount) {
+    function updateCharCount() {
+      const count = textarea.value.length;
+      charCount.textContent = count;
+      
+      if (count < 10) {
+        charCount.style.color = '#f59e0b';
+        if (charWarning) charWarning.style.display = 'inline';
+      } else if (count > 5000) {
+        charCount.style.color = '#ef4444';
+        if (charWarning) charWarning.style.display = 'none';
+      } else {
+        charCount.style.color = 'inherit';
+        if (charWarning) charWarning.style.display = 'none';
+      }
+      
+      if (count > 5000) {
+        textarea.value = textarea.value.substring(0, 5000);
+        charCount.textContent = 5000;
+      }
+    }
+    
+    textarea.addEventListener('input', updateCharCount);
+    updateCharCount();
+  }
+  
+  // Валидация перед отправкой
+  document.querySelector('form').addEventListener('submit', function(e) {
+    const rating = document.querySelector('input[name="rating"]:checked');
+    const content = document.getElementById('content').value.trim();
+    
+    if (!rating) {
+      e.preventDefault();
+      alert('Пожалуйста, поставьте оценку книге');
+      return;
+    }
+    
+    if (content.length < 10) {
+      e.preventDefault();
+      alert('Рецензия должна содержать минимум 10 символов');
+      document.getElementById('content').focus();
+      return;
+    }
+  });
+</script>
