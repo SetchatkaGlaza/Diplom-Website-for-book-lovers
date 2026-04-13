@@ -9,12 +9,10 @@
     <h3>Фильтры</h3>
     
     <form action="/books" method="GET" id="filter-form">
-      <!-- Сохраняем параметры сортировки при отправке фильтров -->
       <% if (sort) { %>
         <input type="hidden" name="sort" value="<%= sort %>">
       <% } %>
       
-      <!-- Поиск по названию -->
       <div class="filter-group">
         <label for="search">Поиск по названию</label>
         <input 
@@ -26,7 +24,6 @@
         >
       </div>
       
-      <!-- Фильтр по жанру -->
       <div class="filter-group">
         <label for="genre">Жанр</label>
         <select id="genre" name="genre">
@@ -42,7 +39,6 @@
         </select>
       </div>
       
-      <!-- Фильтр по автору -->
       <div class="filter-group">
         <label for="author">Автор</label>
         <input 
@@ -54,7 +50,6 @@
         >
       </div>
       
-      <!-- Фильтр по году (диапазон) -->
       <div class="filter-group">
         <label>Год издания</label>
         <div class="range-inputs">
@@ -100,7 +95,7 @@
       </select>
     </div>
     
-    <!-- Сетка книг -->
+    <!-- Сетка книг - 4 колонки -->
     <% if (books.length > 0) { %>
       <div class="books-grid">
         <% books.forEach(book => { %>
@@ -117,24 +112,23 @@
                   <span class="book-year"><%= book.year || 'Год не указан' %></span>
                 </div>
                 <div class="book-rating">
-  <% if (book.averageRating > 0) { %>
-    <span class="rating-stars">
-      <% for(let i = 1; i <= 5; i++) { %>
-        <% if (i <= Math.floor(book.averageRating)) { %>
-          ★
-        <% } else if (i - 0.5 <= book.averageRating) { %>
-          ½
-        <% } else { %>
-          ☆
-        <% } %>
-      <% } %>
-    </span>
-    <span class="rating-value"><%= book.averageRating %></span>
-    <span class="rating-count">(<%= book.ratingsCount %>)</span>
-  <% } else { %>
-    <span class="rating-value no-rating">Нет оценок</span>
-  <% } %>
-</div>
+                  <% if (book.averageRating > 0) { %>
+                    <span class="rating-stars">
+                      <% for(let i = 1; i <= 5; i++) { %>
+                        <% if (i <= Math.floor(book.averageRating)) { %>
+                          ★
+                        <% } else if (i - 0.5 <= book.averageRating) { %>
+                          ½
+                        <% } else { %>
+                          ☆
+                        <% } %>
+                      <% } %>
+                    </span>
+                    <span class="rating-value"><%= book.averageRating %></span>
+                  <% } else { %>
+                    <span class="rating-value no-rating">Нет оценок</span>
+                  <% } %>
+                </div>
               </div>
             </a>
           </div>
@@ -171,8 +165,293 @@
 </div>
 
 <script>
-  // Автоматическая отправка формы при изменении сортировки
-  document.getElementById('sort').addEventListener('change', function() {
+  document.getElementById('sort')?.addEventListener('change', function() {
     document.getElementById('filter-form').submit();
   });
 </script>
+
+<style>
+  /* ===== ОСНОВНЫЕ СТИЛИ ===== */
+  .catalog-header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .books-count {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+  
+  .catalog-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+  
+  /* Фильтры */
+  .filters-sidebar {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    color: white;
+    height: fit-content;
+    position: sticky;
+    top: 90px;
+  }
+  
+  .filters-sidebar h3 {
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .filter-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .filter-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .filter-group input,
+  .filter-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 0.95rem;
+    transition: var(--transition);
+  }
+  
+  .filter-group input:focus,
+  .filter-group select:focus {
+    outline: none;
+    border-color: white;
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .range-inputs {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .range-inputs input {
+    width: 50%;
+  }
+  
+  .btn-block {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Сортировка */
+  .sort-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
+    color: white;
+  }
+  
+  .sort-bar select {
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+  }
+  
+  /* ===== СЕТКА КНИГ - 4 КОЛОНКИ ===== */
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+  
+  /* Карточка книги */
+  .book-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: var(--transition);
+    height: 100%;
+  }
+  
+  .book-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-xl);
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  .book-link {
+    text-decoration: none;
+    color: white;
+    display: block;
+    height: 100%;
+  }
+  
+  .book-cover {
+    position: relative;
+    padding-top: 150%;
+    overflow: hidden;
+  }
+  
+  .book-cover img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+  }
+  
+  .book-card:hover .book-cover img {
+    transform: scale(1.1);
+  }
+  
+  .book-info {
+    padding: 1.5rem;
+  }
+  
+  .book-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .book-author {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 0.5rem;
+  }
+  
+  .book-meta {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .book-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .rating-stars {
+    color: #fbbf24;
+    font-size: 0.9rem;
+  }
+  
+  .rating-value {
+    font-weight: 600;
+  }
+  
+  .no-rating {
+    opacity: 0.6;
+    font-size: 0.9rem;
+  }
+  
+  /* Пагинация */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 3rem 0;
+  }
+  
+  .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-decoration: none;
+    transition: var(--transition);
+  }
+  
+  .page-link:hover,
+  .page-link.active {
+    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    transform: scale(1.05);
+  }
+  
+  .no-books {
+    text-align: center;
+    padding: 3rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-lg);
+    margin: 2rem 0;
+  }
+  
+  /* ===== АДАПТИВНОСТЬ ===== */
+  @media (max-width: 1200px) {
+    .books-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  @media (max-width: 900px) {
+    .catalog-layout {
+      grid-template-columns: 1fr;
+    }
+    
+    .filters-sidebar {
+      position: relative;
+      top: 0;
+    }
+    
+    .books-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .books-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .catalog-header {
+      flex-direction: column;
+      text-align: center;
+      gap: 1rem;
+    }
+    
+    .sort-bar {
+      justify-content: center;
+    }
+  }
+</style>
