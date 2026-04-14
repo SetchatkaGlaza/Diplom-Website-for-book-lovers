@@ -20,10 +20,11 @@
   "type": "commonjs",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "des": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "start": "node app.js",
+  "seed": "node seeders/all-seed.js",
+  "des": "node app.js",
+  "test": "echo \"Error: no test specified\" && exit 1"
+},
   "dependencies": {
     "bcrypt": "^6.0.0",
     "chart.js": "^4.5.1",
