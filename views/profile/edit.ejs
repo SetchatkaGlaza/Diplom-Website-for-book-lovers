@@ -4,6 +4,7 @@
   const name = locals.name || user.name;
   const bio = locals.bio || user.bio || '';
 %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 
 <div class="edit-profile">
   <h1><i class="fas fa-edit"></i> Редактирование профиля</h1>
@@ -36,6 +37,7 @@
             <span class="file-name">Файл не выбран</span>
           </div>
           <p class="file-help">Максимальный размер: 5MB. Форматы: JPG, PNG, GIF, WEBP</p>
+          <p class="file-help">После выбора можно приблизить/отдалить и подвинуть изображение перед сохранением.</p>
           <button type="submit" class="btn btn-primary">
             <i class="fas fa-save"></i> Загрузить
           </button>
@@ -126,6 +128,22 @@
         </p>
         <p class="email-note">Email нельзя изменить самостоятельно. Для смены email обратитесь к администратору.</p>
       </div>
+    </div>
+  </div>
+</div>
+
+<div id="avatarCropModal" class="crop-modal" style="display:none;">
+  <div class="crop-modal-content">
+    <h3>Настройка аватара</h3>
+    <div class="crop-area">
+      <img id="avatarCropImage" alt="Crop avatar">
+    </div>
+    <div class="crop-actions">
+      <button type="button" class="btn btn-outline" id="avatarZoomOut">-</button>
+      <button type="button" class="btn btn-outline" id="avatarZoomIn">+</button>
+      <button type="button" class="btn btn-outline" id="avatarRotate">↻</button>
+      <button type="button" class="btn btn-outline" id="avatarCancelCrop">Отмена</button>
+      <button type="button" class="btn btn-primary" id="avatarApplyCrop">Применить</button>
     </div>
   </div>
 </div>
@@ -221,6 +239,43 @@
     opacity: 0.6;
     margin-bottom: 1rem;
   }
+
+  .crop-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .crop-modal-content {
+    width: min(700px, 95vw);
+    background: #121212;
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .crop-area {
+    max-height: 60vh;
+    overflow: hidden;
+  }
+
+  .crop-area img {
+    max-width: 100%;
+    display: block;
+  }
+
+  .crop-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+  }
   
   .edit-form {
     max-width: 500px;
@@ -248,10 +303,59 @@
   }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 <script>
   // Отображение имени выбранного файла
-  document.getElementById('avatar').addEventListener('change', function(e) {
-    const fileName = e.target.files[0] ? e.target.files[0].name : 'Файл не выбран';
-    document.querySelector('.file-name').textContent = fileName;
+  const avatarInput = document.getElementById('avatar');
+  const fileNameEl = document.querySelector('.file-name');
+  const cropModal = document.getElementById('avatarCropModal');
+  const cropImage = document.getElementById('avatarCropImage');
+  let cropper = null;
+
+  avatarInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    fileNameEl.textContent = file ? file.name : 'Файл не выбран';
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+    cropImage.src = url;
+    cropModal.style.display = 'flex';
+
+    if (cropper) cropper.destroy();
+    cropper = new Cropper(cropImage, {
+      aspectRatio: 1,
+      viewMode: 1,
+      dragMode: 'move',
+      background: false,
+      autoCropArea: 1,
+      responsive: true
+    });
+  });
+
+  document.getElementById('avatarZoomIn').addEventListener('click', () => cropper && cropper.zoom(0.1));
+  document.getElementById('avatarZoomOut').addEventListener('click', () => cropper && cropper.zoom(-0.1));
+  document.getElementById('avatarRotate').addEventListener('click', () => cropper && cropper.rotate(90));
+
+  document.getElementById('avatarCancelCrop').addEventListener('click', () => {
+    cropModal.style.display = 'none';
+    if (cropper) cropper.destroy();
+    cropper = null;
+    avatarInput.value = '';
+    fileNameEl.textContent = 'Файл не выбран';
+  });
+
+  document.getElementById('avatarApplyCrop').addEventListener('click', () => {
+    if (!cropper) return;
+    cropper.getCroppedCanvas({ width: 500, height: 500 }).toBlob((blob) => {
+      if (!blob) return;
+      const file = new File([blob], `avatar-cropped-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      avatarInput.files = dt.files;
+      fileNameEl.textContent = file.name;
+      cropModal.style.display = 'none';
+      cropper.destroy();
+      cropper = null;
+    }, 'image/jpeg', 0.9);
   });
 </script>
