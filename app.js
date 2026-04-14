@@ -10,6 +10,10 @@ const rateLimit = require('express-rate-limit');
 // Импортируем все модели
 const { User, Genre, Book, Review, UserBook, ReviewLike } = require('./models');
 
+if (process.env.NODE_ENV === 'production') {
+  require('./scripts/run-seed-on-startup');
+}
+
 // Импортируем маршруты
 const authRoutes = require('./routes/auth');
 const bookRoutes = require('./routes/books');
