@@ -4,12 +4,9 @@ const fs = require('fs');
 
 /**
  * Валидация изображения для обложки книги
- * Требования:
- * - Минимальная ширина: 200px
- * - Минимальная высота: 300px
- * - Максимальная ширина: 1000px
- * - Максимальная высота: 1500px
- * - Соотношение сторон: примерно 2:3 (допуск ±0.2)
+ * Базовая проверка:
+ * - Файл реально является изображением
+ * - Изображение можно прочитать
  */
 exports.validateBookCover = async (req, res, next) => {
   // Если файл не загружен, пропускаем (значит оставляем старую обложку)
@@ -22,52 +19,12 @@ exports.validateBookCover = async (req, res, next) => {
     const metadata = await sharp(filePath).metadata();
     
     const { width, height } = metadata;
-    const aspectRatio = width / height;
-    const expectedRatio = 2 / 3; // 0.666...
-    const ratioDiff = Math.abs(aspectRatio - expectedRatio);
-    
-    console.log('📸 Проверка изображения:', {
-      width,
-      height,
-      aspectRatio: aspectRatio.toFixed(3),
-      ratioDiff: ratioDiff.toFixed(3)
-    });
-    
-    const errors = [];
-    
-    // Проверка минимальных размеров
-    if (width < 200) {
-      errors.push(`Ширина изображения слишком мала (${width}px). Минимум 200px.`);
-    }
-    
-    if (height < 300) {
-      errors.push(`Высота изображения слишком мала (${height}px). Минимум 300px.`);
-    }
-    
-    // Проверка максимальных размеров
-    if (width > 1000) {
-      errors.push(`Ширина изображения слишком велика (${width}px). Максимум 1000px.`);
-    }
-    
-    if (height > 1500) {
-      errors.push(`Высота изображения слишком велика (${height}px). Максимум 1500px.`);
-    }
-    
-    // Проверка соотношения сторон (допустимое отклонение 0.2)
-    if (ratioDiff > 0.2) {
-      errors.push(`Неподходящее соотношение сторон (${aspectRatio.toFixed(2)}). Ожидается примерно 2:3 (0.67).`);
-    }
-    
-    // Если есть ошибки, удаляем загруженный файл и возвращаем ошибку
-    if (errors.length > 0) {
-      // Удаляем файл
+    if (!width || !height) {
       fs.unlinkSync(filePath);
-      
-      req.flash('error', errors.join(' '));
+      req.flash('error', 'Не удалось определить размеры изображения.');
       return res.redirect('back');
     }
-    
-    // Всё хорошо - идём дальше
+
     next();
     
   } catch (error) {
@@ -86,8 +43,7 @@ exports.validateBookCover = async (req, res, next) => {
 };
 
 /**
- * Автоматическая обрезка изображения под стандартный размер
- * (опционально - может пригодиться позже)
+ * Автоматическая обрезка обложки под 2:3 и стандартный размер
  */
 exports.autoCropBookCover = async (req, res, next) => {
   if (!req.file) return next();
@@ -97,9 +53,9 @@ exports.autoCropBookCover = async (req, res, next) => {
     const parsedPath = path.parse(filePath);
     const outputPath = path.join(parsedPath.dir, `cropped-${parsedPath.base}`);
     
-    // Обрезаем до пропорций 2:3 и уменьшаем до стандартного размера
+    // Обрезаем/масштабируем до пропорций 2:3
     await sharp(filePath)
-      .resize(300, 450, {
+      .resize(600, 900, {
         fit: 'cover',
         position: 'center'
       })
@@ -109,7 +65,7 @@ exports.autoCropBookCover = async (req, res, next) => {
     fs.unlinkSync(filePath);
     fs.renameSync(outputPath, filePath);
     
-    console.log('✅ Изображение обрезано до 300x450');
+    console.log('✅ Изображение обрезано до 600x900');
     next();
     
   } catch (error) {
