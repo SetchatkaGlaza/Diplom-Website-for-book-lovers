@@ -90,9 +90,23 @@ router.get('/', requireAdmin, adminController.getDashboard);
 // ===== УПРАВЛЕНИЕ КНИГАМИ =====
 router.get('/books', requireAdmin, adminController.getBooks);
 router.get('/books/add', requireAdmin, adminController.getAddBook);
-router.post('/books/add', requireAdmin, uploadCover.single('cover'), imageValidator.validateBookCover, adminController.postAddBook);
+router.post(
+  '/books/add',
+  requireAdmin,
+  uploadCover.single('cover'),
+  imageValidator.validateBookCover,
+  imageValidator.autoCropBookCover,
+  adminController.postAddBook
+);
 router.get('/books/:id/edit', requireAdmin, adminController.getEditBook);
-router.post('/books/:id/edit', requireAdmin, uploadCover.single('cover'), imageValidator.validateBookCover, adminController.postEditBook);
+router.post(
+  '/books/:id/edit',
+  requireAdmin,
+  uploadCover.single('cover'),
+  imageValidator.validateBookCover,
+  imageValidator.autoCropBookCover,
+  adminController.postEditBook
+);
 router.delete('/books/:id', requireAdmin, adminController.deleteBook);
 
 // ===== ИМПОРТ КНИГ =====

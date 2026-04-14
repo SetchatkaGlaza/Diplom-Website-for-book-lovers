@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs').promises;
+const sharp = require('sharp');
 
 // Константы
 const SALT_ROUNDS = 10;
@@ -186,6 +187,16 @@ exports.uploadAvatar = async (req, res) => {
       }
     }
     
+    // Нормализуем аватар до квадратного формата (чтобы красиво отображался везде)
+    const avatarPath = path.join(__dirname, '../public/images/avatars', req.file.filename);
+    await sharp(avatarPath)
+      .resize(400, 400, {
+        fit: 'cover',
+        position: 'centre'
+      })
+      .toFile(`${avatarPath}.tmp`);
+    await fs.rename(`${avatarPath}.tmp`, avatarPath);
+
     // Обновляем запись в БД
     await User.update(
       { avatar: req.file.filename },
