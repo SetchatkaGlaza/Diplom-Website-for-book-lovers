@@ -57,7 +57,11 @@
           <h3>Удалённое сообщение</h3>
         </div>
         <div class="deleted-content">
-          <%= moderationCase.content.replace(/\n/g, '<br>') %>
+          <%- moderationCase.content
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\n/g, '<br>') %>
         </div>
       </div>
       

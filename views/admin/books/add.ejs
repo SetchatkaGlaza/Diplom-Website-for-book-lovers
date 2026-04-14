@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 <div class="admin-book-form">
   <div class="admin-header">
     <h1><i class="fas fa-plus-circle"></i> Добавление книги</h1>
@@ -83,8 +84,8 @@
             <p><i class="fas fa-info-circle"></i> <strong>Требования к изображению:</strong></p>
             <ul>
               <li>Минимальный размер: 200x300 пикселей</li>
-              <li>Максимальный размер: 1000x1500 пикселей</li>
-              <li>Соотношение сторон: примерно 2:3 (как у книг)</li>
+              <li>Любое большое изображение автоматически подгоняется</li>
+              <li>Соотношение сторон: 2:3 (настраивается перед загрузкой)</li>
               <li>Форматы: JPG, PNG, WEBP</li>
               <li>Максимальный размер файла: 5 МБ</li>
             </ul>
@@ -112,16 +113,64 @@
   </form>
 </div>
 
+<div id="coverCropModal" class="cover-crop-modal" style="display:none;">
+  <div class="cover-crop-content">
+    <h3>Настройка обложки</h3>
+    <div class="cover-crop-area"><img id="coverCropImage" alt="Crop cover"></div>
+    <div class="cover-crop-actions">
+      <button type="button" class="btn btn-outline" id="coverZoomOut">-</button>
+      <button type="button" class="btn btn-outline" id="coverZoomIn">+</button>
+      <button type="button" class="btn btn-outline" id="coverCancelCrop">Отмена</button>
+      <button type="button" class="btn btn-primary" id="coverApplyCrop">Применить</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .cover-crop-modal { position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+  .cover-crop-content { width: min(760px,95vw); background: #111827; padding: 1rem; border-radius: 12px; color: #fff; }
+  .cover-crop-area { max-height: 65vh; overflow: hidden; }
+  .cover-crop-area img { max-width: 100%; display: block; }
+  .cover-crop-actions { margin-top: 1rem; display:flex; gap:.75rem; justify-content:flex-end; flex-wrap: wrap; }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 <script>
-  // Превью загружаемой обложки
-  document.getElementById('cover').addEventListener('change', function(e) {
+  const coverInput = document.getElementById('cover');
+  const coverPreview = document.getElementById('cover-preview');
+  const coverCropModal = document.getElementById('coverCropModal');
+  const coverCropImage = document.getElementById('coverCropImage');
+  let coverCropper = null;
+
+  coverInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('cover-preview').src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    coverCropImage.src = URL.createObjectURL(file);
+    coverCropModal.style.display = 'flex';
+    if (coverCropper) coverCropper.destroy();
+    coverCropper = new Cropper(coverCropImage, { aspectRatio: 2 / 3, viewMode: 1, dragMode: 'move', autoCropArea: 1, background: false });
+  });
+
+  document.getElementById('coverZoomIn').addEventListener('click', () => coverCropper && coverCropper.zoom(0.1));
+  document.getElementById('coverZoomOut').addEventListener('click', () => coverCropper && coverCropper.zoom(-0.1));
+  document.getElementById('coverCancelCrop').addEventListener('click', () => {
+    coverCropModal.style.display = 'none';
+    if (coverCropper) coverCropper.destroy();
+    coverCropper = null;
+    coverInput.value = '';
+  });
+  document.getElementById('coverApplyCrop').addEventListener('click', () => {
+    if (!coverCropper) return;
+    coverCropper.getCroppedCanvas({ width: 600, height: 900 }).toBlob((blob) => {
+      if (!blob) return;
+      const file = new File([blob], `cover-cropped-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      coverInput.files = dt.files;
+      coverPreview.src = URL.createObjectURL(file);
+      coverCropModal.style.display = 'none';
+      coverCropper.destroy();
+      coverCropper = null;
+    }, 'image/jpeg', 0.9);
   });
 </script>
