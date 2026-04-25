@@ -37,6 +37,10 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   line-height: 1.6;
@@ -45,6 +49,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 body::before {
@@ -110,6 +115,15 @@ background-size: 100% 25px; /* имитация линованной бумаг�
   align-items: center;
   gap: 1rem;
   list-style: none;
+  min-width: 0;
+}
+
+.desktop-only {
+  display: initial;
+}
+
+.mobile-only {
+  display: none;
 }
 
 .nav-link {
@@ -1033,6 +1047,15 @@ background-size: 100% 25px; /* имитация линованной бумаг�
     width: 100%;
   }
 
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: list-item !important;
+    width: 100%;
+  }
+
   .dropdown-menu {
     position: static;
     width: 100%;
@@ -1044,6 +1067,15 @@ background-size: 100% 25px; /* имитация линованной бумаг�
 
   .dropdown.open .dropdown-menu {
     display: block;
+  }
+
+  .mobile-only .notification-bell {
+    justify-content: space-between;
+  }
+
+  .mobile-only .notification-badge {
+    position: static;
+    margin-left: auto;
   }
 }
 
