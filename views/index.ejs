@@ -47,7 +47,7 @@
 <% } else { %>
   <!-- Блок для авторизованных пользователей -->
  <div class="welcome-back-section">
-  <h2>С возвращением, <%= user.name %>! 👋</h2>
+  <h2>С возвращением, <%= user.name %>!</h2>
   <div class="quick-actions">
     <a href="/profile/books" class="quick-action-card">
       <i class="fas fa-bookmark"></i>
@@ -61,7 +61,6 @@
       <i class="fas fa-user"></i>
       <span>Профиль</span>
     </a>
-    <!-- Было /profile/edit, теперь /profile -->
   </div>
 </div>
 <% } %>
@@ -80,7 +79,7 @@
 
 <script>
   // Загружаем популярные книги
-  fetch('/books/popular?limit=5')
+  fetch('/books/popular?limit=6')
     .then(response => response.json())
     .then(books => {
       const container = document.getElementById('popular-books');
