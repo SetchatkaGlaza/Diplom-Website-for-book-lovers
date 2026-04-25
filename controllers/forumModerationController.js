@@ -2,6 +2,19 @@ const { ForumCategory, ForumTopic, ForumPost, ForumPostModeration, User } = requ
 const { Op } = require('sequelize');
 const notificationService = require('../services/notificationService');
 
+const escapeHtml = (text = '') => text
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#039;');
+
+const stripQuoteHeader = (text = '') => text
+  .replace(/^Цитата от[^\n]*\n(?:«[\s\S]*?»\n*)?/i, '')
+  .trim();
+
+const formatSafeMultiline = (text = '') => escapeHtml(stripQuoteHeader(text)).replace(/\n/g, '<br>');
+
 const buildRedirectUrl = (basePath, query = {}) => {
   const params = new URLSearchParams();
 
@@ -466,9 +479,16 @@ exports.getAppeals = async (req, res) => {
       order: [['updatedAt', 'DESC']]
     });
 
+    const normalizedCases = cases.map((item) => ({
+      ...item.toJSON(),
+      contentFormatted: formatSafeMultiline(item.content || ''),
+      explanationFormatted: formatSafeMultiline(item.user_explanation || ''),
+      resolutionFormatted: escapeHtml(item.resolution_comment || '')
+    }));
+
     res.render('admin/forum-appeals', {
       title: 'Форум — обращения по удалённым сообщениям',
-      cases,
+      cases: normalizedCases,
       currentStatus: status,
       user: req.session.user,
       layout: 'layouts/admin',

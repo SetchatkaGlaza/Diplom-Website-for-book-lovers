@@ -1,481 +1,110 @@
-<div class="public-profile">
-  <!-- Шапка профиля -->
+<div class="public-profile-page">
   <div class="profile-header">
     <div class="profile-cover">
       <div class="profile-avatar-wrapper">
         <img src="/images/avatars/<%= profileUser.avatar %>" alt="<%= profileUser.name %>" class="profile-avatar">
       </div>
     </div>
-    
+
     <div class="profile-info">
       <h1 class="profile-name"><%= profileUser.name %></h1>
-      
-      <div class="profile-meta">
-        <span class="meta-item">
-          <i class="fas fa-calendar-alt"></i>
-          На сайте с <%= new Date(profileUser.createdAt).toLocaleDateString('ru-RU', { year: 'numeric', month: 'long' }) %>
-        </span>
-        
-        <span class="meta-item">
-          <i class="fas fa-user-tag"></i>
-          <% if (profileUser.role === 'admin') { %>
-            <span class="role-badge admin">Администратор</span>
-          <% } else if (profileUser.role === 'moderator') { %>
-            <span class="role-badge moderator">Модератор</span>
-          <% } else { %>
-            <span class="role-badge user">Читатель</span>
-          <% } %>
-        </span>
-      </div>
-      
+      <p class="profile-meta">
+        <i class="fas fa-calendar-alt"></i> На сайте с <%= new Date(profileUser.createdAt).toLocaleDateString('ru-RU') %>
+        <i class="fas fa-user-tag"></i>
+        <%= profileUser.role === 'admin' ? 'Администратор' : profileUser.role === 'moderator' ? 'Модератор' : 'Читатель' %>
+      </p>
       <% if (profileUser.bio) { %>
-        <div class="profile-bio">
-          <p><%= profileUser.bio %></p>
-        </div>
+        <div class="profile-bio"><p><%= profileUser.bio %></p></div>
       <% } %>
     </div>
   </div>
-  
-  <!-- Статистика -->
-  <div class="profile-stats">
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-book-reader"></i>
-      </div>
-      <div class="stat-content">
-        <span class="stat-value"><%= stats.booksRead %></span>
-        <span class="stat-label">Прочитано книг</span>
-      </div>
-    </div>
-    
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-star"></i>
-      </div>
-      <div class="stat-content">
-        <span class="stat-value"><%= stats.reviewsCount %></span>
-        <span class="stat-label">Написано рецензий</span>
-      </div>
-    </div>
+
+  <div class="profile-stats-grid">
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-book-reader"></i></div><div class="stat-content"><span class="stat-value"><%= stats.booksRead %></span><span class="stat-label">Прочитано</span></div></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-book-open"></i></div><div class="stat-content"><span class="stat-value"><%= stats.booksReading %></span><span class="stat-label">Читает сейчас</span></div></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-bookmark"></i></div><div class="stat-content"><span class="stat-value"><%= stats.booksWantToRead %></span><span class="stat-label">В планах</span></div></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-star"></i></div><div class="stat-content"><span class="stat-value"><%= stats.reviewsCount %></span><span class="stat-label">Рецензий</span></div></div>
   </div>
-  
-  <!-- Последние рецензии -->
-  <div class="profile-section">
-    <h2 class="section-title">
-      <i class="fas fa-star"></i>
-      Последние рецензии <%= profileUser.name %>
-    </h2>
-    
-    <% if (recentReviews && recentReviews.length > 0) { %>
-      <div class="reviews-grid">
-        <% recentReviews.forEach(review => { %>
-          <div class="review-card">
-            <div class="review-book">
-              <img src="/images/covers/<%= review.book.cover_image %>" alt="<%= review.book.title %>" class="review-book-cover">
-              <div class="review-book-info">
-                <h3>
-                  <a href="/books/<%= review.book.id %>"><%= review.book.title %></a>
-                </h3>
-                <p class="review-book-author"><%= review.book.author %></p>
+
+  <div class="profile-sections">
+    <section class="profile-section">
+      <div class="section-header"><h2><i class="fas fa-book"></i> Книги на полках</h2></div>
+      <% if (recentBooks && recentBooks.length > 0) { %>
+        <div class="books-grid">
+          <% recentBooks.forEach(item => { %>
+            <a href="/books/<%= item.book.id %>" class="book-card">
+              <img src="/images/covers/<%= item.book.cover_image %>" alt="<%= item.book.title %>">
+              <div class="book-card-info">
+                <h3><%= item.book.title %></h3>
+                <p><%= item.book.author %></p>
+                <span class="status-tag status-<%= item.status %>">
+                  <%= item.status === 'read' ? 'Прочитано' : item.status === 'reading' ? 'Читает' : 'В планах' %>
+                </span>
               </div>
-            </div>
-            
-            <div class="review-rating">
-              <% for(let i = 1; i <= 5; i++) { %>
-                <% if (i <= review.rating) { %>
-                  <i class="fas fa-star"></i>
-                <% } else { %>
-                  <i class="far fa-star"></i>
-                <% } %>
-              <% } %>
-            </div>
-            
-            <div class="review-content">
-              <p><%= review.content.length > 200 ? review.content.substring(0, 200) + '...' : review.content %></p>
-            </div>
-            
-            <div class="review-footer">
-              <span class="review-date">
-                <i class="far fa-calendar-alt"></i>
-                <%= new Date(review.createdAt).toLocaleDateString('ru-RU') %>
-              </span>
-              <a href="/books/<%= review.book.id %>" class="read-more-btn">
-                Читать рецензию <i class="fas fa-arrow-right"></i>
-              </a>
-            </div>
-          </div>
-        <% }) %>
-      </div>
-      
-      <% if (stats.reviewsCount > 5) { %>
-        <div class="view-all">
-          <a href="/profile/<%= profileUser.id %>/reviews" class="btn btn-outline">
-            Все рецензии <i class="fas fa-arrow-right"></i>
-          </a>
+            </a>
+          <% }) %>
         </div>
+      <% } else { %>
+        <p class="empty-state">У пользователя пока нет книг на полках.</p>
       <% } %>
-      
-    <% } else { %>
-      <div class="empty-state">
-        <i class="fas fa-star fa-4x"></i>
-        <h3>Пользователь пока не написал рецензий</h3>
-      </div>
-    <% } %>
-  </div>
-  
-  <!-- Кнопка назад -->
-  <div class="back-button">
-    <a href="javascript:history.back()" class="btn btn-outline">
-      <i class="fas fa-arrow-left"></i> Вернуться назад
-    </a>
+    </section>
+
+    <section class="profile-section">
+      <div class="section-header"><h2><i class="fas fa-star"></i> Рецензии пользователя</h2></div>
+      <% if (recentReviews && recentReviews.length > 0) { %>
+        <div class="reviews-list">
+          <% recentReviews.forEach(review => { %>
+            <article class="review-card">
+              <div class="review-head">
+                <a href="/books/<%= review.book.id %>" class="review-book"><%= review.book.title %></a>
+                <span class="review-date"><%= new Date(review.createdAt).toLocaleDateString('ru-RU') %></span>
+              </div>
+              <div class="review-rating">
+                <% for(let i = 1; i <= 5; i++) { %>
+                  <i class="<%= i <= review.rating ? 'fas' : 'far' %> fa-star"></i>
+                <% } %>
+              </div>
+              <p class="review-content"><%= review.content.length > 220 ? review.content.substring(0, 220) + '...' : review.content %></p>
+            </article>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p class="empty-state">Пока нет опубликованных рецензий.</p>
+      <% } %>
+    </section>
   </div>
 </div>
 
 <style>
-  .public-profile {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 24px;
-    padding: 2rem;
-    margin: 2rem 0;
-    color: white;
-  }
-  
-  /* Шапка профиля */
-  .profile-header {
-    margin-bottom: 2rem;
-  }
-  
-  .profile-cover {
-    height: 200px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 16px 16px 0 0;
-    position: relative;
-    margin-bottom: 60px;
-  }
-  
-  .profile-avatar-wrapper {
-    position: absolute;
-    bottom: -50px;
-    left: 2rem;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 4px solid white;
-    overflow: hidden;
-    background: white;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  }
-  
-  .profile-avatar {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .profile-info {
-    padding: 1rem 2rem 1rem 160px;
-  }
-  
-  .profile-name {
-    font-size: 2.2rem;
-    margin: 0 0 0.5rem;
-    background: linear-gradient(135deg, #fff, #e0e0e0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  
-  .profile-meta {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-  }
-  
-  .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.95rem;
-  }
-  
-  .meta-item i {
-    color: #fbbf24;
-  }
-  
-  .role-badge {
-    display: inline-block;
-    padding: 0.25rem 1rem;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    font-weight: 500;
-  }
-  
-  .role-badge.admin {
-    background: #ef4444;
-    color: white;
-  }
-  
-  .role-badge.moderator {
-    background: #f59e0b;
-    color: white;
-  }
-  
-  .role-badge.user {
-    background: #3b82f6;
-    color: white;
-  }
-  
-  .profile-bio {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 1rem 1.5rem;
-    border-radius: 12px;
-    border-left: 4px solid #fbbf24;
-    margin-top: 1rem;
-  }
-  
-  .profile-bio p {
-    margin: 0;
-    line-height: 1.7;
-    color: rgba(255, 255, 255, 0.9);
-  }
-  
-  /* Статистика */
-  .profile-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-  
-  .stat-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s;
-  }
-  
-  .stat-card:hover {
-    transform: translateY(-5px);
-    background: rgba(0, 0, 0, 0.3);
-    border-color: #fbbf24;
-  }
-  
-  .stat-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: #000;
-  }
-  
-  .stat-content {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .stat-value {
-    font-size: 1.8rem;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-  
-  .stat-label {
-    font-size: 0.9rem;
-    opacity: 0.8;
-  }
-  
-  /* Секции */
-  .profile-section {
-    margin-bottom: 2rem;
-  }
-  
-  .section-title {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: #fbbf24;
-    border-bottom: 2px solid rgba(251, 191, 36, 0.3);
-    padding-bottom: 0.5rem;
-  }
-  
-  .section-title i {
-    font-size: 1.3rem;
-  }
-  
-  /* Рецензии */
-  .reviews-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
-  }
-  
-  .review-card {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 16px;
-    padding: 1.5rem;
-    transition: all 0.3s;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-  }
-  
-  .review-card:hover {
-    transform: translateY(-5px);
-    background: rgba(0, 0, 0, 0.3);
-    border-color: #fbbf24;
-  }
-  
-  .review-book {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .review-book-cover {
-    width: 60px;
-    height: 90px;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  }
-  
-  .review-book-info h3 {
-    margin: 0 0 0.25rem;
-    font-size: 1.1rem;
-  }
-  
-  .review-book-info h3 a {
-    color: white;
-    text-decoration: none;
-  }
-  
-  .review-book-info h3 a:hover {
-    color: #fbbf24;
-  }
-  
-  .review-book-author {
-    font-size: 0.9rem;
-    opacity: 0.7;
-    margin: 0;
-  }
-  
-  .review-rating {
-    margin-bottom: 0.75rem;
-    color: #fbbf24;
-  }
-  
-  .review-rating i {
-    margin-right: 0.2rem;
-  }
-  
-  .review-content {
-    margin-bottom: 1rem;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.9);
-  }
-  
-  .review-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 0.75rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .review-date {
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.5);
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-  
-  .read-more-btn {
-    color: #fbbf24;
-    text-decoration: none;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    transition: all 0.3s;
-  }
-  
-  .read-more-btn:hover {
-    gap: 0.5rem;
-  }
-  
-  /* Пустое состояние */
-  .empty-state {
-    text-align: center;
-    padding: 3rem;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 16px;
-  }
-  
-  .empty-state i {
-    opacity: 0.3;
-    margin-bottom: 1rem;
-    color: #fbbf24;
-  }
-  
-  .empty-state h3 {
-    margin: 0;
-    color: rgba(255, 255, 255, 0.7);
-  }
-  
-  /* Кнопка назад */
-  .back-button {
-    text-align: center;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .view-all {
-    text-align: center;
-    margin-top: 1.5rem;
-  }
-  
-  /* Адаптивность */
-  @media (max-width: 768px) {
-    .profile-avatar-wrapper {
-      left: 50%;
-      transform: translateX(-50%);
-    }
-    
-    .profile-info {
-      padding: 80px 1rem 1rem;
-      text-align: center;
-    }
-    
-    .profile-meta {
-      justify-content: center;
-    }
-    
-    .profile-stats {
-      grid-template-columns: 1fr;
-    }
-    
-    .reviews-grid {
-      grid-template-columns: 1fr;
-    }
-    
-    .review-book {
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-  }
+  .public-profile-page { color: #fff; }
+  .profile-header { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); border-radius: 16px; overflow: hidden; margin: 2rem 0 1rem; }
+  .profile-cover { height: 180px; background: linear-gradient(135deg, var(--primary), var(--secondary)); position: relative; }
+  .profile-avatar-wrapper { position: absolute; bottom: -46px; left: 1.5rem; width: 110px; height: 110px; border-radius: 50%; overflow: hidden; border: 4px solid #fff; background: #fff; }
+  .profile-avatar { width: 100%; height: 100%; object-fit: cover; }
+  .profile-info { padding: 3.5rem 1.5rem 1.5rem; }
+  .profile-name { margin: 0 0 .5rem; font-size: 2rem; }
+  .profile-meta { display: flex; flex-wrap: wrap; gap: 1rem; opacity: .85; margin: 0 0 .75rem; }
+  .profile-bio { background: rgba(255,255,255,.08); border-radius: 10px; padding: .75rem 1rem; }
+  .profile-bio p { margin: 0; }
+  .profile-stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap: 12px; margin-bottom: 1rem; }
+  .stat-card { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2); border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 10px; }
+  .stat-value { font-size: 1.25rem; font-weight: 700; }
+  .stat-label { display: block; opacity: .8; font-size: .9rem; }
+  .profile-sections { display: grid; gap: 1rem; }
+  .profile-section { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2); border-radius: 12px; padding: 14px; }
+  .section-header h2 { margin: 0; font-size: 1.15rem; }
+  .books-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 10px; margin-top: 10px; }
+  .book-card { display: grid; grid-template-columns: 64px 1fr; gap: 10px; background: rgba(0,0,0,.2); border-radius: 10px; padding: 8px; color: #fff; text-decoration: none; }
+  .book-card img { width: 64px; height: 92px; object-fit: cover; border-radius: 6px; }
+  .book-card-info h3 { margin: 0 0 4px; font-size: .95rem; }
+  .book-card-info p { margin: 0 0 8px; opacity: .8; font-size: .9rem; }
+  .status-tag { display: inline-block; font-size: .75rem; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,.16); }
+  .reviews-list { display: grid; gap: 10px; margin-top: 10px; }
+  .review-card { background: rgba(0,0,0,.2); border-radius: 10px; padding: 10px; }
+  .review-head { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+  .review-book { color: #fff; font-weight: 600; }
+  .review-date { opacity: .75; font-size: .85rem; }
+  .review-rating { margin: 6px 0; color: #fbbf24; }
+  .review-content { margin: 0; opacity: .95; }
+  .empty-state { opacity: .8; margin-top: 10px; }
 </style>
