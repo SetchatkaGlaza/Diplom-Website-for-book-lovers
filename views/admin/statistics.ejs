@@ -1,578 +1,107 @@
-<div class="admin-statistics">
-  <!-- Заголовок -->
+<div class="admin-statistics-simple">
   <div class="page-header">
-    <h1><i class="fas fa-chart-bar"></i> Статистика проекта</h1>
+    <div>
+      <h1><i class="fas fa-chart-bar"></i> Статистика проекта</h1>
+      <p class="text-muted">Обновлено: <%= new Date().toLocaleString('ru-RU') %></p>
+    </div>
     <div class="header-actions">
-      <span class="text-muted">Обновлено: <%= new Date().toLocaleString('ru-RU') %></span>
-      <a href="/admin" class="btn btn-outline btn-sm">
-        <i class="fas fa-arrow-left"></i> Назад в админку
-      </a>
+      <a href="/admin" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Назад в админку</a>
       <link rel="stylesheet" href="/css/admin.css">
     </div>
   </div>
-  
-  <!-- Карточки с основной статистикой и кнопками навигации -->
+
   <div class="stats-cards">
-    <div class="stat-card primary">
-      <div class="stat-icon">
-        <i class="fas fa-users"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-value"><%= stats.totalUsers.toLocaleString() %></div>
-        <div class="stat-label">Пользователей</div>
-        <div class="stat-today">+<%= stats.newUsersToday %> сегодня</div>
-      </div>
-      <a href="/admin/users" class="stat-card-btn" title="Управление пользователями">
-        <i class="fas fa-arrow-right"></i>
-      </a>
-    </div>
-    
-    <div class="stat-card success">
-      <div class="stat-icon">
-        <i class="fas fa-book"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-value"><%= stats.totalBooks.toLocaleString() %></div>
-        <div class="stat-label">Книг</div>
-        <div class="stat-today">+<%= stats.newBooksToday %> сегодня</div>
-      </div>
-      <a href="/admin/books" class="stat-card-btn" title="Управление книгами">
-        <i class="fas fa-arrow-right"></i>
-      </a>
-    </div>
-    
-    <div class="stat-card warning">
-      <div class="stat-icon">
-        <i class="fas fa-star"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-value"><%= stats.totalReviews.toLocaleString() %></div>
-        <div class="stat-label">Рецензий</div>
-        <div class="stat-today">+<%= stats.newReviewsToday %> сегодня</div>
-      </div>
-      <a href="/admin/reviews" class="stat-card-btn" title="Управление рецензиями">
-        <i class="fas fa-arrow-right"></i>
-      </a>
-    </div>
-    
-    <div class="stat-card info">
-      <div class="stat-icon">
-        <i class="fas fa-tags"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-value"><%= stats.totalGenres.toLocaleString() %></div>
-        <div class="stat-label">Жанров</div>
-      </div>
-      <a href="/admin/genres" class="stat-card-btn" title="Управление жанрами">
-        <i class="fas fa-arrow-right"></i>
-      </a>
-    </div>
+    <div class="stat-card"><strong><%= stats.totalUsers.toLocaleString() %></strong><span>Пользователей (+<%= stats.newUsersToday %> сегодня)</span></div>
+    <div class="stat-card"><strong><%= stats.totalBooks.toLocaleString() %></strong><span>Книг (+<%= stats.newBooksToday %> сегодня)</span></div>
+    <div class="stat-card"><strong><%= stats.totalReviews.toLocaleString() %></strong><span>Рецензий (+<%= stats.newReviewsToday %> сегодня)</span></div>
+    <div class="stat-card"><strong><%= stats.totalGenres.toLocaleString() %></strong><span>Жанров</span></div>
   </div>
-  
-  <!-- Две колонки с таблицами -->
-  <div class="tables-row">
-    <!-- Левая колонка - Топ популярных книг -->
-    <div class="table-container">
-      <div class="table-header">
-        <div>
-          <h2><i class="fas fa-fire"></i> Топ популярных книг</h2>
-          <span class="badge">по просмотрам</span>
-        </div>
-        <a href="/admin/books" class="btn btn-primary btn-sm">
-          <i class="fas fa-cog"></i> Управление книгами
-        </a>
+
+  <div class="tables-grid">
+    <section class="table-card">
+      <div class="table-title-row">
+        <h2>Топ популярных книг</h2>
+        <a href="/admin/books" class="btn btn-primary btn-sm">Управление книгами</a>
       </div>
-      
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Книга</th>
-            <th>Автор</th>
-            <th>Просмотры</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (topBooks && topBooks.length > 0) { %>
-            <% topBooks.forEach((book, index) => { %>
-              <tr>
-                <td><%= index + 1 %></td>
-                <td class="book-cell">
-                  <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>" class="table-cover">
-                  <a href="/books/<%= book.id %>" target="_blank"><%= book.title.length > 30 ? book.title.substring(0, 30) + '...' : book.title %></a>
-                </td>
-                <td><%= book.author.length > 20 ? book.author.substring(0, 20) + '...' : book.author %></td>
-                <td class="text-center"><strong><%= book.views_count.toLocaleString() %></strong></td>
-                <td class="actions-cell">
-                  <a href="/books/<%= book.id %>" class="action-btn" target="_blank" title="Просмотр">
-                    <i class="fas fa-eye"></i>
-                  </a>
-                  <a href="/admin/books/<%= book.id %>/edit" class="action-btn" title="Редактировать">
-                    <i class="fas fa-edit"></i>
-                  </a>
-                </td>
-              </tr>
-            <% }) %>
-          <% } else { %>
-            <tr><td colspan="5" class="text-center">Нет данных</td></tr>
-          <% } %>
-        </tbody>
-      </table>
-      
-      <div class="table-footer">
-        <a href="/admin/books" class="btn-link">Все книги <i class="fas fa-arrow-right"></i></a>
+      <div class="table-wrapper">
+        <table class="simple-admin-table">
+          <thead>
+            <tr>
+              <th style="width:64px;">#</th>
+              <th>Название</th>
+              <th>Автор</th>
+              <th style="width:140px;">Просмотры</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (topBooks && topBooks.length > 0) { %>
+              <% topBooks.forEach((book, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><a href="/books/<%= book.id %>" target="_blank" rel="noopener"><%= book.title %></a></td>
+                  <td><%= book.author %></td>
+                  <td class="text-center"><%= book.views_count.toLocaleString() %></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="4" class="text-center">Нет данных</td></tr>
+            <% } %>
+          </tbody>
+        </table>
       </div>
-    </div>
-    <div class="table-container">
-      <div class="table-header">
-        <div>
-          <h2><i class="fas fa-users"></i> Топ активных пользователей</h2>
-          <span class="badge">по количеству рецензий</span>
-        </div>
-        <a href="/admin/users" class="btn btn-primary btn-sm">
-          <i class="fas fa-cog"></i> Управление пользователями
-        </a>
+    </section>
+
+    <section class="table-card">
+      <div class="table-title-row">
+        <h2>Топ активных пользователей</h2>
+        <a href="/admin/users" class="btn btn-primary btn-sm">Управление пользователями</a>
       </div>
-      
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Пользователь</th>
-            <th>Рецензий</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (topUsers && topUsers.length > 0) { %>
-            <% topUsers.forEach((user, index) => { %>
-              <tr>
-                <td><%= index + 1 %></td>
-                <td class="user-cell">
-                  <img src="/images/avatars/<%= user.avatar || 'default-avatar.png' %>" alt="<%= user.name %>" class="table-avatar">
-                  <a href="/profile/<%= user.id %>" target="_blank"><%= user.name %></a>
-                </td>
-                <td class="text-center"><strong><%= user.reviews_count %></strong></td>
-                <td class="actions-cell">
-                  <a href="/profile/<%= user.id %>" class="action-btn" target="_blank" title="Просмотр профиля">
-                    <i class="fas fa-user"></i>
-                  </a>
-                  <a href="/admin/users" class="action-btn" title="Управление пользователем">
-                    <i class="fas fa-cog"></i>
-                  </a>
-                </td>
-              </tr>
-            <% }) %>
-          <% } else { %>
-            <tr><td colspan="4" class="text-center">Нет данных</td></tr>
-          <% } %>
-        </tbody>
-      </table>
-      
-      <div class="table-footer">
-        <a href="/admin/users" class="btn-link">Все пользователи <i class="fas fa-arrow-right"></i></a>
+      <div class="table-wrapper">
+        <table class="simple-admin-table">
+          <thead>
+            <tr>
+              <th style="width:64px;">#</th>
+              <th>Пользователь</th>
+              <th style="width:160px;">Рецензий</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (topUsers && topUsers.length > 0) { %>
+              <% topUsers.forEach((item, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><a href="/profile/<%= item.id %>" target="_blank" rel="noopener"><%= item.name %></a></td>
+                  <td class="text-center"><%= item.reviews_count %></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="3" class="text-center">Нет данных</td></tr>
+            <% } %>
+          </tbody>
+        </table>
       </div>
-    </div>
-  </div>
-  
-  <!-- Кнопки быстрого доступа -->
-  <div class="quick-actions-grid">
-    <a href="/admin/books/add" class="quick-action-card">
-      <i class="fas fa-plus-circle"></i>
-      <span>Добавить книгу</span>
-    </a>
-    <a href="/admin/reviews?status=pending" class="quick-action-card">
-      <i class="fas fa-clock"></i>
-      <span>Рецензии на модерации</span>
-    </a>
-    <a href="/admin/users" class="quick-action-card">
-      <i class="fas fa-user-plus"></i>
-      <span>Новые пользователи</span>
-    </a>
-    <a href="/admin/statistics" class="quick-action-card">
-      <i class="fas fa-sync-alt"></i>
-      <span>Обновить статистику</span>
-    </a>
+    </section>
   </div>
 </div>
 
 <style>
-  /* Стили для страницы статистики */
-  .admin-statistics {
-    padding: 0;
-    color: white;
-  }
-  
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding: 1rem 1.5rem;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-lg);
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  
-  .page-header h1 {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 1.8rem;
-    margin: 0;
-  }
-  
-  .page-header h1 i {
-    color: var(--accent);
-  }
-  
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .text-muted {
-    opacity: 0.7;
-    font-size: 0.9rem;
-  }
-  
-  .btn-sm {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-    border-radius: var(--radius);
-  }
-  
-  /* Карточки статистики с кнопками */
-  .stats-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-  
-  .stat-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
-    border-radius: var(--radius-lg);
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: transform 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .stat-card:hover {
-    transform: translateY(-5px);
-  }
-  
-  .stat-card.primary { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-  .stat-card.success { background: linear-gradient(135deg, #10b981, #059669); }
-  .stat-card.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
-  .stat-card.info { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-  
-  .stat-icon {
-    font-size: 2.5rem;
-    opacity: 0.9;
-  }
-  
-  .stat-content {
-    flex: 1;
-  }
-  
-  .stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-  
-  .stat-label {
-    font-size: 0.9rem;
-    opacity: 0.9;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  
-  .stat-today {
-    font-size: 0.8rem;
-    opacity: 0.8;
-    margin-top: 0.25rem;
-  }
-  
-  .stat-card-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    text-decoration: none;
-    transition: all 0.3s;
-  }
-  
-  .stat-card-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
-  }
-  
-  /* Контейнеры для таблиц */
-  .tables-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .table-container {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    transition: transform 0.3s;
-  }
-  
-  .table-container:hover {
-    transform: translateY(-3px);
-  }
-  
-  .table-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  
-  .table-header h2 {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 1.3rem;
-    margin: 0;
-  }
-  
-  .table-header h2 i {
-    color: var(--accent);
-  }
-  
-  .badge {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 0.25rem 0.75rem;
-    border-radius: 50px;
-    font-size: 0.8rem;
-    font-weight: 500;
-  }
-  
-  /* Таблицы */
-  .admin-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .admin-table th {
-    text-align: left;
-    padding: 0.75rem 0.5rem;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-    font-weight: 600;
-    opacity: 0.9;
-    font-size: 0.9rem;
-  }
-  
-  .admin-table td {
-    padding: 0.75rem 0.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .admin-table tr:last-child td {
-    border-bottom: none;
-  }
-  
-  .admin-table tr:hover td {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  
-  .text-center {
-    text-align: center;
-  }
-  
-  /* Ячейки с книгами и пользователями */
-  .book-cell, .user-cell {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .table-cover {
-    width: 30px;
-    height: 45px;
-    object-fit: cover;
-    border-radius: 4px;
-  }
-  
-  .table-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-  
-  .admin-table a {
-    color: white;
-    text-decoration: none;
-    transition: color 0.3s;
-  }
-  
-  .admin-table a:hover {
-    color: var(--accent);
-    text-decoration: underline;
-  }
-  
-  /* Ячейка с действиями */
-  .actions-cell {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-  }
-  
-  .action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    text-decoration: none;
-    transition: all 0.3s;
-  }
-  
-  .action-btn:hover {
-    background: var(--accent);
-    transform: scale(1.1);
-  }
-  
-  .rating-badge {
-    display: inline-block;
-    background: rgba(251, 191, 36, 0.2);
-    color: #fbbf24;
-    padding: 0.25rem 0.75rem;
-    border-radius: 50px;
-    font-weight: 600;
-  }
-  
-  .table-footer {
-    margin-top: 1rem;
-    text-align: right;
-  }
-  
-  .btn-link {
-    color: white;
-    text-decoration: none;
-    opacity: 0.8;
-    transition: all 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .btn-link:hover {
-    opacity: 1;
-    transform: translateX(5px);
-  }
-  
-  /* Сетка быстрых действий */
-  .quick-actions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-top: 2rem;
-  }
-  
-  .quick-action-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-lg);
-    color: white;
-    text-decoration: none;
-    transition: all 0.3s;
-  }
-  
-  .quick-action-card:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.2);
-  }
-  
-  .quick-action-card i {
-    font-size: 2rem;
-    color: var(--accent);
-  }
-  
-  /* Адаптивность */
-  @media (max-width: 1024px) {
-    .tables-row {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .page-header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    
-    .header-actions {
-      width: 100%;
-      justify-content: space-between;
-    }
-    
-    .stats-cards {
-      grid-template-columns: 1fr;
-    }
-    
-    .admin-table {
-      font-size: 0.9rem;
-    }
-    
-    .book-cell, .user-cell {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    
-    .actions-cell {
-      flex-wrap: wrap;
-    }
-    
-    .quick-actions-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .quick-actions-grid {
-      grid-template-columns: 1fr;
-    }
-  }
+  .admin-statistics-simple { color: #fff; }
+  .page-header { display:flex; justify-content:space-between; gap:1rem; align-items:flex-start; margin-bottom:1.25rem; flex-wrap:wrap; }
+  .page-header h1 { margin:0 0 .25rem; font-size:1.75rem; }
+  .text-muted { opacity:.75; margin:0; }
+  .stats-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:1rem; }
+  .stat-card { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); border-radius:12px; padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
+  .stat-card strong { font-size:1.25rem; line-height:1; }
+  .tables-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:16px; }
+  .table-card { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); border-radius:12px; padding:12px; }
+  .table-title-row { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+  .table-title-row h2 { margin:0; font-size:1.1rem; }
+  .table-wrapper { overflow-x:auto; }
+  .simple-admin-table { width:100%; border-collapse:collapse; table-layout:fixed; }
+  .simple-admin-table th, .simple-admin-table td { border:1px solid rgba(255,255,255,.14); padding:10px; vertical-align:middle; }
+  .simple-admin-table th { font-weight:600; background:rgba(0,0,0,.2); }
+  .simple-admin-table td { background:rgba(255,255,255,.02); word-break:break-word; }
+  .simple-admin-table tr { height:48px; }
+  .simple-admin-table a { color:#fff; text-decoration:underline; text-underline-offset:2px; }
+  .text-center { text-align:center; }
 </style>
