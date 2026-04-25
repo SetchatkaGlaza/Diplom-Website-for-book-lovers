@@ -15,7 +15,7 @@
       <li><a href="/forum" class="nav-link"><i class="fas fa-comments"></i> Форум</a></li>
       
       <% if (user) { %>
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown desktop-only">
           <a href="#" class="nav-link dropdown-toggle">
             <img src="/images/avatars/<%= user.avatar %>" alt="<%= user.name %>" class="nav-avatar">
             <span><%= user.name %></span>
@@ -33,13 +33,31 @@
             <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Выйти</a></li>
           </ul>
         </li>
+
+        <li class="mobile-only">
+          <a href="/profile" class="nav-link"><i class="fas fa-user"></i> Мой профиль</a>
+        </li>
+        <li class="mobile-only">
+          <a href="/profile/books" class="nav-link"><i class="fas fa-bookmark"></i> Мои книги</a>
+        </li>
+        <li class="mobile-only">
+          <a href="/profile/reviews" class="nav-link"><i class="fas fa-star"></i> Мои рецензии</a>
+        </li>
+        <% if (user.role === 'admin') { %>
+          <li class="mobile-only">
+            <a href="/admin" class="nav-link"><i class="fas fa-cog"></i> Админка</a>
+          </li>
+        <% } %>
+        <li class="mobile-only">
+          <a href="/auth/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Выйти</a>
+        </li>
       <% } else { %>
         <li><a href="/auth/login" class="nav-link"><i class="fas fa-sign-in-alt"></i> Вход</a></li>
         <li><a href="/auth/register" class="nav-link btn-nav">Регистрация</a></li>
       <% } %>
       <% if (user) { %>
-  <li class="nav-item notifications-dropdown">
-    <a href="#" class="nav-link notification-bell" id="notificationBell">
+  <li class="nav-item notifications-dropdown desktop-only">
+    <a href="/notifications" class="nav-link notification-bell" id="notificationBell">
       <i class="fas fa-bell"></i>
       <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
     </a>
@@ -57,6 +75,14 @@
         <a href="/notifications">Все уведомления</a>
       </div>
     </div>
+  </li>
+
+  <li class="mobile-only">
+    <a href="/notifications" class="nav-link notification-bell">
+      <i class="fas fa-bell"></i>
+      <span>Уведомления</span>
+      <span class="notification-badge" id="notificationBadgeMobile" style="display: none;">0</span>
+    </a>
   </li>
 <% } %>
     </ul>
@@ -80,12 +106,21 @@
       const data = await response.json();
       
       const badge = document.getElementById('notificationBadge');
+      const mobileBadge = document.getElementById('notificationBadgeMobile');
       if (badge) {
         if (data.unread > 0) {
           badge.style.display = 'inline';
           badge.textContent = data.unread > 9 ? '9+' : data.unread;
         } else {
           badge.style.display = 'none';
+        }
+      }
+      if (mobileBadge) {
+        if (data.unread > 0) {
+          mobileBadge.style.display = 'inline';
+          mobileBadge.textContent = data.unread > 9 ? '9+' : data.unread;
+        } else {
+          mobileBadge.style.display = 'none';
         }
       }
       
@@ -307,18 +342,9 @@
   }
 
   @media (max-width: 768px) {
-    .notifications-dropdown {
-      position: static;
-    }
-
-    .notifications-panel {
-      position: fixed;
-      top: 74px;
-      left: 0.5rem;
-      right: 0.5rem;
-      width: auto;
-      max-height: calc(100vh - 90px);
-      transform: translateY(-8px);
+    .desktop-only .notifications-panel,
+    .desktop-only .dropdown-menu {
+      display: none !important;
     }
   }
 </style>

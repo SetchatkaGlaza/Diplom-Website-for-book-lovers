@@ -2,10 +2,6 @@
 document.addEventListener('DOMContentLoaded', function() {
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const navMenu = document.getElementById('nav-menu');
-  const profileDropdown = document.querySelector('.dropdown');
-  const profileDropdownToggle = profileDropdown?.querySelector('.dropdown-toggle');
-  const notificationsDropdown = document.querySelector('.notifications-dropdown');
-  const notificationBell = document.getElementById('notificationBell');
   
   if (mobileMenuBtn && navMenu) {
     mobileMenuBtn.addEventListener('click', function() {
@@ -33,39 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Профильное выпадающее меню: hover на desktop, click на touch-устройствах
-  if (profileDropdown && profileDropdownToggle) {
-    profileDropdownToggle.addEventListener('click', function (e) {
-      if (window.innerWidth <= 768) {
-        e.preventDefault();
-        profileDropdown.classList.toggle('open');
-      }
-    });
-  }
-
-  // Уведомления: на мобильных открываем/закрываем по клику
-  if (notificationsDropdown && notificationBell) {
-    notificationBell.addEventListener('click', function (e) {
-      if (window.innerWidth <= 768) {
-        e.preventDefault();
-        notificationsDropdown.classList.toggle('open');
-      }
-    });
-  }
-
-  // Закрытие мобильных попапов при клике вне области
-  document.addEventListener('click', function (e) {
-    if (window.innerWidth > 768) return;
-
-    if (profileDropdown && !profileDropdown.contains(e.target)) {
-      profileDropdown.classList.remove('open');
-    }
-
-    if (notificationsDropdown && !notificationsDropdown.contains(e.target)) {
-      notificationsDropdown.classList.remove('open');
-    }
-  });
-  
   // Анимация чисел статистики
   const statNumbers = document.querySelectorAll('.stat-number');
   
