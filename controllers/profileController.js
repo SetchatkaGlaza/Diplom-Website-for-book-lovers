@@ -579,7 +579,12 @@ exports.deleteReview = async (req, res) => {
  */
 exports.getPublicProfile = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = parseInt(req.params.userId, 10);
+    const currentUserId = req.session.user ? req.session.user.id : null;
+
+    if (currentUserId && currentUserId === userId) {
+      return res.redirect('/profile');
+    }
     
     // Получаем информацию о пользователе
     const user = await User.findByPk(userId, {
@@ -592,24 +597,40 @@ exports.getPublicProfile = async (req, res) => {
     }
     
     // Получаем публичную статистику
-    const stats = {
-      booksRead: await UserBook.count({ where: { user_id: userId, status: 'read' } }),
-      reviewsCount: await Review.count({ where: { user_id: userId } })
-    };
+    const [booksRead, booksWantToRead, booksReading, reviewsCount] = await Promise.all([
+      UserBook.count({ where: { user_id: userId, status: 'read' } }),
+      UserBook.count({ where: { user_id: userId, status: 'want_to_read' } }),
+      UserBook.count({ where: { user_id: userId, status: 'reading' } }),
+      Review.count({ where: { user_id: userId } })
+    ]);
+
+    const stats = { booksRead, booksWantToRead, booksReading, reviewsCount };
     
-    // Получаем последние рецензии пользователя
+    // Получаем рецензии и книги пользователя (как в личном профиле)
     const recentReviews = await Review.findAll({
       where: { user_id: userId },
       include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image'] }],
       order: [['createdAt', 'DESC']],
-      limit: 5
+      limit: 10
+    });
+
+    const recentBooks = await UserBook.findAll({
+      where: { user_id: userId },
+      include: [{
+        model: Book,
+        as: 'book',
+        include: [{ model: Genre, as: 'genre' }]
+      }],
+      order: [['updatedAt', 'DESC']],
+      limit: 12
     });
     
     res.render('profile/public', {
       title: `Профиль ${user.name}`,
       profileUser: user,
       stats,
-      recentReviews
+      recentReviews,
+      recentBooks
     });
     
   } catch (error) {

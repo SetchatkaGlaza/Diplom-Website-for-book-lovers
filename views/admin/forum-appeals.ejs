@@ -119,7 +119,7 @@
               Удалённый текст
             </div>
             <div class="section-content deleted-content">
-              <%= item.content.replace(/\n/g, '<br>') %>
+              <%- item.contentFormatted %>
             </div>
           </div>
           
@@ -132,7 +132,7 @@
               </div>
               <div class="section-content explanation-content">
                 <i class="fas fa-quote-left quote-icon"></i>
-                <%= item.user_explanation.replace(/\n/g, '<br>') %>
+                <%- item.explanationFormatted %>
               </div>
             </div>
           <% } %>
@@ -146,7 +146,7 @@
               </div>
               <div class="section-content resolution-content">
                 <i class="fas fa-comment-dots"></i>
-                <%= item.resolution_comment %>
+                <%- item.resolutionFormatted %>
               </div>
             </div>
           <% } %>
