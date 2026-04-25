@@ -190,6 +190,12 @@ background-size: 100% 25px; /* имитация линованной бумаг�
   transform: translateY(0);
 }
 
+.dropdown.open .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
 .dropdown-menu li a {
   display: flex;
   align-items: center;
@@ -964,6 +970,10 @@ background-size: 100% 25px; /* имитация линованной бумаг�
 }
 
 @media (max-width: 768px) {
+  body.menu-open {
+    overflow: hidden;
+  }
+
   .mobile-menu-btn {
     display: block;
   }
@@ -980,6 +990,8 @@ background-size: 100% 25px; /* имитация линованной бумаг�
     flex-direction: column;
     padding: 2rem;
     transition: 0.3s;
+    overflow-y: auto;
+    z-index: 1200;
   }
   
   .nav-menu.active {
@@ -1015,6 +1027,23 @@ background-size: 100% 25px; /* имитация линованной бумаг�
   .footer-content {
     grid-template-columns: 1fr;
     gap: 2rem;
+  }
+
+  .dropdown {
+    width: 100%;
+  }
+
+  .dropdown-menu {
+    position: static;
+    width: 100%;
+    margin-top: 0.5rem;
+    background: rgba(255, 255, 255, 0.98);
+    transform: none;
+    display: none;
+  }
+
+  .dropdown.open .dropdown-menu {
+    display: block;
   }
 }
 
@@ -2209,6 +2238,33 @@ canvas {
   .btn-large {
     width: 100%;
     justify-content: center;
+  }
+
+  .table-responsive {
+    border-radius: var(--radius);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(14, 18, 30, 0.22);
+  }
+
+  .modern-table {
+    min-width: 560px;
+    font-size: 0.82rem;
+  }
+
+  .modern-table th {
+    white-space: nowrap;
+    font-size: 0.75rem;
+  }
+
+  .modern-table td {
+    padding: 0.58rem;
+    vertical-align: middle;
+  }
+
+  .table-img,
+  .table-cover {
+    width: 32px;
+    height: 32px;
   }
 
   .auth-form h1 {

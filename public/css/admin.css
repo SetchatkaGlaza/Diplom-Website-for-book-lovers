@@ -1637,6 +1637,27 @@
   .item-meta {
     font-size: 0.82rem;
   }
+
+  .table-responsive {
+    border-radius: var(--admin-radius);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(15, 23, 42, 0.4);
+    padding: 0.35rem;
+  }
+
+  .modern-table {
+    min-width: 640px;
+    font-size: 0.84rem;
+  }
+
+  .modern-table th {
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+  }
+
+  .modern-table td {
+    padding: 0.62rem 0.55rem;
+  }
 }
 
 @media (max-width: 576px) {
