@@ -65,7 +65,7 @@ background-size: 100% 25px; /* имитация линованной бумаг�
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
   padding: 0 20px;
   width: 100%;
@@ -353,7 +353,7 @@ background-size: 100% 25px; /* имитация линованной бумаг�
 
 .books-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(6, minmax(200px, 1fr));
   gap: 2rem;
   margin: 2rem 0;
 }
