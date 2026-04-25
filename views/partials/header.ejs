@@ -203,6 +203,12 @@
     visibility: visible;
     transform: translateY(0);
   }
+
+  .notifications-dropdown.open .notifications-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
   
   .notifications-header {
     display: flex;
@@ -298,5 +304,21 @@
   .notifications-footer a {
     color: var(--primary);
     text-decoration: none;
+  }
+
+  @media (max-width: 768px) {
+    .notifications-dropdown {
+      position: static;
+    }
+
+    .notifications-panel {
+      position: fixed;
+      top: 74px;
+      left: 0.5rem;
+      right: 0.5rem;
+      width: auto;
+      max-height: calc(100vh - 90px);
+      transform: translateY(-8px);
+    }
   }
 </style>

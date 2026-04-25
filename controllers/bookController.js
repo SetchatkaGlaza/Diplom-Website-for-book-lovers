@@ -5,6 +5,8 @@ const { Op } = require('sequelize'); // Операторы для сложных
  * Количество книг на одной странице
  */
 const BOOKS_PER_PAGE = 12;
+const BOOKS_PER_PAGE_TABLET = 10;
+const BOOKS_PER_PAGE_MOBILE = 8;
 
 /**
  * 1. ПОКАЗ КАТАЛОГА КНИГ (с фильтрацией, сортировкой, пагинацией)
@@ -13,9 +15,26 @@ exports.getCatalog = async (req, res) => {
   try {
     // Получаем параметры из запроса
     const page = parseInt(req.query.page) || 1;
-    const limit = BOOKS_PER_PAGE;
+    const userAgent = req.get('user-agent') || '';
+    const isMobile = /iphone|ipod|android.+mobile|windows phone|blackberry/i.test(userAgent);
+    const isTablet = /ipad|tablet|android(?!.*mobile)/i.test(userAgent);
+
+    let limit = BOOKS_PER_PAGE;
+    if (isMobile) {
+      limit = BOOKS_PER_PAGE_MOBILE;
+    } else if (isTablet) {
+      limit = BOOKS_PER_PAGE_TABLET;
+    }
+
+    if (req.query.perPage) {
+      const requestedLimit = parseInt(req.query.perPage, 10);
+      if (!Number.isNaN(requestedLimit) && requestedLimit >= 4 && requestedLimit <= BOOKS_PER_PAGE) {
+        limit = requestedLimit;
+      }
+    }
+
     const offset = (page - 1) * limit;
-    
+
     // Фильтры
     const filters = {};
     
