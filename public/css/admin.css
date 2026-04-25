@@ -1540,3 +1540,143 @@
   border: 1px solid rgba(148, 163, 184, 0.22);
   box-shadow: 0 16px 30px rgba(2, 6, 23, 0.25);
 }
+
+/* ===== ДОПОЛНИТЕЛЬНЫЙ АДАПТИВ АДМИНКИ ===== */
+@media (max-width: 1200px) {
+  .admin-main {
+    padding: 1.25rem;
+  }
+
+  .admin-content {
+    max-width: 100%;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .modern-table {
+    min-width: 760px;
+  }
+}
+
+@media (max-width: 992px) {
+  .admin-sidebar {
+    padding: 1rem;
+    border-right: none;
+    border-bottom: 1px solid var(--admin-card-border);
+  }
+
+  .admin-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .admin-nav-item {
+    margin: 0;
+    transform: none !important;
+  }
+
+  .admin-nav-item.sub-item {
+    padding-left: 1rem;
+  }
+
+  .admin-user {
+    margin-top: 0.5rem;
+  }
+
+  .admin-header h1 {
+    font-size: 1.45rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-main {
+    padding: 0.85rem;
+  }
+
+  .admin-header,
+  .admin-card,
+  .stat-card,
+  .modern-form {
+    padding: 1rem;
+  }
+
+  .header-actions,
+  .action-buttons,
+  .moderation-actions,
+  .reject-form-inline,
+  .moderation-toolbar .toolbar-row,
+  .tab-switcher {
+    width: 100%;
+  }
+
+  .header-actions > *,
+  .action-buttons > *,
+  .moderation-actions > *,
+  .reject-form-inline > *,
+  .moderation-toolbar .toolbar-row > * {
+    width: 100%;
+  }
+
+  .quick-actions,
+  .forum-admin-grid,
+  .stats-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    gap: 0.75rem;
+  }
+
+  .stat-icon {
+    font-size: 2.2rem;
+  }
+
+  .item-meta {
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .admin-logo {
+    margin-bottom: 1rem;
+  }
+
+  .admin-logo i {
+    font-size: 2rem;
+  }
+
+  .admin-logo span {
+    font-size: 1.1rem;
+  }
+
+  .admin-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .table-pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pagination-btn {
+    min-width: 34px;
+    height: 34px;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .modal {
+    padding: 0.5rem;
+  }
+
+  .modal-content {
+    padding: 0.85rem;
+    max-height: 88vh;
+  }
+}
