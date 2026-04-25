@@ -1,16 +1,51 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-
-const transporter = nodemailer.createTransport({
+const emailConfig = {
   host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: process.env.EMAIL_PORT || 587,
-  secure: false,
+  port: Number(process.env.EMAIL_PORT) || 587,
+  secure: process.env.EMAIL_SECURE === 'true',
   auth: {
-    user: process.env.EMAIL_USER || 'korepin.123valerii@gmail.com',
-    pass: process.env.EMAIL_PASS || 'feim fihr mqdb ajzk'
+    user: process.env.EMAIL_USER || '',
+    pass: process.env.EMAIL_PASS || ''
   }
-});
+};
+
+const transporter = nodemailer.createTransport(emailConfig);
+
+const emailProvider = (process.env.EMAIL_PROVIDER || 'smtp').toLowerCase();
+const resendApiKey = process.env.RESEND_API_KEY;
+const resendFrom = process.env.RESEND_FROM || process.env.EMAIL_USER || 'onboarding@resend.dev';
+
+async function sendViaResend(mailOptions) {
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${resendApiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from: mailOptions.from || resendFrom,
+      to: Array.isArray(mailOptions.to) ? mailOptions.to : [mailOptions.to],
+      subject: mailOptions.subject,
+      html: mailOptions.html
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Resend API error: ${response.status} ${errorText}`);
+  }
+}
+
+async function sendEmail(mailOptions) {
+  if (emailProvider === 'resend' && resendApiKey) {
+    await sendViaResend(mailOptions);
+    return;
+  }
+
+  await transporter.sendMail(mailOptions);
+}
 
 /**
  * Отправка письма для сброса пароля
@@ -62,7 +97,7 @@ exports.sendPasswordResetEmail = async (toEmail, toName, resetLink) => {
       `
     };
     
-    await transporter.sendMail(mailOptions);
+    await sendEmail(mailOptions);
     console.log(`Письмо для сброса пароля отправлено на ${toEmail}`);
     return { success: true };
     
@@ -109,10 +144,10 @@ exports.sendContactEmail = async (name, email, subject, message) => {
     };
     
     // Отправляем письмо администратору
-    await transporter.sendMail(adminMailOptions);
+    await sendEmail(adminMailOptions);
     
     // Отправляем подтверждение пользователю
-    await transporter.sendMail(userMailOptions);
+    await sendEmail(userMailOptions);
     
     return { success: true };
   } catch (error) {
@@ -138,7 +173,7 @@ exports.sendReplyEmail = async (toEmail, toName, subject, message) => {
       `
     };
     
-    await transporter.sendMail(mailOptions);
+    await sendEmail(mailOptions);
     return { success: true };
   } catch (error) {
     console.error('Ошибка при отправке ответа:', error);

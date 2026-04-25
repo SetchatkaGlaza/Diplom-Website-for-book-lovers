@@ -69,21 +69,6 @@
           </div>
           
           <div class="review-meta">
-            <div class="review-stats">
-              <div class="stat-item">
-                <i class="fas fa-thumbs-up"></i>
-                <span class="stat-value"><%= review.likes_count || 0 %></span>
-              </div>
-              <div class="stat-item">
-                <i class="fas fa-thumbs-down"></i>
-                <span class="stat-value"><%= review.dislikes_count || 0 %></span>
-              </div>
-              <div class="stat-item">
-                <i class="far fa-calendar-alt"></i>
-                <span class="stat-value"><%= new Date(review.createdAt).toLocaleDateString('ru-RU') %></span>
-              </div>
-            </div>
-            
             <div class="review-actions">
               <% if (!review.is_moderated) { %>
                 <form action="/admin/reviews/<%= review.id %>/approve" method="POST" class="inline-form">
@@ -358,28 +343,6 @@
     gap: 1rem;
   }
   
-  .review-stats {
-    display: flex;
-    gap: 1.5rem;
-  }
-  
-  .stat-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: var(--radius-lg);
-  }
-  
-  .stat-item i.fa-thumbs-up { color: #10b981; }
-  .stat-item i.fa-thumbs-down { color: #ef4444; }
-  .stat-item i.fa-calendar-alt { color: var(--accent); }
-  
-  .stat-value {
-    font-weight: 600;
-  }
-  
   .review-actions {
     display: flex;
     gap: 0.75rem;
@@ -537,10 +500,6 @@
     .review-meta {
       flex-direction: column;
       align-items: flex-start;
-    }
-    
-    .review-stats {
-      flex-wrap: wrap;
     }
     
     .review-actions {
