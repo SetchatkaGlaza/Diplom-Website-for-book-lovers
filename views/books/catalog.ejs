@@ -180,14 +180,23 @@
     padding: 2rem;
     margin: 2rem 0;
     color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    align-items: end;
+    column-gap: 2rem;
+  }
+
+  .catalog-header h1 {
+    grid-column: 1;
+    margin: 0;
   }
   
   .books-count {
+    grid-column: 2;
+    justify-self: end;
     font-size: 1.1rem;
     opacity: 0.9;
+    text-align: right;
   }
   
   .catalog-layout {
@@ -425,6 +434,18 @@
   }
   
   @media (max-width: 900px) {
+    .catalog-header {
+      grid-template-columns: 1fr;
+      row-gap: 0.75rem;
+      align-items: start;
+    }
+
+    .books-count {
+      grid-column: 1;
+      justify-self: start;
+      text-align: left;
+    }
+
     .catalog-layout {
       grid-template-columns: 1fr;
     }
@@ -444,12 +465,6 @@
     .books-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.75rem;
-    }
-    
-    .catalog-header {
-      flex-direction: column;
-      text-align: center;
-      gap: 1rem;
     }
     
     .sort-bar {
