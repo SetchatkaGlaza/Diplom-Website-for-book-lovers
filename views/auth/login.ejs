@@ -100,10 +100,6 @@
       
       <!-- Дополнительные опции -->
       <div class="form-options">
-        <label class="checkbox-label">
-          <input type="checkbox" name="remember">
-          <span>Запомнить меня</span>
-        </label>
         <a href="/auth/forgot-password" class="forgot-link">Забыли пароль?</a>
       </div>
       
@@ -119,25 +115,6 @@
       <p>Нет аккаунта? <a href="/auth/register">Зарегистрироваться</a></p>
     </div>
     
-    <!-- Вход через соцсети (опционально) -->
-    <div class="auth-divider">
-      <span>или</span>
-    </div>
-    
-    <div class="auth-social">
-      <p>Войти через социальные сети:</p>
-      <div class="social-buttons">
-        <a href="#" class="social-btn vk" onclick="alert('Вход через ВК будет добавлен позже'); return false;">
-          <i class="fab fa-vk"></i>
-        </a>
-        <a href="#" class="social-btn telegram" onclick="alert('Вход через Telegram будет добавлен позже'); return false;">
-          <i class="fab fa-telegram"></i>
-        </a>
-        <a href="#" class="social-btn github" onclick="alert('Вход через GitHub будет добавлен позже'); return false;">
-          <i class="fab fa-github"></i>
-        </a>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -342,24 +319,8 @@ function refreshCaptcha() {
 
 .form-options {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  accent-color: #fbbf24;
-  margin: 0;
 }
 
 .forgot-link {
@@ -407,82 +368,6 @@ function refreshCaptcha() {
 
 .auth-footer a:hover {
   text-decoration: underline;
-}
-
-.auth-divider {
-  position: relative;
-  text-align: center;
-  margin: 1.5rem 0;
-}
-
-.auth-divider::before,
-.auth-divider::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: calc(50% - 30px);
-  height: 1px;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.auth-divider::before {
-  left: 0;
-}
-
-.auth-divider::after {
-  right: 0;
-}
-
-.auth-divider span {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-}
-
-.auth-social {
-  text-align: center;
-}
-
-.auth-social p {
-  margin-bottom: 1rem;
-  opacity: 0.8;
-}
-
-.social-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.social-btn {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  text-decoration: none;
-  transition: all 0.3s;
-  font-size: 1.2rem;
-}
-
-.social-btn.vk {
-  background: #4c75a3;
-}
-
-.social-btn.telegram {
-  background: #0088cc;
-}
-
-.social-btn.github {
-  background: #333;
-}
-
-.social-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
 .alert {
