@@ -387,6 +387,7 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 800px;
+  table-layout: fixed;
 }
 
 .modern-table th {
@@ -405,6 +406,12 @@
   padding: 1rem 0.75rem;
   border-bottom: 1px solid var(--admin-card-border);
   vertical-align: middle;
+}
+
+.modern-table th,
+.modern-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .modern-table tbody tr:hover {
@@ -473,10 +480,14 @@
 }
 
 .truncate-text {
-  max-width: 200px;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.text-center {
+  text-align: center;
 }
 
 /* ===== БЕЙДЖИ ===== */
@@ -555,8 +566,9 @@
 .action-buttons {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
+  justify-content: center;
 }
 
 .action-btn {

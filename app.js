@@ -4,6 +4,7 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const expressLayouts = require('express-ejs-layouts');
 const methodOverride = require('method-override');
+const path = require('path');
 const sequelize = require('./config/database');
 const rateLimit = require('express-rate-limit');
 
@@ -43,6 +44,11 @@ app.use(methodOverride('_method'));
 
 // Middleware для статических файлов
 app.use(express.static('public'));
+
+// Явная раздача favicon для хостинга, где браузер запрашивает /favicon.ico
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'images', 'icons', 'favicon.ico'));
+});
 
 // Настройка сессий
 app.use(session({

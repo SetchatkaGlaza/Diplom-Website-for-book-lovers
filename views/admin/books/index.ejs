@@ -33,6 +33,17 @@
   <!-- Таблица книг -->
   <div class="table-responsive">
     <table class="modern-table">
+      <colgroup>
+        <col style="width: 84px;">
+        <col style="width: 22%;">
+        <col style="width: 16%;">
+        <col style="width: 12%;">
+        <col style="width: 80px;">
+        <col style="width: 90px;">
+        <col style="width: 90px;">
+        <col style="width: 90px;">
+        <col style="width: 130px;">
+      </colgroup>
       <thead>
         <tr>
           <th><i class="fas fa-image"></i> Обложка</th>
@@ -62,7 +73,7 @@
                   <span class="badge" style="background: rgba(255,255,255,0.1);">—</span>
                 <% } %>
               </td>
-              <td><%= book.year || '—' %></td>
+              <td class="text-center"><%= book.year || '—' %></td>
               <td>
                 <div class="table-rating">
                   <% if (book.avgRating > 0) { %>
@@ -73,8 +84,8 @@
                   <% } %>
                 </div>
               </td>
-              <td><%= book.reviewsCount || 0 %></td>
-              <td><%= book.inUserBooks || 0 %></td>
+              <td class="text-center"><%= book.reviewsCount || 0 %></td>
+              <td class="text-center"><%= book.inUserBooks || 0 %></td>
               <td>
                 <div class="action-buttons">
                   <a href="/books/<%= book.id %>" class="action-btn view" target="_blank" title="Просмотр">

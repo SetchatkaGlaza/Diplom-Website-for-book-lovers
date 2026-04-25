@@ -1,4 +1,25 @@
 
+<%
+  const normalizeAppealText = (text) => {
+    if (!text) return '';
+    return text
+      .replace(/<br\\s*\\/?>/gi, '\n')
+      .replace(/\\r/g, '')
+      .replace(/Цитата от [^\\n]+:\\n«[\\s\\S]*?»\\n*/g, '')
+      .replace(/\\n{3,}/g, '\n\n')
+      .trim();
+  };
+
+  const renderAppealText = (text) => {
+    const normalized = normalizeAppealText(text);
+    return normalized
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/\\n/g, '<br>');
+  };
+%>
 
 <div class="forum-appeals-page">
   <!-- Герой-секция -->
@@ -119,7 +140,7 @@
               Удалённый текст
             </div>
             <div class="section-content deleted-content">
-              <%= item.content.replace(/\n/g, '<br>') %>
+              <%- renderAppealText(item.content) %>
             </div>
           </div>
           
@@ -132,7 +153,7 @@
               </div>
               <div class="section-content explanation-content">
                 <i class="fas fa-quote-left quote-icon"></i>
-                <%= item.user_explanation.replace(/\n/g, '<br>') %>
+                <%- renderAppealText(item.user_explanation) %>
               </div>
             </div>
           <% } %>

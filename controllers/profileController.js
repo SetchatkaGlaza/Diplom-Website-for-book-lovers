@@ -579,7 +579,12 @@ exports.deleteReview = async (req, res) => {
  */
 exports.getPublicProfile = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = Number(req.params.userId);
+
+    // Если пользователь открыл ссылку на самого себя - отправляем в личный профиль
+    if (req.session.user && req.session.user.id === userId) {
+      return res.redirect('/profile');
+    }
     
     // Получаем информацию о пользователе
     const user = await User.findByPk(userId, {
@@ -594,22 +599,37 @@ exports.getPublicProfile = async (req, res) => {
     // Получаем публичную статистику
     const stats = {
       booksRead: await UserBook.count({ where: { user_id: userId, status: 'read' } }),
-      reviewsCount: await Review.count({ where: { user_id: userId } })
+      booksWantToRead: await UserBook.count({ where: { user_id: userId, status: 'want_to_read' } }),
+      booksReading: await UserBook.count({ where: { user_id: userId, status: 'reading' } }),
+      reviewsCount: await Review.count({ where: { user_id: userId, is_moderated: true } })
     };
     
     // Получаем последние рецензии пользователя
     const recentReviews = await Review.findAll({
-      where: { user_id: userId },
+      where: { user_id: userId, is_moderated: true },
       include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image'] }],
       order: [['createdAt', 'DESC']],
-      limit: 5
+      limit: 20
+    });
+
+    // Получаем книги пользователя на полках
+    const userBooks = await UserBook.findAll({
+      where: { user_id: userId },
+      include: [{
+        model: Book,
+        as: 'book',
+        include: [{ model: Genre, as: 'genre' }]
+      }],
+      order: [['updatedAt', 'DESC']],
+      limit: 60
     });
     
     res.render('profile/public', {
       title: `Профиль ${user.name}`,
       profileUser: user,
       stats,
-      recentReviews
+      recentReviews,
+      userBooks
     });
     
   } catch (error) {

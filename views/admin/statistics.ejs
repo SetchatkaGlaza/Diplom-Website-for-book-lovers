@@ -83,7 +83,14 @@
         </a>
       </div>
       
-      <table class="admin-table">
+      <table class="admin-table admin-table-fixed">
+        <colgroup>
+          <col style="width: 56px;">
+          <col style="width: 40%;">
+          <col style="width: 25%;">
+          <col style="width: 20%;">
+          <col style="width: 120px;">
+        </colgroup>
         <thead>
           <tr>
             <th>#</th>
@@ -135,7 +142,13 @@
         </a>
       </div>
       
-      <table class="admin-table">
+      <table class="admin-table admin-table-fixed">
+        <colgroup>
+          <col style="width: 56px;">
+          <col style="width: 56%;">
+          <col style="width: 22%;">
+          <col style="width: 120px;">
+        </colgroup>
         <thead>
           <tr>
             <th>#</th>
@@ -381,6 +394,7 @@
   .admin-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
   }
   
   .admin-table th {
@@ -395,6 +409,7 @@
   .admin-table td {
     padding: 0.75rem 0.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    vertical-align: middle;
   }
   
   .admin-table tr:last-child td {
@@ -414,6 +429,15 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .book-cell a, .user-cell a {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   
   .table-cover {
@@ -446,6 +470,7 @@
     display: flex;
     gap: 0.5rem;
     justify-content: center;
+    flex-wrap: nowrap;
   }
   
   .action-btn {
