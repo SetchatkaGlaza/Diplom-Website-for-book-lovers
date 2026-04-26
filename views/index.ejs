@@ -6,7 +6,7 @@
     <form action="/books" method="GET" class="search-form">
       <input type="text" name="search" placeholder="Поиск книг по названию или автору..." autocomplete="off">
       <button type="submit" class="btn btn-primary">
-        <i class="fas fa-search"></i> Найти
+        <i class="fas fa-search"></i> <span class="search-btn-text">Найти</span>
       </button>
     </form>
   </div>
@@ -317,6 +317,24 @@
   }
   
   @media (max-width: 768px) {
+    .search-btn-text {
+      display: none;
+    }
+
+    .search-form button {
+      min-width: 48px;
+      padding-inline: 0.9rem;
+    }
+
+    .search-form button i {
+      margin: 0;
+    }
+
+    #popular-books .book-rating {
+      justify-content: center;
+      text-align: center;
+    }
+
     .random-book-link {
       grid-template-columns: 1fr;
       text-align: center;

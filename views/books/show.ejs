@@ -727,6 +727,34 @@
     .rating-value {
       width: auto;
     }
+
+    .similar-books .books-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .book-card.small .book-cover {
+      height: 150px;
+    }
+
+    .book-card.small .book-info {
+      padding: 0.65rem;
+    }
+
+    .book-card.small .book-title {
+      font-size: 0.85rem;
+      -webkit-line-clamp: 2;
+    }
+
+    .book-card.small .book-author {
+      font-size: 0.75rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .book-card.small .book-rating {
+      justify-content: center;
+      gap: 0.3rem;
+    }
   }
 </style>
 

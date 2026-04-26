@@ -38,7 +38,10 @@ class PasswordResetService {
     // Отправляем письмо
     const resetLink = `${process.env.BASE_URL || 'http://localhost:3000'}/auth/reset-password/${token}`;
     
-    await emailService.sendPasswordResetEmail(user.email, user.name, resetLink);
+    const emailResult = await emailService.sendPasswordResetEmail(user.email, user.name, resetLink);
+    if (!emailResult.success) {
+      throw new Error('Не удалось отправить письмо для сброса пароля');
+    }
     
     return { success: true };
   }
