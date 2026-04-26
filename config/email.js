@@ -5,10 +5,16 @@ const emailConfig = {
   host: process.env.EMAIL_HOST || 'smtp.gmail.com',
   port: Number(process.env.EMAIL_PORT) || 587,
   secure: process.env.EMAIL_SECURE === 'true',
+  connectionTimeout: Number(process.env.EMAIL_CONNECTION_TIMEOUT) || 10000,
+  greetingTimeout: Number(process.env.EMAIL_GREETING_TIMEOUT) || 10000,
+  socketTimeout: Number(process.env.EMAIL_SOCKET_TIMEOUT) || 15000,
   auth: {
     user: process.env.EMAIL_USER || '',
     pass: process.env.EMAIL_PASS || ''
-  }
+  },
+  pool: true,
+  maxConnections: 3,
+  maxMessages: 50
 };
 
 const transporter = nodemailer.createTransport(emailConfig);
@@ -42,6 +48,10 @@ async function sendEmail(mailOptions) {
   if (emailProvider === 'resend' && resendApiKey) {
     await sendViaResend(mailOptions);
     return;
+  }
+
+  if (!emailConfig.auth.user || !emailConfig.auth.pass) {
+    throw new Error('SMTP credentials are not configured. Set EMAIL_USER and EMAIL_PASS or use EMAIL_PROVIDER=resend.');
   }
 
   await transporter.sendMail(mailOptions);

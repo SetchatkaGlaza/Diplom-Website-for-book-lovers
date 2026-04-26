@@ -307,4 +307,27 @@
       grid-template-columns: 1fr;
     }
   }
+
+  @media (max-width: 768px) {
+    .admin-import .admin-header > div {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    .import-card,
+    .import-info {
+      padding: 1rem;
+    }
+
+    .mapping-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-actions .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 </style>
