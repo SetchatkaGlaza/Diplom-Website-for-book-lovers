@@ -352,16 +352,38 @@
   .recent-book-card {
     text-align: center;
   }
+
+  .book-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    text-decoration: none;
+    color: inherit;
+  }
   
   .book-cover {
     position: relative;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.15rem;
   }
   
   .book-cover img {
     width: 100%;
     height: auto;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
     border-radius: var(--radius);
+  }
+
+  .book-info h4 {
+    margin-bottom: 0.2rem;
+    line-height: 1.3;
+  }
+
+  .book-info p {
+    margin: 0;
+    opacity: 0.85;
+    font-size: 0.9rem;
+    line-height: 1.25;
   }
   
   .book-status {

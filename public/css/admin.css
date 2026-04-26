@@ -52,7 +52,7 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-right: 1px solid var(--admin-card-border);
-  padding: 1.5rem;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -60,12 +60,18 @@
   left: 0;
   bottom: 0;
   overflow-y: auto;
+  scrollbar-width: none;
   z-index: 100;
+}
+
+.admin-sidebar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .admin-logo {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--admin-card-border);
 }
@@ -100,7 +106,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  padding: 0.62rem 0.9rem;
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   border-radius: var(--admin-radius);

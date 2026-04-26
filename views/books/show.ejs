@@ -677,6 +677,10 @@
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 1rem;
   }
+
+  .similar-books .book-rating {
+    text-align: center;
+  }
   
   .book-card.small .book-cover {
     height: 180px;
@@ -726,6 +730,30 @@
     
     .rating-value {
       width: auto;
+    }
+
+    .similar-books .books-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+
+    .similar-books .book-card.small .book-cover {
+      height: 170px;
+    }
+
+    .similar-books .book-title,
+    .similar-books .book-author {
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .similar-books .books-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .similar-books .book-card.small .book-cover {
+      height: 150px;
     }
   }
 </style>
