@@ -104,4 +104,10 @@
   .simple-admin-table tr { height:48px; }
   .simple-admin-table a { color:#fff; text-decoration:underline; text-underline-offset:2px; }
   .text-center { text-align:center; }
+
+  @media (max-width: 768px) {
+    .tables-grid { grid-template-columns: 1fr; }
+    .table-card { padding: 10px; }
+    .simple-admin-table { min-width: 540px; }
+  }
 </style>

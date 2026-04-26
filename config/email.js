@@ -8,6 +8,12 @@ const emailConfig = {
   auth: {
     user: process.env.EMAIL_USER || '',
     pass: process.env.EMAIL_PASS || ''
+  },
+  connectionTimeout: Number(process.env.EMAIL_CONNECTION_TIMEOUT) || 10000,
+  greetingTimeout: Number(process.env.EMAIL_GREETING_TIMEOUT) || 10000,
+  socketTimeout: Number(process.env.EMAIL_SOCKET_TIMEOUT) || 15000,
+  tls: {
+    rejectUnauthorized: process.env.EMAIL_TLS_REJECT_UNAUTHORIZED !== 'false'
   }
 };
 
@@ -38,12 +44,26 @@ async function sendViaResend(mailOptions) {
   }
 }
 
+let smtpVerified = false;
+
+async function ensureSmtpReady() {
+  if (smtpVerified) return;
+
+  if (!emailConfig.auth.user || !emailConfig.auth.pass) {
+    throw new Error('SMTP не настроен: отсутствуют EMAIL_USER или EMAIL_PASS');
+  }
+
+  await transporter.verify();
+  smtpVerified = true;
+}
+
 async function sendEmail(mailOptions) {
   if (emailProvider === 'resend' && resendApiKey) {
     await sendViaResend(mailOptions);
     return;
   }
 
+  await ensureSmtpReady();
   await transporter.sendMail(mailOptions);
 }
 
@@ -143,12 +163,19 @@ exports.sendContactEmail = async (name, email, subject, message) => {
       `
     };
     
-    // Отправляем письмо администратору
-    await sendEmail(adminMailOptions);
-    
-    // Отправляем подтверждение пользователю
-    await sendEmail(userMailOptions);
-    
+    const [adminResult, userResult] = await Promise.allSettled([
+      sendEmail(adminMailOptions),
+      sendEmail(userMailOptions)
+    ]);
+
+    if (adminResult.status === 'rejected') {
+      throw adminResult.reason;
+    }
+
+    if (userResult.status === 'rejected') {
+      console.warn('Не удалось отправить письмо-подтверждение пользователю:', userResult.reason);
+    }
+
     return { success: true };
   } catch (error) {
     console.error('Ошибка при отправке email:', error);
