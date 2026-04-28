@@ -1,15 +1,10 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// Для Railway используется DATABASE_URL
 const databaseUrl = process.env.DATABASE_URL || process.env.DB_URL;
 
-let sequelize;
-
 if (databaseUrl) {
-  // Режим Railway: используем DATABASE_URL
-  console.log('🔗 Подключение через DATABASE_URL');
-  sequelize = new Sequelize(databaseUrl, {
+  module.exports = new Sequelize(databaseUrl, {
     dialect: 'postgres',
     dialectOptions: {
       ssl: {
@@ -25,31 +20,30 @@ if (databaseUrl) {
       idle: 10000
     }
   });
-} else {
-  // Режим локальной разработки
-  console.log('🔍 Параметры подключения к БД (локально):');
-  console.log('DB_NAME:', process.env.DB_NAME);
-  console.log('DB_USER:', process.env.DB_USER);
-  console.log('DB_HOST:', process.env.DB_HOST);
-  console.log('DB_PORT:', process.env.DB_PORT);
-  
-  sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASSWORD,
-    {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      dialect: process.env.DB_DIALECT || 'postgres',
-      logging: process.env.NODE_ENV === 'development' ? console.log : false,
-      pool: {
-        max: 5,
-        min: 0,
-        acquire: 30000,
-        idle: 10000
-      }
-    }
-  );
+  return;
 }
 
-module.exports = sequelize;
+const missingLocalVars = ['DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_PORT']
+  .filter((key) => !process.env[key]);
+
+if (missingLocalVars.length > 0) {
+  console.warn(`⚠️ Отсутствуют переменные окружения БД: ${missingLocalVars.join(', ')}`);
+}
+
+module.exports = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    dialect: process.env.DB_DIALECT || 'postgres',
+    logging: process.env.NODE_ENV === 'development' ? console.log : false,
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
+  }
+);

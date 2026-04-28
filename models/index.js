@@ -1,6 +1,5 @@
 const sequelize = require('../config/database');
 
-// Импортируем модели в правильном порядке
 const User = require('./User');
 const Genre = require('./Genre');
 const Book = require('./Book');
@@ -17,10 +16,8 @@ const ForumPostLike = require('./ForumPostLike');
 const ForumSubscription = require('./ForumSubscription');
 const ForumPostModeration = require('./ForumPostModeration');
 
-// Устанавливаем связи
 require('./associations');
 
-// Экспортируем всё вместе
 module.exports = {
   sequelize,
   User,
