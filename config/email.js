@@ -63,7 +63,7 @@ async function sendEmail(mailOptions) {
 exports.sendPasswordResetEmail = async (toEmail, toName, resetLink) => {
   try {
     const mailOptions = {
-      from: `"Книгоманы" <${process.env.EMAIL_USER || 'noreply@booklovers.ru'}>`,
+      from: `"Книгоманы" <${process.env.EMAIL_USER || 'noreply@bookLovers.ru'}>`,
       to: toEmail,
       subject: 'Восстановление пароля - Книгоманы',
       html: `
@@ -124,7 +124,7 @@ exports.sendContactEmail = async (name, email, subject, message) => {
   try {
     // Письмо администратору
     const adminMailOptions = {
-      from: `"Книгоманы" <${process.env.EMAIL_USER || 'noreply@booklovers.ru'}>`,
+      from: `"Книгоманы" <${process.env.EMAIL_USER || 'noreply@bookLovers.ru'}>`,
       to: process.env.ADMIN_EMAIL || 'korepin.123valerii@gmail.com',
       subject: `[Книгоманы] Новое сообщение: ${subject}`,
       html: `
@@ -140,7 +140,7 @@ exports.sendContactEmail = async (name, email, subject, message) => {
     
     // Письмо пользователю (подтверждение)
     const userMailOptions = {
-      from: `"Книгоманы" <${process.env.EMAIL_USER || 'noreply@booklovers.ru'}>`,
+      from: `"Книгоманы" <${process.env.EMAIL_USER || 'noreply@bookLovers.ru'}>`,
       to: email,
       subject: 'Ваше сообщение получено - Книгоманы',
       html: `
@@ -172,7 +172,7 @@ exports.sendContactEmail = async (name, email, subject, message) => {
 exports.sendReplyEmail = async (toEmail, toName, subject, message) => {
   try {
     const mailOptions = {
-      from: `"Книгоманы" <${process.env.EMAIL_USER || 'noreply@booklovers.ru'}>`,
+      from: `"Книгоманы" <${process.env.EMAIL_USER || 'noreply@bookLovers.ru'}>`,
       to: toEmail,
       subject: `Re: ${subject}`,
       html: `
