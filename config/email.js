@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
+const isRailway = !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_SERVICE_ID;
 
 const emailConfig = {
   host: process.env.EMAIL_HOST || 'smtp.gmail.com',
@@ -45,15 +46,16 @@ async function sendViaResend(mailOptions) {
 }
 
 async function sendEmail(mailOptions) {
-  if (emailProvider === 'resend' && resendApiKey) {
-    await sendViaResend(mailOptions);
-    return;
+  if (isRailway) {
+    console.log(`📧 [MOCK] Письмо для ${mailOptions.to}: ${mailOptions.subject}`);
+    console.log(`   Текст: ${mailOptions.html?.substring(0, 200)}...`);
+    return; // Не отправляем реально
   }
-
+  
+  // Реальная отправка через SMTP (локально)
   if (!emailConfig.auth.user || !emailConfig.auth.pass) {
-    throw new Error('SMTP credentials are not configured. Set EMAIL_USER and EMAIL_PASS or use EMAIL_PROVIDER=resend.');
+    throw new Error('SMTP credentials are not configured');
   }
-
   await transporter.sendMail(mailOptions);
 }
 
