@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const express = require('express');
 const session = require('express-session');
 const flash = require('connect-flash');
@@ -25,6 +25,7 @@ const errorHandler = require('./middlewares/errorHandler');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
+const enableSchemaSync = process.env.DB_SYNC_ALTER === 'true';
 
 if (isProduction) app.set('trust proxy', 1);
 
@@ -112,7 +113,7 @@ const startServer = async () => {
   try {
     await sequelize.authenticate();
 
-    if (!isProduction) {
+    if (!isProduction && enableSchemaSync) {
       await sequelize.sync({ alter: true });
     }
 

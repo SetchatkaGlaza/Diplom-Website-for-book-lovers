@@ -1,4 +1,3 @@
-// controllers/forumController.js
 const { 
   ForumCategory, 
   ForumTopic, 
@@ -12,9 +11,6 @@ const { Op } = require('sequelize');
 const slugify = require('slugify');
 const notificationService = require('../services/notificationService');
 
-/**
- * ГЛАВНАЯ ФОРУМА - список категорий
- */
 exports.getIndex = async (req, res) => {
   try {
     const categories = await ForumCategory.findAll({
@@ -36,7 +32,6 @@ exports.getIndex = async (req, res) => {
       order: [['sort_order', 'ASC'], ['name', 'ASC']]
     });
     
-    // Статистика для каждой категории
     const categoriesWithStats = await Promise.all(
       categories.map(async (category) => {
         const topicsCount = await ForumTopic.count({
@@ -65,7 +60,6 @@ exports.getIndex = async (req, res) => {
       })
     );
     
-    // Активные темы (за последние 24 часа)
     const activeTopics = await ForumTopic.findAll({
       where: {
         is_moderated: true,
@@ -102,9 +96,6 @@ exports.getIndex = async (req, res) => {
   }
 };
 
-/**
- * ПРОСМОТР КАТЕГОРИИ
- */
 exports.getCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
@@ -119,7 +110,6 @@ exports.getCategory = async (req, res) => {
       return res.redirect('/forum');
     }
     
-    // Закреплённые темы
     const pinnedTopics = await ForumTopic.findAll({
       where: {
         category_id: categoryId,
@@ -133,7 +123,6 @@ exports.getCategory = async (req, res) => {
       order: [['last_reply_at', 'DESC']]
     });
     
-    // Обычные темы с пагинацией
     const { count, rows: topics } = await ForumTopic.findAndCountAll({
       where: {
         category_id: categoryId,
@@ -175,9 +164,6 @@ exports.getCategory = async (req, res) => {
   }
 };
 
-/**
- * ПРОСМОТР ТЕМЫ
- */
 exports.getTopic = async (req, res) => {
   try {
     const topicId = req.params.id;
@@ -201,10 +187,8 @@ exports.getTopic = async (req, res) => {
       return res.redirect('/forum');
     }
     
-    // Увеличиваем счётчик просмотров
     await topic.increment('views');
     
-    // Получаем сообщения с пагинацией
     const { count, rows: posts } = await ForumPost.findAndCountAll({
       where: { 
         topic_id: topicId,
@@ -227,7 +211,6 @@ exports.getTopic = async (req, res) => {
       offset
     });
     
-    // Проверяем, подписан ли пользователь на тему
     let isSubscribed = false;
     let userLikes = new Set();
     
@@ -240,7 +223,6 @@ exports.getTopic = async (req, res) => {
       });
       isSubscribed = !!subscription;
       
-      // Собираем лайки пользователя
       posts.forEach(post => {
         const userLiked = post.likes.some(like => like.user_id === req.session.user.id);
         if (userLiked) {
@@ -269,9 +251,6 @@ exports.getTopic = async (req, res) => {
   }
 };
 
-/**
- * СОЗДАНИЕ НОВОЙ ТЕМЫ (форма)
- */
 exports.getNewTopic = async (req, res) => {
   try {
     const categories = await ForumCategory.findAll({
@@ -279,7 +258,6 @@ exports.getNewTopic = async (req, res) => {
       order: [['name', 'ASC']]
     });
     
-    // Передаём пустой массив errors, даже если ошибок нет
     res.render('forum/new-topic', {
       title: 'Создать тему',
       categories,
@@ -295,15 +273,11 @@ exports.getNewTopic = async (req, res) => {
     res.redirect('/forum');
   }
 };
-/**
- * СОЗДАНИЕ НОВОЙ ТЕМЫ (обработка)
- */
 exports.postNewTopic = async (req, res) => {
   try {
     const { category_id, title, content } = req.body;
     const userId = req.session.user.id;
     
-    // Валидация
     const errors = [];
     
     if (!category_id) {
@@ -324,7 +298,6 @@ exports.postNewTopic = async (req, res) => {
         order: [['name', 'ASC']]
       });
       
-      // ВАЖНО: передаём errors и formData обратно в шаблон
       return res.render('forum/new-topic', {
         title: 'Создать тему',
         categories,
@@ -335,10 +308,8 @@ exports.postNewTopic = async (req, res) => {
       });
     }
     
-    // Создаём slug для URL
     const slug = require('slugify')(title, { lower: true, strict: true }) + '-' + Date.now();
     
-    // Создаём тему
     const topic = await ForumTopic.create({
       category_id,
       user_id: userId,
@@ -349,7 +320,6 @@ exports.postNewTopic = async (req, res) => {
       is_moderated: false
     });
     
-    // Создаём первое сообщение
     await ForumPost.create({
       topic_id: topic.id,
       user_id: userId,
@@ -368,9 +338,6 @@ exports.postNewTopic = async (req, res) => {
   }
 };
 
-/**
- * ОТВЕТ В ТЕМЕ
- */
 exports.postReply = async (req, res) => {
   try {
     const topicId = req.params.id;
@@ -394,8 +361,6 @@ exports.postReply = async (req, res) => {
       return res.redirect(`/forum/topic/${topicId}`);
     }
     
-    // Сохраняем как есть, с переносами строк
-    // Не заменяем \n на <br> - это сделаем только при отображении
     content = content.trim();
     
     const post = await ForumPost.create({
@@ -438,9 +403,6 @@ exports.postReply = async (req, res) => {
   }
 };
 
-/**
- * ЛАЙК СООБЩЕНИЯ - ИСПРАВЛЕННАЯ ВЕРСИЯ
- */
 exports.likePost = async (req, res) => {
   try {
     const postId = req.params.id;
@@ -450,7 +412,6 @@ exports.likePost = async (req, res) => {
       return res.status(401).json({ error: 'Требуется авторизация' });
     }
     
-    // Получаем сообщение с текущим количеством лайков
     const post = await ForumPost.findByPk(postId);
     
     if (!post) {
@@ -466,7 +427,6 @@ exports.likePost = async (req, res) => {
       return res.status(403).json({ error: 'Тема закрыта. Реакции отключены.' });
     }
     
-    // Проверяем, ставил ли пользователь уже лайк
     const existingLike = await ForumPostLike.findOne({
       where: { 
         post_id: postId, 
@@ -478,16 +438,13 @@ exports.likePost = async (req, res) => {
     let action;
     
     if (existingLike) {
-      // Если лайк уже есть - удаляем его
       await existingLike.destroy();
       newLikesCount = post.likes_count - 1;
       action = 'unliked';
       
-      // Обновляем счётчик в посте
       await post.update({ likes_count: newLikesCount });
       
     } else {
-      // Если лайка нет - создаём
       await ForumPostLike.create({ 
         post_id: postId, 
         user_id: userId 
@@ -496,10 +453,8 @@ exports.likePost = async (req, res) => {
       newLikesCount = post.likes_count + 1;
       action = 'liked';
       
-      // Обновляем счётчик в посте
       await post.update({ likes_count: newLikesCount });
       
-      // Уведомляем автора поста о лайке (только если это не сам автор)
       if (post.user_id !== userId) {
         const liker = await User.findByPk(userId, { attributes: ['name'] });
         
@@ -512,7 +467,6 @@ exports.likePost = async (req, res) => {
       }
     }
     
-    // Возвращаем актуальное количество лайков
     res.json({ 
       success: true, 
       action: action,
@@ -525,9 +479,6 @@ exports.likePost = async (req, res) => {
   }
 };
 
-/**
- * ПОДПИСКА НА ТЕМУ
- */
 exports.toggleSubscription = async (req, res) => {
   try {
     const topicId = req.params.id;
@@ -551,9 +502,6 @@ exports.toggleSubscription = async (req, res) => {
   }
 };
 
-/**
- * РЕДАКТИРОВАНИЕ СООБЩЕНИЯ (форма)
- */
 exports.getEditPost = async (req, res) => {
   try {
     const postId = req.params.id;
@@ -569,7 +517,6 @@ exports.getEditPost = async (req, res) => {
       return res.redirect('/forum');
     }
     
-    // Проверяем права (автор или модератор/админ)
     const isAuthor = post.user_id === userId;
     const isModerator = req.session.user.role === 'moderator' || req.session.user.role === 'admin';
     
@@ -592,9 +539,6 @@ exports.getEditPost = async (req, res) => {
   }
 };
 
-/**
- * РЕДАКТИРОВАНИЕ СООБЩЕНИЯ (обработка)
- */
 exports.postEditPost = async (req, res) => {
   try {
     const postId = req.params.id;
@@ -608,7 +552,6 @@ exports.postEditPost = async (req, res) => {
       return res.redirect('/forum');
     }
     
-    // Проверяем права
     const isAuthor = post.user_id === userId;
     const isModerator = req.session.user.role === 'moderator' || req.session.user.role === 'admin';
     
@@ -617,7 +560,6 @@ exports.postEditPost = async (req, res) => {
       return res.redirect(`/forum/topic/${post.topic_id}`);
     }
     
-    // Валидация
     if (!content || content.length < 2) {
       req.flash('error', 'Сообщение не может быть пустым');
       return res.redirect(`/forum/post/${postId}/edit`);
@@ -640,9 +582,6 @@ exports.postEditPost = async (req, res) => {
   }
 };
 
-/**
- * ПОИСК ПО ФОРУМУ
- */
 exports.search = async (req, res) => {
   try {
     const query = req.query.q;
@@ -660,7 +599,6 @@ exports.search = async (req, res) => {
       });
     }
     
-    // Ищем в темах
     const { count, rows: topics } = await ForumTopic.findAndCountAll({
       where: {
         [Op.or]: [
@@ -678,7 +616,6 @@ exports.search = async (req, res) => {
       offset
     });
     
-    // Ищем в сообщениях
     const posts = await ForumPost.findAll({
       where: {
         content: { [Op.iLike]: `%${query}%` },

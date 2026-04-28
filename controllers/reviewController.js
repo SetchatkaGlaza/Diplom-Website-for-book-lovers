@@ -2,15 +2,11 @@ const { Review, Book, User, UserBook, ReviewLike } = require('../models');
 const { Op } = require('sequelize');
 const notificationService = require('../services/notificationService');
 
-/**
- * ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ: Обновление рейтинга книги
- */
 async function updateBookRating(bookId) {
   try {
     const book = await Book.findByPk(bookId);
     if (!book) return;
     
-    // Получаем все одобренные рецензии для книги
     const reviews = await Review.findAll({
       where: {
         book_id: bookId,
@@ -22,15 +18,12 @@ async function updateBookRating(bookId) {
     const ratingsCount = reviews.length;
     
     if (ratingsCount === 0) {
-      // Если нет оценок, обнуляем рейтинг
       await book.update({
         ratings_count: 0
       });
       return;
     }
     
-    // Обновляем только количество оценок
-    // Средний рейтинг будем вычислять на лету через getRatingInfo()
     await book.update({
       ratings_count: ratingsCount
     });
@@ -40,14 +33,10 @@ async function updateBookRating(bookId) {
   }
 }
 
-/**
- * 1. ФОРМА НАПИСАНИЯ РЕЦЕНЗИИ
- */
 exports.getNewReview = async (req, res) => {
   try {
     const bookId = req.params.bookId;
     
-    // Проверяем, существует ли книга
     const book = await Book.findByPk(bookId);
     
     if (!book) {
@@ -55,7 +44,6 @@ exports.getNewReview = async (req, res) => {
       return res.redirect('/books');
     }
     
-    // Проверяем, не писал ли пользователь уже рецензию на эту книгу
     const existingReview = await Review.findOne({
       where: {
         user_id: req.session.user.id,
@@ -68,7 +56,6 @@ exports.getNewReview = async (req, res) => {
       return res.redirect(`/books/${bookId}`);
     }
     
-    // Проверяем, отметил ли пользователь книгу как прочитанную
     const userBook = await UserBook.findOne({
       where: {
         user_id: req.session.user.id,
@@ -77,7 +64,6 @@ exports.getNewReview = async (req, res) => {
       }
     });
     
-    // Если не отметил как прочитанную, показываем предупреждение
     const warning = !userBook ? 'Вы не отметили эту книгу как прочитанную. Вы уверены, что хотите написать рецензию?' : null;
     
     res.render('reviews/new', {
@@ -96,16 +82,12 @@ exports.getNewReview = async (req, res) => {
   }
 };
 
-/**
- * 2. СОХРАНЕНИЕ РЕЦЕНЗИИ
- */
 exports.postNewReview = async (req, res) => {
   try {
     const bookId = req.params.bookId;
     const userId = req.session.user.id;
     const { rating, content } = req.body;
     
-    // Валидация
     const errors = [];
     
     if (!rating || rating < 1 || rating > 5) {
@@ -120,7 +102,6 @@ exports.postNewReview = async (req, res) => {
       errors.push({ msg: 'Рецензия не может быть длиннее 5000 символов' });
     }
     
-    // Проверяем, не писал ли уже рецензию
     const existingReview = await Review.findOne({
       where: { user_id: userId, book_id: bookId }
     });
@@ -140,8 +121,6 @@ exports.postNewReview = async (req, res) => {
       });
     }
     
-    // Если пользователь не отметил книгу как прочитанную, но всё равно пишет рецензию,
-    // автоматически добавляем книгу в статус "read"
     const userBook = await UserBook.findOne({
       where: {
         user_id: userId,
@@ -159,7 +138,6 @@ exports.postNewReview = async (req, res) => {
       await userBook.update({ status: 'read' });
     }
     
-    // Создаём рецензию
     await Review.create({
       user_id: userId,
       book_id: bookId,
@@ -170,8 +148,6 @@ exports.postNewReview = async (req, res) => {
       is_moderated: false // Требуется модерация
     });
     
-    // Обновляем рейтинг книги (новая рецензия пока не учитывается, т.к. не одобрена)
-    // Но мы всё равно обновим, чтобы синхронизировать счётчик
     await updateBookRating(bookId);
     
     req.flash('success', 'Рецензия успешно отправлена на модерацию');
@@ -184,9 +160,6 @@ exports.postNewReview = async (req, res) => {
   }
 };
 
-/**
- * 3. РЕДАКТИРОВАНИЕ РЕЦЕНЗИИ
- */
 exports.getEditReview = async (req, res) => {
   try {
     const reviewId = req.params.id;
@@ -221,16 +194,12 @@ exports.getEditReview = async (req, res) => {
   }
 };
 
-/**
- * 4. ОБНОВЛЕНИЕ РЕЦЕНЗИИ
- */
 exports.postEditReview = async (req, res) => {
   try {
     const reviewId = req.params.id;
     const userId = req.session.user.id;
     const { rating, content } = req.body;
     
-    // Валидация
     const errors = [];
     
     if (!rating || rating < 1 || rating > 5) {
@@ -263,14 +232,12 @@ exports.postEditReview = async (req, res) => {
     
     const bookId = review.book_id;
     
-    // Обновляем рецензию и отправляем на повторную модерацию
     await review.update({
       rating: parseInt(rating),
       content: content.trim(),
       is_moderated: false
     });
     
-    // Обновляем рейтинг книги (старая оценка убирается, новая пока не учитывается)
     await updateBookRating(bookId);
     
     req.flash('success', 'Рецензия обновлена и отправлена на модерацию');
@@ -283,9 +250,6 @@ exports.postEditReview = async (req, res) => {
   }
 };
 
-/**
- * 5. УДАЛЕНИЕ РЕЦЕНЗИИ
- */
 exports.deleteReview = async (req, res) => {
   try {
     const reviewId = req.params.id;
@@ -304,7 +268,6 @@ exports.deleteReview = async (req, res) => {
     
     await review.destroy();
     
-    // Обновляем рейтинг книги после удаления
     await updateBookRating(bookId);
     
     req.flash('success', 'Рецензия удалена');
@@ -317,9 +280,6 @@ exports.deleteReview = async (req, res) => {
   }
 };
 
-/**
- * 6. ОЦЕНКА ПОЛЕЗНОСТИ РЕЦЕНЗИИ (лайк/дизлайк)
- */
 exports.rateReview = async (req, res) => {
   try {
     const reviewId = req.params.id;
@@ -330,14 +290,12 @@ exports.rateReview = async (req, res) => {
       return res.status(401).json({ error: 'Требуется авторизация' });
     }
     
-    // Проверяем, существует ли рецензия
     const review = await Review.findByPk(reviewId);
     
     if (!review) {
       return res.status(404).json({ error: 'Рецензия не найдена' });
     }
     
-    // Ищем существующую реакцию пользователя на эту рецензию
     const existingLike = await ReviewLike.findOne({
       where: {
         user_id: userId,
@@ -349,16 +307,13 @@ exports.rateReview = async (req, res) => {
     
     if (existingLike) {
       if (existingLike.type === type) {
-        // Если нажали на ту же кнопку - удаляем реакцию (как переключение)
         await existingLike.destroy();
         action = 'removed';
       } else {
-        // Если нажали на другую кнопку - обновляем тип
         await existingLike.update({ type });
         action = 'updated';
       }
     } else {
-      // Создаём новую реакцию
       await ReviewLike.create({
         user_id: userId,
         review_id: reviewId,
@@ -367,7 +322,6 @@ exports.rateReview = async (req, res) => {
       action = 'created';
     }
     
-    // Пересчитываем количество лайков и дизлайков
     const likesCount = await ReviewLike.count({
       where: {
         review_id: reviewId,
@@ -382,18 +336,15 @@ exports.rateReview = async (req, res) => {
       }
     });
     
-    // Обновляем счётчики в рецензии
     await review.update({
       likes_count: likesCount,
       dislikes_count: dislikesCount
     });
     
-    //  ОТПРАВЛЯЕМ УВЕДОМЛЕНИЕ О ЛАЙКЕ
     if (action !== 'removed' && review.user_id !== userId) {
       await notificationService.reviewLiked(reviewId, userId, type);
     }
 
-    // Определяем текущий статус для пользователя
     let userReaction = null;
     if (existingLike) {
       userReaction = existingLike.type;
@@ -420,14 +371,10 @@ exports.rateReview = async (req, res) => {
   }
 };
 
-/**
- * 7. ОДОБРЕНИЕ РЕЦЕНЗИИ (для админки)
- */
 exports.approveReview = async (req, res) => {
   try {
     const reviewId = req.params.id;
     
-    // Проверяем права доступа (админ или модератор)
     if (!req.session.user || (req.session.user.role !== 'admin' && req.session.user.role !== 'moderator')) {
       req.flash('error', 'Недостаточно прав');
       return res.redirect('/admin/reviews');
@@ -442,7 +389,6 @@ exports.approveReview = async (req, res) => {
     
     await review.update({ is_moderated: true });
     
-    // Обновляем рейтинг книги после одобрения
     await updateBookRating(review.book_id);
     
     req.flash('success', 'Рецензия одобрена');
@@ -455,14 +401,10 @@ exports.approveReview = async (req, res) => {
   }
 };
 
-/**
- * 8. ОТКЛОНЕНИЕ РЕЦЕНЗИИ (для админки)
- */
 exports.rejectReview = async (req, res) => {
   try {
     const reviewId = req.params.id;
     
-    // Проверяем права доступа
     if (!req.session.user || (req.session.user.role !== 'admin' && req.session.user.role !== 'moderator')) {
       req.flash('error', 'Недостаточно прав');
       return res.redirect('/admin/reviews');
@@ -478,7 +420,6 @@ exports.rejectReview = async (req, res) => {
     const bookId = review.book_id;
     await review.destroy();
     
-    // Обновляем рейтинг книги после удаления
     await updateBookRating(bookId);
     
     req.flash('success', 'Рецензия отклонена и удалена');
@@ -491,12 +432,8 @@ exports.rejectReview = async (req, res) => {
   }
 };
 
-/**
- * 9. МАССОВОЕ ОБНОВЛЕНИЕ РЕЙТИНГОВ ВСЕХ КНИГ (для админки)
- */
 exports.updateAllRatings = async (req, res) => {
   try {
-    // Проверяем права доступа (только админ)
     if (!req.session.user || req.session.user.role !== 'admin') {
       req.flash('error', 'Недостаточно прав');
       return res.redirect('/admin');

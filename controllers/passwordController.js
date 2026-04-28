@@ -6,9 +6,6 @@ const emailService = require('../config/email');
 
 const SALT_ROUNDS = 10;
 
-/**
- * Форма запроса сброса пароля
- */
 exports.getForgotPassword = (req, res) => {
   if (req.session.user) {
     return res.redirect('/');
@@ -20,9 +17,6 @@ exports.getForgotPassword = (req, res) => {
   });
 };
 
-/**
- * Отправка письма для сброса пароля
- */
 exports.postForgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -32,20 +26,16 @@ exports.postForgotPassword = async (req, res) => {
       return res.redirect('/auth/forgot-password');
     }
     
-    // Ищем пользователя
     const user = await User.findOne({ where: { email } });
     
-    // Всегда показываем одинаковое сообщение (для безопасности)
     if (!user) {
       req.flash('success', 'Если указанный email зарегистрирован, на него отправлена инструкция');
       return res.redirect('/auth/login');
     }
     
-    // Генерируем токен
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 час
     
-    // Сохраняем токен в БД
     await PasswordReset.create({
       user_id: user.id,
       token,
@@ -53,10 +43,8 @@ exports.postForgotPassword = async (req, res) => {
       used: false
     });
     
-    // Создаём ссылку для сброса
     const resetLink = `${req.protocol}://${req.get('host')}/auth/reset-password/${token}`;
     
-    // Отправляем письмо
     await emailService.sendPasswordResetEmail(user.email, user.name, resetLink);
     
     req.flash('success', 'Инструкция по восстановлению пароля отправлена на ваш email');
@@ -69,14 +57,10 @@ exports.postForgotPassword = async (req, res) => {
   }
 };
 
-/**
- * Форма сброса пароля (по токену)
- */
 exports.getResetPassword = async (req, res) => {
   try {
     const { token } = req.params;
     
-    // Ищем валидный токен
     const resetRequest = await PasswordReset.findOne({
       where: {
         token,
@@ -110,15 +94,11 @@ exports.getResetPassword = async (req, res) => {
   }
 };
 
-/**
- * Установка нового пароля
- */
 exports.postResetPassword = async (req, res) => {
   try {
     const { token } = req.params;
     const { password, password_confirm } = req.body;
     
-    // Валидация
     const errors = [];
     
     if (!password || password.length < 6) {
@@ -138,7 +118,6 @@ exports.postResetPassword = async (req, res) => {
       });
     }
     
-    // Ищем валидный токен
     const resetRequest = await PasswordReset.findOne({
       where: {
         token,
@@ -152,16 +131,13 @@ exports.postResetPassword = async (req, res) => {
       return res.redirect('/auth/login');
     }
     
-    // Хешируем новый пароль
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     
-    // Обновляем пароль пользователя
     await User.update(
       { password_hash: hashedPassword },
       { where: { id: resetRequest.user_id } }
     );
     
-    // Помечаем токен как использованный
     await resetRequest.update({ used: true });
     
     req.flash('success', 'Пароль успешно изменён. Теперь вы можете войти.');

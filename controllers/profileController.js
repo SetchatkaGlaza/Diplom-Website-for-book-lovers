@@ -5,24 +5,18 @@ const path = require('path');
 const fs = require('fs').promises;
 const sharp = require('sharp');
 
-// Константы
 const SALT_ROUNDS = 10;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-/**
- * 1. ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ (главная страница профиля)
- */
 exports.getProfile = async (req, res) => {
   try {
     const userId = req.session.user.id;
     
-    // Получаем полную информацию о пользователе
     const user = await User.findByPk(userId, {
       attributes: { exclude: ['password_hash'] }
     });
     
-    // Получаем статистику пользователя
     const stats = {
       booksRead: await UserBook.count({ where: { user_id: userId, status: 'read' } }),
       booksWantToRead: await UserBook.count({ where: { user_id: userId, status: 'want_to_read' } }),
@@ -30,7 +24,6 @@ exports.getProfile = async (req, res) => {
       reviewsCount: await Review.count({ where: { user_id: userId } })
     };
     
-    // Получаем последние действия пользователя
     const recentReviews = await Review.findAll({
       where: { user_id: userId },
       include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image'] }],
@@ -64,10 +57,6 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-
-/**
- * 2. РЕДАКТИРОВАНИЕ ПРОФИЛЯ (форма)
- */
 exports.getEditProfile = async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -88,16 +77,12 @@ exports.getEditProfile = async (req, res) => {
   }
 };
 
-/**
- * 3. ОБНОВЛЕНИЕ ПРОФИЛЯ (ИСПРАВЛЕННАЯ ВЕРСИЯ)
- */
 exports.postEditProfile = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const { name, bio } = req.body;
     
     
-    // Валидация
     const errors = [];
     
     if (!name || name.length < 2) {
@@ -121,7 +106,6 @@ exports.postEditProfile = async (req, res) => {
       });
     }
     
-    // Обновляем пользователя
     const [updated] = await User.update(
       { 
         name: name.trim(),
@@ -134,12 +118,10 @@ exports.postEditProfile = async (req, res) => {
     );
     
     if (updated) {
-      // Получаем обновлённого пользователя
       const updatedUser = await User.findByPk(userId, {
         attributes: { exclude: ['password_hash'] }
       });
       
-      // Обновляем данные в сессии
       req.session.user = {
         id: updatedUser.id,
         name: updatedUser.name,
@@ -160,9 +142,6 @@ exports.postEditProfile = async (req, res) => {
   }
 };
 
-/**
- * 4. ЗАГРУЗКА АВАТАРКИ
- */
 exports.uploadAvatar = async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -172,10 +151,8 @@ exports.uploadAvatar = async (req, res) => {
       return res.redirect('/profile/edit');
     }
     
-    // Получаем старого пользователя для удаления старой аватарки
     const user = await User.findByPk(userId);
     
-    // Если у пользователя была не стандартная аватарка, удаляем старый файл
     if (user.avatar && user.avatar !== 'default-avatar.png') {
       const oldAvatarPath = path.join(__dirname, '../public/images/avatars', user.avatar);
       try {
@@ -185,7 +162,6 @@ exports.uploadAvatar = async (req, res) => {
       }
     }
     
-    // Нормализуем аватар до квадратного формата (чтобы красиво отображался везде)
     const avatarPath = path.join(__dirname, '../public/images/avatars', req.file.filename);
     await sharp(avatarPath)
       .resize(400, 400, {
@@ -195,13 +171,11 @@ exports.uploadAvatar = async (req, res) => {
       .toFile(`${avatarPath}.tmp`);
     await fs.rename(`${avatarPath}.tmp`, avatarPath);
 
-    // Обновляем запись в БД
     await User.update(
       { avatar: req.file.filename },
       { where: { id: userId } }
     );
     
-    // Обновляем сессию
     req.session.user.avatar = req.file.filename;
     
     req.flash('success', 'Аватарка успешно обновлена');
@@ -214,9 +188,6 @@ exports.uploadAvatar = async (req, res) => {
   }
 };
 
-/**
- * 5. СМЕНА ПАРОЛЯ
- */
 exports.postChangePassword = async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -245,10 +216,8 @@ exports.postChangePassword = async (req, res) => {
       });
     }
     
-    // Получаем пользователя с паролем
     const user = await User.findByPk(userId);
     
-    // Проверяем текущий пароль
     const isMatch = await bcrypt.compare(current_password, user.password_hash);
     
     if (!isMatch) {
@@ -260,10 +229,8 @@ exports.postChangePassword = async (req, res) => {
       });
     }
     
-    // Хешируем новый пароль
     const hashedPassword = await bcrypt.hash(new_password, SALT_ROUNDS);
     
-    // Обновляем пароль
     await User.update(
       { password_hash: hashedPassword },
       { where: { id: userId } }
@@ -279,26 +246,20 @@ exports.postChangePassword = async (req, res) => {
   }
 };
 
-/**
- * 6. МОИ КНИГИ (полки)
- */
 exports.getMyBooks = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const status = req.query.status || 'all'; // all, read, want_to_read, reading
     
-    // Настройки пагинации
     const page = parseInt(req.query.page) || 1;
     const limit = 12;
     const offset = (page - 1) * limit;
     
-    // Базовый where для запроса
     const where = { user_id: userId };
     if (status !== 'all') {
       where.status = status;
     }
     
-    // Получаем книги пользователя с пагинацией
     const { count, rows: userBooks } = await UserBook.findAndCountAll({
       where,
       include: [
@@ -313,7 +274,6 @@ exports.getMyBooks = async (req, res) => {
       offset
     });
     
-    // Получаем статистику по каждой книге
     const booksWithDetails = await Promise.all(
       userBooks.map(async (ub) => {
         const book = ub.book;
@@ -337,7 +297,6 @@ exports.getMyBooks = async (req, res) => {
       })
     );
     
-    // Считаем количество книг по статусам
     const counts = {
       all: await UserBook.count({ where: { user_id: userId } }),
       read: await UserBook.count({ where: { user_id: userId, status: 'read' } }),
@@ -362,30 +321,23 @@ exports.getMyBooks = async (req, res) => {
   }
 };
 
-/**
- * 7. ИЗМЕНЕНИЕ СТАТУСА КНИГИ (AJAX)
- */
 exports.updateBookStatus = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const { book_id, status } = req.body;
     
-    // Проверяем существование книги
     const book = await Book.findByPk(book_id);
     if (!book) {
       return res.status(404).json({ error: 'Книга не найдена' });
     }
     
-    // Ищем существующую запись
     const userBook = await UserBook.findOne({
       where: { user_id: userId, book_id }
     });
     
     if (userBook) {
-      // Обновляем статус
       await userBook.update({ status });
     } else {
-      // Создаём новую запись
       await UserBook.create({
         user_id: userId,
         book_id,
@@ -401,9 +353,6 @@ exports.updateBookStatus = async (req, res) => {
   }
 };
 
-/**
- * 8. УДАЛЕНИЕ КНИГИ С ПОЛКИ
- */
 exports.removeBookFromShelf = async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -423,9 +372,6 @@ exports.removeBookFromShelf = async (req, res) => {
   }
 };
 
-/**
- * 9. МОИ РЕЦЕНЗИИ
- */
 exports.getMyReviews = async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -448,7 +394,6 @@ exports.getMyReviews = async (req, res) => {
       offset
     });
     
-    // Добавляем информацию о полезности
     const reviewsWithStats = reviews.map(review => ({
       ...review.toJSON(),
       helpful_percent: review.likes_count + review.dislikes_count > 0
@@ -471,9 +416,6 @@ exports.getMyReviews = async (req, res) => {
   }
 };
 
-/**
- * 10. РЕДАКТИРОВАНИЕ РЕЦЕНЗИИ (форма)
- */
 exports.getEditReview = async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -501,16 +443,12 @@ exports.getEditReview = async (req, res) => {
   }
 };
 
-/**
- * 11. ОБНОВЛЕНИЕ РЕЦЕНЗИИ
- */
 exports.postEditReview = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const reviewId = req.params.reviewId;
     const { rating, content } = req.body;
     
-    // Валидация
     const errors = [];
     
     if (!rating || rating < 1 || rating > 5) {
@@ -534,7 +472,6 @@ exports.postEditReview = async (req, res) => {
       });
     }
     
-    // Обновляем рецензию
     await Review.update(
       { rating, content },
       { where: { id: reviewId, user_id: userId } }
@@ -550,9 +487,6 @@ exports.postEditReview = async (req, res) => {
   }
 };
 
-/**
- * 12. УДАЛЕНИЕ РЕЦЕНЗИИ
- */
 exports.deleteReview = async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -572,9 +506,6 @@ exports.deleteReview = async (req, res) => {
   }
 };
 
-/**
- * 13. ПУБЛИЧНЫЙ ПРОФИЛЬ (просмотр профиля другого пользователя)
- */
 exports.getPublicProfile = async (req, res) => {
   try {
     const userId = parseInt(req.params.userId, 10);
@@ -584,7 +515,6 @@ exports.getPublicProfile = async (req, res) => {
       return res.redirect('/profile');
     }
     
-    // Получаем информацию о пользователе
     const user = await User.findByPk(userId, {
       attributes: ['id', 'name', 'avatar', 'bio', 'createdAt', 'role']
     });
@@ -594,7 +524,6 @@ exports.getPublicProfile = async (req, res) => {
       return res.redirect('/');
     }
     
-    // Получаем публичную статистику
     const [booksRead, booksWantToRead, booksReading, reviewsCount] = await Promise.all([
       UserBook.count({ where: { user_id: userId, status: 'read' } }),
       UserBook.count({ where: { user_id: userId, status: 'want_to_read' } }),
@@ -604,7 +533,6 @@ exports.getPublicProfile = async (req, res) => {
 
     const stats = { booksRead, booksWantToRead, booksReading, reviewsCount };
     
-    // Получаем рецензии и книги пользователя (как в личном профиле)
     const recentReviews = await Review.findAll({
       where: { user_id: userId },
       include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image'] }],
