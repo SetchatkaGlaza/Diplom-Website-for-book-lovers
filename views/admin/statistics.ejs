@@ -133,8 +133,66 @@
     .table-title-row { align-items: stretch; }
     .table-title-row .btn { width: 100%; justify-content: center; }
     .table-card { padding: 10px; }
-    .simple-admin-table { min-width: 520px; }
+    .simple-admin-table { min-width: 500px; }
     .simple-admin-table th, .simple-admin-table td { padding: 9px 10px; font-size: .86rem; }
+  }
+
+  @media (max-width: 640px) {
+    .table-wrapper {
+      overflow: visible;
+      border: none;
+      border-radius: 0;
+    }
+
+    .simple-admin-table {
+      min-width: 0;
+      table-layout: auto;
+    }
+
+    .simple-admin-table thead {
+      display: none;
+    }
+
+    .simple-admin-table tbody {
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    .simple-admin-table tr {
+      display: block;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 12px;
+      background: rgba(255,255,255,.04);
+      padding: 0.35rem 0.55rem;
+    }
+
+    .simple-admin-table td {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      border: none;
+      border-bottom: 1px dashed rgba(255,255,255,.14);
+      padding: 0.48rem 0.2rem;
+      font-size: 0.84rem;
+      text-align: right !important;
+      background: transparent;
+      word-break: break-word;
+    }
+
+    .simple-admin-table td:last-child {
+      border-bottom: none;
+    }
+
+    .simple-admin-table td::before {
+      content: attr(data-label);
+      font-weight: 600;
+      opacity: 0.75;
+      font-size: 0.78rem;
+      text-align: left;
+      margin-right: auto;
+      color: rgba(255,255,255,.86);
+    }
   }
 
   @media (max-width: 480px) {
@@ -142,6 +200,6 @@
     .stat-card { padding: 12px; min-height: 84px; }
     .stat-card strong { font-size: 1.15rem; }
     .stat-card span { font-size: .84rem; }
-    .simple-admin-table { min-width: 460px; }
+    .table-card { padding: 8px; }
   }
 </style>
