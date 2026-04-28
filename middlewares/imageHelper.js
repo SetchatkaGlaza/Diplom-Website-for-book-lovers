@@ -1,8 +1,6 @@
-// middlewares/imageHelper.js
 const imageHelper = require('../utils/imageHelper');
 
 module.exports = (req, res, next) => {
-  // Добавляем helper в локальные переменные шаблонов
   res.locals.imageHelper = {
     avatar: (name, role) => imageHelper.getAvatarPath(name, role),
     cover: (name) => imageHelper.getCoverPath(name),
@@ -10,6 +8,6 @@ module.exports = (req, res, next) => {
     webp: (path) => imageHelper.getWebpPath(path),
     srcset: (path, sizes) => imageHelper.getSrcSet(path, sizes)
   };
-  
+
   next();
 };

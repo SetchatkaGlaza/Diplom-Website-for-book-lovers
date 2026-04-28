@@ -1,16 +1,11 @@
 const emailService = require('../config/email');
-/**
- * Страница "О проекте"
- */
+
 exports.getAbout = (req, res) => {
   res.render('pages/about', {
     title: 'О проекте'
   });
 };
 
-/**
- * Страница FAQ
- */
 exports.getFaq = (req, res) => {
   const faqItems = [
     {
@@ -51,32 +46,22 @@ exports.getFaq = (req, res) => {
   });
 };
 
-/**
- * Страница правил
- */
 exports.getRules = (req, res) => {
   res.render('pages/rules', {
     title: 'Правила сайта'
   });
 };
 
-/**
- * Страница контактов
- */
 exports.getContact = (req, res) => {
   res.render('pages/contact', {
     title: 'Контакты'
   });
 };
 
-/**
- * Обработка формы обратной связи
- */
 exports.postContact = async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
     
-    // Валидация
     const errors = [];
     
     if (!name || name.length < 2) {
@@ -98,12 +83,11 @@ exports.postContact = async (req, res) => {
     if (errors.length > 0) {
       return res.render('pages/contact', {
         title: 'Контакты',
-        errors: [],
+        errors,
         formData: { name, email, subject, message }
       });
     }
-    
-    // Отправка email
+
     const result = await emailService.sendContactEmail(name, email, subject, message);
     
     if (result.success) {
