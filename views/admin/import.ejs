@@ -309,6 +309,10 @@
   }
 
   @media (max-width: 768px) {
+    .admin-import .admin-header {
+      align-items: stretch;
+    }
+
     .admin-import .admin-header > div {
       display: grid;
       grid-template-columns: 1fr;
@@ -316,13 +320,50 @@
       width: 100%;
     }
 
+    .admin-import .admin-header .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
     .import-card,
     .import-info {
       padding: 1rem;
     }
 
+    .import-icon {
+      font-size: 2.5rem;
+    }
+
+    .import-card h2 {
+      font-size: 1.2rem;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
     .mapping-grid {
       grid-template-columns: 1fr;
+    }
+
+    .file-label {
+      padding: 1.1rem 0.75rem;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.92rem;
+      line-height: 1.35;
+    }
+
+    .import-info pre {
+      font-size: 0.78rem;
+      line-height: 1.35;
+      padding: 0.75rem;
     }
 
     .form-actions .btn {

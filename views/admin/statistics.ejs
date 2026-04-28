@@ -37,10 +37,10 @@
             <% if (topBooks && topBooks.length > 0) { %>
               <% topBooks.forEach((book, index) => { %>
                 <tr>
-                  <td><%= index + 1 %></td>
-                  <td><a href="/books/<%= book.id %>" target="_blank" rel="noopener"><%= book.title %></a></td>
-                  <td><%= book.author %></td>
-                  <td class="text-center"><%= book.views_count.toLocaleString() %></td>
+                  <td data-label="#"><%= index + 1 %></td>
+                  <td data-label="Название"><a href="/books/<%= book.id %>" target="_blank" rel="noopener"><%= book.title %></a></td>
+                  <td data-label="Автор"><%= book.author %></td>
+                  <td data-label="Просмотры" class="text-center"><%= book.views_count.toLocaleString() %></td>
                 </tr>
               <% }) %>
             <% } else { %>
@@ -69,9 +69,9 @@
             <% if (topUsers && topUsers.length > 0) { %>
               <% topUsers.forEach((item, index) => { %>
                 <tr>
-                  <td><%= index + 1 %></td>
-                  <td><a href="/profile/<%= item.id %>" target="_blank" rel="noopener"><%= item.name %></a></td>
-                  <td class="text-center"><%= item.reviews_count %></td>
+                  <td data-label="#"><%= index + 1 %></td>
+                  <td data-label="Пользователь"><a href="/profile/<%= item.id %>" target="_blank" rel="noopener"><%= item.name %></a></td>
+                  <td data-label="Рецензий" class="text-center"><%= item.reviews_count %></td>
                 </tr>
               <% }) %>
             <% } else { %>
@@ -106,6 +106,16 @@
   .text-center { text-align:center; }
 
   @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .header-actions .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
     .tables-grid {
       grid-template-columns: 1fr;
     }
@@ -114,14 +124,69 @@
       padding: 10px;
     }
 
+    .table-title-row {
+      align-items: stretch;
+    }
+
+    .table-title-row .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
     .table-wrapper {
-      margin-inline: -6px;
-      padding-inline: 6px;
+      overflow: visible;
+    }
+
+    .simple-admin-table,
+    .simple-admin-table thead,
+    .simple-admin-table tbody,
+    .simple-admin-table th,
+    .simple-admin-table td,
+    .simple-admin-table tr {
+      display: block;
+      width: 100%;
     }
 
     .simple-admin-table {
-      min-width: 540px;
-      table-layout: auto;
+      min-width: 0;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .simple-admin-table thead {
+      display: none;
+    }
+
+    .simple-admin-table tr {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      padding: 8px;
+    }
+
+    .simple-admin-table td {
+      border: none;
+      border-bottom: 1px dashed rgba(255,255,255,.15);
+      padding: 8px 8px 8px 44%;
+      min-height: 36px;
+      position: relative;
+      text-align: left !important;
+    }
+
+    .simple-admin-table td:last-child {
+      border-bottom: none;
+    }
+
+    .simple-admin-table td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      width: 38%;
+      opacity: .72;
+      font-weight: 600;
+      font-size: .78rem;
     }
   }
 </style>

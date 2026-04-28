@@ -271,6 +271,39 @@
     });
   });
 
+  function removeLegacyQuoteBlocks(text) {
+    let source = String(text || '');
+    let iterations = 0;
+
+    while (iterations < 10) {
+      const markerMatch = source.match(/Цитата от [^:\n]+:\s*\n?\s*«/);
+      if (!markerMatch) break;
+
+      const start = markerMatch.index;
+      const quoteStart = start + markerMatch[0].length - 1;
+      let depth = 0;
+      let end = -1;
+
+      for (let i = quoteStart; i < source.length; i += 1) {
+        if (source[i] === '«') depth += 1;
+        if (source[i] === '»') {
+          depth -= 1;
+          if (depth === 0) {
+            end = i;
+            break;
+          }
+        }
+      }
+
+      if (end === -1) break;
+
+      source = `${source.slice(0, start)}${source.slice(end + 1)}`.replace(/^\s+|\s+$/g, '');
+      iterations += 1;
+    }
+
+    return source;
+  }
+
   function getCleanPostContent(postId) {
     const postCard = document.getElementById(`post-${postId}`);
     if (!postCard) return '';
@@ -288,6 +321,7 @@
       .replace(/\[quote="[^"]*"\][\s\S]*?\[\/quote\]/g, '')
       .replace(/<blockquote[^>]*>[\s\S]*?<\/blockquote>/gi, '')
       .replace(/\n{3,}/g, '\n\n');
+    content = removeLegacyQuoteBlocks(content);
     return content.trim();
   }
 
