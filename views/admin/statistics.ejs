@@ -37,10 +37,10 @@
             <% if (topBooks && topBooks.length > 0) { %>
               <% topBooks.forEach((book, index) => { %>
                 <tr>
-                  <td><%= index + 1 %></td>
-                  <td><a href="/books/<%= book.id %>" target="_blank" rel="noopener"><%= book.title %></a></td>
-                  <td><%= book.author %></td>
-                  <td class="text-center"><%= book.views_count.toLocaleString() %></td>
+                  <td data-label="#"><%= index + 1 %></td>
+                  <td data-label="Название"><a href="/books/<%= book.id %>" target="_blank" rel="noopener"><%= book.title %></a></td>
+                  <td data-label="Автор"><%= book.author %></td>
+                  <td data-label="Просмотры" class="text-center"><%= book.views_count.toLocaleString() %></td>
                 </tr>
               <% }) %>
             <% } else { %>
@@ -69,9 +69,9 @@
             <% if (topUsers && topUsers.length > 0) { %>
               <% topUsers.forEach((item, index) => { %>
                 <tr>
-                  <td><%= index + 1 %></td>
-                  <td><a href="/profile/<%= item.id %>" target="_blank" rel="noopener"><%= item.name %></a></td>
-                  <td class="text-center"><%= item.reviews_count %></td>
+                  <td data-label="#"><%= index + 1 %></td>
+                  <td data-label="Пользователь"><a href="/profile/<%= item.id %>" target="_blank" rel="noopener"><%= item.name %></a></td>
+                  <td data-label="Рецензий" class="text-center"><%= item.reviews_count %></td>
                 </tr>
               <% }) %>
             <% } else { %>
@@ -87,41 +87,61 @@
 <style>
   .admin-statistics-simple { color: #fff; }
   .page-header { display:flex; justify-content:space-between; gap:1rem; align-items:flex-start; margin-bottom:1.25rem; flex-wrap:wrap; }
-  .page-header h1 { margin:0 0 .25rem; font-size:1.75rem; }
+  .page-header h1 { margin:0 0 .25rem; font-size:1.75rem; line-height:1.2; }
   .text-muted { opacity:.75; margin:0; }
   .stats-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:1rem; }
-  .stat-card { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); border-radius:12px; padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
-  .stat-card strong { font-size:1.25rem; line-height:1; }
+  .stat-card {
+    background: linear-gradient(160deg, rgba(255,255,255,.11), rgba(255,255,255,.04));
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:14px;
+    padding:14px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+    min-height:92px;
+  }
+  .stat-card strong { font-size:1.34rem; line-height:1; }
+  .stat-card span { opacity:.92; font-size:.92rem; }
   .tables-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:16px; }
-  .table-card { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); border-radius:12px; padding:12px; }
-  .table-title-row { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
-  .table-title-row h2 { margin:0; font-size:1.1rem; }
-  .table-wrapper { overflow-x:auto; }
-  .simple-admin-table { width:100%; border-collapse:collapse; table-layout:fixed; }
-  .simple-admin-table th, .simple-admin-table td { border:1px solid rgba(255,255,255,.14); padding:10px; vertical-align:middle; }
-  .simple-admin-table th { font-weight:600; background:rgba(0,0,0,.2); }
-  .simple-admin-table td { background:rgba(255,255,255,.02); word-break:break-word; }
-  .simple-admin-table tr { height:48px; }
+  .table-card { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); border-radius:14px; padding:14px; }
+  .table-title-row { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+  .table-title-row h2 { margin:0; font-size:1.08rem; }
+  .table-wrapper {
+    overflow-x:auto;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,.38) transparent;
+  }
+  .table-wrapper::-webkit-scrollbar { height: 7px; }
+  .table-wrapper::-webkit-scrollbar-thumb { background: rgba(255,255,255,.35); border-radius: 7px; }
+  .simple-admin-table { width:100%; min-width:560px; border-collapse:collapse; table-layout:fixed; }
+  .simple-admin-table th, .simple-admin-table td { border-bottom:1px solid rgba(255,255,255,.14); padding:10px 12px; vertical-align:middle; }
+  .simple-admin-table th { font-weight:600; background:rgba(0,0,0,.25); text-align:left; font-size:.86rem; letter-spacing:.02em; }
+  .simple-admin-table td { background:rgba(255,255,255,.02); word-break:break-word; font-size:.92rem; }
+  .simple-admin-table tr:last-child td { border-bottom: none; }
   .simple-admin-table a { color:#fff; text-decoration:underline; text-underline-offset:2px; }
   .text-center { text-align:center; }
 
+  @media (max-width: 900px) {
+    .tables-grid { grid-template-columns: 1fr; }
+  }
+
   @media (max-width: 768px) {
-    .tables-grid {
-      grid-template-columns: 1fr;
-    }
+    .page-header { flex-direction: column; align-items: stretch; }
+    .header-actions .btn { width: 100%; justify-content: center; }
+    .table-title-row { align-items: stretch; }
+    .table-title-row .btn { width: 100%; justify-content: center; }
+    .table-card { padding: 10px; }
+    .simple-admin-table { min-width: 520px; }
+    .simple-admin-table th, .simple-admin-table td { padding: 9px 10px; font-size: .86rem; }
+  }
 
-    .table-card {
-      padding: 10px;
-    }
-
-    .table-wrapper {
-      margin-inline: -6px;
-      padding-inline: 6px;
-    }
-
-    .simple-admin-table {
-      min-width: 540px;
-      table-layout: auto;
-    }
+  @media (max-width: 480px) {
+    .page-header h1 { font-size: 1.4rem; }
+    .stat-card { padding: 12px; min-height: 84px; }
+    .stat-card strong { font-size: 1.15rem; }
+    .stat-card span { font-size: .84rem; }
+    .simple-admin-table { min-width: 460px; }
   }
 </style>
