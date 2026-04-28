@@ -5,6 +5,11 @@ const { Book, Genre } = require('../models');
 const notificationService = require('../services/notificationService');
 const { Op } = require('sequelize');
 
+const DEBUG_IMPORT = process.env.DEBUG_IMPORT === 'true';
+const debugLog = (...args) => {
+  if (DEBUG_IMPORT) console.log(...args);
+};
+
 /**
  * Страница импорта книг
  */
@@ -69,7 +74,7 @@ async function getGenreId(genreName, createIfNotExists = false, defaultGenreId =
   }
   
   const cleanName = genreName.trim();
-  console.log(`   🔍 Поиск жанра: "${cleanName}"`);
+  debugLog(`   🔍 Поиск жанра: "${cleanName}"`);
   
   // Ищем точное совпадение (регистронезависимо)
   const genre = await Genre.findOne({
@@ -81,23 +86,23 @@ async function getGenreId(genreName, createIfNotExists = false, defaultGenreId =
   });
   
   if (genre) {
-    console.log(`   ✅ Жанр найден: ${genre.name} (ID: ${genre.id})`);
+    debugLog(`   ✅ Жанр найден: ${genre.name} (ID: ${genre.id})`);
     return genre.id;
   }
   
   // Если жанр не найден и разрешено создавать
   if (createIfNotExists) {
-    console.log(`   ➕ Создаём новый жанр: "${cleanName}"`);
+    debugLog(`   ➕ Создаём новый жанр: "${cleanName}"`);
     const newGenre = await Genre.create({ 
       name: cleanName,
       createdAt: new Date(),
       updatedAt: new Date()
     });
-    console.log(`   ✅ Создан жанр ID: ${newGenre.id}`);
+    debugLog(`   ✅ Создан жанр ID: ${newGenre.id}`);
     return newGenre.id;
   }
   
-  console.log(`   ❌ Жанр не найден и создание запрещено`);
+  debugLog(`   ❌ Жанр не найден и создание запрещено`);
   return defaultGenreId;
 }
 
@@ -114,13 +119,13 @@ exports.importBooks = async (req, res) => {
     const filePath = req.file.path;
     let results = [];
     
-    console.log('\n📁 ===== НАЧАЛО ИМПОРТА =====');
-    console.log(`📁 Файл: ${req.file.originalname}`);
-    console.log(`📁 Размер: ${req.file.size} байт`);
+    debugLog('\n📁 ===== НАЧАЛО ИМПОРТА =====');
+    debugLog(`📁 Файл: ${req.file.originalname}`);
+    debugLog(`📁 Размер: ${req.file.size} байт`);
     
     // Определяем тип файла
     const ext = path.extname(req.file.originalname).toLowerCase();
-    console.log(`📁 Расширение: ${ext}`);
+    debugLog(`📁 Расширение: ${ext}`);
     
     try {
       if (ext === '.json') {
@@ -137,7 +142,7 @@ exports.importBooks = async (req, res) => {
       return res.redirect('/admin/import');
     }
     
-    console.log(`📊 Найдено записей: ${results.length}`);
+    debugLog(`📊 Найдено записей: ${results.length}`);
     
     if (results.length === 0) {
       fs.unlinkSync(filePath);
@@ -146,8 +151,8 @@ exports.importBooks = async (req, res) => {
     }
     
     // Показываем первую запись для примера
-    console.log('\n📝 Пример первой записи:');
-    console.log(JSON.stringify(results[0], null, 2));
+    debugLog('\n📝 Пример первой записи:');
+    debugLog(JSON.stringify(results[0], null, 2));
     
     // Получаем настройки из формы
     const fieldMapping = {
@@ -165,11 +170,11 @@ exports.importBooks = async (req, res) => {
     const skipDuplicates = req.body.skip_duplicates === 'on';
     const defaultGenreId = req.body.default_genre || null;
     
-    console.log('\n⚙️ Настройки импорта:');
-    console.log(`   - Маппинг полей:`, fieldMapping);
-    console.log(`   - Создавать жанры: ${createGenres}`);
-    console.log(`   - Пропускать дубликаты: ${skipDuplicates}`);
-    console.log(`   - Жанр по умолчанию ID: ${defaultGenreId}`);
+    debugLog('\n⚙️ Настройки импорта:');
+    debugLog(`   - Маппинг полей:`, fieldMapping);
+    debugLog(`   - Создавать жанры: ${createGenres}`);
+    debugLog(`   - Пропускать дубликаты: ${skipDuplicates}`);
+    debugLog(`   - Жанр по умолчанию ID: ${defaultGenreId}`);
     
     // Статистика импорта
     const stats = {
@@ -186,7 +191,7 @@ exports.importBooks = async (req, res) => {
       const bookData = {};
       const rowErrors = [];
       
-      console.log(`\n📖 [${i + 1}/${results.length}] Обработка записи...`);
+      debugLog(`\n📖 [${i + 1}/${results.length}] Обработка записи...`);
       
       try {
         // === НАЗВАНИЕ (обязательное) ===
@@ -195,10 +200,10 @@ exports.importBooks = async (req, res) => {
         
         if (!titleValue) {
           rowErrors.push('Отсутствует название');
-          console.log(`   ❌ Нет названия`);
+          debugLog(`   ❌ Нет названия`);
         } else {
           bookData.title = titleValue.toString().trim();
-          console.log(`   ✅ Название: ${bookData.title.substring(0, 50)}${bookData.title.length > 50 ? '...' : ''}`);
+          debugLog(`   ✅ Название: ${bookData.title.substring(0, 50)}${bookData.title.length > 50 ? '...' : ''}`);
         }
         
         // === АВТОР (обязательное) ===
@@ -207,10 +212,10 @@ exports.importBooks = async (req, res) => {
         
         if (!authorValue) {
           rowErrors.push('Отсутствует автор');
-          console.log(`   ❌ Нет автора`);
+          debugLog(`   ❌ Нет автора`);
         } else {
           bookData.author = authorValue.toString().trim();
-          console.log(`   ✅ Автор: ${bookData.author.substring(0, 30)}${bookData.author.length > 30 ? '...' : ''}`);
+          debugLog(`   ✅ Автор: ${bookData.author.substring(0, 30)}${bookData.author.length > 30 ? '...' : ''}`);
         }
         
         // === ОПИСАНИЕ ===
@@ -263,25 +268,25 @@ exports.importBooks = async (req, res) => {
         const genreValue = row[genreKey] || row[Object.keys(row).find(k => k.toLowerCase() === genreKey)];
         
         if (genreValue) {
-          console.log(`   🏷️ Значение жанра из файла: "${genreValue}"`);
+          debugLog(`   🏷️ Значение жанра из файла: "${genreValue}"`);
           const genreId = await getGenreId(genreValue, createGenres, defaultGenreId);
           if (genreId) {
             bookData.genre_id = genreId;
-            console.log(`   ✅ Жанр установлен: ID ${genreId}`);
+            debugLog(`   ✅ Жанр установлен: ID ${genreId}`);
           } else {
-            console.log(`   ⚠️ Жанр не установлен`);
+            debugLog(`   ⚠️ Жанр не установлен`);
           }
         } else {
-          console.log(`   ℹ️ Жанр не указан в файле`);
+          debugLog(`   ℹ️ Жанр не указан в файле`);
           if (defaultGenreId) {
             bookData.genre_id = defaultGenreId;
-            console.log(`   ℹ️ Используем жанр по умолчанию: ID ${defaultGenreId}`);
+            debugLog(`   ℹ️ Используем жанр по умолчанию: ID ${defaultGenreId}`);
           }
         }
         
         // Если есть ошибки, пропускаем
         if (rowErrors.length > 0) {
-          console.log(`   ❌ Ошибки:`, rowErrors);
+          debugLog(`   ❌ Ошибки:`, rowErrors);
           stats.errors++;
           stats.details.push({
             row: i + 1,
@@ -302,7 +307,7 @@ exports.importBooks = async (req, res) => {
           });
           
           if (existing) {
-            console.log(`   ⏭️ Найден дубликат, пропускаем`);
+            debugLog(`   ⏭️ Найден дубликат, пропускаем`);
             stats.skipped++;
             stats.details.push({
               row: i + 1,
@@ -318,7 +323,7 @@ exports.importBooks = async (req, res) => {
         bookData.cover_image = 'default-book-cover.jpg';
         bookData.views_count = 0;
         
-        console.log(`   💾 Сохраняем книгу:`, {
+        debugLog(`   💾 Сохраняем книгу:`, {
           title: bookData.title,
           author: bookData.author,
           genre_id: bookData.genre_id || 'не указан'
@@ -327,7 +332,7 @@ exports.importBooks = async (req, res) => {
         // Создаём книгу
         await Book.create(bookData);
         
-        console.log(`   ✅ Книга успешно создана`);
+        debugLog(`   ✅ Книга успешно создана`);
         stats.success++;
         stats.details.push({
           row: i + 1,
@@ -354,11 +359,11 @@ exports.importBooks = async (req, res) => {
     // Удаляем временный файл
     fs.unlinkSync(filePath);
     
-    console.log('\n📊 ===== ИТОГИ ИМПОРТА =====');
-    console.log(`   Всего записей: ${stats.total}`);
-    console.log(`   ✅ Успешно: ${stats.success}`);
-    console.log(`   ❌ Ошибок: ${stats.errors}`);
-    console.log(`   ⏭️ Пропущено: ${stats.skipped}`);
+    debugLog('\n📊 ===== ИТОГИ ИМПОРТА =====');
+    debugLog(`   Всего записей: ${stats.total}`);
+    debugLog(`   ✅ Успешно: ${stats.success}`);
+    debugLog(`   ❌ Ошибок: ${stats.errors}`);
+    debugLog(`   ⏭️ Пропущено: ${stats.skipped}`);
     
     // Отправляем уведомление
     await notificationService.booksImported(req.session.user.id, stats);

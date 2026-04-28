@@ -64,13 +64,10 @@ const importFileFilter = (req, file, cb) => {
   const allowedExtensions = ['.csv', '.json', '.txt'];
   const ext = path.extname(file.originalname).toLowerCase();
   
-  console.log('📁 Загружаемый файл:', file.originalname, 'Расширение:', ext);
   
   if (allowedExtensions.includes(ext)) {
-    console.log('✅ Расширение разрешено для импорта');
     cb(null, true);
   } else {
-    console.log('❌ Неподдерживаемое расширение для импорта:', ext);
     cb(new Error('Неподдерживаемый тип файла. Используйте CSV или JSON'), false);
   }
 };

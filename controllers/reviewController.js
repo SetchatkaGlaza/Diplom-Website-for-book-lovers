@@ -35,7 +35,6 @@ async function updateBookRating(bookId) {
       ratings_count: ratingsCount
     });
     
-    console.log(`✅ Рейтинг книги ID ${bookId} обновлён: ${ratingsCount} оценок`);
   } catch (error) {
     console.error(`❌ Ошибка при обновлении рейтинга книги ${bookId}:`, error);
   }
