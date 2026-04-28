@@ -166,6 +166,11 @@
     flex-wrap: wrap;
     gap: 0.6rem;
   }
+
+  .admin-import .admin-header .btn {
+    flex: 1 1 180px;
+    justify-content: center;
+  }
   
   .import-container {
     display: grid;
@@ -360,13 +365,14 @@
 
     .admin-import .admin-header > div {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.5rem;
       width: 100%;
     }
 
     .admin-import .admin-header .btn {
       width: 100%;
+      flex: none;
       justify-content: center;
     }
 
@@ -392,12 +398,20 @@
       width: 100%;
       justify-content: center;
     }
+
+    .import-info pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 0.75rem;
+    }
   }
 
   @media (max-width: 560px) {
     .mapping-grid { grid-template-columns: 1fr; }
     .admin-import .admin-header h1 { font-size: 1.28rem; }
+    .admin-import .admin-header > div { grid-template-columns: 1fr; }
     .import-info pre { font-size: 0.72rem; }
     .file-label { flex-direction: column; text-align: center; }
+    .checkbox-group { padding: 0.75rem; }
   }
 </style>
