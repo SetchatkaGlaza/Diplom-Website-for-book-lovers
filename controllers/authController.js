@@ -7,12 +7,8 @@ const SALT_ROUNDS = 10;
 const MAX_LOGIN_ATTEMPTS = 5;
 const BLOCK_TIME = 15 * 60 * 1000; // 15 минут в миллисекундах
 
-/**
- * Проверка и обновление попыток входа
- */
 async function checkLoginAttempts(ip, email) {
   try {
-    // Ищем запись для этого IP и email
     let attempt = await LoginAttempt.findOne({
       where: {
         ip_address: ip,
@@ -21,7 +17,6 @@ async function checkLoginAttempts(ip, email) {
     });
     
     if (!attempt) {
-      // Первая попытка
       attempt = await LoginAttempt.create({
         ip_address: ip,
         email: email,
@@ -31,7 +26,6 @@ async function checkLoginAttempts(ip, email) {
       return { allowed: true, attempts: 1 };
     }
     
-    // Проверяем, не заблокирован ли
     if (attempt.blocked_until && attempt.blocked_until > new Date()) {
       const waitMinutes = Math.ceil((attempt.blocked_until - new Date()) / (60 * 1000));
       return { 
@@ -42,7 +36,6 @@ async function checkLoginAttempts(ip, email) {
       };
     }
     
-    // Если блокировка истекла, сбрасываем счётчик
     if (attempt.blocked_until && attempt.blocked_until <= new Date()) {
       await attempt.update({
         attempts: 1,
@@ -52,11 +45,9 @@ async function checkLoginAttempts(ip, email) {
       return { allowed: true, attempts: 1 };
     }
     
-    // Увеличиваем счётчик
     const newAttempts = attempt.attempts + 1;
     
     if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
-      // Блокируем
       await attempt.update({
         attempts: newAttempts,
         blocked_until: new Date(Date.now() + BLOCK_TIME),
@@ -69,7 +60,6 @@ async function checkLoginAttempts(ip, email) {
         attempts: newAttempts 
       };
     } else {
-      // Просто увеличиваем счётчик
       await attempt.update({
         attempts: newAttempts,
         last_attempt: new Date()
@@ -83,14 +73,10 @@ async function checkLoginAttempts(ip, email) {
     
   } catch (error) {
     console.error('Ошибка при проверке попыток входа:', error);
-    // В случае ошибки разрешаем попытку (чтобы не блокировать легитимных пользователей)
     return { allowed: true, attempts: 0 };
   }
 }
 
-/**
- * Сброс счётчика попыток после успешного входа
- */
 async function resetLoginAttempts(ip, email) {
   try {
     await LoginAttempt.destroy({
@@ -104,15 +90,11 @@ async function resetLoginAttempts(ip, email) {
   }
 }
 
-/**
- * ПОКАЗ ФОРМЫ ВХОДА (с каптчей при необходимости)
- */
 exports.getLogin = async (req, res) => {
   if (req.session.user) {
     return res.redirect('/');
   }
   
-  // Проверяем, нужно ли показывать каптчу
   const showCaptcha = false;
   
   res.render('auth/login', {
@@ -124,15 +106,11 @@ exports.getLogin = async (req, res) => {
   });
 };
 
-/**
- * ОБРАБОТКА ВХОДА (с проверкой попыток и каптчей)
- */
 exports.postLogin = async (req, res) => {
   try {
     const { email, password, captcha } = req.body;
     const ip = req.ip;
     
-    // Проверяем попытки входа
     const attemptCheck = await checkLoginAttempts(ip, email);
     
     if (!attemptCheck.allowed) {
@@ -144,30 +122,25 @@ exports.postLogin = async (req, res) => {
       return res.redirect('/auth/login');
     }
     
-    // Если осталось мало попыток, проверяем каптчу
     if (attemptCheck.remaining <= 2) {
       if (!captcha) {
         req.flash('error', 'Пожалуйста, введите код с картинки');
         return res.redirect('/auth/login');
       }
       
-      // Проверяем каптчу
       if (!req.session.captcha || captcha.toLowerCase() !== req.session.captcha) {
         req.flash('error', 'Неверный код с картинки');
         return res.redirect('/auth/login');
       }
       
-      // Очищаем каптчу
       delete req.session.captcha;
     }
     
-    // Проверяем, что поля заполнены
     if (!email || !password) {
       req.flash('error', 'Пожалуйста, введите email и пароль');
       return res.redirect('/auth/login');
     }
     
-    // Ищем пользователя
     const user = await User.findOne({ where: { email } });
     
     if (!user) {
@@ -175,13 +148,11 @@ exports.postLogin = async (req, res) => {
       return res.redirect('/auth/login');
     }
     
-    // Проверяем, не заблокирован ли пользователь
     if (user.isBlocked) {
       if (user.blocked_until && user.blocked_until > new Date()) {
         const waitMinutes = Math.ceil((user.blocked_until - new Date()) / (60 * 1000));
         req.flash('error', `Аккаунт заблокирован. Попробуйте через ${waitMinutes} минут.`);
       } else if (user.blocked_until && user.blocked_until <= new Date()) {
-        // Разблокируем, если время истекло
         await user.update({ isBlocked: false, blocked_until: null });
       } else {
         req.flash('error', 'Аккаунт заблокирован администратором');
@@ -189,7 +160,6 @@ exports.postLogin = async (req, res) => {
       return res.redirect('/auth/login');
     }
     
-    // Сравниваем пароль
     const isMatch = await bcrypt.compare(password, user.password_hash);
     
     if (!isMatch) {
@@ -197,10 +167,8 @@ exports.postLogin = async (req, res) => {
       return res.redirect('/auth/login');
     }
     
-    // Успешный вход - сбрасываем счётчик попыток
     await resetLoginAttempts(ip, email);
     
-    // Сохраняем пользователя в сессии
     req.session.user = {
       id: user.id,
       name: user.name,
@@ -211,7 +179,6 @@ exports.postLogin = async (req, res) => {
     
     req.flash('success', 'Вы успешно вошли в систему!');
     
-    // Редирект на запрошенную страницу или главную
     const redirectTo = req.session.returnTo || '/';
     delete req.session.returnTo;
     res.redirect(redirectTo);
@@ -223,9 +190,6 @@ exports.postLogin = async (req, res) => {
   }
 };
 
-/**
- * ПОКАЗ ФОРМЫ РЕГИСТРАЦИИ
- */
 exports.getRegister = (req, res) => {
   if (req.session.user) {
     return res.redirect('/');
@@ -240,26 +204,19 @@ exports.getRegister = (req, res) => {
   });
 };
 
-/**
- * ОБРАБОТКА РЕГИСТРАЦИИ
- */
 exports.postRegister = async (req, res) => {
   try {
     const { name, email, password, password2, captcha } = req.body;
     
-    // Проверяем каптчу
     if (!req.session.captcha || captcha.toLowerCase() !== req.session.captcha) {
       req.flash('error', 'Неверный код с картинки');
       return res.redirect('/auth/register');
     }
     
-    // Очищаем каптчу
     delete req.session.captcha;
     
-    // Массив для ошибок
     const errors = [];
 
-    // Валидация
     if (!name || !email || !password || !password2) {
       errors.push({ msg: 'Пожалуйста, заполните все поля' });
     }
@@ -291,7 +248,6 @@ exports.postRegister = async (req, res) => {
       });
     }
 
-    // Проверяем, существует ли пользователь
     const existingUser = await User.findOne({ where: { email } });
     
     if (existingUser) {
@@ -305,10 +261,8 @@ exports.postRegister = async (req, res) => {
       });
     }
 
-    // Хешируем пароль
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-    // Создаём пользователя
     const newUser = await User.create({
       name,
       email,
@@ -319,10 +273,8 @@ exports.postRegister = async (req, res) => {
       email_verified: false
     });
 
-    // ОТПРАВЛЯЕМ ПРИВЕТСТВЕННОЕ УВЕДОМЛЕНИЕ
     await notificationService.welcomeNewUser(newUser.id, newUser.name);
 
-    // Сразу логиним
     req.session.user = {
       id: newUser.id,
       name: newUser.name,
@@ -341,9 +293,6 @@ exports.postRegister = async (req, res) => {
   }
 };
 
-/**
- * ВЫХОД
- */
 exports.logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {

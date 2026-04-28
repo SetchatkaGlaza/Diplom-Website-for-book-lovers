@@ -1,8 +1,5 @@
 const notificationService = require('../services/notificationService');
 
-/**
- * Получить уведомления пользователя
- */
 exports.getNotifications = async (req, res) => {
   try {
     if (!req.session.user) {
@@ -16,12 +13,10 @@ exports.getNotifications = async (req, res) => {
     
     const result = await notificationService.getUserNotifications(userId, limit, offset);
     
-    // Для AJAX запросов возвращаем JSON
     if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
       return res.json(result);
     }
     
-    // Для обычных запросов рендерим страницу
     res.render('notifications/index', {
       title: 'Уведомления',
       notifications: result.notifications,
@@ -43,9 +38,6 @@ exports.getNotifications = async (req, res) => {
   }
 };
 
-/**
- * Получить количество непрочитанных уведомлений
- */
 exports.getUnreadCount = async (req, res) => {
   try {
     if (!req.session.user) {
@@ -63,9 +55,6 @@ exports.getUnreadCount = async (req, res) => {
   }
 };
 
-/**
- * Отметить уведомление как прочитанное
- */
 exports.markAsRead = async (req, res) => {
   try {
     if (!req.session.user) {
@@ -89,9 +78,6 @@ exports.markAsRead = async (req, res) => {
   }
 };
 
-/**
- * Отметить все уведомления как прочитанные
- */
 exports.markAllAsRead = async (req, res) => {
   try {
     if (!req.session.user) {
@@ -110,9 +96,6 @@ exports.markAllAsRead = async (req, res) => {
   }
 };
 
-/**
- * Удалить уведомление
- */
 exports.deleteNotification = async (req, res) => {
   try {
     if (!req.session.user) {

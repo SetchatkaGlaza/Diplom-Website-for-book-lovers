@@ -10,9 +10,6 @@ const debugLog = (...args) => {
   if (DEBUG_IMPORT) console.log(...args);
 };
 
-/**
- * Страница импорта книг
- */
 exports.getImportPage = async (req, res) => {
   try {
     const genres = await Genre.findAll({ order: [['name', 'ASC']] });
@@ -30,14 +27,10 @@ exports.getImportPage = async (req, res) => {
   }
 };
 
-/**
- * Обработка импорта из JSON файла
- */
 async function processJsonFile(filePath) {
   const fileContent = fs.readFileSync(filePath, 'utf8');
   const jsonData = JSON.parse(fileContent);
   
-  // Поддерживаем разные форматы JSON
   if (Array.isArray(jsonData)) {
     return jsonData;
   } else if (jsonData.books && Array.isArray(jsonData.books)) {
@@ -47,9 +40,6 @@ async function processJsonFile(filePath) {
   }
 }
 
-/**
- * Обработка импорта из CSV файла
- */
 async function processCsvFile(filePath, delimiter) {
   return new Promise((resolve, reject) => {
     const results = [];
@@ -65,9 +55,6 @@ async function processCsvFile(filePath, delimiter) {
   });
 }
 
-/**
- * Получение ID жанра по названию
- */
 async function getGenreId(genreName, createIfNotExists = false, defaultGenreId = null) {
   if (!genreName || genreName.trim() === '') {
     return defaultGenreId;
@@ -76,7 +63,6 @@ async function getGenreId(genreName, createIfNotExists = false, defaultGenreId =
   const cleanName = genreName.trim();
   debugLog(`   🔍 Поиск жанра: "${cleanName}"`);
   
-  // Ищем точное совпадение (регистронезависимо)
   const genre = await Genre.findOne({
     where: {
       name: {
@@ -90,7 +76,6 @@ async function getGenreId(genreName, createIfNotExists = false, defaultGenreId =
     return genre.id;
   }
   
-  // Если жанр не найден и разрешено создавать
   if (createIfNotExists) {
     debugLog(`   ➕ Создаём новый жанр: "${cleanName}"`);
     const newGenre = await Genre.create({ 
@@ -106,9 +91,6 @@ async function getGenreId(genreName, createIfNotExists = false, defaultGenreId =
   return defaultGenreId;
 }
 
-/**
- * Импорт книг
- */
 exports.importBooks = async (req, res) => {
   try {
     if (!req.file) {
@@ -123,7 +105,6 @@ exports.importBooks = async (req, res) => {
     debugLog(`📁 Файл: ${req.file.originalname}`);
     debugLog(`📁 Размер: ${req.file.size} байт`);
     
-    // Определяем тип файла
     const ext = path.extname(req.file.originalname).toLowerCase();
     debugLog(`📁 Расширение: ${ext}`);
     
@@ -150,11 +131,9 @@ exports.importBooks = async (req, res) => {
       return res.redirect('/admin/import');
     }
     
-    // Показываем первую запись для примера
     debugLog('\n📝 Пример первой записи:');
     debugLog(JSON.stringify(results[0], null, 2));
     
-    // Получаем настройки из формы
     const fieldMapping = {
       title: req.body.field_title || 'title',
       author: req.body.field_author || 'author',
@@ -176,7 +155,6 @@ exports.importBooks = async (req, res) => {
     debugLog(`   - Пропускать дубликаты: ${skipDuplicates}`);
     debugLog(`   - Жанр по умолчанию ID: ${defaultGenreId}`);
     
-    // Статистика импорта
     const stats = {
       total: results.length,
       success: 0,
@@ -185,7 +163,6 @@ exports.importBooks = async (req, res) => {
       details: []
     };
     
-    // Обрабатываем каждую книгу
     for (let i = 0; i < results.length; i++) {
       const row = results[i];
       const bookData = {};
@@ -194,7 +171,6 @@ exports.importBooks = async (req, res) => {
       debugLog(`\n📖 [${i + 1}/${results.length}] Обработка записи...`);
       
       try {
-        // === НАЗВАНИЕ (обязательное) ===
         const titleKey = fieldMapping.title.toLowerCase();
         const titleValue = row[titleKey] || row[Object.keys(row).find(k => k.toLowerCase() === titleKey)];
         
@@ -206,7 +182,6 @@ exports.importBooks = async (req, res) => {
           debugLog(`   ✅ Название: ${bookData.title.substring(0, 50)}${bookData.title.length > 50 ? '...' : ''}`);
         }
         
-        // === АВТОР (обязательное) ===
         const authorKey = fieldMapping.author.toLowerCase();
         const authorValue = row[authorKey] || row[Object.keys(row).find(k => k.toLowerCase() === authorKey)];
         
@@ -218,14 +193,12 @@ exports.importBooks = async (req, res) => {
           debugLog(`   ✅ Автор: ${bookData.author.substring(0, 30)}${bookData.author.length > 30 ? '...' : ''}`);
         }
         
-        // === ОПИСАНИЕ ===
         const descKey = fieldMapping.description.toLowerCase();
         const descValue = row[descKey] || row[Object.keys(row).find(k => k.toLowerCase() === descKey)];
         if (descValue) {
           bookData.description = descValue.toString().trim();
         }
         
-        // === ГОД ===
         const yearKey = fieldMapping.year.toLowerCase();
         const yearValue = row[yearKey] || row[Object.keys(row).find(k => k.toLowerCase() === yearKey)];
         if (yearValue) {
@@ -237,7 +210,6 @@ exports.importBooks = async (req, res) => {
           }
         }
         
-        // === СТРАНИЦЫ ===
         const pagesKey = fieldMapping.pages.toLowerCase();
         const pagesValue = row[pagesKey] || row[Object.keys(row).find(k => k.toLowerCase() === pagesKey)];
         if (pagesValue) {
@@ -249,21 +221,18 @@ exports.importBooks = async (req, res) => {
           }
         }
         
-        // === ИЗДАТЕЛЬСТВО ===
         const publisherKey = fieldMapping.publisher.toLowerCase();
         const publisherValue = row[publisherKey] || row[Object.keys(row).find(k => k.toLowerCase() === publisherKey)];
         if (publisherValue) {
           bookData.publisher = publisherValue.toString().trim();
         }
         
-        // === ISBN ===
         const isbnKey = fieldMapping.isbn.toLowerCase();
         const isbnValue = row[isbnKey] || row[Object.keys(row).find(k => k.toLowerCase() === isbnKey)];
         if (isbnValue) {
           bookData.isbn = isbnValue.toString().trim();
         }
         
-        // === ЖАНР (САМОЕ ВАЖНОЕ) ===
         const genreKey = fieldMapping.genre.toLowerCase();
         const genreValue = row[genreKey] || row[Object.keys(row).find(k => k.toLowerCase() === genreKey)];
         
@@ -284,7 +253,6 @@ exports.importBooks = async (req, res) => {
           }
         }
         
-        // Если есть ошибки, пропускаем
         if (rowErrors.length > 0) {
           debugLog(`   ❌ Ошибки:`, rowErrors);
           stats.errors++;
@@ -297,7 +265,6 @@ exports.importBooks = async (req, res) => {
           continue;
         }
         
-        // Проверка дубликатов
         if (skipDuplicates) {
           const existing = await Book.findOne({
             where: {
@@ -319,7 +286,6 @@ exports.importBooks = async (req, res) => {
           }
         }
         
-        // Добавляем обязательные поля
         bookData.cover_image = 'default-book-cover.jpg';
         bookData.views_count = 0;
         
@@ -329,7 +295,6 @@ exports.importBooks = async (req, res) => {
           genre_id: bookData.genre_id || 'не указан'
         });
         
-        // Создаём книгу
         await Book.create(bookData);
         
         debugLog(`   ✅ Книга успешно создана`);
@@ -356,7 +321,6 @@ exports.importBooks = async (req, res) => {
       }
     }
     
-    // Удаляем временный файл
     fs.unlinkSync(filePath);
     
     debugLog('\n📊 ===== ИТОГИ ИМПОРТА =====');
@@ -365,10 +329,8 @@ exports.importBooks = async (req, res) => {
     debugLog(`   ❌ Ошибок: ${stats.errors}`);
     debugLog(`   ⏭️ Пропущено: ${stats.skipped}`);
     
-    // Отправляем уведомление
     await notificationService.booksImported(req.session.user.id, stats);
     
-    // Сохраняем результат в сессии
     req.session.importResult = stats;
     
     req.flash('success', `Импорт завершён. Добавлено: ${stats.success}, ошибок: ${stats.errors}, пропущено: ${stats.skipped}`);
@@ -386,9 +348,6 @@ exports.importBooks = async (req, res) => {
   }
 };
 
-/**
- * Показать результат импорта
- */
 exports.showImportResult = async (req, res) => {
   try {
     const result = req.session.importResult || null;
@@ -406,9 +365,6 @@ exports.showImportResult = async (req, res) => {
   }
 };
 
-/**
- * Скачать шаблон для импорта
- */
 exports.downloadTemplate = (req, res) => {
   try {
     const type = req.query.type || 'csv';
@@ -450,12 +406,8 @@ exports.downloadTemplate = (req, res) => {
   }
 };
 
-/**
- * Скачать пример с жанрами
- */
 exports.downloadExampleWithGenres = async (req, res) => {
   try {
-    // Получаем реальные жанры из БД
     const genres = await Genre.findAll({ limit: 10 });
     const genreNames = genres.map(g => g.name);
     

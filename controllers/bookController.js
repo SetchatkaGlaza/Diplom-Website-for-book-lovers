@@ -1,19 +1,12 @@
 const { Book, Genre, Review, User, UserBook } = require('../models');
 const { Op } = require('sequelize'); // Операторы для сложных запросов
 
-/**
- * Количество книг на одной странице
- */
 const BOOKS_PER_PAGE = 12;
 const BOOKS_PER_PAGE_TABLET = 10;
 const BOOKS_PER_PAGE_MOBILE = 8;
 
-/**
- * 1. ПОКАЗ КАТАЛОГА КНИГ (с фильтрацией, сортировкой, пагинацией)
- */
 exports.getCatalog = async (req, res) => {
   try {
-    // Получаем параметры из запроса
     const page = parseInt(req.query.page) || 1;
     const userAgent = req.get('user-agent') || '';
     const isMobile = /iphone|ipod|android.+mobile|windows phone|blackberry/i.test(userAgent);
@@ -35,20 +28,16 @@ exports.getCatalog = async (req, res) => {
 
     const offset = (page - 1) * limit;
 
-    // Фильтры
     const filters = {};
     
-    // Фильтр по жанру
     if (req.query.genre) {
       filters.genre_id = req.query.genre;
     }
     
-    // Фильтр по автору (частичное совпадение)
     if (req.query.author) {
       filters.author = { [Op.iLike]: `%${req.query.author}%` }; // iLike = регистронезависимый поиск
     }
     
-    // Фильтр по году (диапазон)
     if (req.query.year_from || req.query.year_to) {
       filters.year = {};
       if (req.query.year_from) {
@@ -59,7 +48,6 @@ exports.getCatalog = async (req, res) => {
       }
     }
     
-    // Поиск по названию
     if (req.query.search) {
   filters[Op.or] = [
     { title: { [Op.iLike]: `%${req.query.search}%` } },
@@ -67,7 +55,6 @@ exports.getCatalog = async (req, res) => {
   ];
 }
     
-    // Сортировка
     let order = [];
     switch (req.query.sort) {
       case 'title_asc':
@@ -86,14 +73,12 @@ exports.getCatalog = async (req, res) => {
         order = [['views_count', 'DESC']];
         break;
       case 'rating':
-        // Сортировка по рейтингу сложнее, пока сортируем по дате добавления
         order = [['createdAt', 'DESC']];
         break;
       default:
         order = [['createdAt', 'DESC']]; // по умолчанию новые сначала
     }
     
-    // Выполняем запрос с пагинацией
     const { count, rows: books } = await Book.findAndCountAll({
       where: filters,
       include: [
@@ -109,12 +94,10 @@ exports.getCatalog = async (req, res) => {
       distinct: true // важно для правильного подсчёта при include
     });
     
-    // Получаем все жанры для фильтра
     const genres = await Genre.findAll({
       order: [['name', 'ASC']]
     });
     
-    // Для каждой книги получаем средний рейтинг
     const booksWithRating = await Promise.all(
       books.map(async (book) => {
         const rating = await book.getAverageRating();
@@ -125,7 +108,6 @@ exports.getCatalog = async (req, res) => {
       })
     );
     
-    // Рендерим страницу
     res.render('books/catalog', {
       title: 'Каталог книг',
       books: booksWithRating,
@@ -145,14 +127,10 @@ exports.getCatalog = async (req, res) => {
   }
 };
 
-/**
- * 2. ПОКАЗ ОДНОЙ КНИГИ (по ID)
- */
 exports.getBookById = async (req, res) => {
   try {
     const bookId = req.params.id;
     
-    // Ищем книгу с жанром
     const book = await Book.findByPk(bookId, {
       include: [
         {
@@ -168,13 +146,10 @@ exports.getBookById = async (req, res) => {
       return res.redirect('/books');
     }
     
-    // Увеличиваем счётчик просмотров
     await book.incrementViews();
     
-    // Получаем средний рейтинг
     const ratingInfo = await book.getRatingInfo();
     
-    // Получаем рецензии к книге с информацией о пользователях
     const reviews = await Review.findAll({
       where: { book_id: bookId },
       include: [
@@ -187,14 +162,12 @@ exports.getBookById = async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
     
-    // Проверяем, есть ли книга в полках текущего пользователя
     let userBookStatus = null;
     let userReview = null;
     
     if (req.session.user) {
       const UserBook = require('../models/UserBook');
       
-      // Статус книги для пользователя
       const userBook = await UserBook.findOne({
         where: {
           user_id: req.session.user.id,
@@ -206,7 +179,6 @@ exports.getBookById = async (req, res) => {
         userBookStatus = userBook.status;
       }
       
-      // Рецензия пользователя на эту книгу
       userReview = await Review.findOne({
         where: {
           user_id: req.session.user.id,
@@ -215,7 +187,6 @@ exports.getBookById = async (req, res) => {
       });
     }
     
-    // Получаем похожие книги (по тому же жанру)
     const similarBooks = await Book.findAll({
       where: {
         genre_id: book.genre_id,
@@ -232,7 +203,6 @@ exports.getBookById = async (req, res) => {
       order: [['views_count', 'DESC']]
     });
     
-    // Добавляем рейтинг для похожих книг
     const similarBooksWithRating = await Promise.all(
       similarBooks.map(async (similarBook) => {
         const rating = await similarBook.getAverageRating();
@@ -264,9 +234,6 @@ exports.getBookById = async (req, res) => {
   }
 };
 
-/**
- * 3. ПОИСК КНИГ (AJAX для быстрого поиска на главной)
- */
 exports.searchBooks = async (req, res) => {
   try {
     const query = req.query.q;
@@ -292,7 +259,6 @@ exports.searchBooks = async (req, res) => {
       limit: 10
     });
     
-    // Добавляем рейтинг к результатам
     const booksWithRating = await Promise.all(
       books.map(async (book) => {
         const ratingInfo = await book.getRatingInfo();
@@ -316,9 +282,6 @@ exports.searchBooks = async (req, res) => {
   }
 };
 
-/**
- * 4. ПОЛУЧЕНИЕ ПОПУЛЯРНЫХ КНИГ (для главной)
- */
 exports.getPopularBooks = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 8;
@@ -354,9 +317,6 @@ exports.getPopularBooks = async (req, res) => {
   }
 };
 
-/**
- * 5. ПОЛУЧЕНИЕ СЛУЧАЙНОЙ КНИГИ
- */
 exports.getRandomBook = async (req, res) => {
   try {
     const count = await Book.count();

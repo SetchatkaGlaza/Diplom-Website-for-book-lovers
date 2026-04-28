@@ -287,8 +287,6 @@ Review.belongsToMany(User, {
   as: 'voters'
 });
 
-console.log('✅ Все связи между моделями установлены');
-
 module.exports = {
   User,
   Genre,

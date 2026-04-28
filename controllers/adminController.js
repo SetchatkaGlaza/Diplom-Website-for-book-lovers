@@ -1,4 +1,3 @@
-// controllers/adminController.js
 const { User, Book, Genre, Review, UserBook, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
@@ -8,19 +7,14 @@ const notificationService = require('../services/notificationService');
 
 const SALT_ROUNDS = 10;
 
-/**
- * 1. ДАШБОРД (главная страница админки)
- */
 exports.getDashboard = async (req, res) => {
   try {
-    // Основная статистика
     const stats = {
       totalUsers: await User.count(),
       totalBooks: await Book.count(),
       totalReviews: await Review.count(),
       totalGenres: await Genre.count(),
       
-      // Новые за сегодня
       newUsersToday: await User.count({
         where: {
           createdAt: {
@@ -46,7 +40,6 @@ exports.getDashboard = async (req, res) => {
       })
     };
     
-    // Статистика по ролям (ИСПРАВЛЕНО)
     const rolesStatsRaw = await User.findAll({
       attributes: [
         'role',
@@ -55,30 +48,25 @@ exports.getDashboard = async (req, res) => {
       group: ['role']
     });
     
-    // Преобразуем данные для графика
     const rolesStats = rolesStatsRaw.map(stat => ({
       role: stat.role,
       count: parseInt(stat.dataValues.count)
     }));
     
-    // Если нет данных, добавляем пустой массив
     const formattedRolesStats = rolesStats.length > 0 ? rolesStats : [];
     
-    // Последние пользователи
     const recentUsers = await User.findAll({
       attributes: ['id', 'name', 'email', 'role', 'avatar', 'createdAt'],
       order: [['createdAt', 'DESC']],
       limit: 5
     });
     
-    // Последние книги
     const recentBooks = await Book.findAll({
       include: [{ model: Genre, as: 'genre', attributes: ['name'] }],
       order: [['createdAt', 'DESC']],
       limit: 5
     });
     
-    // Последние рецензии
     const recentReviews = await Review.findAll({
       include: [
         { 
@@ -115,9 +103,6 @@ exports.getDashboard = async (req, res) => {
   }
 };
 
-/**
- * 2. УПРАВЛЕНИЕ КНИГАМИ (список)
- */
 exports.getBooks = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -125,7 +110,6 @@ exports.getBooks = async (req, res) => {
     const offset = (page - 1) * limit;
     const search = req.query.search || '';
     
-    // Поиск по названию или автору
     const where = search ? {
       [Op.or]: [
         { title: { [Op.iLike]: `%${search}%` } },
@@ -141,7 +125,6 @@ exports.getBooks = async (req, res) => {
       offset
     });
     
-    // Дополнительная информация для каждой книги
     const booksWithStats = await Promise.all(
       books.map(async (book) => {
         const reviewsCount = await Review.count({ where: { book_id: book.id } });
@@ -176,9 +159,6 @@ exports.getBooks = async (req, res) => {
   }
 };
 
-/**
- * 3. ДОБАВЛЕНИЕ КНИГИ (форма)
- */
 exports.getAddBook = async (req, res) => {
   try {
     const genres = await Genre.findAll({ order: [['name', 'ASC']] });
@@ -200,9 +180,6 @@ exports.getAddBook = async (req, res) => {
   }
 };
 
-/**
- * 4. ДОБАВЛЕНИЕ КНИГИ (обработка)
- */
 exports.postAddBook = async (req, res) => {
   try {
     const {
@@ -210,7 +187,6 @@ exports.postAddBook = async (req, res) => {
       publisher, genre_id, isbn
     } = req.body;
     
-    // Валидация
     const errors = [];
     
     if (!title || title.length < 1) {
@@ -238,14 +214,12 @@ exports.postAddBook = async (req, res) => {
       });
     }
     
-    // Обработка загрузки обложки
     let cover_image = 'default-book-cover.jpg';
 
 if (req.file) {
   cover_image = req.file.filename;
 }
     
-    // Создаём книгу
     await Book.create({
       title,
       author,
@@ -268,9 +242,6 @@ if (req.file) {
   }
 };
 
-/**
- * 5. РЕДАКТИРОВАНИЕ КНИГИ (форма)
- */
 exports.getEditBook = async (req, res) => {
   try {
     const bookId = req.params.id;
@@ -303,9 +274,6 @@ exports.getEditBook = async (req, res) => {
   }
 };
 
-/**
- * 6. РЕДАКТИРОВАНИЕ КНИГИ (обработка)
- */
 exports.postEditBook = async (req, res) => {
   try {
     const bookId = req.params.id;
@@ -314,7 +282,6 @@ exports.postEditBook = async (req, res) => {
       publisher, genre_id, isbn
     } = req.body;
     
-    // Находим книгу
     const book = await Book.findByPk(bookId);
     
     if (!book) {
@@ -322,7 +289,6 @@ exports.postEditBook = async (req, res) => {
       return res.redirect('/admin/books');
     }
     
-    // Валидация
     const errors = [];
     
     if (!title || title.length < 1) {
@@ -347,7 +313,6 @@ exports.postEditBook = async (req, res) => {
       });
     }
     
-    // Подготовка данных для обновления
     const updateData = {
       title,
       author,
@@ -359,16 +324,13 @@ exports.postEditBook = async (req, res) => {
       isbn: isbn || null
     };
     
-    // Если загружена новая обложка
 if (req.file) {
-  // Удаляем старую обложку, ТОЛЬКО если она не является заглушкой
   const isDefaultCover = book.cover_image === 'default-book-cover.jpg' || 
                          book.cover_image === 'default-book-cover.svg';
   
   if (book.cover_image && !isDefaultCover) {
     const oldCoverPath = path.join(__dirname, '../public/images/covers', book.cover_image);
     try {
-      // Проверяем существование файла перед удалением
       try {
         await fs.access(oldCoverPath);
         await fs.unlink(oldCoverPath);
@@ -390,7 +352,6 @@ if (req.file) {
   updateData.cover_image = req.file.filename;
 }
     
-    // Обновляем книгу
     await book.update(updateData);
     
     req.flash('success', 'Книга успешно обновлена');
@@ -403,9 +364,6 @@ if (req.file) {
   }
 };
 
-/**
- * 7. УДАЛЕНИЕ КНИГИ
- */
 exports.deleteBook = async (req, res) => {
   try {
     const bookId = req.params.id;
@@ -417,7 +375,6 @@ exports.deleteBook = async (req, res) => {
       return res.redirect('/admin/books');
     }
     
-    // Удаляем обложку, если она не стандартная
     if (book.cover_image && book.cover_image !== 'default-book-cover.jpg') {
       const coverPath = path.join(__dirname, '../public/images/covers', book.cover_image);
       try {
@@ -427,11 +384,9 @@ exports.deleteBook = async (req, res) => {
       }
     }
     
-    // Удаляем все связанные записи
     await Review.destroy({ where: { book_id: bookId } });
     await UserBook.destroy({ where: { book_id: bookId } });
     
-    // Удаляем книгу
     await book.destroy();
     
     req.flash('success', 'Книга успешно удалена');
@@ -444,9 +399,6 @@ exports.deleteBook = async (req, res) => {
   }
 };
 
-/**
- * 8. УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ
- */
 exports.getUsers = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -455,7 +407,6 @@ exports.getUsers = async (req, res) => {
     const search = req.query.search || '';
     const role = req.query.role || 'all';
     
-    // Поиск
     const where = {};
     
     if (search) {
@@ -477,7 +428,6 @@ exports.getUsers = async (req, res) => {
       offset
     });
     
-    // Статистика по пользователям
     const usersWithStats = await Promise.all(
       users.map(async (user) => {
         const booksCount = await UserBook.count({ where: { user_id: user.id } });
@@ -491,7 +441,6 @@ exports.getUsers = async (req, res) => {
       })
     );
     
-    // Статистика по ролям для фильтра
     const roleStats = await User.findAll({
       attributes: ['role', [sequelize.fn('COUNT', sequelize.col('role')), 'count']],
       group: ['role']
@@ -519,22 +468,17 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-/**
- * 9. ИЗМЕНЕНИЕ РОЛИ ПОЛЬЗОВАТЕЛЯ
- */
 exports.updateUserRole = async (req, res) => {
   try {
     const userId = req.params.id;
     const { role } = req.body;
     
-    // Проверяем, что роль допустима
     const allowedRoles = ['user', 'moderator', 'admin'];
     if (!allowedRoles.includes(role)) {
       req.flash('error', 'Недопустимая роль');
       return res.redirect('/admin/users');
     }
     
-    // Не даём изменить роль суперадмина (самого себя)
     if (userId == req.session.user.id && role !== 'admin') {
       req.flash('error', 'Вы не можете понизить свою роль');
       return res.redirect('/admin/users');
@@ -559,14 +503,10 @@ exports.updateUserRole = async (req, res) => {
   }
 };
 
-/**
- * 10. БЛОКИРОВКА/РАЗБЛОКИРОВКА ПОЛЬЗОВАТЕЛЯ
- */
 exports.toggleUserBlock = async (req, res) => {
   try {
     const userId = req.params.id;
     
-    // Не даём заблокировать самого себя
     if (userId == req.session.user.id) {
       req.flash('error', 'Вы не можете заблокировать самого себя');
       return res.redirect('/admin/users');
@@ -579,8 +519,6 @@ exports.toggleUserBlock = async (req, res) => {
       return res.redirect('/admin/users');
     }
     
-    // Временно используем поле isBlocked (если его нет в модели, нужно добавить)
-    // Для простоты будем использовать флаг в статусе
     await user.update({ 
       isBlocked: user.isBlocked ? false : true 
     });
@@ -596,16 +534,12 @@ exports.toggleUserBlock = async (req, res) => {
   }
 };
 
-/**
- * 11. УПРАВЛЕНИЕ ЖАНРАМИ
- */
 exports.getGenres = async (req, res) => {
   try {
     const genres = await Genre.findAll({
       order: [['name', 'ASC']]
     });
     
-    // Получаем количество книг в каждом жанре
     const genresWithStats = await Promise.all(
       genres.map(async (genre) => {
         const booksCount = await Book.count({ where: { genre_id: genre.id } });
@@ -632,9 +566,6 @@ exports.getGenres = async (req, res) => {
   }
 };
 
-/**
- * 12. ДОБАВЛЕНИЕ ЖАНРА
- */
 exports.addGenre = async (req, res) => {
   try {
     const { name } = req.body;
@@ -644,7 +575,6 @@ exports.addGenre = async (req, res) => {
       return res.redirect('/admin/genres');
     }
     
-    // Проверяем, существует ли уже такой жанр
     const existingGenre = await Genre.findOne({ where: { name } });
     
     if (existingGenre) {
@@ -664,9 +594,6 @@ exports.addGenre = async (req, res) => {
   }
 };
 
-/**
- * 13. РЕДАКТИРОВАНИЕ ЖАНРА
- */
 exports.editGenre = async (req, res) => {
   try {
     const genreId = req.params.id;
@@ -684,7 +611,6 @@ exports.editGenre = async (req, res) => {
       return res.redirect('/admin/genres');
     }
     
-    // Проверяем, не занято ли имя другим жанром
     const existingGenre = await Genre.findOne({ 
       where: { 
         name,
@@ -709,14 +635,10 @@ exports.editGenre = async (req, res) => {
   }
 };
 
-/**
- * 14. УДАЛЕНИЕ ЖАНРА
- */
 exports.deleteGenre = async (req, res) => {
   try {
     const genreId = req.params.id;
     
-    // Проверяем, есть ли книги в этом жанре
     const booksCount = await Book.count({ where: { genre_id: genreId } });
     
     if (booksCount > 0) {
@@ -743,9 +665,6 @@ exports.deleteGenre = async (req, res) => {
   }
 };
 
-/**
- * 15. МОДЕРАЦИЯ РЕЦЕНЗИЙ
- */
 exports.getReviews = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -792,9 +711,6 @@ exports.getReviews = async (req, res) => {
   }
 };
 
-/**
- * 16. ОДОБРЕНИЕ РЕЦЕНЗИИ
- */
 exports.approveReview = async (req, res) => {
   try {
     const reviewId = req.params.id;
@@ -808,7 +724,6 @@ exports.approveReview = async (req, res) => {
     
     await review.update({ is_moderated: true });
     
-    //  ОТПРАВЛЯЕМ УВЕДОМЛЕНИЕ ОБ ОДОБРЕНИИ
     await notificationService.reviewModerated(review.id, true);
 
     req.flash('success', 'Рецензия одобрена');
@@ -821,9 +736,6 @@ exports.approveReview = async (req, res) => {
   }
 };
 
-/**
- * 17. УДАЛЕНИЕ РЕЦЕНЗИИ (модератором)
- */
 exports.deleteReview = async (req, res) => {
   try {
     const reviewId = req.params.id;
@@ -849,18 +761,13 @@ exports.deleteReview = async (req, res) => {
   }
 };
 
-/**
- * 18. СТАТИСТИКА (упрощённая и понятная)
- */
 exports.getStatistics = async (req, res) => {
   try {
-    // ===== ОСНОВНАЯ СТАТИСТИКА =====
     const totalUsers = await User.count();
     const totalBooks = await Book.count();
     const totalReviews = await Review.count();
     const totalGenres = await Genre.count();
     
-    // Статистика за сегодня
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -876,14 +783,12 @@ exports.getStatistics = async (req, res) => {
       where: { createdAt: { [Op.gte]: today } }
     });
     
-    // ===== ТОП ПОПУЛЯРНЫХ КНИГ (по просмотрам) =====
     const topBooks = await Book.findAll({
       attributes: ['id', 'title', 'author', 'cover_image', 'views_count'],
       order: [['views_count', 'DESC']],
       limit: 10
     });
     
-    // ===== ТОП КНИГ ПО РЕЙТИНГУ =====
     const topRatedBooks = await sequelize.query(`
       SELECT 
         b.id,
@@ -900,7 +805,6 @@ exports.getStatistics = async (req, res) => {
       LIMIT 10
     `, { type: sequelize.QueryTypes.SELECT });
     
-    // ===== ТОП АКТИВНЫХ ПОЛЬЗОВАТЕЛЕЙ =====
     const topUsers = await sequelize.query(`
       SELECT 
         u.id,
@@ -914,7 +818,6 @@ exports.getStatistics = async (req, res) => {
       LIMIT 10
     `, { type: sequelize.QueryTypes.SELECT });
     
-    // ===== ПОПУЛЯРНЫЕ ЖАНРЫ =====
     const popularGenres = await sequelize.query(`
       SELECT 
         g.id,
