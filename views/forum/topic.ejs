@@ -208,6 +208,85 @@
 
   applyLikesFormatting();
 
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function decodeRawPostContent(rawContent) {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = rawContent || '';
+    return textarea.value.replace(/\\n/g, '\n');
+  }
+
+  function parseLeadingQuoteBlocks(sourceText) {
+    let text = String(sourceText || '').trim();
+    const quotes = [];
+    let guard = 0;
+
+    while (guard < 10) {
+      const match = text.match(/^Цитата от ([^:\n]+):\s*\n?\s*«/);
+      if (!match) break;
+
+      const author = match[1].trim();
+      const quoteStart = match[0].length - 1;
+      let depth = 0;
+      let quoteEnd = -1;
+
+      for (let i = quoteStart; i < text.length; i += 1) {
+        if (text[i] === '«') depth += 1;
+        if (text[i] === '»') {
+          depth -= 1;
+          if (depth === 0) {
+            quoteEnd = i;
+            break;
+          }
+        }
+      }
+
+      if (quoteEnd === -1) break;
+
+      const quoteContent = text.slice(quoteStart + 1, quoteEnd).trim();
+      quotes.push({ author, content: quoteContent });
+      text = text.slice(quoteEnd + 1).replace(/^\s+/, '');
+      guard += 1;
+    }
+
+    return { quotes, rest: text };
+  }
+
+  function renderPostContent(rawContent) {
+    const decoded = decodeRawPostContent(rawContent).trim();
+    if (!decoded) return '';
+
+    const { quotes, rest } = parseLeadingQuoteBlocks(decoded);
+    const quoteHtml = quotes.map((quote) => `
+      <blockquote class="forum-quote-box">
+        <div class="forum-quote-author">Цитата от ${escapeHtml(quote.author)}</div>
+        <div class="forum-quote-text">${escapeHtml(quote.content).replace(/\n/g, '<br>')}</div>
+      </blockquote>
+    `).join('');
+
+    const mainTextHtml = rest
+      ? `<div class="forum-post-text">${escapeHtml(rest).replace(/\n/g, '<br>')}</div>`
+      : '';
+
+    return `${quoteHtml}${mainTextHtml}`;
+  }
+
+  function initPostContentFormatting() {
+    document.querySelectorAll('.post-content').forEach((contentNode) => {
+      const raw = contentNode.getAttribute('data-raw-content') || '';
+      contentNode.innerHTML = renderPostContent(raw);
+    });
+  }
+
+  initPostContentFormatting();
+
   document.getElementById('subscribeBtn')?.addEventListener('click', async function() {
     const topicId = this.dataset.topicId;
     try {
@@ -271,6 +350,41 @@
     });
   });
 
+  function removeLegacyQuoteBlocks(text) {
+    let source = String(text || '');
+    let iterations = 0;
+
+    while (iterations < 10) {
+      const markerMatch = source.match(/Цитата от [^:\n]+:\s*\n?\s*«/);
+      if (!markerMatch) break;
+
+      const start = markerMatch.index;
+      const quoteStart = start + markerMatch[0].length - 1;
+      let depth = 0;
+      let end = -1;
+
+      for (let i = quoteStart; i < source.length; i += 1) {
+        if (source[i] === '«') depth += 1;
+        if (source[i] === '»') {
+          depth -= 1;
+          if (depth === 0) {
+            end = i;
+            break;
+          }
+        }
+      }
+
+      if (end === -1) break;
+
+      source = `${source.slice(0, start)}${source.slice(end + 1)}`
+        .replace(/\n{3,}/g, '\n\n')
+        .replace(/^\s+|\s+$/g, '');
+      iterations += 1;
+    }
+
+    return source;
+  }
+
   function getCleanPostContent(postId) {
     const postCard = document.getElementById(`post-${postId}`);
     if (!postCard) return '';
@@ -288,6 +402,7 @@
       .replace(/\[quote="[^"]*"\][\s\S]*?\[\/quote\]/g, '')
       .replace(/<blockquote[^>]*>[\s\S]*?<\/blockquote>/gi, '')
       .replace(/\n{3,}/g, '\n\n');
+    content = removeLegacyQuoteBlocks(content);
     return content.trim();
   }
 
@@ -594,6 +709,28 @@
     margin-bottom: 1rem;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    white-space: normal;
+  }
+  .forum-quote-box {
+    margin: 0 0 0.8rem;
+    padding: 0.8rem 0.9rem;
+    border-left: 4px solid #fbbf24;
+    background: rgba(251, 191, 36, 0.12);
+    border-radius: 10px;
+  }
+  .forum-quote-author {
+    color: #fbbf24;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+  .forum-quote-text {
+    color: rgba(255, 255, 255, 0.88);
+    font-style: italic;
+    line-height: 1.6;
+    white-space: normal;
+  }
+  .forum-post-text {
     white-space: normal;
   }
 
