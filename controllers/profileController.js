@@ -96,7 +96,6 @@ exports.postEditProfile = async (req, res) => {
     const userId = req.session.user.id;
     const { name, bio } = req.body;
     
-    console.log('Получены данные:', { name, bio }); // для отладки
     
     // Валидация
     const errors = [];
@@ -149,7 +148,6 @@ exports.postEditProfile = async (req, res) => {
         avatar: updatedUser.avatar
       };
       
-      console.log('Профиль обновлён:', updatedUser.toJSON()); // для отладки
     }
     
     req.flash('success', 'Профиль успешно обновлён');

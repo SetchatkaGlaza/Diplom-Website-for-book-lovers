@@ -96,8 +96,6 @@ exports.getDashboard = async (req, res) => {
       limit: 5
     });
     
-    console.log('RolesStats:', formattedRolesStats); // Для отладки
-    
     res.render('admin/dashboard', {
       title: 'Админ-панель',
       layout: 'layouts/admin',
