@@ -7,7 +7,7 @@ const methodOverride = require('method-override');
 const rateLimit = require('express-rate-limit');
 
 const sequelize = require('./config/database');
-const { User, Book, Review } = require('./models');
+const { EMPTY_STATS, getSiteStats } = require('./services/statsService');
 
 const authRoutes = require('./routes/auth');
 const bookRoutes = require('./routes/books');
@@ -26,6 +26,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
 const enableSchemaSync = process.env.DB_SYNC_ALTER === 'true';
+const HOME_PAGE_TITLE = 'Главная';
 
 if (isProduction) app.set('trust proxy', 1);
 
@@ -83,26 +84,17 @@ app.use('/forum', forumRoutes);
 app.use('/admin/forum', adminForumRoutes);
 app.use('/', pageRoutes);
 
+const renderHomePage = (res, stats) => res.render('index', {
+  title: HOME_PAGE_TITLE,
+  stats
+});
+
 app.get('/', async (req, res) => {
   try {
-    const [totalBooks, totalUsers, totalReviews] = await Promise.all([
-      Book.count(),
-      User.count(),
-      Review.count()
-    ]);
-
-    res.render('index', {
-      title: 'Главная',
-      layout: 'layouts/main',
-      stats: { totalBooks, totalUsers, totalReviews }
-    });
+    renderHomePage(res, await getSiteStats());
   } catch (error) {
     console.error('Ошибка при загрузке главной страницы:', error);
-    res.render('index', {
-      title: 'Главная',
-      layout: 'layouts/main',
-      stats: { totalBooks: 0, totalUsers: 0, totalReviews: 0 }
-    });
+    renderHomePage(res, EMPTY_STATS);
   }
 });
 
