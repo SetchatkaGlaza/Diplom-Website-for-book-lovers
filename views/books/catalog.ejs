@@ -139,19 +139,19 @@
       <% if (totalPages > 1) { %>
         <div class="pagination">
           <% if (currentPage > 1) { %>
-            <a href="?<%= new URLSearchParams({...filters, page: currentPage - 1, sort}).toString() %>" class="page-link">←</a>
+            <a href="?<%= new URLSearchParams({...filters, page: currentPage - 1, sort}).toString() %>" class="page-link" data-page-nav="prev">←</a>
           <% } %>
           
           <% for(let i = 1; i <= totalPages; i++) { %>
             <% if (i === currentPage) { %>
-              <span class="page-link active"><%= i %></span>
+              <span class="page-link active" data-page-number="<%= i %>"><%= i %></span>
             <% } else { %>
-              <a href="?<%= new URLSearchParams({...filters, page: i, sort}).toString() %>" class="page-link"><%= i %></a>
+              <a href="?<%= new URLSearchParams({...filters, page: i, sort}).toString() %>" class="page-link" data-page-number="<%= i %>"><%= i %></a>
             <% } %>
           <% } %>
           
           <% if (currentPage < totalPages) { %>
-            <a href="?<%= new URLSearchParams({...filters, page: currentPage + 1, sort}).toString() %>" class="page-link">→</a>
+            <a href="?<%= new URLSearchParams({...filters, page: currentPage + 1, sort}).toString() %>" class="page-link" data-page-nav="next">→</a>
           <% } %>
         </div>
       <% } %>
@@ -168,6 +168,43 @@
   document.getElementById('sort')?.addEventListener('change', function() {
     document.getElementById('filter-form').submit();
   });
+
+  (function limitVisiblePagination() {
+    const pagination = document.querySelector('.pagination');
+    if (!pagination) return;
+
+    const pageLinks = Array.from(pagination.querySelectorAll('[data-page-number]'));
+    const activeElement = pagination.querySelector('.page-link.active[data-page-number]');
+    const currentPage = activeElement ? Number(activeElement.dataset.pageNumber) : 1;
+
+    const getMaxVisiblePages = () => {
+      if (window.innerWidth <= 480) return 5;
+      if (window.innerWidth <= 768) return 7;
+      if (window.innerWidth <= 1024) return 10;
+      return 20;
+    };
+
+    const updateVisiblePages = () => {
+      const maxVisiblePages = getMaxVisiblePages();
+      const half = Math.floor(maxVisiblePages / 2);
+      let start = Math.max(1, currentPage - half);
+      let end = start + maxVisiblePages - 1;
+      const total = pageLinks.length;
+
+      if (end > total) {
+        end = total;
+        start = Math.max(1, end - maxVisiblePages + 1);
+      }
+
+      pageLinks.forEach((link) => {
+        const pageNumber = Number(link.dataset.pageNumber);
+        link.style.display = (pageNumber >= start && pageNumber <= end) ? '' : 'none';
+      });
+    };
+
+    updateVisiblePages();
+    window.addEventListener('resize', updateVisiblePages);
+  })();
 </script>
 
 <style>
