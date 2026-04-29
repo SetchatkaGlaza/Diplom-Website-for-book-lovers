@@ -1,14 +1,12 @@
-// Мобильное меню
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const navMenu = document.getElementById('nav-menu');
-  
+
   if (mobileMenuBtn && navMenu) {
-    mobileMenuBtn.addEventListener('click', function() {
+    mobileMenuBtn.addEventListener('click', () => {
       navMenu.classList.toggle('active');
-      
-      // Меняем иконку
-      const icon = this.querySelector('i');
+
+      const icon = mobileMenuBtn.querySelector('i');
       if (navMenu.classList.contains('active')) {
         icon.className = 'fas fa-times';
         document.body.classList.add('menu-open');
@@ -17,8 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.remove('menu-open');
       }
     });
-    
-    // Закрываем меню при клике на ссылку
+
     navMenu.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         navMenu.classList.remove('active');
@@ -29,9 +26,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Анимация чисел статистики
   const statNumbers = document.querySelectorAll('.stat-number');
-  
+
   statNumbers.forEach(stat => {
     const target = parseInt(stat.textContent);
     if (target > 0) {
@@ -48,12 +44,11 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 30);
     }
   });
-  
-  // Плавная прокрутка
+
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
+    anchor.addEventListener('click', (e) => {
       e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
+      const target = document.querySelector(anchor.getAttribute('href'));
       if (target) {
         target.scrollIntoView({
           behavior: 'smooth',
@@ -62,11 +57,10 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
-  
-  // Подсветка активной ссылки в навигации
+
   const currentLocation = window.location.pathname;
   const navLinks = document.querySelectorAll('.nav-link');
-  
+
   navLinks.forEach(link => {
     if (link.getAttribute('href') === currentLocation) {
       link.classList.add('active');
@@ -74,14 +68,13 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// Анимация при скролле
-window.addEventListener('scroll', function() {
+window.addEventListener('scroll', () => {
   const elements = document.querySelectorAll('.book-card, .stat-item, .review-card');
-  
+
   elements.forEach(element => {
     const elementTop = element.getBoundingClientRect().top;
     const elementBottom = element.getBoundingClientRect().bottom;
-    
+
     if (elementTop < window.innerHeight && elementBottom > 0) {
       element.style.opacity = '1';
       element.style.transform = 'translateY(0)';
