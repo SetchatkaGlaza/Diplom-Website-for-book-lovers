@@ -1,29 +1,27 @@
 const bcrypt = require('bcrypt');
 const { User, LoginAttempt } = require('../models');
-const { Op } = require('sequelize');
 const notificationService = require('../services/notificationService');
 
 const SALT_ROUNDS = 10;
 const MAX_LOGIN_ATTEMPTS = 5;
+const CAPTCHA_THRESHOLD = 3;
 const BLOCK_TIME = 15 * 60 * 1000; // 15 минут в миллисекундах
+
+async function getLoginAttempt(ip, email) {
+  return LoginAttempt.findOne({
+    where: {
+      ip_address: ip,
+      email
+    }
+  });
+}
 
 async function checkLoginAttempts(ip, email) {
   try {
-    let attempt = await LoginAttempt.findOne({
-      where: {
-        ip_address: ip,
-        email: email
-      }
-    });
+    const attempt = await getLoginAttempt(ip, email);
     
     if (!attempt) {
-      attempt = await LoginAttempt.create({
-        ip_address: ip,
-        email: email,
-        attempts: 1,
-        last_attempt: new Date()
-      });
-      return { allowed: true, attempts: 1 };
+      return { allowed: true, attempts: 0 };
     }
     
     if (attempt.blocked_until && attempt.blocked_until > new Date()) {
@@ -38,43 +36,49 @@ async function checkLoginAttempts(ip, email) {
     
     if (attempt.blocked_until && attempt.blocked_until <= new Date()) {
       await attempt.update({
-        attempts: 1,
+        attempts: 0,
         blocked_until: null,
         last_attempt: new Date()
       });
-      return { allowed: true, attempts: 1 };
+      return { allowed: true, attempts: 0 };
     }
     
-    const newAttempts = attempt.attempts + 1;
-    
-    if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
-      await attempt.update({
-        attempts: newAttempts,
-        blocked_until: new Date(Date.now() + BLOCK_TIME),
-        last_attempt: new Date()
-      });
-      return { 
-        allowed: false, 
-        blocked: true, 
-        waitMinutes: 15,
-        attempts: newAttempts 
-      };
-    } else {
-      await attempt.update({
-        attempts: newAttempts,
-        last_attempt: new Date()
-      });
-      return { 
-        allowed: true, 
-        attempts: newAttempts,
-        remaining: MAX_LOGIN_ATTEMPTS - newAttempts
-      };
-    }
+    return {
+      allowed: true,
+      attempts: attempt.attempts,
+      remaining: MAX_LOGIN_ATTEMPTS - attempt.attempts
+    };
     
   } catch (error) {
     console.error('Ошибка при проверке попыток входа:', error);
     return { allowed: true, attempts: 0 };
   }
+}
+
+async function registerFailedLogin(ip, email) {
+  const now = new Date();
+  const attempt = await getLoginAttempt(ip, email);
+
+  if (!attempt) {
+    await LoginAttempt.create({
+      ip_address: ip,
+      email,
+      attempts: 1,
+      last_attempt: now
+    });
+    return { blocked: false, attempts: 1 };
+  }
+
+  const nextAttempts = attempt.attempts + 1;
+  const shouldBlock = nextAttempts >= MAX_LOGIN_ATTEMPTS;
+
+  await attempt.update({
+    attempts: nextAttempts,
+    blocked_until: shouldBlock ? new Date(Date.now() + BLOCK_TIME) : null,
+    last_attempt: now
+  });
+
+  return { blocked: shouldBlock, attempts: nextAttempts };
 }
 
 async function resetLoginAttempts(ip, email) {
@@ -95,7 +99,7 @@ exports.getLogin = async (req, res) => {
     return res.redirect('/');
   }
   
-  const showCaptcha = false;
+  const showCaptcha = req.session.showCaptcha === true;
   
   res.render('auth/login', {
     title: 'Вход',
@@ -122,13 +126,17 @@ exports.postLogin = async (req, res) => {
       return res.redirect('/auth/login');
     }
     
-    if (attemptCheck.remaining <= 2) {
+    const shouldShowCaptcha = attemptCheck.attempts >= CAPTCHA_THRESHOLD;
+
+    if (shouldShowCaptcha) {
       if (!captcha) {
+        req.session.showCaptcha = true;
         req.flash('error', 'Пожалуйста, введите код с картинки');
         return res.redirect('/auth/login');
       }
       
       if (!req.session.captcha || captcha.toLowerCase() !== req.session.captcha) {
+        req.session.showCaptcha = true;
         req.flash('error', 'Неверный код с картинки');
         return res.redirect('/auth/login');
       }
@@ -144,6 +152,12 @@ exports.postLogin = async (req, res) => {
     const user = await User.findOne({ where: { email } });
     
     if (!user) {
+      const failResult = await registerFailedLogin(ip, email);
+      req.session.showCaptcha = failResult.attempts >= CAPTCHA_THRESHOLD;
+      if (failResult.blocked) {
+        req.flash('error', 'Слишком много неудачных попыток. Попробуйте через 15 минут.');
+        return res.redirect('/auth/login');
+      }
       req.flash('error', 'Неверный email или пароль');
       return res.redirect('/auth/login');
     }
@@ -163,11 +177,18 @@ exports.postLogin = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password_hash);
     
     if (!isMatch) {
+      const failResult = await registerFailedLogin(ip, email);
+      req.session.showCaptcha = failResult.attempts >= CAPTCHA_THRESHOLD;
+      if (failResult.blocked) {
+        req.flash('error', 'Слишком много неудачных попыток. Попробуйте через 15 минут.');
+        return res.redirect('/auth/login');
+      }
       req.flash('error', 'Неверный email или пароль');
       return res.redirect('/auth/login');
     }
     
     await resetLoginAttempts(ip, email);
+    req.session.showCaptcha = false;
     
     req.session.user = {
       id: user.id,
