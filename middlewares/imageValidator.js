@@ -1,5 +1,4 @@
 const sharp = require('sharp');
-const path = require('path');
 const fs = require('fs');
 
 /**
@@ -15,12 +14,14 @@ exports.validateBookCover = async (req, res, next) => {
   }
 
   try {
-    const filePath = req.file.path;
-    const metadata = await sharp(filePath).metadata();
+    const imageInput = req.file.buffer || req.file.path;
+    const metadata = await sharp(imageInput).metadata();
     
     const { width, height } = metadata;
     if (!width || !height) {
-      fs.unlinkSync(filePath);
+      if (req.file.path && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
       req.flash('error', 'Не удалось определить размеры изображения.');
       return res.redirect(req.get('referer') || '/admin/books');
     }
@@ -33,7 +34,9 @@ exports.validateBookCover = async (req, res, next) => {
     // Удаляем проблемный файл
     if (req.file && req.file.path) {
       try {
-        fs.unlinkSync(req.file.path);
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
       } catch (e) {}
     }
     
@@ -49,21 +52,25 @@ exports.autoCropBookCover = async (req, res, next) => {
   if (!req.file) return next();
   
   try {
-    const filePath = req.file.path;
-    const parsedPath = path.parse(filePath);
-    const outputPath = path.join(parsedPath.dir, `cropped-${parsedPath.base}`);
-    
-    // Обрезаем/масштабируем до пропорций 2:3
-    await sharp(filePath)
+    const imageInput = req.file.buffer || req.file.path;
+    const croppedBuffer = await sharp(imageInput)
       .resize(600, 900, {
         fit: 'cover',
         position: 'center'
       })
-      .toFile(outputPath);
-    
-    // Заменяем оригинал обрезанным
-    fs.unlinkSync(filePath);
-    fs.renameSync(outputPath, filePath);
+      .jpeg({ quality: 88 })
+      .toBuffer();
+
+    // Для memoryStorage подменяем буфер, для diskStorage перезаписываем файл
+    if (req.file.buffer) {
+      req.file.buffer = croppedBuffer;
+      req.file.size = croppedBuffer.length;
+      req.file.mimetype = 'image/jpeg';
+    } else if (req.file.path) {
+      fs.writeFileSync(req.file.path, croppedBuffer);
+      req.file.size = croppedBuffer.length;
+      req.file.mimetype = 'image/jpeg';
+    }
     
     console.log('✅ Изображение обрезано до 600x900');
     next();
