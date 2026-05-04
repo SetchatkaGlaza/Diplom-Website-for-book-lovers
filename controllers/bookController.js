@@ -271,6 +271,8 @@ exports.searchBooks = async (req, res) => {
           title: book.title,
           author: book.author,
           cover: book.cover_image,
+      cover_public_id: book.cover_public_id,
+      coverUrl: getCoverUrl(book.cover_image, book.cover_public_id),
           genre: book.genre ? book.genre.name : 'Без жанра',
           year: book.year,
           rating
@@ -308,7 +310,8 @@ exports.getPopularBooks = async (req, res) => {
     return {
       ...book.toJSON(),
       averageRating: ratingInfo.average,
-      ratingsCount: ratingInfo.count
+      ratingsCount: ratingInfo.count,
+      coverUrl: getCoverUrl(book.cover_image, book.cover_public_id)
     };
   })
 );
@@ -349,6 +352,8 @@ exports.getRandomBook = async (req, res) => {
       title: book.title,
       author: book.author,
       cover: book.cover_image,
+      cover_public_id: book.cover_public_id,
+      coverUrl: getCoverUrl(book.cover_image, book.cover_public_id),
       description: book.description ? book.description.substring(0, 200) + '...' : '',
       genre: book.genre ? book.genre.name : 'Без жанра',
       year: book.year,

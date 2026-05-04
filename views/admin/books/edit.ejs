@@ -76,7 +76,7 @@
           <div class="cover-upload">
             <input type="file" id="cover" name="cover" accept="image/jpeg,image/png,image/webp">
             <div class="cover-preview">
-              <img src="<%= book.cover_image && book.cover_image.startsWith('http') ? book.cover_image : '/images/covers/' + (book.cover_image || 'default-book-cover.jpg') %>" alt="<%= book.title %>" id="cover-preview">
+              <img src="<%= getCoverUrl(book.cover_image, book.cover_public_id) %>" alt="<%= book.title %>" id="cover-preview">
             </div>
           </div>
           

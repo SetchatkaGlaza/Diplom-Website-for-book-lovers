@@ -33,7 +33,7 @@
         <div class="books-grid">
           <% recentBooks.forEach(item => { %>
             <a href="/books/<%= item.book.id %>" class="book-card">
-              <img src="<%= item.book.coverUrl || '/images/covers/default-book-cover.jpg' %>" alt="<%= item.book.title %>">
+              <img src="<%= item.book.coverUrl || getCoverUrl(item.book.cover_image, item.book.cover_public_id) %>" alt="<%= item.book.title %>">
               <div class="book-card-info">
                 <h3><%= item.book.title %></h3>
                 <p><%= item.book.author %></p>

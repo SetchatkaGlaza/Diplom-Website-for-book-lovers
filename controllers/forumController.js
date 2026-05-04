@@ -198,7 +198,7 @@ exports.getTopic = async (req, res) => {
         { 
           model: User, 
           as: 'user', 
-          attributes: ['id', 'name', 'avatar', 'role', 'createdAt'] 
+          attributes: ['id', 'name', 'avatar', 'avatar_public_id', 'role', 'createdAt'] 
         },
         {
           model: ForumPostLike,
