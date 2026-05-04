@@ -6,9 +6,9 @@ const expressLayouts = require('express-ejs-layouts');
 const methodOverride = require('method-override');
 const rateLimit = require('express-rate-limit');
 
+const { DataTypes } = require('sequelize');
 const sequelize = require('./config/database');
 const { EMPTY_STATS, getSiteStats } = require('./services/statsService');
-
 const authRoutes = require('./routes/auth');
 const bookRoutes = require('./routes/books');
 const profileRoutes = require('./routes/profile');
@@ -99,9 +99,30 @@ app.get('/', async (req, res) => {
 app.use(errorHandler.notFound);
 app.use(errorHandler.errorHandler);
 
+
+
+const ensureCloudinaryColumns = async () => {
+  const queryInterface = sequelize.getQueryInterface();
+
+  const checks = [
+    { table: 'Books', attribute: 'cover_public_id', definition: { type: DataTypes.STRING, allowNull: true } },
+    { table: 'Users', attribute: 'avatar_public_id', definition: { type: DataTypes.STRING, allowNull: true } }
+  ];
+
+  for (const { table, attribute, definition } of checks) {
+    const tableDescription = await queryInterface.describeTable(table);
+
+    if (!tableDescription[attribute]) {
+      await queryInterface.addColumn(table, attribute, definition);
+      console.warn(`⚠️ Добавлена отсутствующая колонка ${table}.${attribute} для совместимости схемы.`);
+    }
+  }
+};
+
 const startServer = async () => {
   try {
     await sequelize.authenticate();
+    await ensureCloudinaryColumns();
 
     if (!isProduction && enableSchemaSync) {
       await sequelize.sync({ alter: true });

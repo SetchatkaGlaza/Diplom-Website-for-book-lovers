@@ -1,14 +1,10 @@
 const { User, Book, Review, UserBook, Genre, ReviewLike } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
-const path = require('path');
-const fs = require('fs').promises;
 const sharp = require('sharp');
 const uploadService = require('../services/uploadService');
 
 const SALT_ROUNDS = 10;
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 // Функция для получения публичного URL аватарки (с поддержкой дефолтных)
 function getAvatarUrl(avatar, avatarPublicId) {
@@ -37,16 +33,6 @@ exports.getProfile = async (req, res) => {
       attributes: { exclude: ['password_hash'] }
     });
 
-    const recentBooksWithCoverUrl = recentBooks.map(ub => ({
-  ...ub.toJSON(),
-  book: {
-    ...ub.book.toJSON(),
-    coverUrl: ub.book.cover_image && ub.book.cover_image.startsWith('http') 
-      ? ub.book.cover_image 
-      : `/images/covers/${ub.book.cover_image || 'default-book-cover.jpg'}`
-  }
-}));
-    
     const stats = {
       booksRead: await UserBook.count({ where: { user_id: userId, status: 'read' } }),
       booksWantToRead: await UserBook.count({ where: { user_id: userId, status: 'want_to_read' } }),
