@@ -94,7 +94,7 @@
     <div class="book-card">
       <a href="/books/${book.id}" class="book-link">
         <div class="book-cover">
-          <img src="/images/covers/${book.cover_image}" alt="${book.title}">
+          <img src="${getCoverUrl(book.cover_image, book.cover_public_id)}" alt="${book.title}">
         </div>
         <div class="book-info">
           <h3 class="book-title">${book.title}</h3>
@@ -131,7 +131,7 @@
           container.innerHTML = `
             <a href="/books/${book.id}" class="random-book-link">
               <div class="random-book-cover">
-                <img src="/images/covers/${book.cover}" alt="${book.title}">
+                <img src="${getCoverUrl(book.cover, book.cover_public_id)}" alt="${book.title}">
               </div>
               <div class="random-book-info">
                 <h3>${book.title}</h3>

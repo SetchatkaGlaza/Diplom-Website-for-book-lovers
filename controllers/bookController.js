@@ -1,5 +1,6 @@
 const { Book, Genre, Review, User, UserBook } = require('../models');
 const { Op } = require('sequelize'); // Операторы для сложных запросов
+const { getAvatarUrl, getCoverUrl } = require('../utils/imageUrls');
 
 const BOOKS_PER_PAGE = 12;
 const BOOKS_PER_PAGE_TABLET = 10;
@@ -104,9 +105,7 @@ exports.getCatalog = async (req, res) => {
     return {
       ...book.toJSON(),
       averageRating: rating,
-      coverUrl: book.cover_image && book.cover_image.startsWith('http')
-        ? book.cover_image
-        : `/images/covers/${book.cover_image || 'default-book-cover.jpg'}`
+      coverUrl: getCoverUrl(book.cover_image, book.cover_public_id)
     };
   })
 );
@@ -159,7 +158,7 @@ exports.getBookById = async (req, res) => {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'name', 'avatar']
+          attributes: ['id', 'name', 'avatar', 'avatar_public_id']
         }
       ],
       order: [['createdAt', 'DESC']]
@@ -211,7 +210,8 @@ exports.getBookById = async (req, res) => {
         const rating = await similarBook.getAverageRating();
         return {
           ...similarBook.toJSON(),
-          averageRating: rating
+          averageRating: rating,
+          coverUrl: getCoverUrl(similarBook.cover_image, similarBook.cover_public_id)
         };
       })
     );
@@ -220,10 +220,11 @@ exports.getBookById = async (req, res) => {
   title: book.title,
   book: {
     ...book.toJSON(),
-    averageRating: ratingInfo.average
+    averageRating: ratingInfo.average,
+    coverUrl: getCoverUrl(book.cover_image, book.cover_public_id)
   },
   ratingInfo,
-  reviews,
+  reviews: reviews.map((review) => ({ ...review.toJSON(), user: { ...review.user.toJSON(), avatarUrl: getAvatarUrl(review.user.avatar, review.user.avatar_public_id) } })),
   similarBooks: similarBooksWithRating,
   userBookStatus,
   userReview,
