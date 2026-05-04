@@ -21,6 +21,7 @@ const adminForumRoutes = require('./routes/adminForum');
 
 const globalData = require('./middlewares/globalData');
 const errorHandler = require('./middlewares/errorHandler');
+const { getAvatarUrl, getCoverUrl } = require('./utils/imageUrls');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -65,6 +66,8 @@ app.use((req, res, next) => {
   res.locals.success_msg = req.flash('success');
   res.locals.error_msg = req.flash('error');
   res.locals.user = req.session.user || null;
+  res.locals.getAvatarUrl = getAvatarUrl;
+  res.locals.getCoverUrl = getCoverUrl;
   next();
 });
 

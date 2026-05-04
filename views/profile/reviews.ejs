@@ -7,7 +7,7 @@
         <div class="review-detailed-card">
           <div class="review-detailed-header">
             <div class="review-book-info">
-              <img src="/images/covers/<%= review.book.cover_image %>" alt="<%= review.book.title %>" class="review-book-cover">
+              <img src="<%= review.book.coverUrl || getCoverUrl(review.book.cover_image, review.book.cover_public_id) %>" alt="<%= review.book.title %>" class="review-book-cover">
               <div>
                 <h3><a href="/books/<%= review.book.id %>"><%= review.book.title %></a></h3>
                 <p class="review-book-author"><%= review.book.author %></p>

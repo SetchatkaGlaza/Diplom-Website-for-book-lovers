@@ -17,7 +17,7 @@
       <% if (user) { %>
         <li class="nav-item dropdown desktop-only">
           <a href="#" class="nav-link dropdown-toggle">
-            <img src="<%= user.avatar && user.avatar.startsWith('http') ? user.avatar : '/images/avatars/' + (user.avatar || 'default-avatar.png') %>" alt="<%= user.name %>" class="nav-avatar">
+            <img src="<%= getAvatarUrl(user.avatar, user.avatar_public_id) %>" alt="<%= user.name %>" class="nav-avatar">
             <span><%= user.name %></span>
             <i class="fas fa-chevron-down"></i>
           </a>
