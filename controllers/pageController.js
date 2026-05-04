@@ -59,48 +59,6 @@ exports.getContact = (req, res) => {
 };
 
 exports.postContact = async (req, res) => {
-  try {
-    const { name, email, subject, message } = req.body;
-    
-    const errors = [];
-    
-    if (!name || name.length < 2) {
-      errors.push({ msg: 'Имя должно содержать минимум 2 символа' });
-    }
-    
-    if (!email || !email.includes('@')) {
-      errors.push({ msg: 'Введите корректный email' });
-    }
-    
-    if (!subject || subject.length < 3) {
-      errors.push({ msg: 'Тема должна содержать минимум 3 символа' });
-    }
-    
-    if (!message || message.length < 10) {
-      errors.push({ msg: 'Сообщение должно содержать минимум 10 символов' });
-    }
-    
-    if (errors.length > 0) {
-      return res.render('pages/contact', {
-        title: 'Контакты',
-        errors,
-        formData: { name, email, subject, message }
-      });
-    }
-
-    const result = await emailService.sendContactEmail(name, email, subject, message);
-    
-    if (result.success) {
-      req.flash('success', 'Сообщение отправлено! Мы ответим вам в ближайшее время.');
-    } else {
-      req.flash('error', 'Произошла ошибка при отправке. Попробуйте позже.');
-    }
-    
-    res.redirect('/contact');
-    
-  } catch (error) {
-    console.error('Ошибка при отправке сообщения:', error);
-    req.flash('error', 'Произошла ошибка при отправке');
-    res.redirect('/contact');
-  }
+  req.flash('success', 'Спасибо! Свяжитесь с нами по email: Korepin.eil@yandex.ru');
+  res.redirect('/contact');
 };
