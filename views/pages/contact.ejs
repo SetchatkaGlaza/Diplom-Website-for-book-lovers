@@ -1,154 +1,142 @@
-<div class="page-content contact-page">
-  <div class="contact-hero">
-    <div>
-      <h1><i class="fas fa-envelope-open-text"></i> Контакты</h1>
-      <p class="contact-subtitle">Всегда на связи: поддержка сайта, вопросы по аккаунту и предложения по улучшению.</p>
-    </div>
-    <a class="mail-pill" href="mailto:Korepin.eil@yandex.ru">
-      <i class="fas fa-paper-plane"></i>
-      Korepin.eil@yandex.ru
-    </a>
+<section class="contact-page-wrap">
+  <div class="contact-header">
+    <h1><i class="fas fa-envelope-open-text"></i> Связаться с нами</h1>
+    <p>Если у вас есть вопросы по сайту, напишите нам на почту или приходите по адресу ниже.</p>
   </div>
 
-  <div class="contact-layout">
-    <section class="contact-info">
-      <article class="info-card">
-        <div class="icon-wrap"><i class="fas fa-map-marker-alt"></i></div>
+  <div class="contact-grid">
+    <aside class="contact-panel">
+      <div class="contact-card">
+        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
         <div>
-          <h3>Наш адрес</h3>
+          <h3>Адрес</h3>
           <p>г. Вологда, ул. Ильюшина, д. 15</p>
-          <small>Университетский колледж ВоГУ</small>
+          <span>Университетский колледж ВоГУ</span>
         </div>
-      </article>
+      </div>
 
-      <article class="info-card">
-        <div class="icon-wrap"><i class="fas fa-clock"></i></div>
+      <div class="contact-card">
+        <div class="contact-icon"><i class="fas fa-clock"></i></div>
         <div>
-          <h3>Часы работы</h3>
-          <p>Пн–Пт: 8:30 — 14:20</p>
-          <small>Сб–Вс: выходной</small>
+          <h3>Время работы</h3>
+          <p>Пн–Пт: 8:30–14:20</p>
+          <span>Сб–Вс: выходной</span>
         </div>
-      </article>
+      </div>
 
-      <article class="info-card accent-card">
-        <div class="icon-wrap"><i class="fas fa-envelope"></i></div>
+      <a class="contact-mail" href="mailto:Korepin.eil@yandex.ru">
+        <i class="fas fa-paper-plane"></i>
         <div>
-          <h3>Электронная почта</h3>
-          <p><a href="mailto:Korepin.eil@yandex.ru">Korepin.eil@yandex.ru</a></p>
-          <small>Ответим в рабочее время</small>
+          <strong>Korepin.eil@yandex.ru</strong>
+          <small>Нажмите, чтобы написать письмо</small>
         </div>
-      </article>
-    </section>
+      </a>
+    </aside>
 
-    <section class="contact-map">
-      <div class="map-title">
+    <div class="map-panel">
+      <div class="map-panel__head">
         <h2><i class="fas fa-map"></i> Мы на карте</h2>
         <span>ул. Ильюшина, 15</span>
       </div>
-      <div class="map-frame">
+      <div class="map-shell">
         <iframe
           src="https://yandex.ru/map-widget/v1/?text=%D0%B3.%20%D0%92%D0%BE%D0%BB%D0%BE%D0%B3%D0%B4%D0%B0%2C%20%D1%83%D0%BB.%20%D0%98%D0%BB%D1%8C%D1%8E%D1%88%D0%B8%D0%BD%D0%B0%2C%2015&z=16"
           width="100%"
-          height="460"
+          height="500"
           frameborder="0"
           allowfullscreen="true">
         </iframe>
       </div>
-    </section>
+    </div>
   </div>
-</div>
+</section>
 
 <style>
-.contact-page {
+.contact-page-wrap {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.2);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(236,72,153,.18), transparent 35%),
+    radial-gradient(circle at 100% 100%, rgba(99,102,241,.2), transparent 40%),
+    rgba(255,255,255,.09);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: #fff;
-  border-radius: 18px;
-  background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
-  border: 1px solid rgba(255,255,255,.22);
+  box-shadow: 0 20px 45px rgba(17,24,39,.24);
 }
 
-.contact-hero {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
+.contact-header h1 { display: flex; gap: .65rem; align-items: center; margin-bottom: .4rem; }
+.contact-header p { opacity: .9; max-width: 760px; margin-bottom: 1.2rem; }
 
-.contact-hero h1 { margin-bottom: .35rem; }
-.contact-subtitle { opacity: .9; margin: 0; max-width: 720px; }
-
-.mail-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: .55rem;
-  padding: .65rem 1rem;
-  border-radius: 999px;
-  text-decoration: none;
-  color: #fff;
-  background: linear-gradient(135deg, rgba(236,72,153,.95), rgba(139,92,246,.9));
-  box-shadow: 0 10px 20px rgba(0,0,0,.2);
-  font-weight: 600;
-}
-
-.contact-layout {
+.contact-grid {
   display: grid;
-  grid-template-columns: minmax(300px, 1fr) minmax(340px, 1.4fr);
+  grid-template-columns: minmax(300px, 1fr) minmax(420px, 1.55fr);
   gap: 1rem;
 }
 
-.contact-info { display: grid; gap: .85rem; }
+.contact-panel { display: grid; gap: .85rem; }
 
-.info-card {
-  background: rgba(12, 19, 38, .35);
-  border: 1px solid rgba(255,255,255,.18);
-  border-radius: 14px;
-  padding: 1rem;
+.contact-card {
   display: flex;
-  gap: .85rem;
-  transition: .2s ease;
+  gap: .8rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: rgba(10,17,35,.35);
+  border: 1px solid rgba(255,255,255,.16);
 }
-.info-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.3); }
 
-.accent-card { background: linear-gradient(135deg, rgba(99,102,241,.28), rgba(236,72,153,.22)); }
-
-.icon-wrap {
+.contact-icon {
   width: 44px;
   height: 44px;
   border-radius: 12px;
   background: rgba(255,255,255,.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: var(--accent);
+  display: grid;
+  place-items: center;
   flex: 0 0 44px;
 }
 
-.info-card h3 { margin: 0 0 .25rem; }
-.info-card p { margin: 0; font-weight: 600; }
-.info-card small { opacity: .85; }
-.info-card a { color: #fff; }
+.contact-card h3 { margin: 0 0 .2rem; }
+.contact-card p { margin: 0; font-weight: 600; }
+.contact-card span { opacity: .8; font-size: .92rem; }
 
-.contact-map {
-  background: rgba(0,0,0,.23);
-  border: 1px solid rgba(255,255,255,.16);
+.contact-mail {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  border-radius: 14px;
+  padding: 1rem;
+  text-decoration: none;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(99,102,241,.65), rgba(236,72,153,.65));
+  border: 1px solid rgba(255,255,255,.24);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.contact-mail:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(17,24,39,.28); }
+.contact-mail i { font-size: 1.15rem; }
+.contact-mail small { display: block; opacity: .9; margin-top: .15rem; }
+
+.map-panel {
   border-radius: 14px;
   padding: .9rem;
+  background: rgba(5,10,25,.32);
+  border: 1px solid rgba(255,255,255,.18);
 }
 
-.map-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: .7rem; }
-.map-title h2 { margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: .45rem; }
-.map-title span { opacity: .85; font-size: .9rem; }
+.map-panel__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; }
+.map-panel__head h2 { margin: 0; display: flex; align-items: center; gap: .5rem; font-size: 1.1rem; }
+.map-panel__head span { opacity: .85; font-size: .92rem; }
 
-.map-frame {
+.map-shell {
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,.2);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.24);
 }
 
-@media (max-width: 900px) {
-  .contact-hero { flex-direction: column; align-items: flex-start; }
-  .mail-pill { width: 100%; justify-content: center; }
-  .contact-layout { grid-template-columns: 1fr; }
+@media (max-width: 960px) {
+  .contact-grid { grid-template-columns: 1fr; }
+  .map-shell iframe { height: 380px; }
 }
 </style>
