@@ -85,7 +85,7 @@
               <td><%= new Date(user.createdAt).toLocaleDateString('ru-RU') %></td>
               <td>
                 <div class="action-buttons">
-                  <a href="/profile/<%= user.id %>" target="_blank" rel="noopener" class="action-btn approve" title="Открыть профиль"><i class="fas fa-user"></i><span class="action-text">Профиль</span></a>
+                  <a href="/profile/<%= user.id %>" target="_blank" rel="noopener" class="action-btn approve" title="Открыть профиль"><i class="fas fa-user"></i></a>
                   <% if (user.id !== user.id) { %>
                     <form action="/admin/users/<%= user.id %>/toggle-block" method="POST" style="display: inline;">
                       <button type="submit" class="action-btn <%= user.isBlocked ? 'approve' : 'delete' %>" 
