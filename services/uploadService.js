@@ -1,19 +1,16 @@
 const cloudinary = require('../config/cloudinary');
 const { Readable } = require('stream');
 
-/**
- * Загрузка изображения в Cloudinary
- * @param {Buffer} buffer - буфер изображения
- * @param {string} folder - папка (avatars или covers)
- * @param {string} publicId - уникальное имя файла (опционально)
- * @returns {Promise<{url: string, publicId: string}>}
- */
+// НАЗВАНИЕ ПРЕСЕТА, КОТОРЫЙ ТЫ СОЗДАЛ
+const UNSIGNED_PRESET = 'booklovers_unsigned'; 
+
 async function uploadImage(buffer, folder, publicId = null) {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: `booklovers/${folder}`,
         public_id: publicId || undefined,
+        upload_preset: UNSIGNED_PRESET,   // <-- ГЛАВНОЕ ДОБАВЛЕНИЕ
         transformation: [
           { quality: 'auto:good' },
           { fetch_format: 'auto' }
