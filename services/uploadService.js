@@ -1,24 +1,41 @@
 const cloudinary = require('../config/cloudinary');
 const { Readable } = require('stream');
+const crypto = require('crypto');
 
-// НАЗВАНИЕ ПРЕСЕТА, КОТОРЫЙ ТЫ СОЗДАЛ
-const UNSIGNED_PRESET = 'booklovers_unsigned'; 
+function generateSignature(params, apiSecret) {
+  const sortedParams = Object.keys(params)
+    .sort()
+    .map(key => `${key}=${params[key]}`)
+    .join('&');
+  const signed = crypto.createHash('sha1').update(sortedParams + apiSecret).digest('hex');
+  return signed;
+}
 
 async function uploadImage(buffer, folder, publicId = null) {
   return new Promise((resolve, reject) => {
+    const timestamp = Math.floor(Date.now() / 1000);
+    const params = {
+      folder: `booklovers/${folder}`,
+      public_id: publicId || undefined,
+      timestamp: timestamp,
+      transformation: 'q_auto:good/f_auto'
+    };
+    // Удаляем undefined
+    Object.keys(params).forEach(k => params[k] === undefined && delete params[k]);
+
+    const signature = generateSignature(params, process.env.CLOUDINARY_API_SECRET);
+
+    const uploadOptions = {
+      ...params,
+      signature,
+      api_key: process.env.CLOUDINARY_API_KEY
+    };
+
     const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: `booklovers/${folder}`,
-        public_id: publicId || undefined,
-        upload_preset: UNSIGNED_PRESET,   // <-- ГЛАВНОЕ ДОБАВЛЕНИЕ
-        transformation: [
-          { quality: 'auto:good' },
-          { fetch_format: 'auto' }
-        ]
-      },
+      uploadOptions,
       (error, result) => {
         if (error) {
-          console.error('Ошибка загрузки в Cloudinary:', error);
+          console.error('Cloudinary upload error:', error);
           reject(error);
         } else {
           resolve({ url: result.secure_url, publicId: result.public_id });
