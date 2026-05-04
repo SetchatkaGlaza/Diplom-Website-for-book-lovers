@@ -347,4 +347,35 @@
       display: none !important;
     }
   }
+
+  @media (max-width: 768px) {
+    .nav-menu {
+      padding: .75rem;
+      gap: .45rem;
+    }
+    .nav-menu li { width: 100%; }
+    .nav-menu .nav-link {
+      width: 100%;
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      border-radius: 10px;
+      padding: .7rem .9rem;
+      justify-content: flex-start;
+      font-size: .98rem;
+    }
+    .nav-menu .btn-nav {
+      width: 100%;
+      text-align: left;
+      justify-content: flex-start;
+      min-height: 46px;
+      padding: .7rem .9rem;
+      border-radius: 10px;
+    }
+    .nav-menu .notification-bell {
+      justify-content: flex-start;
+      gap: .65rem;
+    }
+  }
 </style>
