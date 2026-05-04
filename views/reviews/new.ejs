@@ -7,7 +7,7 @@
   </div>
   
   <div class="review-book-info">
-    <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>" class="review-book-cover">
+    <img src="<%= book.coverUrl || getCoverUrl(book.cover_image, book.cover_public_id) %>" alt="<%= book.title %>" class="review-book-cover">
     <div>
       <h2><%= book.title %></h2>
       <p class="book-author"><%= book.author %></p>
