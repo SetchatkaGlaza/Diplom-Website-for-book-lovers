@@ -1,43 +1,55 @@
 <div class="page-content contact-page">
-  <h1><i class="fas fa-envelope"></i> Контакты</h1>
-  <p class="contact-subtitle">Свяжитесь с нами по вопросам работы сайта и поддержки пользователей.</p>
+  <div class="contact-hero">
+    <div>
+      <h1><i class="fas fa-envelope-open-text"></i> Контакты</h1>
+      <p class="contact-subtitle">Всегда на связи: поддержка сайта, вопросы по аккаунту и предложения по улучшению.</p>
+    </div>
+    <a class="mail-pill" href="mailto:Korepin.eil@yandex.ru">
+      <i class="fas fa-paper-plane"></i>
+      Korepin.eil@yandex.ru
+    </a>
+  </div>
 
   <div class="contact-layout">
     <section class="contact-info">
-      <div class="info-card">
+      <article class="info-card">
         <div class="icon-wrap"><i class="fas fa-map-marker-alt"></i></div>
         <div>
-          <h3>Адрес</h3>
+          <h3>Наш адрес</h3>
           <p>г. Вологда, ул. Ильюшина, д. 15</p>
-          <p>Университетский колледж ВоГУ</p>
+          <small>Университетский колледж ВоГУ</small>
         </div>
-      </div>
+      </article>
 
-      <div class="info-card">
-        <div class="icon-wrap"><i class="fas fa-envelope"></i></div>
-        <div>
-          <h3>Email</h3>
-          <p><a href="mailto:Korepin.eil@yandex.ru">Korepin.eil@yandex.ru</a></p>
-        </div>
-      </div>
-
-      <div class="info-card">
+      <article class="info-card">
         <div class="icon-wrap"><i class="fas fa-clock"></i></div>
         <div>
           <h3>Часы работы</h3>
-          <p>Пн-Пт: 8:30–14:20</p>
-          <p>Сб-Вс: выходной</p>
+          <p>Пн–Пт: 8:30 — 14:20</p>
+          <small>Сб–Вс: выходной</small>
         </div>
-      </div>
+      </article>
+
+      <article class="info-card accent-card">
+        <div class="icon-wrap"><i class="fas fa-envelope"></i></div>
+        <div>
+          <h3>Электронная почта</h3>
+          <p><a href="mailto:Korepin.eil@yandex.ru">Korepin.eil@yandex.ru</a></p>
+          <small>Ответим в рабочее время</small>
+        </div>
+      </article>
     </section>
 
     <section class="contact-map">
-      <h2>Мы на карте</h2>
+      <div class="map-title">
+        <h2><i class="fas fa-map"></i> Мы на карте</h2>
+        <span>ул. Ильюшина, 15</span>
+      </div>
       <div class="map-frame">
         <iframe
           src="https://yandex.ru/map-widget/v1/?text=%D0%B3.%20%D0%92%D0%BE%D0%BB%D0%BE%D0%B3%D0%B4%D0%B0%2C%20%D1%83%D0%BB.%20%D0%98%D0%BB%D1%8C%D1%8E%D1%88%D0%B8%D0%BD%D0%B0%2C%2015&z=16"
           width="100%"
-          height="420"
+          height="460"
           frameborder="0"
           allowfullscreen="true">
         </iframe>
@@ -47,17 +59,96 @@
 </div>
 
 <style>
-.contact-page { color: #fff; }
-.contact-subtitle { opacity: .9; margin: -.5rem 0 1.5rem; }
-.contact-layout { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.3fr); gap: 1.25rem; align-items: stretch; }
-.contact-info { display: grid; gap: .9rem; }
-.info-card { background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.16); border-radius: 14px; padding: 1rem; display: flex; gap: .9rem; }
-.icon-wrap { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; color: var(--accent); flex: 0 0 42px; }
+.contact-page {
+  color: #fff;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+  border: 1px solid rgba(255,255,255,.22);
+}
+
+.contact-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.contact-hero h1 { margin-bottom: .35rem; }
+.contact-subtitle { opacity: .9; margin: 0; max-width: 720px; }
+
+.mail-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .65rem 1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(236,72,153,.95), rgba(139,92,246,.9));
+  box-shadow: 0 10px 20px rgba(0,0,0,.2);
+  font-weight: 600;
+}
+
+.contact-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(340px, 1.4fr);
+  gap: 1rem;
+}
+
+.contact-info { display: grid; gap: .85rem; }
+
+.info-card {
+  background: rgba(12, 19, 38, .35);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  gap: .85rem;
+  transition: .2s ease;
+}
+.info-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.3); }
+
+.accent-card { background: linear-gradient(135deg, rgba(99,102,241,.28), rgba(236,72,153,.22)); }
+
+.icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex: 0 0 44px;
+}
+
 .info-card h3 { margin: 0 0 .25rem; }
-.info-card p { margin: .2rem 0; opacity: .92; }
+.info-card p { margin: 0; font-weight: 600; }
+.info-card small { opacity: .85; }
 .info-card a { color: #fff; }
-.contact-map { background: rgba(0,0,0,.2); border: 1px solid rgba(255,255,255,.16); border-radius: 14px; padding: 1rem; }
-.contact-map h2 { margin-top: 0; margin-bottom: .75rem; }
-.map-frame { border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,.18); }
-@media (max-width: 900px){ .contact-layout { grid-template-columns: 1fr; } .contact-map { order: 2; } }
+
+.contact-map {
+  background: rgba(0,0,0,.23);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 14px;
+  padding: .9rem;
+}
+
+.map-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: .7rem; }
+.map-title h2 { margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: .45rem; }
+.map-title span { opacity: .85; font-size: .9rem; }
+
+.map-frame {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.2);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+}
+
+@media (max-width: 900px) {
+  .contact-hero { flex-direction: column; align-items: flex-start; }
+  .mail-pill { width: 100%; justify-content: center; }
+  .contact-layout { grid-template-columns: 1fr; }
+}
 </style>
