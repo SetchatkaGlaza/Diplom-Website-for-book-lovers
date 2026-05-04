@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const sharp = require('sharp');
 const uploadService = require('../services/uploadService');
+const cloudinary = require('../config/cloudinary');
 
 const SALT_ROUNDS = 10;
 
@@ -14,8 +15,7 @@ function getAvatarUrl(avatar, avatarPublicId) {
   }
   // Если есть публичный ID (был загружен в облако, но URL не сохранился)
   if (avatarPublicId && !avatarPublicId.includes('default')) {
-    // Можно сгенерировать URL из publicId (но лучше чтобы URL был в БД)
-    return `/images/avatars/${avatar}`;
+    return cloudinary.url(avatarPublicId, { secure: true });
   }
   // Дефолтная аватарка из локальной папки
   if (!avatar || avatar === 'default-avatar.png') {
