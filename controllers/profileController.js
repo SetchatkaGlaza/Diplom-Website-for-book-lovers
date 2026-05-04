@@ -1,6 +1,8 @@
 const { User, Book, Review, UserBook, Genre, ReviewLike } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
+const path = require('path');
 const sharp = require('sharp');
 const uploadService = require('../services/uploadService');
 const cloudinary = require('../config/cloudinary');
@@ -22,7 +24,12 @@ function getAvatarUrl(avatar, avatarPublicId) {
     return '/images/avatars/default-avatar.png';
   }
   // Старый локальный файл (для обратной совместимости)
-  return `/images/avatars/${avatar}`;
+  const localAvatarPath = path.join(__dirname, '..', 'public', 'images', 'avatars', avatar || '');
+  if (avatar && fs.existsSync(localAvatarPath)) {
+    return `/images/avatars/${avatar}`;
+  }
+  // Если файла уже нет на хосте — показываем дефолтную картинку вместо 404
+  return '/images/avatars/default-avatar.png';
 }
 
 exports.getProfile = async (req, res) => {
