@@ -71,8 +71,6 @@ app.use((req, res, next) => {
 app.use(globalData);
 
 app.use('/auth/login', authLimiter);
-app.use('/auth/register', authLimiter);
-app.use('/auth/forgot-password', authLimiter);
 
 app.use('/auth', authRoutes);
 app.use('/books', bookRoutes);

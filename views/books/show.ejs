@@ -759,6 +759,8 @@
 </style>
 
 <script>
+  const isAuthorized = <%= user ? 'true' : 'false' %>;
+
   // Обработка кнопок "Хочу прочитать" и т.д.
   document.querySelectorAll('.book-actions .btn').forEach(button => {
     button.addEventListener('click', async function() {
@@ -801,6 +803,11 @@
       const reviewId = this.dataset.reviewId;
       const type = this.dataset.type;
       
+      if (!isAuthorized) {
+        alert('Лайки и дизлайки доступны только авторизованным пользователям.');
+        return;
+      }
+
       try {
         const response = await fetch('/reviews/' + reviewId + '/rate', {
           method: 'POST',
