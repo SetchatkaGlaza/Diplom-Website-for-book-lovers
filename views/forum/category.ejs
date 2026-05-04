@@ -54,7 +54,7 @@
               
               <div class="topic-meta">
                 <div class="topic-author">
-                  <img src="/images/avatars/<%= topic.user.avatar %>" alt="<%= topic.user.name %>" class="mini-avatar">
+                  <img src="<%= topic.user.avatar && topic.user.avatar.startsWith('http') ? topic.user.avatar : '/images/avatars/' + (topic.user.avatar || 'default-avatar.png') %>" alt="<%= topic.user.name %>" class="mini-avatar">
                   <a href="/profile/<%= topic.user.id %>" class="author-link"><%= topic.user.name %></a>
                 </div>
                 
@@ -106,7 +106,7 @@
               
               <div class="topic-meta">
                 <div class="topic-author">
-                  <img src="/images/avatars/<%= topic.user.avatar %>" alt="<%= topic.user.name %>" class="mini-avatar">
+                  <img src="<%= topic.user.avatar && topic.user.avatar.startsWith('http') ? topic.user.avatar : '/images/avatars/' + (topic.user.avatar || 'default-avatar.png') %>" alt="<%= topic.user.name %>" class="mini-avatar">
                   <a href="/profile/<%= topic.user.id %>" class="author-link"><%= topic.user.name %></a>
                 </div>
                 

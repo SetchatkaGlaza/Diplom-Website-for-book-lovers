@@ -76,7 +76,7 @@
           <div class="cover-upload">
             <input type="file" id="cover" name="cover" accept="image/jpeg,image/png,image/webp">
             <div class="cover-preview">
-              <img src="/images/covers/default-book-cover.jpg" alt="Preview" id="cover-preview">
+              <img src="<%= process.env.CLOUDINARY_DEFAULT_COVER || '/images/covers/default-book-cover.jpg' %>" alt="Preview" id="cover-preview">
             </div>
           </div>
           

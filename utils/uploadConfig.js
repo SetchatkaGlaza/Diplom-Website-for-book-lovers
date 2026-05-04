@@ -12,6 +12,12 @@ const ensureDirectory = (dir) => {
   }
 };
 
+// НОВАЯ ФУНКЦИЯ: memoryStorage для Cloudinary (без сохранения на диск)
+const createMemoryStorage = () => {
+  return multer.memoryStorage();
+};
+
+// Старая функция для diskStorage (локальное хранение)
 const createDiskStorage = ({ destinationDir, filenamePrefix }) => multer.diskStorage({
   destination: (req, file, cb) => {
     ensureDirectory(destinationDir);
@@ -36,6 +42,7 @@ const imageFileFilter = (req, file, cb) => {
 module.exports = {
   MB,
   createDiskStorage,
+  createMemoryStorage,  // НОВЫЙ ЭКСПОРТ
   imageFileFilter,
   ensureDirectory
 };

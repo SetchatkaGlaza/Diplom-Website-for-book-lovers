@@ -27,28 +27,33 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     defaultValue: 'default-avatar.png',
   },
+  // НОВОЕ ПОЛЕ: публичный ID в Cloudinary (для удаления старого файла)
+  avatar_public_id: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   bio: {
     type: DataTypes.TEXT,
     allowNull: true,
     defaultValue: '',
   },
   isBlocked: {
-  type: DataTypes.BOOLEAN,
-  defaultValue: false,
-  allowNull: false
-},
-blocked_until: {
-  type: DataTypes.DATE,
-  allowNull: true
-},
-email_verified: {
-  type: DataTypes.BOOLEAN,
-  defaultValue: false
-},
-email_verification_token: {
-  type: DataTypes.STRING,
-  allowNull: true
-}
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false
+  },
+  blocked_until: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  email_verified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  email_verification_token: {
+    type: DataTypes.STRING,
+    allowNull: true
+  }
 }, {
   // Добавит поля createdAt и updatedAt автоматически
   timestamps: true,

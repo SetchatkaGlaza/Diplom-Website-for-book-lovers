@@ -25,7 +25,7 @@
       <div class="avatar-section">
         <h3>Аватар</h3>
         <div class="current-avatar">
-          <img src="/images/avatars/<%= user.avatar %>" alt="<%= user.name %>">
+          <img src="<%= user.avatarUrl || '/images/avatars/default-avatar.png' %>" alt="<%= user.name %>">
         </div>
         
         <form action="/profile/avatar" method="POST" enctype="multipart/form-data" class="avatar-form">

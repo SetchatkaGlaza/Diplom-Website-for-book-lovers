@@ -3,9 +3,25 @@ const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs').promises;
+const sharp = require('sharp');
 const notificationService = require('../services/notificationService');
+const uploadService = require('../services/uploadService');
 
 const SALT_ROUNDS = 10;
+
+// Функция для получения публичного URL обложки
+function getCoverUrl(coverImage, coverPublicId) {
+  // Если есть URL из облака — возвращаем его
+  if (coverImage && coverImage.startsWith('http')) {
+    return coverImage;
+  }
+  // Дефолтная обложка
+  if (!coverImage || coverImage === 'default-book-cover.jpg') {
+    return '/images/covers/default-book-cover.jpg';
+  }
+  // Старый локальный файл (для обратной совместимости)
+  return `/images/covers/${coverImage}`;
+}
 
 exports.getDashboard = async (req, res) => {
   try {
@@ -135,7 +151,8 @@ exports.getBooks = async (req, res) => {
           ...book.toJSON(),
           reviewsCount,
           avgRating,
-          inUserBooks
+          inUserBooks,
+          coverUrl: getCoverUrl(book.cover_image, book.cover_public_id)
         };
       })
     );
@@ -146,7 +163,7 @@ exports.getBooks = async (req, res) => {
       currentPage: 'books',
       books: booksWithStats,
       search,
-      currentPage: page,
+      currentPageNum: page,
       totalPages: Math.ceil(count / limit),
       totalBooks: count,
       user: req.session.user
@@ -214,13 +231,23 @@ exports.postAddBook = async (req, res) => {
       });
     }
     
-    let cover_image = 'default-book-cover.jpg';
-
-if (req.file) {
-  cover_image = req.file.filename;
-}
+    let coverUrl = '/images/covers/default-book-cover.jpg';
+    let coverPublicId = null;
     
-    await Book.create({
+    if (req.file) {
+      // Обрабатываем изображение: ресайз и конвертация
+      const processedBuffer = await sharp(req.file.buffer)
+        .resize(300, 450, { fit: 'cover' })
+        .jpeg({ quality: 85 })
+        .toBuffer();
+      
+      // Загружаем в облако (bookId пока null, будет после создания)
+      const result = await uploadService.uploadBookCover(processedBuffer, null);
+      coverUrl = result.url;
+      coverPublicId = result.publicId;
+    }
+    
+    const newBook = await Book.create({
       title,
       author,
       description,
@@ -228,7 +255,8 @@ if (req.file) {
       pages: pages || null,
       publisher: publisher || null,
       genre_id: genre_id || null,
-      cover_image,
+      cover_image: coverUrl,
+      cover_public_id: coverPublicId,
       isbn: isbn || null
     });
     
@@ -261,7 +289,10 @@ exports.getEditBook = async (req, res) => {
       title: 'Редактирование книги',
       layout: 'layouts/admin',
       currentPage: 'books',
-      book,
+      book: {
+        ...book.toJSON(),
+        coverUrl: getCoverUrl(book.cover_image, book.cover_public_id)
+      },
       genres,
       errors: [],
       user: req.session.user
@@ -307,9 +338,12 @@ exports.postEditBook = async (req, res) => {
       const genres = await Genre.findAll({ order: [['name', 'ASC']] });
       return res.render('admin/books/edit', {
         title: 'Редактирование книги',
+        layout: 'layouts/admin',
+        currentPage: 'books',
         book: { ...book.toJSON(), ...req.body },
         genres,
-        errors
+        errors,
+        user: req.session.user
       });
     }
     
@@ -324,33 +358,23 @@ exports.postEditBook = async (req, res) => {
       isbn: isbn || null
     };
     
-if (req.file) {
-  const isDefaultCover = book.cover_image === 'default-book-cover.jpg' || 
-                         book.cover_image === 'default-book-cover.svg';
-  
-  if (book.cover_image && !isDefaultCover) {
-    const oldCoverPath = path.join(__dirname, '../public/images/covers', book.cover_image);
-    try {
-      try {
-        await fs.access(oldCoverPath);
-        await fs.unlink(oldCoverPath);
-        console.log(`✅ Удалён старый файл: ${book.cover_image}`);
-      } catch (err) {
-        if (err.code === 'ENOENT') {
-          console.log(`⚠️ Файл не найден (возможно уже удалён): ${book.cover_image}`);
-        } else {
-          console.log(`❌ Ошибка при удалении: ${err.message}`);
-        }
+    // Обновление обложки
+    if (req.file) {
+      // Удаляем старый файл из облака (если не дефолтный)
+      if (book.cover_public_id && !book.cover_public_id.includes('default')) {
+        await uploadService.deleteImage(book.cover_public_id);
       }
-    } catch (err) {
-      console.log(`⚠️ Не удалось проверить файл: ${err.message}`);
+      
+      // Обрабатываем новое изображение
+      const processedBuffer = await sharp(req.file.buffer)
+        .resize(300, 450, { fit: 'cover' })
+        .jpeg({ quality: 85 })
+        .toBuffer();
+      
+      const result = await uploadService.uploadBookCover(processedBuffer, bookId);
+      updateData.cover_image = result.url;
+      updateData.cover_public_id = result.publicId;
     }
-  } else if (isDefaultCover) {
-    console.log(`ℹ️ Пропускаем удаление заглушки: ${book.cover_image}`);
-  }
-  
-  updateData.cover_image = req.file.filename;
-}
     
     await book.update(updateData);
     
@@ -375,13 +399,9 @@ exports.deleteBook = async (req, res) => {
       return res.redirect('/admin/books');
     }
     
-    if (book.cover_image && book.cover_image !== 'default-book-cover.jpg') {
-      const coverPath = path.join(__dirname, '../public/images/covers', book.cover_image);
-      try {
-        await fs.unlink(coverPath);
-      } catch (err) {
-        console.log('Не удалось удалить обложку:', err.message);
-      }
+    // Удаляем обложку из облака (если не дефолтная)
+    if (book.cover_public_id && !book.cover_public_id.includes('default')) {
+      await uploadService.deleteImage(book.cover_public_id);
     }
     
     await Review.destroy({ where: { book_id: bookId } });
@@ -454,7 +474,7 @@ exports.getUsers = async (req, res) => {
       roleStats,
       search,
       currentRole: role,
-      currentPage: page,
+      currentPageNum: page,
       totalPages: Math.ceil(count / limit),
       totalUsers: count,
       errors: [],
@@ -670,7 +690,7 @@ exports.getReviews = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const offset = (page - 1) * limit;
-    const status = req.query.status || 'all'; // all, pending, moderated
+    const status = req.query.status || 'all';
     
     const where = {};
     
@@ -697,7 +717,7 @@ exports.getReviews = async (req, res) => {
       currentPage: 'reviews',
       reviews,
       status,
-      currentPage: page,
+      currentPageNum: page,
       totalPages: Math.ceil(count / limit),
       totalReviews: count,
       errors: [],
@@ -830,6 +850,12 @@ exports.getStatistics = async (req, res) => {
       LIMIT 5
     `, { type: sequelize.QueryTypes.SELECT });
     
+    // Добавляем URL обложек для topBooks
+    const topBooksWithUrls = topBooks.map(book => ({
+      ...book.toJSON(),
+      coverUrl: getCoverUrl(book.cover_image, book.cover_public_id)
+    }));
+    
     res.render('admin/statistics', {
       title: 'Статистика',
       layout: 'layouts/admin',
@@ -843,7 +869,7 @@ exports.getStatistics = async (req, res) => {
         newBooksToday,
         newReviewsToday
       },
-      topBooks,
+      topBooks: topBooksWithUrls,
       topRatedBooks,
       topUsers,
       popularGenres,
