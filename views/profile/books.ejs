@@ -27,7 +27,7 @@
       <% books.forEach(item => { %>
         <div class="book-detailed-card">
           <div class="book-detailed-cover">
-            <img src="/images/covers/<%= item.book.cover_image %>" alt="<%= item.book.title %>">
+            <img src="<%= item.book.coverUrl || getCoverUrl(item.book.cover_image, item.book.cover_public_id) %>" alt="<%= item.book.title %>">
             <span class="book-detailed-status status-<%= item.status %>">
               <% if (item.status === 'read') { %>
                 <i class="fas fa-check-circle"></i> Прочитано

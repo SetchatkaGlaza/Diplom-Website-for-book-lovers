@@ -24,7 +24,7 @@ exports.getIndex = async (req, res) => {
           limit: 5,
           order: [['last_reply_at', 'DESC']],
           include: [
-            { model: User, as: 'user', attributes: ['id', 'name', 'avatar'] },
+            { model: User, as: 'user', attributes: ['id', 'name', 'avatar', 'avatar_public_id'] },
             { model: User, as: 'lastReplyUser', attributes: ['id', 'name'] }
           ]
         }
@@ -68,7 +68,7 @@ exports.getIndex = async (req, res) => {
         }
       },
       include: [
-        { model: User, as: 'user', attributes: ['id', 'name', 'avatar'] },
+        { model: User, as: 'user', attributes: ['id', 'name', 'avatar', 'avatar_public_id'] },
         { 
           model: ForumPost, 
           as: 'posts',
@@ -117,7 +117,7 @@ exports.getCategory = async (req, res) => {
         is_moderated: true
       },
       include: [
-        { model: User, as: 'user', attributes: ['id', 'name', 'avatar'] },
+        { model: User, as: 'user', attributes: ['id', 'name', 'avatar', 'avatar_public_id'] },
         { model: User, as: 'lastReplyUser', attributes: ['id', 'name'] }
       ],
       order: [['last_reply_at', 'DESC']]
@@ -130,7 +130,7 @@ exports.getCategory = async (req, res) => {
         is_moderated: true
       },
       include: [
-        { model: User, as: 'user', attributes: ['id', 'name', 'avatar'] },
+        { model: User, as: 'user', attributes: ['id', 'name', 'avatar', 'avatar_public_id'] },
         { model: User, as: 'lastReplyUser', attributes: ['id', 'name'] },
         {
           model: ForumPost,
@@ -177,7 +177,7 @@ exports.getTopic = async (req, res) => {
         is_moderated: true 
       },
       include: [
-        { model: User, as: 'user', attributes: ['id', 'name', 'avatar', 'role'] },
+        { model: User, as: 'user', attributes: ['id', 'name', 'avatar', 'avatar_public_id', 'role'] },
         { model: ForumCategory, as: 'category', attributes: ['id', 'name'] }
       ]
     });
@@ -608,7 +608,7 @@ exports.search = async (req, res) => {
         is_moderated: true
       },
       include: [
-        { model: User, as: 'user', attributes: ['id', 'name', 'avatar'] },
+        { model: User, as: 'user', attributes: ['id', 'name', 'avatar', 'avatar_public_id'] },
         { model: ForumCategory, as: 'category', attributes: ['id', 'name'] }
       ],
       order: [['last_reply_at', 'DESC']],

@@ -14,7 +14,7 @@
 
     <div class="topic-info">
       <div class="topic-author">
-        <img src="<%= topic.user.avatar && topic.user.avatar.startsWith('http') ? topic.user.avatar : '/images/avatars/' + (topic.user.avatar || 'default-avatar.png') %>" alt="<%= topic.user.name %>" class="topic-avatar">
+        <img src="<%= getAvatarUrl(topic.user.avatar, topic.user.avatar_public_id) %>" alt="<%= topic.user.name %>" class="topic-avatar">
         <div class="topic-author-details">
           <a href="/profile/<%= topic.user.id %>" class="topic-author-name"><%= topic.user.name %></a>
           <span class="topic-author-role">
@@ -54,7 +54,7 @@
     <% posts.forEach((post, index) => { %>
       <div class="post-card" id="post-<%= post.id %>" data-post-id="<%= post.id %>">
         <div class="post-sidebar">
-          <img src="<%= post.user.avatar && post.user.avatar.startsWith('http') ? post.user.avatar : '/images/avatars/' + (post.user.avatar || 'default-avatar.png') %>" alt="<%= post.user.name %>" class="post-avatar">
+          <img src="<%= getAvatarUrl(post.user.avatar, post.user.avatar_public_id) %>" alt="<%= post.user.name %>" class="post-avatar">
 
           <div class="post-author-info">
             <a href="/profile/<%= post.user.id %>" class="post-author-name"><%= post.user.name %></a>
