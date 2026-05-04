@@ -29,7 +29,7 @@
         <div class="review-moderation-card <%= !review.is_moderated ? 'pending' : 'approved' %>">
           <div class="review-moderation-header">
             <div class="review-user-info">
-              <img src="/images/avatars/<%= review.user ? (review.user.avatar || 'default-avatar.png') : 'default-avatar.png' %>" 
+              <img src="<%= review.user ? getAvatarUrl(review.user.avatar, review.user.avatar_public_id) : '/images/avatars/default-avatar.png' %>" 
                    alt="<%= review.user ? review.user.name : 'User' %>" 
                    class="review-avatar"
                    onerror="this.src='/images/avatars/default-avatar.png'">
@@ -40,7 +40,7 @@
             </div>
             
             <div class="review-book-info">
-              <img src="/images/covers/<%= review.book ? review.book.cover_image : 'default-book-cover.jpg' %>" 
+              <img src="<%= review.book ? getCoverUrl(review.book.cover_image, review.book.cover_public_id) : '/images/covers/default-book-cover.jpg' %>" 
                    alt="<%= review.book ? review.book.title : 'Unknown' %>" 
                    class="review-book-cover"
                    onerror="this.src='/images/covers/default-book-cover.jpg'">

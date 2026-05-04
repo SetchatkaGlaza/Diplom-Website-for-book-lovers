@@ -70,7 +70,7 @@
         <% recentReviews.forEach(review => { %>
           <div class="recent-review-card">
             <div class="review-book-cover">
-              <img src="<%= review.book.cover_image && review.book.cover_image.startsWith('http') ? review.book.cover_image : '/images/covers/' + (review.book.cover_image || 'default-book-cover.jpg') %>" alt="<%= review.book.title %>">
+              <img src="<%= review.book.coverUrl || getCoverUrl(review.book.cover_image, review.book.cover_public_id) %>" alt="<%= review.book.title %>">
             </div>
             <div class="review-content">
               <h3><a href="/books/<%= review.book.id %>"><%= review.book.title %></a></h3>
