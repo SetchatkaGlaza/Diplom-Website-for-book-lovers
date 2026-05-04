@@ -6,7 +6,7 @@
       <p class="date-today">Сегодня: <%= new Date().toLocaleDateString('ru-RU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></p>
     </div>
     <div class="admin-user-card">
-      <img src="/images/avatars/<%= user.avatar %>" alt="<%= user.name %>" class="admin-avatar">
+      <img src="<%= getAvatarUrl(user.avatar, user.avatar_public_id) %>" alt="<%= user.name %>" class="admin-avatar">
       <div>
         <div class="admin-name"><%= user.name %></div>
         <div class="admin-role-badge"><%= user.role === 'admin' ? 'Главный администратор' : 'Модератор' %></div>
@@ -157,7 +157,7 @@
       <div class="user-list">
         <% recentUsers.forEach(user => { %>
           <div class="user-list-item">
-            <img src="/images/avatars/<%= user.avatar || 'default-avatar.png' %>" alt="<%= user.name %>" class="user-avatar" 
+            <img src="<%= getAvatarUrl(user.avatar, user.avatar_public_id) %>" alt="<%= user.name %>" class="user-avatar" 
                  onerror="this.src='/images/avatars/default-avatar.png'">
             <div class="user-info">
               <div class="user-name"><%= user.name %></div>
@@ -191,7 +191,7 @@
           <div class="book-list">
             <% recentBooks.forEach(book => { %>
               <div class="book-list-item">
-                <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>" class="book-cover-mini">
+                <img src="<%= getCoverUrl(book.cover_image, book.cover_public_id) %>" alt="<%= book.title %>" class="book-cover-mini">
                 <div class="book-info">
                   <div class="book-title"><%= book.title %></div>
                   <div class="book-author"><%= book.author %></div>
@@ -224,7 +224,7 @@
           <div class="review-list-item">
             <div class="review-header">
               <div class="review-user">
-                <img src="/images/avatars/<%= review.user ? (review.user.avatar || 'default-avatar.png') : 'default-avatar.png' %>" 
+                <img src="<%= review.user ? getAvatarUrl(review.user.avatar, review.user.avatar_public_id) : '/images/avatars/default-avatar.png' %>" 
                      alt="<%= review.user ? review.user.name : 'User' %>" 
                      class="reviewer-avatar-mini"
                      onerror="this.src='/images/avatars/default-avatar.png'">

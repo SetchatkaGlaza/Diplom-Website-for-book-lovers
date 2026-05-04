@@ -63,7 +63,7 @@
           <% users.forEach(user => { %>
             <tr class="<%= user.isBlocked ? 'blocked-user' : '' %>">
               <td>
-                <img src="<%= user.avatar && user.avatar.startsWith('http') ? user.avatar : '/images/avatars/' + (user.avatar || 'default-avatar.png') %>" alt="<%= user.name %>" class="table-img">
+                <img src="<%= getAvatarUrl(user.avatar, user.avatar_public_id) %>" alt="<%= user.name %>" class="table-img">
               </td>
               <td><strong><%= user.name %></strong></td>
               <td><%= user.email %></td>
