@@ -1,36 +1,11 @@
 const { User, Book, Review, UserBook, Genre, ReviewLike } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
-const fs = require('fs');
-const path = require('path');
 const sharp = require('sharp');
 const uploadService = require('../services/uploadService');
-const cloudinary = require('../config/cloudinary');
+const { getAvatarUrl, getCoverUrl } = require('../utils/imageUrls');
 
 const SALT_ROUNDS = 10;
-
-// Функция для получения публичного URL аватарки (с поддержкой дефолтных)
-function getAvatarUrl(avatar, avatarPublicId) {
-  // Если есть URL из облака — возвращаем его
-  if (avatar && avatar.startsWith('http')) {
-    return avatar;
-  }
-  // Если есть публичный ID (был загружен в облако, но URL не сохранился)
-  if (avatarPublicId && !avatarPublicId.includes('default')) {
-    return cloudinary.url(avatarPublicId, { secure: true });
-  }
-  // Дефолтная аватарка из локальной папки
-  if (!avatar || avatar === 'default-avatar.png') {
-    return '/images/avatars/default-avatar.png';
-  }
-  // Старый локальный файл (для обратной совместимости)
-  const localAvatarPath = path.join(__dirname, '..', 'public', 'images', 'avatars', avatar || '');
-  if (avatar && fs.existsSync(localAvatarPath)) {
-    return `/images/avatars/${avatar}`;
-  }
-  // Если файла уже нет на хосте — показываем дефолтную картинку вместо 404
-  return '/images/avatars/default-avatar.png';
-}
 
 exports.getProfile = async (req, res) => {
   try {
@@ -49,7 +24,7 @@ exports.getProfile = async (req, res) => {
     
     const recentReviews = await Review.findAll({
       where: { user_id: userId },
-      include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image'] }],
+      include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image', 'cover_public_id'] }],
       order: [['createdAt', 'DESC']],
       limit: 5
     });
@@ -65,6 +40,23 @@ exports.getProfile = async (req, res) => {
       limit: 5
     });
     
+
+    const recentReviewsWithUrls = recentReviews.map((review) => ({
+      ...review.toJSON(),
+      book: {
+        ...review.book.toJSON(),
+        coverUrl: getCoverUrl(review.book.cover_image, review.book.cover_public_id)
+      }
+    }));
+
+    const recentBooksWithUrls = recentBooks.map((item) => ({
+      ...item.toJSON(),
+      book: {
+        ...item.book.toJSON(),
+        coverUrl: getCoverUrl(item.book.cover_image, item.book.cover_public_id)
+      }
+    }));
+
     // Добавляем корректный URL аватарки в объект user
     const userWithAvatarUrl = {
       ...user.toJSON(),
@@ -75,8 +67,8 @@ exports.getProfile = async (req, res) => {
       title: 'Мой профиль',
       user: userWithAvatarUrl,
       stats,
-      recentReviews,
-      recentBooks
+      recentReviews: recentReviewsWithUrls,
+      recentBooks: recentBooksWithUrls
     });
     
   } catch (error) {
@@ -580,7 +572,7 @@ exports.getPublicProfile = async (req, res) => {
     
     const recentReviews = await Review.findAll({
       where: { user_id: userId },
-      include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image'] }],
+      include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image', 'cover_public_id'] }],
       order: [['createdAt', 'DESC']],
       limit: 10
     });
@@ -606,8 +598,8 @@ exports.getPublicProfile = async (req, res) => {
       title: `Профиль ${user.name}`,
       profileUser: profileUserWithAvatarUrl,
       stats,
-      recentReviews,
-      recentBooks
+      recentReviews: recentReviewsWithUrls,
+      recentBooks: recentBooksWithUrls
     });
     
   } catch (error) {

@@ -22,7 +22,7 @@ exports.validateBookCover = async (req, res, next) => {
     if (!width || !height) {
       fs.unlinkSync(filePath);
       req.flash('error', 'Не удалось определить размеры изображения.');
-      return res.redirect('back');
+      return res.redirect(req.get('referer') || '/admin/books');
     }
 
     next();
@@ -38,7 +38,7 @@ exports.validateBookCover = async (req, res, next) => {
     }
     
     req.flash('error', 'Ошибка при обработке изображения. Файл может быть повреждён.');
-    res.redirect('back');
+    res.redirect(req.get('referer') || '/admin/books');
   }
 };
 

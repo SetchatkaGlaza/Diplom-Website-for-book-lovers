@@ -77,7 +77,7 @@
       </nav>
       
       <div class="admin-user">
-        <img src="/images/avatars/<%= user.avatar %>" alt="<%= user.name %>">
+        <img src="<%= getAvatarUrl(user.avatar, user.avatar_public_id) %>" alt="<%= user.name %>">
         <div>
           <div><%= user.name %></div>
           <small><%= user.role === 'admin' ? 'Администратор' : 'Модератор' %></small>
