@@ -4,10 +4,30 @@ const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs').promises;
 const sharp = require('sharp');
+const uploadService = require('../services/uploadService');
 
 const SALT_ROUNDS = 10;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+// Функция для получения публичного URL аватарки (с поддержкой дефолтных)
+function getAvatarUrl(avatar, avatarPublicId) {
+  // Если есть URL из облака — возвращаем его
+  if (avatar && avatar.startsWith('http')) {
+    return avatar;
+  }
+  // Если есть публичный ID (был загружен в облако, но URL не сохранился)
+  if (avatarPublicId && !avatarPublicId.includes('default')) {
+    // Можно сгенерировать URL из publicId (но лучше чтобы URL был в БД)
+    return `/images/avatars/${avatar}`;
+  }
+  // Дефолтная аватарка из локальной папки
+  if (!avatar || avatar === 'default-avatar.png') {
+    return '/images/avatars/default-avatar.png';
+  }
+  // Старый локальный файл (для обратной совместимости)
+  return `/images/avatars/${avatar}`;
+}
 
 exports.getProfile = async (req, res) => {
   try {
@@ -16,6 +36,16 @@ exports.getProfile = async (req, res) => {
     const user = await User.findByPk(userId, {
       attributes: { exclude: ['password_hash'] }
     });
+
+    const recentBooksWithCoverUrl = recentBooks.map(ub => ({
+  ...ub.toJSON(),
+  book: {
+    ...ub.book.toJSON(),
+    coverUrl: ub.book.cover_image && ub.book.cover_image.startsWith('http') 
+      ? ub.book.cover_image 
+      : `/images/covers/${ub.book.cover_image || 'default-book-cover.jpg'}`
+  }
+}));
     
     const stats = {
       booksRead: await UserBook.count({ where: { user_id: userId, status: 'read' } }),
@@ -42,9 +72,15 @@ exports.getProfile = async (req, res) => {
       limit: 5
     });
     
+    // Добавляем корректный URL аватарки в объект user
+    const userWithAvatarUrl = {
+      ...user.toJSON(),
+      avatarUrl: getAvatarUrl(user.avatar, user.avatar_public_id)
+    };
+    
     res.render('profile/index', {
       title: 'Мой профиль',
-      user,
+      user: userWithAvatarUrl,
       stats,
       recentReviews,
       recentBooks
@@ -64,10 +100,15 @@ exports.getEditProfile = async (req, res) => {
       attributes: { exclude: ['password_hash'] }
     });
     
+    const userWithAvatarUrl = {
+      ...user.toJSON(),
+      avatarUrl: getAvatarUrl(user.avatar, user.avatar_public_id)
+    };
+    
     res.render('profile/edit', {
       title: 'Редактирование профиля',
-      user,
-      errors: [] // добавляем пустой массив ошибок
+      user: userWithAvatarUrl,
+      errors: []
     });
     
   } catch (error) {
@@ -81,7 +122,6 @@ exports.postEditProfile = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const { name, bio } = req.body;
-    
     
     const errors = [];
     
@@ -97,9 +137,13 @@ exports.postEditProfile = async (req, res) => {
       const user = await User.findByPk(userId, {
         attributes: { exclude: ['password_hash'] }
       });
+      const userWithAvatarUrl = {
+        ...user.toJSON(),
+        avatarUrl: getAvatarUrl(user.avatar, user.avatar_public_id)
+      };
       return res.render('profile/edit', {
         title: 'Редактирование профиля',
-        user,
+        user: userWithAvatarUrl,
         errors,
         name,
         bio
@@ -113,7 +157,7 @@ exports.postEditProfile = async (req, res) => {
       },
       { 
         where: { id: userId },
-        returning: true // для PostgreSQL возвращает обновлённую запись
+        returning: true
       }
     );
     
@@ -129,7 +173,6 @@ exports.postEditProfile = async (req, res) => {
         role: updatedUser.role,
         avatar: updatedUser.avatar
       };
-      
     }
     
     req.flash('success', 'Профиль успешно обновлён');
@@ -153,30 +196,31 @@ exports.uploadAvatar = async (req, res) => {
     
     const user = await User.findByPk(userId);
     
-    if (user.avatar && user.avatar !== 'default-avatar.png') {
-      const oldAvatarPath = path.join(__dirname, '../public/images/avatars', user.avatar);
-      try {
-        await fs.unlink(oldAvatarPath);
-      } catch (err) {
-        console.log('Не удалось удалить старую аватарку:', err.message);
-      }
+    // Обрабатываем изображение: ресайз и конвертация
+    const processedBuffer = await sharp(req.file.buffer)
+      .resize(400, 400, { fit: 'cover', position: 'centre' })
+      .jpeg({ quality: 85 })
+      .toBuffer();
+    
+    // Загружаем в облако
+    const { url, publicId } = await uploadService.uploadAvatar(processedBuffer, userId);
+    
+    // Удаляем старый файл из облака (если не дефолтный)
+    if (user.avatar_public_id && !user.avatar_public_id.includes('default')) {
+      await uploadService.deleteImage(user.avatar_public_id);
     }
     
-    const avatarPath = path.join(__dirname, '../public/images/avatars', req.file.filename);
-    await sharp(avatarPath)
-      .resize(400, 400, {
-        fit: 'cover',
-        position: 'centre'
-      })
-      .toFile(`${avatarPath}.tmp`);
-    await fs.rename(`${avatarPath}.tmp`, avatarPath);
-
+    // Обновляем БД
     await User.update(
-      { avatar: req.file.filename },
+      { 
+        avatar: url,
+        avatar_public_id: publicId
+      },
       { where: { id: userId } }
     );
     
-    req.session.user.avatar = req.file.filename;
+    // Обновляем сессию
+    req.session.user.avatar = url;
     
     req.flash('success', 'Аватарка успешно обновлена');
     res.redirect('/profile/edit');
@@ -209,9 +253,13 @@ exports.postChangePassword = async (req, res) => {
     
     if (errors.length > 0) {
       const user = await User.findByPk(userId);
+      const userWithAvatarUrl = {
+        ...user.toJSON(),
+        avatarUrl: getAvatarUrl(user.avatar, user.avatar_public_id)
+      };
       return res.render('profile/edit', {
         title: 'Редактирование профиля',
-        user,
+        user: userWithAvatarUrl,
         errors
       });
     }
@@ -222,9 +270,13 @@ exports.postChangePassword = async (req, res) => {
     
     if (!isMatch) {
       errors.push({ msg: 'Неверный текущий пароль' });
+      const userWithAvatarUrl = {
+        ...user.toJSON(),
+        avatarUrl: getAvatarUrl(user.avatar, user.avatar_public_id)
+      };
       return res.render('profile/edit', {
         title: 'Редактирование профиля',
-        user,
+        user: userWithAvatarUrl,
         errors
       });
     }
@@ -249,7 +301,7 @@ exports.postChangePassword = async (req, res) => {
 exports.getMyBooks = async (req, res) => {
   try {
     const userId = req.session.user.id;
-    const status = req.query.status || 'all'; // all, read, want_to_read, reading
+    const status = req.query.status || 'all';
     
     const page = parseInt(req.query.page) || 1;
     const limit = 12;
@@ -516,7 +568,7 @@ exports.getPublicProfile = async (req, res) => {
     }
     
     const user = await User.findByPk(userId, {
-      attributes: ['id', 'name', 'avatar', 'bio', 'createdAt', 'role']
+      attributes: ['id', 'name', 'avatar', 'avatar_public_id', 'bio', 'createdAt', 'role']
     });
     
     if (!user) {
@@ -551,9 +603,15 @@ exports.getPublicProfile = async (req, res) => {
       limit: 12
     });
     
+    // Добавляем корректный URL аватарки для публичного профиля
+    const profileUserWithAvatarUrl = {
+      ...user.toJSON(),
+      avatarUrl: getAvatarUrl(user.avatar, user.avatar_public_id)
+    };
+    
     res.render('profile/public', {
       title: `Профиль ${user.name}`,
-      profileUser: user,
+      profileUser: profileUserWithAvatarUrl,
       stats,
       recentReviews,
       recentBooks

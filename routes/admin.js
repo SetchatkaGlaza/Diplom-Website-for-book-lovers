@@ -6,14 +6,13 @@ const multer = require('multer');
 const path = require('path');
 const importController = require('../controllers/importController');
 const imageValidator = require('../middlewares/imageValidator');
-const { MB, createDiskStorage, ensureDirectory, imageFileFilter } = require('../utils/uploadConfig');
+const { MB, createMemoryStorage, createDiskStorage, ensureDirectory, imageFileFilter } = require('../utils/uploadConfig');
 const COVER_DIR = 'public/images/covers';
 const IMPORT_DIR = 'uploads';
 
-const coverStorage = createDiskStorage({
-  destinationDir: COVER_DIR,
-  filenamePrefix: 'cover'
-});
+// ===== ПЕРЕКЛЮЧАЕМСЯ НА MEMORYSTORAGE ДЛЯ CLOUDINARY =====
+// Вместо diskStorage используем memoryStorage для загрузки в облако
+const coverStorage = createMemoryStorage();
 
 const uploadCover = multer({
   storage: coverStorage,
@@ -21,6 +20,7 @@ const uploadCover = multer({
   fileFilter: imageFileFilter
 });
 
+// Для импорта книг оставляем diskStorage (файлы нужны для парсинга)
 const importStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     ensureDirectory(IMPORT_DIR);
@@ -52,6 +52,7 @@ const uploadImport = multer({
 
 router.get('/', requireAdmin, adminController.getDashboard);
 
+// ===== УПРАВЛЕНИЕ КНИГАМИ =====
 router.get('/books', requireAdmin, adminController.getBooks);
 router.get('/books/add', requireAdmin, adminController.getAddBook);
 router.post(
@@ -73,6 +74,7 @@ router.post(
 );
 router.delete('/books/:id', requireAdmin, adminController.deleteBook);
 
+// ===== ИМПОРТ КНИГ =====
 router.get('/import/example-genres', requireAdmin, importController.downloadExampleWithGenres);
 router.get('/import', requireAdmin, importController.getImportPage);
 router.post('/import', requireAdmin, uploadImport.single('file'), (err, req, res, next) => {
@@ -87,19 +89,23 @@ router.post('/import', requireAdmin, uploadImport.single('file'), (err, req, res
 router.get('/import/result', requireAdmin, importController.showImportResult);
 router.get('/import/template', requireAdmin, importController.downloadTemplate);
 
+// ===== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ =====
 router.get('/users', requireAdmin, adminController.getUsers);
 router.post('/users/:id/role', requireSuperAdmin, adminController.updateUserRole);
 router.post('/users/:id/toggle-block', requireAdmin, adminController.toggleUserBlock);
 
+// ===== УПРАВЛЕНИЕ ЖАНРАМИ =====
 router.get('/genres', requireAdmin, adminController.getGenres);
 router.post('/genres/add', requireAdmin, adminController.addGenre);
 router.post('/genres/:id/edit', requireAdmin, adminController.editGenre);
 router.delete('/genres/:id', requireAdmin, adminController.deleteGenre);
 
+// ===== МОДЕРАЦИЯ РЕЦЕНЗИЙ =====
 router.get('/reviews', requireAdmin, adminController.getReviews);
 router.post('/reviews/:id/approve', requireAdmin, adminController.approveReview);
 router.delete('/reviews/:id', requireAdmin, adminController.deleteReview);
 
+// ===== СТАТИСТИКА =====
 router.get('/statistics', requireAdmin, adminController.getStatistics);
 
 module.exports = router;

@@ -99,14 +99,17 @@ exports.getCatalog = async (req, res) => {
     });
     
     const booksWithRating = await Promise.all(
-      books.map(async (book) => {
-        const rating = await book.getAverageRating();
-        return {
-          ...book.toJSON(),
-          averageRating: rating
-        };
-      })
-    );
+  books.map(async (book) => {
+    const rating = await book.getAverageRating();
+    return {
+      ...book.toJSON(),
+      averageRating: rating,
+      coverUrl: book.cover_image && book.cover_image.startsWith('http')
+        ? book.cover_image
+        : `/images/covers/${book.cover_image || 'default-book-cover.jpg'}`
+    };
+  })
+);
     
     res.render('books/catalog', {
       title: 'Каталог книг',

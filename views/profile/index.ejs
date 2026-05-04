@@ -1,7 +1,7 @@
 <div class="profile-header">
   <div class="profile-cover">
     <div class="profile-avatar-large">
-      <img src="/images/avatars/<%= user.avatar %>" alt="<%= user.name %>">
+      <img src="<%= user.avatarUrl || '/images/avatars/default-avatar.png' %>" alt="<%= user.name %>">
     </div>
   </div>
   
@@ -70,7 +70,7 @@
         <% recentReviews.forEach(review => { %>
           <div class="recent-review-card">
             <div class="review-book-cover">
-              <img src="/images/covers/<%= review.book.cover_image %>" alt="<%= review.book.title %>">
+              <img src="<%= review.book.cover_image && review.book.cover_image.startsWith('http') ? review.book.cover_image : '/images/covers/' + (review.book.cover_image || 'default-book-cover.jpg') %>" alt="<%= review.book.title %>">
             </div>
             <div class="review-content">
               <h3><a href="/books/<%= review.book.id %>"><%= review.book.title %></a></h3>
@@ -108,7 +108,7 @@
           <div class="recent-book-card">
             <a href="/books/<%= ub.book.id %>" class="book-link">
               <div class="book-cover">
-                <img src="/images/covers/<%= ub.book.cover_image %>" alt="<%= ub.book.title %>">
+                <img src="<%= ub.book.coverUrl || '/images/covers/default-book-cover.jpg' %>" alt="<%= ub.book.title %>">
                 <span class="book-status status-<%= ub.status %>">
                   <% if (ub.status === 'read') { %>
                     <i class="fas fa-check"></i> Прочитано

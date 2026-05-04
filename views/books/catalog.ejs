@@ -102,7 +102,7 @@
           <div class="book-card">
             <a href="/books/<%= book.id %>" class="book-link">
               <div class="book-cover">
-                <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>">
+                <img src="<%= book.coverUrl || '/images/covers/default-book-cover.jpg' %>" alt="<%= book.title %>">
               </div>
               <div class="book-info">
                 <h3 class="book-title"><%= book.title %></h3>

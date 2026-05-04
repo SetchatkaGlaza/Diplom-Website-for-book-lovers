@@ -51,6 +51,11 @@ const Book = sequelize.define('Book', {
     defaultValue: 'default-book-cover.jpg', // если нет обложки
     allowNull: false
   },
+  // НОВОЕ ПОЛЕ: публичный ID в Cloudinary (для удаления старого файла)
+  cover_public_id: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   views_count: {
     type: DataTypes.INTEGER,
     defaultValue: 0,         // при создании 0 просмотров

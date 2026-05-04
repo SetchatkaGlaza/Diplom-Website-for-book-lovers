@@ -2,7 +2,7 @@
   <div class="book-main">
     <!-- Обложка -->
     <div class="book-cover-large">
-      <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>">
+      <img src="<%= book.coverUrl || '/images/covers/default-book-cover.jpg' %>" alt="<%= book.title %>">
     </div>
     
     <!-- Информация о книге -->
@@ -159,7 +159,7 @@
           <div class="review-card" data-review-id="<%= review.id %>">
             <div class="review-header">
               <div class="reviewer-info">
-                <img src="/images/avatars/<%= review.user.avatar %>" alt="<%= review.user.name %>" class="reviewer-avatar">
+                <img src="<%= review.user.avatarUrl || '/images/avatars/default-avatar.png' %>" alt="<%= review.user.name %>" class="reviewer-avatar">
                 <div>
                   <span class="reviewer-name"><%= review.user.name %></span>
                   <% if (!review.is_moderated) { %>
@@ -254,7 +254,7 @@
           <div class="book-card small">
             <a href="/books/<%= book.id %>" class="book-link">
               <div class="book-cover">
-                <img src="/images/covers/<%= book.cover_image %>" alt="<%= book.title %>">
+                <img src="<%= book.coverUrl || '/images/covers/default-book-cover.jpg' %>" alt="<%= book.title %>">
               </div>
               <div class="book-info">
                 <h4 class="book-title"><%= book.title %></h4>

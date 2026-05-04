@@ -3,12 +3,10 @@ const router = express.Router();
 const profileController = require('../controllers/profileController');
 const { requireAuth } = require('../middlewares/authMiddleware');
 const multer = require('multer');
-const { MB, createDiskStorage, imageFileFilter } = require('../utils/uploadConfig');
+const { MB, createMemoryStorage, imageFileFilter } = require('../utils/uploadConfig');
 
-const storage = createDiskStorage({
-  destinationDir: 'public/images/avatars/',
-  filenamePrefix: 'avatar'
-});
+// Переключаемся с diskStorage на memoryStorage для Cloudinary
+const storage = createMemoryStorage();
 
 const upload = multer({
   storage,
