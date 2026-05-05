@@ -1,59 +1,118 @@
 const { User, PasswordReset } = require('../models');
-const crypto = require('crypto');
-const { Op } = require('sequelize');
+const { Op, fn, col, where: sequelizeWhere } = require('sequelize');
 const bcrypt = require('bcrypt');
-const emailService = require('../config/email');
 
 const SALT_ROUNDS = 10;
+
+function normalizeIdentifier(identifier = '') {
+  return identifier.trim().toLowerCase();
+}
+
+function renderDirectResetForm(res, data = {}) {
+  return res.render('auth/forgot-password', {
+    title: 'Восстановление пароля',
+    identifier: data.identifier || '',
+    errors: data.errors || [],
+    layout: 'layouts/main'
+  });
+}
+
+async function findUserByIdentifier(identifier) {
+  const normalizedIdentifier = normalizeIdentifier(identifier);
+
+  if (!normalizedIdentifier) {
+    return { user: null, ambiguous: false };
+  }
+
+  const users = await User.findAll({
+    where: {
+      [Op.or]: [
+        sequelizeWhere(fn('LOWER', col('email')), normalizedIdentifier),
+        sequelizeWhere(fn('LOWER', col('name')), normalizedIdentifier)
+      ]
+    },
+    limit: 2
+  });
+
+  if (users.length > 1) {
+    return { user: null, ambiguous: true };
+  }
+
+  return { user: users[0] || null, ambiguous: false };
+}
 
 exports.getForgotPassword = (req, res) => {
   if (req.session.user) {
     return res.redirect('/');
   }
   
-  res.render('auth/forgot-password', {
-    title: 'Восстановление пароля',
-    layout: 'layouts/main'
-  });
+  renderDirectResetForm(res);
 };
 
 exports.postForgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
-    
-    if (!email) {
-      req.flash('error', 'Введите email');
-      return res.redirect('/auth/forgot-password');
+    const identifier = (req.body.identifier || '').trim();
+    const password = req.body.password || '';
+    const passwordConfirm = req.body.password_confirm || '';
+    const captcha = (req.body.captcha || '').trim().toLowerCase();
+    const errors = [];
+
+    if (!identifier) {
+      errors.push({ msg: 'Введите имя пользователя или email аккаунта' });
     }
-    
-    const user = await User.findOne({ where: { email } });
-    
+
+    if (!password || password.length < 6) {
+      errors.push({ msg: 'Новый пароль должен содержать минимум 6 символов' });
+    }
+
+    if (password !== passwordConfirm) {
+      errors.push({ msg: 'Пароли не совпадают' });
+    }
+
+    if (!req.session.captcha || captcha !== req.session.captcha) {
+      errors.push({ msg: 'Неверный код с картинки' });
+    }
+
+    if (errors.length > 0) {
+      return renderDirectResetForm(res, { identifier, errors });
+    }
+
+    delete req.session.captcha;
+
+    const { user, ambiguous } = await findUserByIdentifier(identifier);
+
+    if (ambiguous) {
+      return renderDirectResetForm(res, {
+        identifier,
+        errors: [{ msg: 'Найдено несколько аккаунтов с таким именем. Укажите email аккаунта.' }]
+      });
+    }
+
     if (!user) {
-      req.flash('success', 'Если указанный email зарегистрирован, на него отправлена инструкция');
-      return res.redirect('/auth/login');
+      return renderDirectResetForm(res, {
+        identifier,
+        errors: [{ msg: 'Аккаунт с таким именем или email не найден' }]
+      });
     }
-    
-    const token = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 час
-    
-    await PasswordReset.create({
-      user_id: user.id,
-      token,
-      expires_at: expiresAt,
-      used: false
-    });
-    
-    const resetLink = `${req.protocol}://${req.get('host')}/auth/reset-password/${token}`;
-    
-    await emailService.sendPasswordResetEmail(user.email, user.name, resetLink);
-    
-    req.flash('success', 'Инструкция по восстановлению пароля отправлена на ваш email');
-    res.redirect('/auth/login');
+
+    if (user.isBlocked) {
+      return renderDirectResetForm(res, {
+        identifier,
+        errors: [{ msg: 'Аккаунт заблокирован. Обратитесь к администратору.' }]
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+    await user.update({ password_hash: hashedPassword });
+
+    req.flash('success', 'Пароль успешно изменён. Теперь вы можете войти с новым паролем.');
+    return res.redirect('/auth/login');
     
   } catch (error) {
-    console.error('Ошибка при запросе сброса пароля:', error);
+    console.error('Ошибка при восстановлении пароля:', error);
     req.flash('error', 'Произошла ошибка. Попробуйте позже.');
-    res.redirect('/auth/forgot-password');
+    return res.redirect('/auth/forgot-password');
   }
 };
 
