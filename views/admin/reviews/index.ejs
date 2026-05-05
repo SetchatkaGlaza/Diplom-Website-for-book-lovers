@@ -79,8 +79,8 @@
               <% } %>
               
               <form action="/admin/reviews/<%= review.id %>?_method=DELETE" method="POST" class="inline-form">
-                <button type="submit" class="btn-reject" onclick="return confirm('Удалить рецензию?')">
-                  <i class="fas fa-trash"></i> Удалить
+                <button type="submit" class="btn-reject" onclick="return confirm('Отклонить рецензию?')">
+                  <i class="fas fa-ban"></i> Отклонить
                 </button>
               </form>
             </div>
@@ -104,22 +104,22 @@
   <!-- Пагинация -->
   <% if (totalPages > 1) { %>
     <div class="table-pagination">
-      <% if (currentPage > 1) { %>
-        <a href="?page=<%= currentPage - 1 %><%= status !== 'all' ? '&status=' + status : '' %>" class="pagination-btn">
+      <% if (currentPageNum > 1) { %>
+        <a href="?page=<%= currentPageNum - 1 %><%= status !== 'all' ? '&status=' + status : '' %>" class="pagination-btn">
           <i class="fas fa-chevron-left"></i>
         </a>
       <% } %>
       
       <% for(let i = 1; i <= totalPages; i++) { %>
-        <% if (i === currentPage) { %>
+        <% if (i === currentPageNum) { %>
           <span class="pagination-btn active"><%= i %></span>
         <% } else { %>
           <a href="?page=<%= i %><%= status !== 'all' ? '&status=' + status : '' %>" class="pagination-btn"><%= i %></a>
         <% } %>
       <% } %>
       
-      <% if (currentPage < totalPages) { %>
-        <a href="?page=<%= currentPage + 1 %><%= status !== 'all' ? '&status=' + status : '' %>" class="pagination-btn">
+      <% if (currentPageNum < totalPages) { %>
+        <a href="?page=<%= currentPageNum + 1 %><%= status !== 'all' ? '&status=' + status : '' %>" class="pagination-btn">
           <i class="fas fa-chevron-right"></i>
         </a>
       <% } %>

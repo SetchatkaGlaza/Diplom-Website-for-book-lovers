@@ -3,23 +3,23 @@
     <h1><i class="fas fa-users"></i> Управление пользователями</h1>
   <link rel="stylesheet" href="/css/admin.css">
   </div>
-  
+
   <!-- Поиск и фильтры -->
   <div class="table-search">
     <form action="/admin/users" method="GET" style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
       <input type="text" name="search" placeholder="🔍 Поиск по имени или email..." value="<%= search || '' %>" style="flex: 2;">
-      
+
       <select name="role" class="filter-select" style="flex: 1;">
         <option value="all" <%= currentRole === 'all' ? 'selected' : '' %>>Все роли</option>
         <option value="user" <%= currentRole === 'user' ? 'selected' : '' %>>Пользователи</option>
         <option value="moderator" <%= currentRole === 'moderator' ? 'selected' : '' %>>Модераторы</option>
         <option value="admin" <%= currentRole === 'admin' ? 'selected' : '' %>>Администраторы</option>
       </select>
-      
+
       <button type="submit" class="btn btn-primary">
         <i class="fas fa-search"></i> Применить
       </button>
-      
+
       <% if (search || currentRole !== 'all') { %>
         <a href="/admin/users" class="btn btn-outline">
           <i class="fas fa-times"></i> Сбросить
@@ -27,21 +27,21 @@
       <% } %>
     </form>
   </div>
-  
+
   <!-- Статистика -->
   <div class="table-stats">
     <% if (roleStats && roleStats.length > 0) { %>
       <% roleStats.forEach(stat => { %>
         <div class="stat-pill">
           <i class="fas fa-user"></i>
-          <span><%= stat.dataValues.count %></span> 
-          <%= stat.role === 'admin' ? 'Администраторов' : 
+          <span><%= stat.dataValues.count %></span>
+          <%= stat.role === 'admin' ? 'Администраторов' :
               stat.role === 'moderator' ? 'Модераторов' : 'Пользователей' %>
         </div>
       <% }) %>
     <% } %>
   </div>
-  
+
   <!-- Таблица пользователей -->
   <div class="table-responsive">
     <table class="modern-table">
@@ -60,47 +60,47 @@
       </thead>
       <tbody>
         <% if (users && users.length > 0) { %>
-          <% users.forEach(user => { %>
-            <tr class="<%= user.isBlocked ? 'blocked-user' : '' %>">
+          <% users.forEach(profileUser => { %>
+            <tr class="<%= profileUser.isBlocked ? 'blocked-user' : '' %>">
               <td>
-                <img src="<%= getAvatarUrl(user.avatar, user.avatar_public_id) %>" alt="<%= user.name %>" class="table-img">
+                <img src="<%= getAvatarUrl(profileUser.avatar, profileUser.avatar_public_id) %>" alt="<%= profileUser.name %>" class="table-img">
               </td>
-              <td><strong><%= user.name %></strong></td>
-              <td><%= user.email %></td>
+              <td><strong><%= profileUser.name %></strong></td>
+              <td><%= profileUser.email %></td>
               <td>
-                <span class="badge role-<%= user.role %>">
-                  <%= user.role === 'admin' ? 'Админ' : 
-                      user.role === 'moderator' ? 'Модератор' : 'Пользователь' %>
+                <span class="badge role-<%= profileUser.role %>">
+                  <%= profileUser.role === 'admin' ? 'Админ' :
+                      profileUser.role === 'moderator' ? 'Модератор' : 'Пользователь' %>
                 </span>
               </td>
               <td>
-                <% if (user.isBlocked) { %>
+                <% if (profileUser.isBlocked) { %>
                   <span class="badge badge-danger">Заблокирован</span>
                 <% } else { %>
                   <span class="badge badge-success">Активен</span>
                 <% } %>
               </td>
-              <td><%= user.booksCount || 0 %></td>
-              <td><%= user.reviewsCount || 0 %></td>
-              <td><%= new Date(user.createdAt).toLocaleDateString('ru-RU') %></td>
+              <td><%= profileUser.booksCount || 0 %></td>
+              <td><%= profileUser.reviewsCount || 0 %></td>
+              <td><%= new Date(profileUser.createdAt).toLocaleDateString('ru-RU') %></td>
               <td>
                 <div class="action-buttons">
-                  <a href="/profile/<%= user.id %>" target="_blank" rel="noopener" class="action-btn approve" title="Открыть профиль"><i class="fas fa-user"></i></a>
-                  <% if (user.id !== user.id) { %>
-                    <form action="/admin/users/<%= user.id %>/toggle-block" method="POST" style="display: inline;">
-                      <button type="submit" class="action-btn <%= user.isBlocked ? 'approve' : 'delete' %>" 
-                              title="<%= user.isBlocked ? 'Разблокировать' : 'Заблокировать' %>">
-                        <i class="fas <%= user.isBlocked ? 'fa-unlock' : 'fa-lock' %>"></i>
+                  <a href="/profile/<%= profileUser.id %>" target="_blank" rel="noopener" class="action-btn approve" title="Открыть профиль"><i class="fas fa-user"></i></a>
+                  <% if (profileUser.id !== user.id) { %>
+                    <form action="/admin/users/<%= profileUser.id %>/toggle-block" method="POST" style="display: inline;">
+                      <button type="submit" class="action-btn <%= profileUser.isBlocked ? 'approve' : 'delete' %>"
+                              title="<%= profileUser.isBlocked ? 'Разблокировать' : 'Заблокировать' %>">
+                        <i class="fas <%= profileUser.isBlocked ? 'fa-unlock' : 'fa-lock' %>"></i>
                       </button>
                     </form>
                   <% } %>
-                  
-                  <% if (user.role !== 'admin' || user.id !== user.id) { %>
-                    <select class="role-select" data-user-id="<%= user.id %>" 
+
+                  <% if (profileUser.role !== 'admin' || profileUser.id !== user.id) { %>
+                    <select class="role-select" data-user-id="<%= profileUser.id %>"
                             style="padding: 0.35rem; border-radius: var(--radius-sm); background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
-                      <option value="user" <%= user.role === 'user' ? 'selected' : '' %>>Пользователь</option>
-                      <option value="moderator" <%= user.role === 'moderator' ? 'selected' : '' %>>Модератор</option>
-                      <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Админ</option>
+                      <option value="user" <%= profileUser.role === 'user' ? 'selected' : '' %>>Пользователь</option>
+                      <option value="moderator" <%= profileUser.role === 'moderator' ? 'selected' : '' %>>Модератор</option>
+                      <option value="admin" <%= profileUser.role === 'admin' ? 'selected' : '' %>>Админ</option>
                     </select>
                   <% } %>
                 </div>
@@ -118,7 +118,7 @@
       </tbody>
     </table>
   </div>
-  
+
   <!-- Пагинация -->
   <% if (totalPages > 1) { %>
     <div class="table-pagination">
@@ -127,7 +127,7 @@
           <i class="fas fa-chevron-left"></i>
         </a>
       <% } %>
-      
+
       <% for(let i = 1; i <= totalPages; i++) { %>
         <% if (i === currentPage) { %>
           <span class="pagination-btn active"><%= i %></span>
@@ -135,7 +135,7 @@
           <a href="?page=<%= i %><%= search ? '&search=' + search : '' %><%= currentRole !== 'all' ? '&role=' + currentRole : '' %>" class="pagination-btn"><%= i %></a>
         <% } %>
       <% } %>
-      
+
       <% if (currentPage < totalPages) { %>
         <a href="?page=<%= currentPage + 1 %><%= search ? '&search=' + search : '' %><%= currentRole !== 'all' ? '&role=' + currentRole : '' %>" class="pagination-btn">
           <i class="fas fa-chevron-right"></i>
@@ -151,12 +151,12 @@
     select.addEventListener('change', async function() {
       const userId = this.dataset.userId;
       const role = this.value;
-      
+
       if (!confirm('Изменить роль пользователя?')) {
         this.value = this.querySelector('option[selected]')?.value || 'user';
         return;
       }
-      
+
       try {
         const response = await fetch(`/admin/users/${userId}/role`, {
           method: 'POST',
@@ -165,7 +165,7 @@
           },
           body: JSON.stringify({ role })
         });
-        
+
         if (response.ok) {
           location.reload();
         } else {

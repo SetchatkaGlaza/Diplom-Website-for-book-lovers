@@ -24,50 +24,55 @@
         <span>Книгоманы</span>
         <small>Админ-панель</small>
       </div>
-      
+
       <nav class="admin-nav">
-        <a href="/admin" class="admin-nav-item">
-          <i class="fas fa-tachometer-alt"></i> Дашборд
-        </a>
-        
-        <!-- Книги с подменю -->
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">
-            <i class="fas fa-book"></i> Книги
+        <% const isAdmin = user && user.role === 'admin'; %>
+        <% if (isAdmin) { %>
+          <a href="/admin" class="admin-nav-item">
+            <i class="fas fa-tachometer-alt"></i> Дашборд
+          </a>
+
+          <!-- Книги с подменю -->
+          <div class="admin-nav-group">
+            <div class="admin-nav-group-title">
+              <i class="fas fa-book"></i> Книги
+            </div>
+            <a href="/admin/books" class="admin-nav-item sub-item">
+              <i class="fas fa-list"></i> Все книги
+            </a>
+            <a href="/admin/books/add" class="admin-nav-item sub-item">
+              <i class="fas fa-plus"></i> Добавить книгу
+            </a>
+            <a href="/admin/import" class="admin-nav-item sub-item">
+              <i class="fas fa-file-upload"></i> Импорт книг
+            </a>
           </div>
-          <a href="/admin/books" class="admin-nav-item sub-item">
-            <i class="fas fa-list"></i> Все книги
+
+          <a href="/admin/users" class="admin-nav-item">
+            <i class="fas fa-users"></i> Пользователи
           </a>
-          <a href="/admin/books/add" class="admin-nav-item sub-item">
-            <i class="fas fa-plus"></i> Добавить книгу
+
+          <a href="/admin/genres" class="admin-nav-item">
+            <i class="fas fa-tags"></i> Жанры
           </a>
-          <a href="/admin/import" class="admin-nav-item sub-item">
-            <i class="fas fa-file-upload"></i> Импорт книг
-          </a>
-        </div>
-        
-        <a href="/admin/users" class="admin-nav-item">
-          <i class="fas fa-users"></i> Пользователи
-        </a>
-        
-        <a href="/admin/genres" class="admin-nav-item">
-          <i class="fas fa-tags"></i> Жанры
-        </a>
-        
+        <% } %>
+
         <a href="/admin/reviews" class="admin-nav-item">
           <i class="fas fa-star"></i> Рецензии
         </a>
 
         <a href="/admin/forum" class="admin-nav-item <%= (locals.path && path.includes('/admin/forum')) ? 'active' : '' %>">
-  <i class="fas fa-comments"></i> Форум
-</a>
-        
-        <a href="/admin/statistics" class="admin-nav-item">
-          <i class="fas fa-chart-bar"></i> Статистика
+          <i class="fas fa-comments"></i> Форум
         </a>
-        
+
+        <% if (isAdmin) { %>
+          <a href="/admin/statistics" class="admin-nav-item">
+            <i class="fas fa-chart-bar"></i> Статистика
+          </a>
+        <% } %>
+
         <div class="admin-nav-divider"></div>
-        
+
         <a href="/" class="admin-nav-item" target="_blank">
           <i class="fas fa-external-link-alt"></i> На сайт
         </a>
@@ -75,7 +80,7 @@
           <i class="fas fa-sign-out-alt"></i> Выйти
         </a>
       </nav>
-      
+
       <div class="admin-user">
         <img src="<%= getAvatarUrl(user.avatar, user.avatar_public_id) %>" alt="<%= user.name %>">
         <div>
@@ -84,7 +89,7 @@
         </div>
       </div>
     </aside>
-    
+
     <!-- Основной контент -->
     <main class="admin-main">
       <% if (success_msg && success_msg.length > 0) { %>
@@ -93,14 +98,14 @@
           <%= success_msg %>
         </div>
       <% } %>
-      
+
       <% if (error_msg && error_msg.length > 0) { %>
         <div class="alert alert-danger">
           <i class="fas fa-exclamation-circle"></i>
           <%= error_msg %>
         </div>
       <% } %>
-      
+
       <div class="admin-content">
         <%- body %>
       </div>

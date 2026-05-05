@@ -156,7 +156,8 @@ exports.postEditProfile = async (req, res) => {
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role,
-        avatar: updatedUser.avatar
+        avatar: updatedUser.avatar,
+        avatar_public_id: updatedUser.avatar_public_id || null
       };
     }
     
@@ -206,6 +207,7 @@ exports.uploadAvatar = async (req, res) => {
     
     // Обновляем сессию
     req.session.user.avatar = url;
+    req.session.user.avatar_public_id = publicId;
     
     req.flash('success', 'Аватарка успешно обновлена');
     res.redirect('/profile/edit');
@@ -588,6 +590,22 @@ exports.getPublicProfile = async (req, res) => {
       limit: 12
     });
     
+    const recentReviewsWithUrls = recentReviews.map((review) => ({
+      ...review.toJSON(),
+      book: {
+        ...review.book.toJSON(),
+        coverUrl: getCoverUrl(review.book.cover_image, review.book.cover_public_id)
+      }
+    }));
+
+    const recentBooksWithUrls = recentBooks.map((item) => ({
+      ...item.toJSON(),
+      book: {
+        ...item.book.toJSON(),
+        coverUrl: getCoverUrl(item.book.cover_image, item.book.cover_public_id)
+      }
+    }));
+
     // Добавляем корректный URL аватарки для публичного профиля
     const profileUserWithAvatarUrl = {
       ...user.toJSON(),

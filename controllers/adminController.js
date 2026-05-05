@@ -24,6 +24,10 @@ function getCoverUrl(coverImage, coverPublicId) {
 }
 
 exports.getDashboard = async (req, res) => {
+  if (req.session.user.role === 'moderator') {
+    return res.redirect('/admin/reviews?status=pending');
+  }
+
   try {
     const stats = {
       totalUsers: await User.count(),
@@ -703,8 +707,8 @@ exports.getReviews = async (req, res) => {
     const { count, rows: reviews } = await Review.findAndCountAll({
       where,
       include: [
-        { model: User, as: 'user', attributes: ['id', 'name', 'avatar'] },
-        { model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image'] }
+        { model: User, as: 'user', attributes: ['id', 'name', 'avatar', 'avatar_public_id'] },
+        { model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image', 'cover_public_id'] }
       ],
       order: [['createdAt', 'DESC']],
       limit,
@@ -767,11 +771,11 @@ exports.deleteReview = async (req, res) => {
       return res.redirect('/admin/reviews');
     }
     
-    await review.destroy();
-    
     await notificationService.reviewModerated(review.id, false);
 
-    req.flash('success', 'Рецензия удалена');
+    await review.destroy();
+
+    req.flash('success', 'Рецензия отклонена');
     res.redirect('/admin/reviews');
     
   } catch (error) {
