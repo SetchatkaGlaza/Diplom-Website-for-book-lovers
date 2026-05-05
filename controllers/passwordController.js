@@ -1,4 +1,4 @@
-const { User, PasswordReset } = require('../models');
+const { User, PasswordReset, LoginAttempt } = require('../models');
 const { Op, fn, col, where: sequelizeWhere } = require('sequelize');
 const bcrypt = require('bcrypt');
 
@@ -15,6 +15,18 @@ function renderDirectResetForm(res, data = {}) {
     errors: data.errors || [],
     layout: 'layouts/main'
   });
+}
+
+async function clearPasswordRecoveryLoginState(req, user) {
+  await LoginAttempt.destroy({
+    where: {
+      email: normalizeIdentifier(user.email)
+    }
+  });
+
+  req.session.showCaptcha = false;
+  delete req.session.captcha;
+  delete req.session.captchaExpires;
 }
 
 async function findUserByIdentifier(identifier) {
@@ -69,7 +81,9 @@ exports.postForgotPassword = async (req, res) => {
       errors.push({ msg: 'Пароли не совпадают' });
     }
 
-    if (!req.session.captcha || captcha !== req.session.captcha) {
+    if (!req.session.captcha || !req.session.captchaExpires || req.session.captchaExpires < Date.now()) {
+      errors.push({ msg: 'Срок действия проверочного кода истёк. Обновите код и попробуйте снова.' });
+    } else if (captcha !== req.session.captcha) {
       errors.push({ msg: 'Неверный код с картинки' });
     }
 
@@ -105,6 +119,7 @@ exports.postForgotPassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
     await user.update({ password_hash: hashedPassword });
+    await clearPasswordRecoveryLoginState(req, user);
 
     req.flash('success', 'Пароль успешно изменён. Теперь вы можете войти с новым паролем.');
     return res.redirect('/auth/login');
@@ -192,12 +207,16 @@ exports.postResetPassword = async (req, res) => {
     
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     
-    await User.update(
-      { password_hash: hashedPassword },
-      { where: { id: resetRequest.user_id } }
-    );
-    
+    const user = await User.findByPk(resetRequest.user_id);
+
+    if (!user) {
+      req.flash('error', 'Пользователь не найден');
+      return res.redirect('/auth/login');
+    }
+
+    await user.update({ password_hash: hashedPassword });
     await resetRequest.update({ used: true });
+    await clearPasswordRecoveryLoginState(req, user);
     
     req.flash('success', 'Пароль успешно изменён. Теперь вы можете войти.');
     res.redirect('/auth/login');
