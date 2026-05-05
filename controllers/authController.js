@@ -7,6 +7,30 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const CAPTCHA_THRESHOLD = 3;
 const BLOCK_TIME = 15 * 60 * 1000; // 15 минут в миллисекундах
 
+function createSessionUser(user) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    avatar: user.avatar,
+    avatar_public_id: user.avatar_public_id || null
+  };
+}
+
+function persistLoginSession(req, user) {
+  return new Promise((resolve, reject) => {
+    req.session.regenerate((error) => {
+      if (error) {
+        return reject(error);
+      }
+
+      req.session.user = createSessionUser(user);
+      resolve();
+    });
+  });
+}
+
 async function getLoginAttempt(ip, email) {
   return LoginAttempt.findOne({
     where: {
@@ -112,8 +136,15 @@ exports.getLogin = async (req, res) => {
 
 exports.postLogin = async (req, res) => {
   try {
-    const { email, password, captcha } = req.body;
+    const email = (req.body.email || '').trim().toLowerCase();
+    const password = req.body.password || '';
+    const captcha = (req.body.captcha || '').trim().toLowerCase();
     const ip = req.ip;
+
+    if (!email || !password) {
+      req.flash('error', 'Пожалуйста, введите email и пароль');
+      return res.redirect('/auth/login');
+    }
     
     const attemptCheck = await checkLoginAttempts(ip, email);
     
@@ -135,18 +166,13 @@ exports.postLogin = async (req, res) => {
         return res.redirect('/auth/login');
       }
       
-      if (!req.session.captcha || captcha.toLowerCase() !== req.session.captcha) {
+      if (!req.session.captcha || captcha !== req.session.captcha) {
         req.session.showCaptcha = true;
         req.flash('error', 'Неверный код с картинки');
         return res.redirect('/auth/login');
       }
       
       delete req.session.captcha;
-    }
-    
-    if (!email || !password) {
-      req.flash('error', 'Пожалуйста, введите email и пароль');
-      return res.redirect('/auth/login');
     }
     
     const user = await User.findOne({ where: { email } });
@@ -190,17 +216,11 @@ exports.postLogin = async (req, res) => {
     await resetLoginAttempts(ip, email);
     req.session.showCaptcha = false;
     
-    req.session.user = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar
-    };
+    const redirectTo = req.session.returnTo || '/';
+    await persistLoginSession(req, user);
     
     req.flash('success', 'Вы успешно вошли в систему!');
     
-    const redirectTo = req.session.returnTo || '/';
     delete req.session.returnTo;
     res.redirect(redirectTo);
     
@@ -227,9 +247,12 @@ exports.getRegister = (req, res) => {
 
 exports.postRegister = async (req, res) => {
   try {
-    const { name, email, password, password2, captcha } = req.body;
+    const name = (req.body.name || '').trim();
+    const email = (req.body.email || '').trim().toLowerCase();
+    const { password, password2 } = req.body;
+    const captcha = (req.body.captcha || '').trim().toLowerCase();
     
-    if (!req.session.captcha || captcha.toLowerCase() !== req.session.captcha) {
+    if (!req.session.captcha || captcha !== req.session.captcha) {
       req.flash('error', 'Неверный код с картинки');
       return res.redirect('/auth/register');
     }
@@ -296,13 +319,7 @@ exports.postRegister = async (req, res) => {
 
     await notificationService.welcomeNewUser(newUser.id, newUser.name);
 
-    req.session.user = {
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
-      avatar: newUser.avatar
-    };
+    await persistLoginSession(req, newUser);
 
     req.flash('success', 'Регистрация прошла успешно! Добро пожаловать!');
     res.redirect('/');

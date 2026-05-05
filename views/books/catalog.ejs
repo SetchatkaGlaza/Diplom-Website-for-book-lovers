@@ -9,10 +9,6 @@
     <h3>Фильтры</h3>
     
     <form action="/books" method="GET" id="filter-form">
-      <% if (sort) { %>
-        <input type="hidden" name="sort" value="<%= sort %>">
-      <% } %>
-      
       <div class="filter-group">
         <label for="search">Поиск по названию</label>
         <input 
@@ -88,6 +84,7 @@
       <select id="sort" name="sort" form="filter-form">
         <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Сначала новые</option>
         <option value="popular" <%= sort === 'popular' ? 'selected' : '' %>>По популярности</option>
+        <option value="rating" <%= sort === 'rating' ? 'selected' : '' %>>По рейтингу</option>
         <option value="title_asc" <%= sort === 'title_asc' ? 'selected' : '' %>>По названию (А-Я)</option>
         <option value="title_desc" <%= sort === 'title_desc' ? 'selected' : '' %>>По названию (Я-А)</option>
         <option value="year_desc" <%= sort === 'year_desc' ? 'selected' : '' %>>По году (сначала новые)</option>

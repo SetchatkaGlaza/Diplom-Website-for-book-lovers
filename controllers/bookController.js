@@ -1,4 +1,4 @@
-const { Book, Genre, Review, User, UserBook } = require('../models');
+const { Book, Genre, Review, User, UserBook, sequelize } = require('../models');
 const { Op } = require('sequelize'); // Операторы для сложных запросов
 const { getAvatarUrl, getCoverUrl } = require('../utils/imageUrls');
 
@@ -6,9 +6,27 @@ const BOOKS_PER_PAGE = 12;
 const BOOKS_PER_PAGE_TABLET = 10;
 const BOOKS_PER_PAGE_MOBILE = 8;
 
+const getSingleQueryValue = (value, fallback = '') => {
+  if (Array.isArray(value)) {
+    return value.find((item) => item !== undefined && item !== null && item !== '') || fallback;
+  }
+
+  return value || fallback;
+};
+
+const SORT_OPTIONS = {
+  newest: [['createdAt', 'DESC'], ['id', 'DESC']],
+  popular: [['views_count', 'DESC'], ['createdAt', 'DESC'], ['id', 'DESC']],
+  title_asc: [['title', 'ASC'], ['author', 'ASC'], ['id', 'ASC']],
+  title_desc: [['title', 'DESC'], ['author', 'DESC'], ['id', 'DESC']],
+  year_desc: [['year', 'DESC NULLS LAST'], ['createdAt', 'DESC'], ['id', 'DESC']],
+  year_asc: [['year', 'ASC NULLS LAST'], ['createdAt', 'DESC'], ['id', 'DESC']],
+  rating: [[sequelize.literal('average_rating'), 'DESC'], [sequelize.literal('approved_reviews_count'), 'DESC'], ['createdAt', 'DESC'], ['id', 'DESC']]
+};
+
 exports.getCatalog = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     const userAgent = req.get('user-agent') || '';
     const isMobile = /iphone|ipod|android.+mobile|windows phone|blackberry/i.test(userAgent);
     const isTablet = /ipad|tablet|android(?!.*mobile)/i.test(userAgent);
@@ -28,60 +46,49 @@ exports.getCatalog = async (req, res) => {
     }
 
     const offset = (page - 1) * limit;
+    const sort = getSingleQueryValue(req.query.sort, 'newest');
+    const selectedSort = SORT_OPTIONS[sort] ? sort : 'newest';
 
     const filters = {};
     
-    if (req.query.genre) {
-      filters.genre_id = req.query.genre;
+    const genre = getSingleQueryValue(req.query.genre);
+    if (genre) {
+      filters.genre_id = genre;
     }
     
-    if (req.query.author) {
-      filters.author = { [Op.iLike]: `%${req.query.author}%` }; // iLike = регистронезависимый поиск
+    const author = getSingleQueryValue(req.query.author).trim();
+    if (author) {
+      filters.author = { [Op.iLike]: `%${author}%` }; // iLike = регистронезависимый поиск
     }
     
-    if (req.query.year_from || req.query.year_to) {
+    const yearFrom = parseInt(getSingleQueryValue(req.query.year_from), 10);
+    const yearTo = parseInt(getSingleQueryValue(req.query.year_to), 10);
+    if (!Number.isNaN(yearFrom) || !Number.isNaN(yearTo)) {
       filters.year = {};
-      if (req.query.year_from) {
-        filters.year[Op.gte] = parseInt(req.query.year_from);
+      if (!Number.isNaN(yearFrom)) {
+        filters.year[Op.gte] = yearFrom;
       }
-      if (req.query.year_to) {
-        filters.year[Op.lte] = parseInt(req.query.year_to);
+      if (!Number.isNaN(yearTo)) {
+        filters.year[Op.lte] = yearTo;
       }
     }
     
-    if (req.query.search) {
-  filters[Op.or] = [
-    { title: { [Op.iLike]: `%${req.query.search}%` } },
-    { author: { [Op.iLike]: `%${req.query.search}%` } }
-  ];
-}
-    
-    let order = [];
-    switch (req.query.sort) {
-      case 'title_asc':
-        order = [['title', 'ASC']];
-        break;
-      case 'title_desc':
-        order = [['title', 'DESC']];
-        break;
-      case 'year_desc':
-        order = [['year', 'DESC']];
-        break;
-      case 'year_asc':
-        order = [['year', 'ASC']];
-        break;
-      case 'popular':
-        order = [['views_count', 'DESC']];
-        break;
-      case 'rating':
-        order = [['createdAt', 'DESC']];
-        break;
-      default:
-        order = [['createdAt', 'DESC']]; // по умолчанию новые сначала
+    const search = getSingleQueryValue(req.query.search).trim();
+    if (search) {
+      filters[Op.or] = [
+        { title: { [Op.iLike]: `%${search}%` } },
+        { author: { [Op.iLike]: `%${search}%` } }
+      ];
     }
     
     const { count, rows: books } = await Book.findAndCountAll({
       where: filters,
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COALESCE(AVG("rating"), 0) FROM "Reviews" WHERE "Reviews"."book_id" = "Book"."id" AND "Reviews"."is_moderated" = true)'), 'average_rating'],
+          [sequelize.literal('(SELECT COUNT(*) FROM "Reviews" WHERE "Reviews"."book_id" = "Book"."id" AND "Reviews"."is_moderated" = true)'), 'approved_reviews_count']
+        ]
+      },
       include: [
         {
           model: Genre,
@@ -89,7 +96,7 @@ exports.getCatalog = async (req, res) => {
           attributes: ['id', 'name']
         }
       ],
-      order,
+      order: SORT_OPTIONS[selectedSort],
       limit,
       offset,
       distinct: true // важно для правильного подсчёта при include
@@ -99,16 +106,16 @@ exports.getCatalog = async (req, res) => {
       order: [['name', 'ASC']]
     });
     
-    const booksWithRating = await Promise.all(
-  books.map(async (book) => {
-    const rating = await book.getAverageRating();
-    return {
-      ...book.toJSON(),
-      averageRating: rating,
-      coverUrl: getCoverUrl(book.cover_image, book.cover_public_id)
-    };
-  })
-);
+    const booksWithRating = books.map((book) => {
+      const bookData = book.toJSON();
+      const averageRating = Number(bookData.average_rating || 0).toFixed(1);
+
+      return {
+        ...bookData,
+        averageRating: parseFloat(averageRating),
+        coverUrl: getCoverUrl(book.cover_image, book.cover_public_id)
+      };
+    });
     
     res.render('books/catalog', {
       title: 'Каталог книг',
@@ -118,7 +125,7 @@ exports.getCatalog = async (req, res) => {
       totalPages: Math.ceil(count / limit),
       totalBooks: count,
       filters: req.query,
-      sort: req.query.sort || 'newest',
+      sort: selectedSort,
       user: req.session.user || null
     });
     
