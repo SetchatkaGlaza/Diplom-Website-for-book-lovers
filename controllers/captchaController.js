@@ -3,19 +3,19 @@ const svgCaptcha = require('svg-captcha');
 exports.generateCaptcha = (req, res) => {
   try {
     const captcha = svgCaptcha.create({
-      size: 6, // количество символов
-      noise: 2, // количество линий шума
-      color: true,
-      background: '#f0f0f0',
-      width: 200,
-      height: 70,
-      fontSize: 50,
-      charPreset: 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789' // без сложных символов
+      size: 4, // короткий код легче вводить пользователю
+      noise: 0, // убираем шумные линии, чтобы каптча была читаемой
+      color: false,
+      background: '#ffffff',
+      width: 160,
+      height: 56,
+      fontSize: 44,
+      charPreset: '23456789' // только простые цифры без 0 и 1
     });
     
     req.session.captcha = captcha.text.toLowerCase();
     
-    req.session.captchaExpires = Date.now() + 5 * 60 * 1000;
+    req.session.captchaExpires = Date.now() + 10 * 60 * 1000;
     
     res.setHeader('Content-Type', 'image/svg+xml');
     res.send(captcha.data);
@@ -36,12 +36,12 @@ exports.validateCaptcha = (req, res, next) => {
     }
     
     if (!req.session.captcha || !req.session.captchaExpires || req.session.captchaExpires < Date.now()) {
-      req.flash('error', 'Срок действия каптчи истёк. Пожалуйста, обновите страницу.');
+      req.flash('error', 'Срок действия каптчи истёк. Пожалуйста, обновите картинку.');
       return res.redirect('back');
     }
     
     if (captcha.toLowerCase() !== req.session.captcha) {
-      req.flash('error', 'Неверный код с картинки');
+      req.flash('error', 'Проверочный код введён неверно');
       return res.redirect('back');
     }
     
