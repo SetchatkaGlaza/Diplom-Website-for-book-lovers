@@ -1,11 +1,22 @@
 const bcrypt = require('bcrypt');
 const { User, LoginAttempt } = require('../models');
+const { fn, col, where: sequelizeWhere } = require('sequelize');
 const notificationService = require('../services/notificationService');
 
 const SALT_ROUNDS = 10;
 const MAX_LOGIN_ATTEMPTS = 5;
 const CAPTCHA_THRESHOLD = 3;
 const BLOCK_TIME = 15 * 60 * 1000; // 15 минут в миллисекундах
+
+function normalizeEmail(email = '') {
+  return email.trim().toLowerCase();
+}
+
+async function findUserByEmail(email) {
+  return User.findOne({
+    where: sequelizeWhere(fn('LOWER', col('email')), normalizeEmail(email))
+  });
+}
 
 function createSessionUser(user) {
   return {
@@ -136,7 +147,7 @@ exports.getLogin = async (req, res) => {
 
 exports.postLogin = async (req, res) => {
   try {
-    const email = (req.body.email || '').trim().toLowerCase();
+    const email = normalizeEmail(req.body.email || '');
     const password = req.body.password || '';
     const captcha = (req.body.captcha || '').trim().toLowerCase();
     const ip = req.ip;
@@ -175,7 +186,7 @@ exports.postLogin = async (req, res) => {
       delete req.session.captcha;
     }
     
-    const user = await User.findOne({ where: { email } });
+    const user = await findUserByEmail(email);
     
     if (!user) {
       const failResult = await registerFailedLogin(ip, email);
@@ -200,7 +211,8 @@ exports.postLogin = async (req, res) => {
       return res.redirect('/auth/login');
     }
     
-    const isMatch = await bcrypt.compare(password, user.password_hash);
+    const storedPasswordHash = String(user.password_hash || '').trim();
+    const isMatch = await bcrypt.compare(password, storedPasswordHash);
     
     if (!isMatch) {
       const failResult = await registerFailedLogin(ip, email);
@@ -248,7 +260,7 @@ exports.getRegister = (req, res) => {
 exports.postRegister = async (req, res) => {
   try {
     const name = (req.body.name || '').trim();
-    const email = (req.body.email || '').trim().toLowerCase();
+    const email = normalizeEmail(req.body.email || '');
     const { password, password2 } = req.body;
     const captcha = (req.body.captcha || '').trim().toLowerCase();
     

@@ -4,6 +4,30 @@ const bcrypt = require('bcrypt');
 
 const SALT_ROUNDS = 10;
 
+function createSessionUser(user) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    avatar: user.avatar,
+    avatar_public_id: user.avatar_public_id || null
+  };
+}
+
+function persistRecoverySession(req, user) {
+  return new Promise((resolve, reject) => {
+    req.session.regenerate((error) => {
+      if (error) {
+        return reject(error);
+      }
+
+      req.session.user = createSessionUser(user);
+      resolve();
+    });
+  });
+}
+
 function normalizeIdentifier(identifier = '') {
   return identifier.trim().toLowerCase();
 }
@@ -20,7 +44,11 @@ function renderDirectResetForm(res, data = {}) {
 async function clearPasswordRecoveryLoginState(req, user) {
   await LoginAttempt.destroy({
     where: {
-      email: normalizeIdentifier(user.email)
+      [Op.or]: [
+        { email: normalizeIdentifier(user.email) },
+        { email: user.email },
+        { user_id: user.id }
+      ]
     }
   });
 
@@ -119,10 +147,22 @@ exports.postForgotPassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
     await user.update({ password_hash: hashedPassword });
-    await clearPasswordRecoveryLoginState(req, user);
+    await user.reload();
 
-    req.flash('success', 'Пароль успешно изменён. Теперь вы можете войти с новым паролем.');
-    return res.redirect('/auth/login');
+    const passwordSaved = await bcrypt.compare(password, String(user.password_hash || '').trim());
+
+    if (!passwordSaved) {
+      return renderDirectResetForm(res, {
+        identifier,
+        errors: [{ msg: 'Не удалось сохранить новый пароль. Попробуйте ещё раз.' }]
+      });
+    }
+
+    await clearPasswordRecoveryLoginState(req, user);
+    await persistRecoverySession(req, user);
+
+    req.flash('success', 'Пароль успешно изменён. Вы уже вошли в аккаунт.');
+    return res.redirect('/');
     
   } catch (error) {
     console.error('Ошибка при восстановлении пароля:', error);
@@ -215,11 +255,21 @@ exports.postResetPassword = async (req, res) => {
     }
 
     await user.update({ password_hash: hashedPassword });
+    await user.reload();
+
+    const passwordSaved = await bcrypt.compare(password, String(user.password_hash || '').trim());
+
+    if (!passwordSaved) {
+      req.flash('error', 'Не удалось сохранить новый пароль. Попробуйте ещё раз.');
+      return res.redirect(`/auth/reset-password/${token}`);
+    }
+
     await resetRequest.update({ used: true });
     await clearPasswordRecoveryLoginState(req, user);
+    await persistRecoverySession(req, user);
     
-    req.flash('success', 'Пароль успешно изменён. Теперь вы можете войти.');
-    res.redirect('/auth/login');
+    req.flash('success', 'Пароль успешно изменён. Вы уже вошли в аккаунт.');
+    res.redirect('/');
     
   } catch (error) {
     console.error('Ошибка при сбросе пароля:', error);
