@@ -1,4 +1,4 @@
-const { User, Book, Genre, Review, UserBook, sequelize } = require('../models');
+const { User, Book, Genre, Review, UserBook, ForumPost, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const path = require('path');
@@ -8,6 +8,93 @@ const notificationService = require('../services/notificationService');
 const uploadService = require('../services/uploadService');
 
 const SALT_ROUNDS = 10;
+const ADMIN_POLICY = {
+  maxAdmins: 5,
+  minAccountAgeDays: 30,
+  minReviews: 5,
+  minActivityScore: 30,
+  reviewWeight: 3,
+  bookWeight: 1,
+  forumPostWeight: 1
+};
+
+function getAccountAgeDays(createdAt) {
+  const created = new Date(createdAt);
+
+  if (Number.isNaN(created.getTime())) {
+    return 0;
+  }
+
+  return Math.max(0, Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24)));
+}
+
+function getActivityScore({ reviewsCount = 0, booksCount = 0, forumPostsCount = 0 }) {
+  return (reviewsCount * ADMIN_POLICY.reviewWeight)
+    + (booksCount * ADMIN_POLICY.bookWeight)
+    + (forumPostsCount * ADMIN_POLICY.forumPostWeight);
+}
+
+function getAdminEligibility(user, stats, currentAdminCount) {
+  const accountAgeDays = getAccountAgeDays(user.createdAt);
+  const activityScore = getActivityScore(stats);
+  const checks = [
+    {
+      passed: !user.isBlocked,
+      message: 'аккаунт не заблокирован'
+    },
+    {
+      passed: accountAgeDays >= ADMIN_POLICY.minAccountAgeDays,
+      message: `на сайте не менее ${ADMIN_POLICY.minAccountAgeDays} дней`
+    },
+    {
+      passed: stats.reviewsCount >= ADMIN_POLICY.minReviews,
+      message: `минимум ${ADMIN_POLICY.minReviews} рецензий`
+    },
+    {
+      passed: activityScore >= ADMIN_POLICY.minActivityScore,
+      message: `индекс активности от ${ADMIN_POLICY.minActivityScore}`
+    }
+  ];
+
+  const hasFreeAdminSlot = user.role === 'admin' || currentAdminCount < ADMIN_POLICY.maxAdmins;
+  const missingReasons = checks.filter((check) => !check.passed).map((check) => check.message);
+
+  if (!hasFreeAdminSlot) {
+    missingReasons.push(`лимит ${ADMIN_POLICY.maxAdmins} администраторов уже достигнут`);
+  }
+
+  return {
+    canBeAdmin: missingReasons.length === 0,
+    accountAgeDays,
+    activityScore,
+    missingReasons,
+    summary: missingReasons.length > 0
+      ? missingReasons.join('; ')
+      : 'подходит: давно в сообществе и активно участвует'
+  };
+}
+
+function wantsJson(req) {
+  return req.xhr || req.is('application/json') || (req.get('accept') || '').includes('application/json');
+}
+
+function sendRoleError(req, res, message, status = 400) {
+  if (wantsJson(req)) {
+    return res.status(status).json({ error: message });
+  }
+
+  req.flash('error', message);
+  return res.redirect('/admin/users');
+}
+
+function sendRoleSuccess(req, res, message) {
+  if (wantsJson(req)) {
+    return res.json({ success: true, message });
+  }
+
+  req.flash('success', message);
+  return res.redirect('/admin/users');
+}
 
 // Функция для получения публичного URL обложки
 function getCoverUrl(coverImage, coverPublicId) {
@@ -452,15 +539,19 @@ exports.getUsers = async (req, res) => {
       offset
     });
     
+    const currentAdminCount = await User.count({ where: { role: 'admin' } });
+
     const usersWithStats = await Promise.all(
       users.map(async (user) => {
         const booksCount = await UserBook.count({ where: { user_id: user.id } });
         const reviewsCount = await Review.count({ where: { user_id: user.id } });
-        
+        const forumPostsCount = await ForumPost.count({ where: { user_id: user.id } });
+        const stats = { booksCount, reviewsCount, forumPostsCount };
+
         return {
           ...user.toJSON(),
-          booksCount,
-          reviewsCount
+          ...stats,
+          adminEligibility: getAdminEligibility(user, stats, currentAdminCount)
         };
       })
     );
@@ -476,6 +567,8 @@ exports.getUsers = async (req, res) => {
       currentPage: 'users',
       users: usersWithStats,
       roleStats,
+      adminPolicy: ADMIN_POLICY,
+      currentAdminCount,
       search,
       currentRole: role,
       currentPageNum: page,
@@ -496,34 +589,61 @@ exports.updateUserRole = async (req, res) => {
   try {
     const userId = req.params.id;
     const { role } = req.body;
-    
+
     const allowedRoles = ['user', 'moderator', 'admin'];
     if (!allowedRoles.includes(role)) {
-      req.flash('error', 'Недопустимая роль');
-      return res.redirect('/admin/users');
+      return sendRoleError(req, res, 'Недопустимая роль');
     }
-    
+
     if (userId == req.session.user.id && role !== 'admin') {
-      req.flash('error', 'Вы не можете понизить свою роль');
-      return res.redirect('/admin/users');
+      return sendRoleError(req, res, 'Вы не можете понизить свою роль');
     }
-    
+
     const user = await User.findByPk(userId);
-    
+
     if (!user) {
-      req.flash('error', 'Пользователь не найден');
-      return res.redirect('/admin/users');
+      return sendRoleError(req, res, 'Пользователь не найден', 404);
     }
-    
+
+    if (role === 'admin' && user.role !== 'admin') {
+      const currentAdminCount = await User.count({ where: { role: 'admin' } });
+
+      if (currentAdminCount >= ADMIN_POLICY.maxAdmins) {
+        return sendRoleError(
+          req,
+          res,
+          `Нельзя назначить администратора: лимит ${ADMIN_POLICY.maxAdmins} администраторов уже достигнут`
+        );
+      }
+
+      const stats = {
+        booksCount: await UserBook.count({ where: { user_id: user.id } }),
+        reviewsCount: await Review.count({ where: { user_id: user.id } }),
+        forumPostsCount: await ForumPost.count({ where: { user_id: user.id } })
+      };
+      const eligibility = getAdminEligibility(user, stats, currentAdminCount);
+
+      if (!eligibility.canBeAdmin) {
+        return sendRoleError(
+          req,
+          res,
+          `Нельзя назначить администратора: ${eligibility.summary}. Администратор должен быть проверенным активным участником сообщества.`
+        );
+      }
+    }
+
     await user.update({ role });
-    
-    req.flash('success', `Роль пользователя ${user.name} изменена на ${role}`);
-    res.redirect('/admin/users');
-    
+
+    const roleLabels = {
+      user: 'пользователь',
+      moderator: 'модератор',
+      admin: 'администратор'
+    };
+    return sendRoleSuccess(req, res, `Роль пользователя ${user.name} изменена на «${roleLabels[role]}»`);
+
   } catch (error) {
     console.error('Ошибка при изменении роли:', error);
-    req.flash('error', 'Произошла ошибка');
-    res.redirect('/admin/users');
+    return sendRoleError(req, res, 'Произошла ошибка');
   }
 };
 
