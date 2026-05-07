@@ -3,6 +3,29 @@ const sequelize = require('../config/database');
 
 const MAX_ADMINS = 5;
 
+function getMaxAdminsErrorMessage() {
+  return `На сайте может быть не больше ${MAX_ADMINS} администраторов`;
+}
+
+async function countAdmins(transaction) {
+  return User.count({
+    where: { role: 'admin' },
+    transaction
+  });
+}
+
+async function assertAdminSlotsAvailable(adminsToAdd, transaction) {
+  if (adminsToAdd <= 0) {
+    return;
+  }
+
+  const adminsCount = await countAdmins(transaction);
+
+  if (adminsCount + adminsToAdd > MAX_ADMINS) {
+    throw new Error(getMaxAdminsErrorMessage());
+  }
+}
+
 const User = sequelize.define('User', {
   // id создастся автоматически
   name: {
@@ -77,17 +100,12 @@ const User = sequelize.define('User', {
         return;
       }
 
-      const adminsCount = await User.count({
-        where: {
-          role: 'admin',
-          id: { [Op.ne]: user.id || 0 }
-        },
-        transaction: options.transaction
-      });
+      await assertAdminSlotsAvailable(1, options.transaction);
+    },
 
-      if (adminsCount >= MAX_ADMINS) {
-        throw new Error(`На сайте может быть не больше ${MAX_ADMINS} администраторов`);
-      }
+    async beforeBulkCreate(users, options) {
+      const newAdminsCount = users.filter((user) => user.role === 'admin').length;
+      await assertAdminSlotsAvailable(newAdminsCount, options.transaction);
     },
 
     async beforeBulkUpdate(options) {
@@ -95,18 +113,23 @@ const User = sequelize.define('User', {
         return;
       }
 
-      const adminsCount = await User.count({
-        where: { role: 'admin' },
+      const targetNonAdminsCount = await User.count({
+        where: {
+          [Op.and]: [
+            options.where || {},
+            { role: { [Op.ne]: 'admin' } }
+          ]
+        },
         transaction: options.transaction
       });
 
-      if (adminsCount >= MAX_ADMINS) {
-        throw new Error(`На сайте может быть не больше ${MAX_ADMINS} администраторов`);
-      }
+      await assertAdminSlotsAvailable(targetNonAdminsCount, options.transaction);
     }
   }
 });
 
 User.MAX_ADMINS = MAX_ADMINS;
+User.getMaxAdminsErrorMessage = getMaxAdminsErrorMessage;
+User.countAdmins = countAdmins;
 
 module.exports = User;

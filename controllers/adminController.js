@@ -585,7 +585,7 @@ exports.getUsers = async (req, res) => {
       offset
     });
     
-    const currentAdminCount = await User.count({ where: { role: 'admin' } });
+    const currentAdminCount = await User.countAdmins();
 
     const usersWithStats = await Promise.all(
       users.map(async (user) => {
@@ -662,7 +662,7 @@ exports.updateUserRole = async (req, res) => {
       }
 
       adminAppointmentReason = normalizedReason;
-      const currentAdminCount = await User.count({ where: { role: 'admin' } });
+      const currentAdminCount = await User.countAdmins();
 
       if (currentAdminCount >= ADMIN_POLICY.maxAdmins) {
         return sendRoleError(
@@ -714,6 +714,11 @@ exports.updateUserRole = async (req, res) => {
 
   } catch (error) {
     console.error('Ошибка при изменении роли:', error);
+
+    if (error.message === User.getMaxAdminsErrorMessage()) {
+      return sendRoleError(req, res, error.message);
+    }
+
     return sendRoleError(req, res, 'Произошла ошибка');
   }
 };
