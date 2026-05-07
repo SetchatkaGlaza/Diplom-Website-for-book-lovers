@@ -123,17 +123,30 @@
                   <% if (profileUser.role !== 'admin' || profileUser.id !== user.id) { %>
                     <select class="role-select" data-user-id="<%= profileUser.id %>"
                             data-current-role="<%= profileUser.role %>"
-                            data-admin-reason="<%= profileUser.adminEligibility.summary %>"
-                            data-positive-reason="<%= profileUser.adminEligibility.positiveReason %>"
                             style="padding: 0.35rem; border-radius: var(--radius-sm); background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
+                      <% if (profileUser.role === 'admin') { %>
+                        <option value="admin" selected>Администратор</option>
+                      <% } %>
                       <option value="user" <%= profileUser.role === 'user' ? 'selected' : '' %>>Пользователь</option>
                       <option value="moderator" <%= profileUser.role === 'moderator' ? 'selected' : '' %>>Модератор</option>
-                      <option value="admin"
-                              <%= profileUser.role === 'admin' ? 'selected' : '' %>
-                              <%= profileUser.role !== 'admin' && !profileUser.adminEligibility.canBeAdmin ? 'disabled' : '' %>>
-                        Админ
-                      </option>
                     </select>
+
+                    <% if (profileUser.role !== 'admin') { %>
+                      <% if (profileUser.adminEligibility.canBeAdmin) { %>
+                        <form action="/admin/users/<%= profileUser.id %>/role" method="POST" class="admin-appoint-form">
+                          <input type="hidden" name="role" value="admin">
+                          <textarea name="reason" minlength="<%= adminPolicy.minReasonLength %>" maxlength="<%= adminPolicy.maxReasonLength %>" required><%= `Пользователь выбран администратором, потому что ${profileUser.adminEligibility.positiveReason}.` %></textarea>
+                          <button type="submit" class="action-btn admin-promote" title="Назначить администратором">
+                            <i class="fas fa-user-shield"></i> Назначить админом
+                          </button>
+                        </form>
+                      <% } else { %>
+                        <div class="admin-denied" title="<%= profileUser.adminEligibility.summary %>">
+                          <i class="fas fa-ban"></i> Админ недоступен
+                          <small><%= profileUser.adminEligibility.summary %></small>
+                        </div>
+                      <% } %>
+                    <% } %>
                   <% } %>
                 </div>
               </td>
@@ -224,6 +237,38 @@
     gap: 0.25rem;
   }
 
+  .admin-appoint-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 220px;
+  }
+
+  .admin-appoint-form textarea {
+    min-height: 64px;
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    resize: vertical;
+  }
+
+  .admin-promote {
+    width: auto;
+    background: rgba(251, 191, 36, 0.2);
+    color: #fde68a;
+    border: 1px solid rgba(251, 191, 36, 0.45);
+  }
+
+  .admin-denied {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    max-width: 240px;
+    color: #fecaca;
+  }
+
   .badge-warning {
     background: rgba(251, 191, 36, 0.2);
     color: #fde68a;
@@ -243,27 +288,7 @@
       const userId = this.dataset.userId;
       const role = this.value;
 
-      let reason = '';
-
-      if (role === 'admin') {
-        if (!this.dataset.adminReason || !this.dataset.adminReason.startsWith('подходит')) {
-          alert(`Нельзя назначить администратора: ${this.dataset.adminReason || 'пользователь не подходит по критериям'}`);
-          this.value = this.dataset.currentRole || 'user';
-          return;
-        }
-
-        const defaultReason = `Пользователь выбран администратором, потому что ${this.dataset.positiveReason}.`;
-        reason = prompt(
-          `Укажите причину назначения администратора. Лимит: ${document.querySelector('.admin-limit span')?.textContent || ''}.`,
-          defaultReason
-        );
-
-        if (!reason || reason.trim().length < <%= adminPolicy.minReasonLength %>) {
-          alert('Назначение отменено: причина должна быть понятной и не короче <%= adminPolicy.minReasonLength %> символов.');
-          this.value = this.dataset.currentRole || 'user';
-          return;
-        }
-      } else if (!confirm('Изменить роль пользователя?')) {
+      if (!confirm('Изменить роль пользователя? Для администратора используйте отдельную форму с причиной назначения.')) {
         this.value = this.dataset.currentRole || 'user';
         return;
       }
@@ -274,7 +299,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ role, reason })
+          body: JSON.stringify({ role })
         });
 
         if (response.ok) {

@@ -9,7 +9,7 @@ const uploadService = require('../services/uploadService');
 
 const SALT_ROUNDS = 10;
 const ADMIN_POLICY = {
-  maxAdmins: 5,
+  maxAdmins: User.MAX_ADMINS,
   minAccountAgeDays: 30,
   minApprovedReviews: 3,
   minForumPosts: 5,

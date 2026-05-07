@@ -1,5 +1,7 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes, Op } = require('sequelize');
 const sequelize = require('../config/database');
+
+const MAX_ADMINS = 5;
 
 const User = sequelize.define('User', {
   // id создастся автоматически
@@ -69,6 +71,42 @@ const User = sequelize.define('User', {
 }, {
   // Добавит поля createdAt и updatedAt автоматически
   timestamps: true,
+  hooks: {
+    async beforeSave(user, options) {
+      if (!user.changed('role') || user.role !== 'admin' || user.previous('role') === 'admin') {
+        return;
+      }
+
+      const adminsCount = await User.count({
+        where: {
+          role: 'admin',
+          id: { [Op.ne]: user.id || 0 }
+        },
+        transaction: options.transaction
+      });
+
+      if (adminsCount >= MAX_ADMINS) {
+        throw new Error(`На сайте может быть не больше ${MAX_ADMINS} администраторов`);
+      }
+    },
+
+    async beforeBulkUpdate(options) {
+      if (!options.attributes || options.attributes.role !== 'admin') {
+        return;
+      }
+
+      const adminsCount = await User.count({
+        where: { role: 'admin' },
+        transaction: options.transaction
+      });
+
+      if (adminsCount >= MAX_ADMINS) {
+        throw new Error(`На сайте может быть не больше ${MAX_ADMINS} администраторов`);
+      }
+    }
+  }
 });
+
+User.MAX_ADMINS = MAX_ADMINS;
 
 module.exports = User;
