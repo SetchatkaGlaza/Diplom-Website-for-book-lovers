@@ -19,6 +19,8 @@
     </div>
   </div>
   
+  <p class="retention-note"><i class="fas fa-clock"></i> Уведомления старше <%= notificationRetentionDays %> дней удаляются автоматически.</p>
+
   <div class="notifications-list-container">
     <% if (notifications && notifications.length > 0) { %>
       <div class="notifications-list">
@@ -49,7 +51,11 @@
                 </span>
               </div>
               
-              <p class="notification-message"><%= notification.message %></p>
+              <% const notificationPreview = truncateText(notification.message, 220); %>
+              <p class="notification-message"><%= notificationPreview.text %></p>
+              <% if (notificationPreview.isTruncated) { %>
+                <details class="read-more-block"><summary>Читать дальше</summary><p><%= notificationPreview.fullText %></p></details>
+              <% } %>
               
               <% if (notification.link) { %>
                 <a href="<%= notification.link %>" class="notification-link">
@@ -231,6 +237,22 @@
     gap: 1rem;
   }
 
+  .retention-note {
+    margin: -1rem 0 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .read-more-block summary {
+    color: #fbbf24;
+    cursor: pointer;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .read-more-block p {
+    margin-top: 0.5rem;
+  }
+
   .notifications-list-container {
     overflow-x: hidden;
   }
@@ -301,15 +323,21 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    color: var(--accent);
+    color: #111827;
+    background: linear-gradient(135deg, #fde68a, #f59e0b);
+    border-radius: 999px;
+    padding: 0.5rem 0.9rem;
     text-decoration: none;
     font-size: 0.9rem;
+    font-weight: 800;
+    box-shadow: 0 8px 18px rgba(245, 158, 11, 0.25);
     transition: var(--transition);
   }
   
   .notification-link:hover {
     transform: translateX(5px);
-    text-decoration: underline;
+    background: linear-gradient(135deg, #fef3c7, #fbbf24);
+    text-decoration: none;
   }
   
   .notification-actions {

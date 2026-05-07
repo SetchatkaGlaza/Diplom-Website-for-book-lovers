@@ -64,7 +64,11 @@
                   <i class="<%= i <= review.rating ? 'fas' : 'far' %> fa-star"></i>
                 <% } %>
               </div>
-              <p class="review-content"><%= review.content.length > 220 ? review.content.substring(0, 220) + '...' : review.content %></p>
+              <% const reviewPreview = truncateText(review.content, 220); %>
+              <p class="review-content"><%= reviewPreview.text %></p>
+              <% if (reviewPreview.isTruncated) { %>
+                <details class="read-more-block"><summary>Читать дальше</summary><p><%= reviewPreview.fullText %></p></details>
+              <% } %>
             </article>
           <% }) %>
         </div>
@@ -107,4 +111,6 @@
   .review-rating { margin: 6px 0; color: #fbbf24; }
   .review-content { margin: 0; opacity: .95; }
   .empty-state { opacity: .8; margin-top: 10px; }
+  .read-more-block summary { color: #fbbf24; cursor: pointer; font-weight: 700; }
+  .read-more-block p { margin-top: 0.5rem; }
 </style>

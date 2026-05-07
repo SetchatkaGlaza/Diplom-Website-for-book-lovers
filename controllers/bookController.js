@@ -5,6 +5,7 @@ const { getAvatarUrl, getCoverUrl } = require('../utils/imageUrls');
 const BOOKS_PER_PAGE = 12;
 const BOOKS_PER_PAGE_TABLET = 10;
 const BOOKS_PER_PAGE_MOBILE = 8;
+const REVIEWS_PER_BOOK_PAGE = 3;
 const FALLBACK_MIN_YEAR = 1000;
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -200,7 +201,10 @@ exports.getBookById = async (req, res) => {
     
     const ratingInfo = await book.getRatingInfo();
     
-    const reviews = await Review.findAll({
+    const reviewsPage = Math.max(parseInt(req.query.reviewsPage, 10) || 1, 1);
+    const reviewsOffset = (reviewsPage - 1) * REVIEWS_PER_BOOK_PAGE;
+
+    const { count: reviewsCount, rows: reviews } = await Review.findAndCountAll({
       where: { book_id: bookId },
       include: [
         {
@@ -209,7 +213,9 @@ exports.getBookById = async (req, res) => {
           attributes: ['id', 'name', 'avatar', 'avatar_public_id']
         }
       ],
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      limit: REVIEWS_PER_BOOK_PAGE,
+      offset: reviewsOffset
     });
     
     let userBookStatus = null;
@@ -276,7 +282,12 @@ exports.getBookById = async (req, res) => {
   similarBooks: similarBooksWithRating,
   userBookStatus,
   userReview,
-  user: req.session.user || null
+  user: req.session.user || null,
+  reviewsPagination: {
+    currentPage: reviewsPage,
+    totalPages: Math.ceil(reviewsCount / REVIEWS_PER_BOOK_PAGE),
+    totalReviews: reviewsCount
+  }
 });
     
   } catch (error) {

@@ -168,7 +168,7 @@ exports.getTopic = async (req, res) => {
   try {
     const topicId = req.params.id;
     const page = parseInt(req.query.page) || 1;
-    const limit = 15;
+    const limit = 3;
     const offset = (page - 1) * limit;
     
     const topic = await ForumTopic.findOne({

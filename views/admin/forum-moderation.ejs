@@ -33,7 +33,8 @@
                 <span><strong>Категория:</strong> <%= topic.category ? topic.category.name : '—' %></span>
                 <span><strong>Дата:</strong> <%= new Date(topic.createdAt).toLocaleString('ru-RU') %></span>
               </p>
-              <div class="content-preview"><%= topic.content.substring(0, 350) %><%= topic.content.length > 350 ? '...' : '' %></div>
+              <% const topicPreview = truncateText(topic.content, 260); %>
+              <div class="content-preview"><%= topicPreview.text %></div>
             </div>
             <div class="moderation-actions">
               <a href="/admin/forum/topic/<%= topic.id %>/posts" class="btn btn-outline"><i class="fas fa-list"></i> Сообщения</a>

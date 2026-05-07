@@ -38,7 +38,8 @@
               <span><strong>Email:</strong> <%= post.user ? post.user.email : '—' %></span>
               <span><strong>Дата:</strong> <%= new Date(post.createdAt).toLocaleString('ru-RU') %></span>
             </p>
-            <div class="content-preview"><%= post.content %></div>
+            <% const postPreview = truncateText(post.content, 260); %>
+            <div class="content-preview"><%= postPreview.text %></div>
 
             <form action="/admin/forum/post/<%= post.id %>/delete" method="POST" class="reject-form-inline" onsubmit="return confirm('Удалить это сообщение?')">
               <input type="text" name="reason" required placeholder="Причина удаления (обязательно)">

@@ -44,7 +44,8 @@
                     <%= topic.replies_count %> ответов • 
                     <%= topic.views %> просмотров
                   </p>
-                  <p class="result-excerpt"><%= topic.content.substring(0, 200) %>...</p>
+                  <% const topicPreview = truncateText(topic.content, 240); %>
+                  <p class="result-excerpt"><%= topicPreview.text %></p>
                 </div>
               </div>
             <% }) %>
@@ -72,7 +73,8 @@
                     Автор: <a href="/profile/<%= post.user.id %>"><%= post.user.name %></a> • 
                     <%= new Date(post.createdAt).toLocaleString('ru-RU') %>
                   </p>
-                  <p class="result-excerpt"><%= post.content.substring(0, 200) %>...</p>
+                  <% const postPreview = truncateText(post.content, 240); %>
+                  <p class="result-excerpt"><%= postPreview.text %></p>
                 </div>
               </div>
             <% }) %>

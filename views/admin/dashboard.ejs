@@ -245,7 +245,7 @@
               <span class="review-book-title"><%= review.book ? review.book.title : 'Неизвестная книга' %></span>
             </div>
             <div class="review-preview">
-              <%= review.content ? (review.content.length > 100 ? review.content.substring(0, 100) + '...' : review.content) : '' %>
+              <%= truncateText(review.content, 140).text %>
             </div>
             <div class="review-footer">
               <span class="review-date"><i class="far fa-clock"></i> <%= new Date(review.createdAt).toLocaleDateString('ru-RU') %></span>

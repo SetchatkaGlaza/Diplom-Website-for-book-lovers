@@ -1,4 +1,5 @@
 const notificationService = require('../services/notificationService');
+const { NOTIFICATION_RETENTION_DAYS } = notificationService;
 
 exports.getNotifications = async (req, res) => {
   try {
@@ -8,9 +9,10 @@ exports.getNotifications = async (req, res) => {
     
     const userId = req.session.user.id;
     const page = parseInt(req.query.page) || 1;
-    const limit = 20;
+    const limit = 6;
     const offset = (page - 1) * limit;
     
+    await notificationService.cleanupOldNotifications();
     const result = await notificationService.getUserNotifications(userId, limit, offset);
     
     if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
@@ -24,6 +26,7 @@ exports.getNotifications = async (req, res) => {
       unread: result.unread,
       currentPage: page,
       totalPages: Math.ceil(result.total / limit),
+      notificationRetentionDays: NOTIFICATION_RETENTION_DAYS,
       layout: 'layouts/main'
     });
     

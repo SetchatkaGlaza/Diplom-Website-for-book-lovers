@@ -436,7 +436,7 @@ exports.getMyReviews = async (req, res) => {
     const userId = req.session.user.id;
     
     const page = parseInt(req.query.page) || 1;
-    const limit = 10;
+    const limit = 3;
     const offset = (page - 1) * limit;
     
     const { count, rows: reviews } = await Review.findAndCountAll({

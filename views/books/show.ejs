@@ -146,10 +146,10 @@
   </div>
   
   <!-- Блок рецензий -->
-  <div class="book-reviews">
+  <div class="book-reviews" id="reviews">
     <h3><i class="fas fa-star"></i> Рецензии читателей 
-      <% if (reviews.length > 0) { %>
-        <span class="reviews-count">(<%= reviews.length %>)</span>
+      <% if (reviewsPagination.totalReviews > 0) { %>
+        <span class="reviews-count">(<%= reviewsPagination.totalReviews %>)</span>
       <% } %>
     </h3>
     
@@ -181,8 +181,17 @@
               </span>
             </div>
             
+            <% const reviewPreview = truncateText(review.content, 240); %>
             <div class="review-content">
-              <p><%= review.content %></p>
+              <% if (reviewPreview.isTruncated) { %>
+                <p><%= reviewPreview.text %></p>
+                <details class="read-more-block">
+                  <summary>Читать дальше</summary>
+                  <p><%= reviewPreview.fullText %></p>
+                </details>
+              <% } else { %>
+                <p><%= reviewPreview.fullText %></p>
+              <% } %>
             </div>
             
             <% if (review.is_moderated) { %>
@@ -232,6 +241,27 @@
           </div>
         <% }) %>
       </div>
+      <% if (reviewsPagination.totalPages > 1) { %>
+        <div class="pagination reviews-pagination">
+          <% if (reviewsPagination.currentPage > 1) { %>
+            <a href="?reviewsPage=<%= reviewsPagination.currentPage - 1 %>#reviews" class="page-link">
+              <i class="fas fa-chevron-left"></i>
+            </a>
+          <% } %>
+          <% for(let i = 1; i <= reviewsPagination.totalPages; i++) { %>
+            <% if (i === reviewsPagination.currentPage) { %>
+              <span class="page-link active"><%= i %></span>
+            <% } else { %>
+              <a href="?reviewsPage=<%= i %>#reviews" class="page-link"><%= i %></a>
+            <% } %>
+          <% } %>
+          <% if (reviewsPagination.currentPage < reviewsPagination.totalPages) { %>
+            <a href="?reviewsPage=<%= reviewsPagination.currentPage + 1 %>#reviews" class="page-link">
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          <% } %>
+        </div>
+      <% } %>
     <% } else { %>
       <div class="no-reviews">
         <i class="fas fa-star fa-3x"></i>
@@ -564,6 +594,24 @@
   .review-content {
     margin-bottom: 1rem;
     line-height: 1.8;
+  }
+
+  .read-more-block {
+    margin-top: 0.5rem;
+  }
+
+  .read-more-block summary {
+    color: #fbbf24;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .read-more-block p {
+    margin-top: 0.5rem;
+  }
+
+  .reviews-pagination {
+    margin-top: 1.5rem;
   }
   
   .review-footer {
