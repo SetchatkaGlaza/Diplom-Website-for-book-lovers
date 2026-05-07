@@ -14,10 +14,10 @@
     </div>
   </div>
   
-  <div class="alert alert-info">
-    <i class="fas fa-info-circle"></i>
-    После редактирования рецензия будет отправлена на повторную модерацию.
-  </div>
+  <div class="alert alert-warning">
+  <i class="fas fa-clock"></i>
+  <strong>Рецензия уйдёт на повторную модерацию.</strong> После проверки она снова станет доступна другим читателям.
+</div>
   
   <% if (errors && errors.length > 0) { %>
     <div class="alert alert-danger">
@@ -129,6 +129,17 @@
     margin-left: auto;
     margin-right: auto;
   }
+
+  .alert-warning {
+  background: rgba(245, 158, 11, 0.12);
+  border-left: 4px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #fef9e6;
+}
   
   .review-header {
     margin-bottom: 2rem;
