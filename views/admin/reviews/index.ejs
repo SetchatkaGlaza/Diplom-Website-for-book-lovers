@@ -65,7 +65,13 @@
           </div>
           
           <div class="review-content-box">
-            <p><%= review.content %></p>
+            <% const reviewPreview = truncateText(review.content, 240); %>
+            <% if (reviewPreview.isTruncated) { %>
+              <p><%= reviewPreview.text %></p>
+              <details class="read-more-block"><summary>Читать дальше</summary><p><%= reviewPreview.fullText %></p></details>
+            <% } else { %>
+              <p><%= reviewPreview.fullText %></p>
+            <% } %>
           </div>
           
           <div class="review-meta">
@@ -511,4 +517,6 @@
       justify-content: center;
     }
   }
+  .read-more-block summary { color: #fbbf24; cursor: pointer; font-weight: 700; }
+  .read-more-block p { margin-top: 0.5rem; }
 </style>

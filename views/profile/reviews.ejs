@@ -40,7 +40,13 @@
           </div>
           
           <div class="review-detailed-content">
-            <p><%= review.content %></p>
+            <% const reviewPreview = truncateText(review.content, 240); %>
+              <% if (reviewPreview.isTruncated) { %>
+                <p><%= reviewPreview.text %></p>
+                <details class="read-more-block"><summary>Читать дальше</summary><p><%= reviewPreview.fullText %></p></details>
+              <% } else { %>
+                <p><%= reviewPreview.fullText %></p>
+              <% } %>
           </div>
           
           <!-- ЕДИНЫЙ РАЗМЕР КНОПОК - ВСЕ ОДИНАКОВЫЕ! -->
@@ -400,4 +406,6 @@
       min-width: 100%;
     }
   }
+  .read-more-block summary { color: var(--accent); cursor: pointer; font-weight: 700; }
+  .read-more-block p { margin-top: 0.5rem; }
 </style>

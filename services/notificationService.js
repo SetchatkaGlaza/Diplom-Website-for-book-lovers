@@ -1,4 +1,7 @@
 const { Notification, User, UserBook, Review, Book } = require('../models');
+const { Op } = require('sequelize');
+
+const NOTIFICATION_RETENTION_DAYS = 30;
 
 class NotificationService {
   
@@ -27,6 +30,26 @@ class NotificationService {
     }
   }
   
+
+  /**
+   * Удалить устаревшие уведомления, чтобы лента оставалась компактной.
+   */
+  async cleanupOldNotifications(retentionDays = NOTIFICATION_RETENTION_DAYS) {
+    try {
+      const retentionMs = retentionDays * 24 * 60 * 60 * 1000;
+      const expiresBefore = new Date(Date.now() - retentionMs);
+
+      return await Notification.destroy({
+        where: {
+          createdAt: { [Op.lt]: expiresBefore }
+        }
+      });
+    } catch (error) {
+      console.error('❌ Ошибка при удалении старых уведомлений:', error);
+      return 0;
+    }
+  }
+
   /**
    * Получить уведомления пользователя
    */
@@ -366,3 +389,4 @@ async forumPostModerated(userId, topic, post, approved, reason = null, moderatio
 }
 
 module.exports = new NotificationService();
+module.exports.NOTIFICATION_RETENTION_DAYS = NOTIFICATION_RETENTION_DAYS;

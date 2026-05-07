@@ -142,7 +142,7 @@
               </div>
               <div class="notification-content">
                 <div class="notification-title">${escapeHtml(n.title)}</div>
-                <div class="notification-message">${escapeHtml(n.message.substring(0, 50))}${n.message.length > 50 ? '...' : ''}</div>
+                <div class="notification-message">${escapeHtml(truncateNotificationMessage(n.message))}</div>
                 <div class="notification-time">${new Date(n.createdAt).toLocaleString('ru-RU')}</div>
               </div>
               <button class="notification-mark-read" onclick="markAsRead(${n.id})">
@@ -159,6 +159,12 @@
     }
   }
   
+  function truncateNotificationMessage(message, maxLength = 70) {
+    const text = String(message || '').replace(/\s+/g, ' ').trim();
+    if (text.length <= maxLength) return text;
+    return `${text.substring(0, maxLength).trim()}…`;
+  }
+
   function getIconForType(type, data) {
     const icons = {
       review_moderated: data?.approved ? 'fa-check-circle' : 'fa-times-circle',

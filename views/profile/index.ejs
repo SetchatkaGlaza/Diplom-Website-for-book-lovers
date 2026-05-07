@@ -86,7 +86,8 @@
                 </span>
                 <span class="review-date"><%= new Date(review.createdAt).toLocaleDateString('ru-RU') %></span>
               </p>
-              <p class="review-excerpt"><%= review.content.substring(0, 150) %>...</p>
+              <% const reviewPreview = truncateText(review.content, 180); %>
+              <p class="review-excerpt"><%= reviewPreview.text %></p>
             </div>
           </div>
         <% }) %>
