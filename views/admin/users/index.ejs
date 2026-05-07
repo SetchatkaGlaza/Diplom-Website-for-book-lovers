@@ -45,8 +45,8 @@
   <div class="admin-policy-card">
     <div>
       <h3><i class="fas fa-user-shield"></i> Правило назначения администраторов</h3>
-      <p>Администратором можно назначить только проверенного активного участника: аккаунт не заблокирован, зарегистрирован не менее <strong><%= adminPolicy.minAccountAgeDays %> дней</strong>, написал минимум <strong><%= adminPolicy.minReviews %> рецензий</strong> и набрал индекс активности от <strong><%= adminPolicy.minActivityScore %></strong>.</p>
-      <small>Индекс: рецензия ×<%= adminPolicy.reviewWeight %>, книга на полке ×<%= adminPolicy.bookWeight %>, сообщение форума ×<%= adminPolicy.forumPostWeight %>. Это объясняет, почему роль получает именно активный старожил сообщества.</small>
+      <p>Администратором можно назначить только проверенного активного участника: аккаунт не заблокирован, зарегистрирован не менее <strong><%= adminPolicy.minAccountAgeDays %> дней</strong>, имеет минимум <strong><%= adminPolicy.minApprovedReviews %> одобренные рецензии</strong> или <strong><%= adminPolicy.minForumPosts %> сообщений форума</strong>, держит на полках минимум <strong><%= adminPolicy.minLibraryBooks %> книги</strong> и набрал индекс активности от <strong><%= adminPolicy.minActivityScore %></strong>.</p>
+      <small>Индекс: месяц на сайте ×<%= adminPolicy.weights.accountAgeMonth %>, одобренная рецензия ×<%= adminPolicy.weights.approvedReview %>, сообщение форума ×<%= adminPolicy.weights.forumPost %>, книга на полке ×<%= adminPolicy.weights.libraryBook %>. При назначении обязательно сохраняется причина — почему выбран именно этот пользователь.</small>
     </div>
     <div class="admin-limit">
       <span><%= currentAdminCount %>/<%= adminPolicy.maxAdmins %></span>
@@ -99,10 +99,13 @@
               <td>
                 <div class="activity-cell" title="<%= profileUser.adminEligibility.summary %>">
                   <strong><%= profileUser.adminEligibility.activityScore %></strong>
-                  <small><%= profileUser.adminEligibility.accountAgeDays %> дн., <%= profileUser.reviewsCount || 0 %> рец., <%= profileUser.booksCount || 0 %> книг, <%= profileUser.forumPostsCount || 0 %> форум</small>
+                  <small><%= profileUser.adminEligibility.accountAgeDays %> дн., <%= profileUser.approvedReviewsCount || 0 %>/<%= profileUser.reviewsCount || 0 %> рец., <%= profileUser.booksCount || 0 %> книг, <%= profileUser.forumPostsCount || 0 %> форум</small>
                   <span class="badge <%= profileUser.adminEligibility.canBeAdmin ? 'badge-success' : 'badge-warning' %>">
                     <%= profileUser.adminEligibility.canBeAdmin ? 'Кандидат в админы' : 'Не подходит' %>
                   </span>
+                  <% if (profileUser.role === 'admin' && profileUser.admin_appointment_reason) { %>
+                    <small title="Причина назначения">Причина: <%= profileUser.admin_appointment_reason %></small>
+                  <% } %>
                 </div>
               </td>
               <td>
@@ -121,6 +124,7 @@
                     <select class="role-select" data-user-id="<%= profileUser.id %>"
                             data-current-role="<%= profileUser.role %>"
                             data-admin-reason="<%= profileUser.adminEligibility.summary %>"
+                            data-positive-reason="<%= profileUser.adminEligibility.positiveReason %>"
                             style="padding: 0.35rem; border-radius: var(--radius-sm); background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
                       <option value="user" <%= profileUser.role === 'user' ? 'selected' : '' %>>Пользователь</option>
                       <option value="moderator" <%= profileUser.role === 'moderator' ? 'selected' : '' %>>Модератор</option>
@@ -239,8 +243,23 @@
       const userId = this.dataset.userId;
       const role = this.value;
 
-      if (role === 'admin' && this.dataset.adminReason && this.dataset.adminReason.startsWith('подходит')) {
-        if (!confirm(`Назначить администратора? Причина: ${this.dataset.adminReason}. Свободных мест ограничено: ${document.querySelector('.admin-limit span')?.textContent || ''}.`)) {
+      let reason = '';
+
+      if (role === 'admin') {
+        if (!this.dataset.adminReason || !this.dataset.adminReason.startsWith('подходит')) {
+          alert(`Нельзя назначить администратора: ${this.dataset.adminReason || 'пользователь не подходит по критериям'}`);
+          this.value = this.dataset.currentRole || 'user';
+          return;
+        }
+
+        const defaultReason = `Пользователь выбран администратором, потому что ${this.dataset.positiveReason}.`;
+        reason = prompt(
+          `Укажите причину назначения администратора. Лимит: ${document.querySelector('.admin-limit span')?.textContent || ''}.`,
+          defaultReason
+        );
+
+        if (!reason || reason.trim().length < <%= adminPolicy.minReasonLength %>) {
+          alert('Назначение отменено: причина должна быть понятной и не короче <%= adminPolicy.minReasonLength %> символов.');
           this.value = this.dataset.currentRole || 'user';
           return;
         }
@@ -255,7 +274,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ role })
+          body: JSON.stringify({ role, reason })
         });
 
         if (response.ok) {

@@ -11,11 +11,18 @@ const SALT_ROUNDS = 10;
 const ADMIN_POLICY = {
   maxAdmins: 5,
   minAccountAgeDays: 30,
-  minReviews: 5,
-  minActivityScore: 30,
-  reviewWeight: 3,
-  bookWeight: 1,
-  forumPostWeight: 1
+  minApprovedReviews: 3,
+  minForumPosts: 5,
+  minLibraryBooks: 3,
+  minActivityScore: 50,
+  maxReasonLength: 500,
+  minReasonLength: 20,
+  weights: {
+    accountAgeMonth: 5,
+    approvedReview: 8,
+    forumPost: 2,
+    libraryBook: 1
+  }
 };
 
 function getAccountAgeDays(createdAt) {
@@ -28,15 +35,21 @@ function getAccountAgeDays(createdAt) {
   return Math.max(0, Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24)));
 }
 
-function getActivityScore({ reviewsCount = 0, booksCount = 0, forumPostsCount = 0 }) {
-  return (reviewsCount * ADMIN_POLICY.reviewWeight)
-    + (booksCount * ADMIN_POLICY.bookWeight)
-    + (forumPostsCount * ADMIN_POLICY.forumPostWeight);
+function getActivityScore({ accountAgeDays = 0, approvedReviewsCount = 0, booksCount = 0, forumPostsCount = 0 }) {
+  const accountAgeMonths = Math.floor(accountAgeDays / 30);
+
+  return (accountAgeMonths * ADMIN_POLICY.weights.accountAgeMonth)
+    + (approvedReviewsCount * ADMIN_POLICY.weights.approvedReview)
+    + (forumPostsCount * ADMIN_POLICY.weights.forumPost)
+    + (booksCount * ADMIN_POLICY.weights.libraryBook);
 }
 
 function getAdminEligibility(user, stats, currentAdminCount) {
   const accountAgeDays = getAccountAgeDays(user.createdAt);
-  const activityScore = getActivityScore(stats);
+  const activityScore = getActivityScore({ ...stats, accountAgeDays });
+  const hasEnoughTrustedContent = stats.approvedReviewsCount >= ADMIN_POLICY.minApprovedReviews
+    || stats.forumPostsCount >= ADMIN_POLICY.minForumPosts;
+
   const checks = [
     {
       passed: !user.isBlocked,
@@ -47,8 +60,12 @@ function getAdminEligibility(user, stats, currentAdminCount) {
       message: `на сайте не менее ${ADMIN_POLICY.minAccountAgeDays} дней`
     },
     {
-      passed: stats.reviewsCount >= ADMIN_POLICY.minReviews,
-      message: `минимум ${ADMIN_POLICY.minReviews} рецензий`
+      passed: hasEnoughTrustedContent,
+      message: `есть минимум ${ADMIN_POLICY.minApprovedReviews} одобренные рецензии или ${ADMIN_POLICY.minForumPosts} сообщений форума`
+    },
+    {
+      passed: stats.booksCount >= ADMIN_POLICY.minLibraryBooks,
+      message: `на полках минимум ${ADMIN_POLICY.minLibraryBooks} книги`
     },
     {
       passed: activityScore >= ADMIN_POLICY.minActivityScore,
@@ -63,15 +80,44 @@ function getAdminEligibility(user, stats, currentAdminCount) {
     missingReasons.push(`лимит ${ADMIN_POLICY.maxAdmins} администраторов уже достигнут`);
   }
 
+  const positiveReason = [
+    `аккаунт существует ${accountAgeDays} дн.`,
+    `${stats.approvedReviewsCount} одобренных рецензий`,
+    `${stats.forumPostsCount} сообщений форума`,
+    `${stats.booksCount} книг на полках`,
+    `индекс активности ${activityScore}`
+  ].join(', ');
+
   return {
     canBeAdmin: missingReasons.length === 0,
     accountAgeDays,
     activityScore,
     missingReasons,
+    positiveReason,
     summary: missingReasons.length > 0
       ? missingReasons.join('; ')
-      : 'подходит: давно в сообществе и активно участвует'
+      : `подходит: ${positiveReason}`
   };
+}
+
+function validateAdminAppointmentReason(reason) {
+  const normalizedReason = String(reason || '').trim();
+
+  if (normalizedReason.length < ADMIN_POLICY.minReasonLength) {
+    return {
+      normalizedReason,
+      error: `Укажите причину назначения администратора: минимум ${ADMIN_POLICY.minReasonLength} символов`
+    };
+  }
+
+  if (normalizedReason.length > ADMIN_POLICY.maxReasonLength) {
+    return {
+      normalizedReason,
+      error: `Причина назначения администратора не должна быть длиннее ${ADMIN_POLICY.maxReasonLength} символов`
+    };
+  }
+
+  return { normalizedReason, error: null };
 }
 
 function wantsJson(req) {
@@ -545,8 +591,9 @@ exports.getUsers = async (req, res) => {
       users.map(async (user) => {
         const booksCount = await UserBook.count({ where: { user_id: user.id } });
         const reviewsCount = await Review.count({ where: { user_id: user.id } });
+        const approvedReviewsCount = await Review.count({ where: { user_id: user.id, is_moderated: true } });
         const forumPostsCount = await ForumPost.count({ where: { user_id: user.id } });
-        const stats = { booksCount, reviewsCount, forumPostsCount };
+        const stats = { booksCount, reviewsCount, approvedReviewsCount, forumPostsCount };
 
         return {
           ...user.toJSON(),
@@ -605,7 +652,16 @@ exports.updateUserRole = async (req, res) => {
       return sendRoleError(req, res, 'Пользователь не найден', 404);
     }
 
+    let adminAppointmentReason = null;
+
     if (role === 'admin' && user.role !== 'admin') {
+      const { normalizedReason, error: reasonError } = validateAdminAppointmentReason(req.body.reason);
+
+      if (reasonError) {
+        return sendRoleError(req, res, reasonError);
+      }
+
+      adminAppointmentReason = normalizedReason;
       const currentAdminCount = await User.count({ where: { role: 'admin' } });
 
       if (currentAdminCount >= ADMIN_POLICY.maxAdmins) {
@@ -619,6 +675,7 @@ exports.updateUserRole = async (req, res) => {
       const stats = {
         booksCount: await UserBook.count({ where: { user_id: user.id } }),
         reviewsCount: await Review.count({ where: { user_id: user.id } }),
+        approvedReviewsCount: await Review.count({ where: { user_id: user.id, is_moderated: true } }),
         forumPostsCount: await ForumPost.count({ where: { user_id: user.id } })
       };
       const eligibility = getAdminEligibility(user, stats, currentAdminCount);
@@ -632,7 +689,21 @@ exports.updateUserRole = async (req, res) => {
       }
     }
 
-    await user.update({ role });
+    const updateData = { role };
+
+    if (role === 'admin' && user.role !== 'admin') {
+      updateData.admin_appointed_at = new Date();
+      updateData.admin_appointed_by = req.session.user.id;
+      updateData.admin_appointment_reason = adminAppointmentReason;
+    }
+
+    if (role !== 'admin') {
+      updateData.admin_appointed_at = null;
+      updateData.admin_appointed_by = null;
+      updateData.admin_appointment_reason = null;
+    }
+
+    await user.update(updateData);
 
     const roleLabels = {
       user: 'пользователь',

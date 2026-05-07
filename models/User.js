@@ -53,6 +53,18 @@ const User = sequelize.define('User', {
   email_verification_token: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  admin_appointed_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  admin_appointed_by: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  admin_appointment_reason: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 }, {
   // Добавит поля createdAt и updatedAt автоматически
