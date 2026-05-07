@@ -54,23 +54,34 @@
             name="year_from" 
             placeholder="От"
             value="<%= filters.year_from || '' %>"
-            min="1000"
-            max="2026"
+            min="<%= minCatalogYear %>"
+            max="<%= maxCatalogYear %>"
+            data-min-year="<%= minCatalogYear %>"
           >
           <input 
             type="number" 
             name="year_to" 
             placeholder="До"
             value="<%= filters.year_to || '' %>"
-            min="1000"
-            max="2026"
+            min="<%= minCatalogYear %>"
+            max="<%= maxCatalogYear %>"
+            data-min-year="<%= minCatalogYear %>"
           >
         </div>
+        <small class="filter-hint">Минимальный год в каталоге: <strong><%= minCatalogYear %></strong></small>
       </div>
+
+      <% if (filterWarnings && filterWarnings.length > 0) { %>
+        <div class="filter-warnings">
+          <% filterWarnings.forEach(warning => { %>
+            <div class="filter-warning"><i class="fas fa-exclamation-triangle"></i><span><%= warning %></span></div>
+          <% }) %>
+        </div>
+      <% } %>
       
       <button type="submit" class="btn btn-primary btn-block">Применить фильтры</button>
       
-      <% if (Object.keys(filters).length > 0) { %>
+      <% if (hasActiveFilters) { %>
         <a href="/books" class="btn btn-outline btn-block">Сбросить фильтры</a>
       <% } %>
     </form>
@@ -155,15 +166,49 @@
       
     <% } else { %>
       <div class="no-books">
-        <p>Книги не найдены. Попробуйте изменить параметры поиска.</p>
+        <div class="no-books-icon"><i class="fas fa-book-open"></i></div>
+        <h2><%= hasActiveFilters ? 'По этим фильтрам книг не найдено' : 'В каталоге пока нет книг' %></h2>
+        <p><%= hasActiveFilters ? 'Попробуйте изменить жанр, автора, годы издания или поисковый запрос.' : 'Когда книги будут добавлены, они появятся на этой странице.' %></p>
+        <% if (hasActiveFilters) { %>
+          <a href="/books" class="btn btn-primary">Показать весь каталог</a>
+        <% } %>
       </div>
     <% } %>
   </main>
 </div>
 
 <script>
+  const filterForm = document.getElementById('filter-form');
+  const yearFromInput = filterForm?.querySelector('input[name="year_from"]');
+
+  function validateYearFrom() {
+    if (!yearFromInput || !yearFromInput.value) return true;
+
+    const minYear = Number(yearFromInput.dataset.minYear);
+    const selectedYear = Number(yearFromInput.value);
+
+    if (Number.isFinite(minYear) && Number.isFinite(selectedYear) && selectedYear < minYear) {
+      yearFromInput.setCustomValidity(`Минимальный год в каталоге — ${minYear}`);
+      yearFromInput.reportValidity();
+      return false;
+    }
+
+    yearFromInput.setCustomValidity('');
+    return true;
+  }
+
+  yearFromInput?.addEventListener('input', validateYearFrom);
+
+  filterForm?.addEventListener('submit', function(event) {
+    if (!validateYearFrom()) {
+      event.preventDefault();
+    }
+  });
+
   document.getElementById('sort')?.addEventListener('change', function() {
-    document.getElementById('filter-form').submit();
+    if (validateYearFrom()) {
+      filterForm?.submit();
+    }
   });
 
   (function limitVisiblePagination() {
@@ -547,4 +592,110 @@
       display: none;
     }
   }
+
+  /* Улучшенная читаемость фильтров каталога */
+  .filters-sidebar .filter-group input,
+  .filters-sidebar .filter-group select,
+  .sort-bar select {
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.96), rgba(51, 65, 85, 0.92));
+    color: #f8fafc;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .filters-sidebar .filter-group input:hover,
+  .filters-sidebar .filter-group select:hover,
+  .sort-bar select:hover {
+    border-color: #fbbf24;
+    background: linear-gradient(135deg, rgba(51, 65, 85, 0.98), rgba(71, 85, 105, 0.94));
+  }
+
+  .filters-sidebar .filter-group input:focus,
+  .filters-sidebar .filter-group select:focus,
+  .sort-bar select:focus {
+    border-color: #fbbf24;
+    background: rgba(30, 41, 59, 0.98);
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.22);
+  }
+
+  .filters-sidebar .filter-group select option,
+  .sort-bar select option {
+    background: #243447;
+    color: #f8fafc;
+  }
+
+  .filters-sidebar .filter-group select option:checked,
+  .sort-bar select option:checked {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #ffffff;
+  }
+
+  .filter-hint {
+    display: block;
+    margin-top: 0.45rem;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.82rem;
+  }
+
+  .filter-hint strong {
+    color: #fbbf24;
+  }
+
+  .filter-warnings {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+  }
+
+  .filter-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    padding: 0.75rem;
+    border-radius: var(--radius);
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    background: rgba(251, 191, 36, 0.12);
+    color: #fde68a;
+    font-size: 0.9rem;
+  }
+
+  .filter-warning i {
+    margin-top: 0.12rem;
+  }
+
+  .no-books {
+    text-align: center;
+    padding: clamp(2rem, 6vw, 4rem);
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.86), rgba(49, 46, 129, 0.62));
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-lg);
+    margin: 2rem 0;
+    color: #f8fafc;
+    box-shadow: 0 24px 60px rgba(2, 6, 23, 0.26);
+  }
+
+  .no-books-icon {
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 1rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(251, 191, 36, 0.16);
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    color: #fbbf24;
+    font-size: 2rem;
+  }
+
+  .no-books h2 {
+    margin: 0 0 0.6rem;
+    font-size: clamp(1.35rem, 4vw, 2rem);
+  }
+
+  .no-books p {
+    max-width: 560px;
+    margin: 0 auto 1.4rem;
+    color: rgba(255, 255, 255, 0.74);
+  }
+
 </style>

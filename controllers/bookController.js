@@ -5,6 +5,8 @@ const { getAvatarUrl, getCoverUrl } = require('../utils/imageUrls');
 const BOOKS_PER_PAGE = 12;
 const BOOKS_PER_PAGE_TABLET = 10;
 const BOOKS_PER_PAGE_MOBILE = 8;
+const FALLBACK_MIN_YEAR = 1000;
+const CURRENT_YEAR = new Date().getFullYear();
 
 const getSingleQueryValue = (value, fallback = '') => {
   if (Array.isArray(value)) {
@@ -48,39 +50,74 @@ exports.getCatalog = async (req, res) => {
     const offset = (page - 1) * limit;
     const sort = getSingleQueryValue(req.query.sort, 'newest');
     const selectedSort = SORT_OPTIONS[sort] ? sort : 'newest';
+    const oldestBookYearRaw = await Book.min('year', {
+      where: {
+        year: { [Op.ne]: null }
+      }
+    });
+    const minCatalogYear = Number.isFinite(Number(oldestBookYearRaw))
+      ? Number(oldestBookYearRaw)
+      : FALLBACK_MIN_YEAR;
+    const filterWarnings = [];
 
     const filters = {};
-    
+    const filtersForView = {};
+
     const genre = getSingleQueryValue(req.query.genre);
     if (genre) {
       filters.genre_id = genre;
+      filtersForView.genre = genre;
     }
-    
+
     const author = getSingleQueryValue(req.query.author).trim();
     if (author) {
-      filters.author = { [Op.iLike]: `%${author}%` }; // iLike = регистронезависимый поиск
+      filters.author = { [Op.iLike]: `%${author}%` };
+      filtersForView.author = author;
     }
-    
-    const yearFrom = parseInt(getSingleQueryValue(req.query.year_from), 10);
-    const yearTo = parseInt(getSingleQueryValue(req.query.year_to), 10);
+
+    const yearFromRaw = getSingleQueryValue(req.query.year_from);
+    const yearToRaw = getSingleQueryValue(req.query.year_to);
+    let yearFrom = parseInt(yearFromRaw, 10);
+    let yearTo = parseInt(yearToRaw, 10);
+
+    if (!Number.isNaN(yearFrom) && yearFrom < minCatalogYear) {
+      filterWarnings.push(`Минимальный год в каталоге — ${minCatalogYear}. Поиск начат с этого года.`);
+      yearFrom = minCatalogYear;
+    }
+
+    if (!Number.isNaN(yearTo) && yearTo < minCatalogYear) {
+      filterWarnings.push(`Год «до» не может быть меньше ${minCatalogYear}. Значение скорректировано.`);
+      yearTo = minCatalogYear;
+    }
+
+    if (!Number.isNaN(yearFrom) && !Number.isNaN(yearTo) && yearFrom > yearTo) {
+      filterWarnings.push('Год «от» был больше года «до», поэтому значения поменяны местами.');
+      [yearFrom, yearTo] = [yearTo, yearFrom];
+    }
+
     if (!Number.isNaN(yearFrom) || !Number.isNaN(yearTo)) {
       filters.year = {};
       if (!Number.isNaN(yearFrom)) {
         filters.year[Op.gte] = yearFrom;
+        filtersForView.year_from = String(yearFrom);
       }
       if (!Number.isNaN(yearTo)) {
         filters.year[Op.lte] = yearTo;
+        filtersForView.year_to = String(yearTo);
       }
     }
-    
+
     const search = getSingleQueryValue(req.query.search).trim();
     if (search) {
       filters[Op.or] = [
         { title: { [Op.iLike]: `%${search}%` } },
         { author: { [Op.iLike]: `%${search}%` } }
       ];
+      filtersForView.search = search;
     }
-    
+
+    const hasActiveFilters = Object.keys(filtersForView).length > 0;
+
     const { count, rows: books } = await Book.findAndCountAll({
       where: filters,
       attributes: {
@@ -124,7 +161,11 @@ exports.getCatalog = async (req, res) => {
       currentPage: page,
       totalPages: Math.ceil(count / limit),
       totalBooks: count,
-      filters: req.query,
+      filters: filtersForView,
+      hasActiveFilters,
+      filterWarnings,
+      minCatalogYear,
+      maxCatalogYear: CURRENT_YEAR,
       sort: selectedSort,
       user: req.session.user || null
     });

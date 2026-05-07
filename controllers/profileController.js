@@ -6,6 +6,7 @@ const uploadService = require('../services/uploadService');
 const { getAvatarUrl, getCoverUrl } = require('../utils/imageUrls');
 
 const SALT_ROUNDS = 10;
+const AVATAR_MIN_SIZE = 200;
 
 exports.getProfile = async (req, res) => {
   try {
@@ -181,7 +182,26 @@ exports.uploadAvatar = async (req, res) => {
     }
     
     const user = await User.findByPk(userId);
-    
+
+    let metadata;
+    try {
+      metadata = await sharp(req.file.buffer).metadata();
+    } catch (metadataError) {
+      console.error('Ошибка чтения аватарки:', metadataError);
+      req.flash('error', 'Не удалось прочитать изображение. Файл может быть повреждён или иметь неподдерживаемый формат.');
+      return res.redirect('/profile/edit');
+    }
+
+    if (!metadata.width || !metadata.height) {
+      req.flash('error', 'Не удалось определить размеры изображения. Выберите другую картинку.');
+      return res.redirect('/profile/edit');
+    }
+
+    if (metadata.width < AVATAR_MIN_SIZE || metadata.height < AVATAR_MIN_SIZE) {
+      req.flash('error', `Изображение слишком маленькое. Минимальный размер аватара — ${AVATAR_MIN_SIZE}×${AVATAR_MIN_SIZE}px.`);
+      return res.redirect('/profile/edit');
+    }
+
     // Обрабатываем изображение: ресайз и конвертация
     const processedBuffer = await sharp(req.file.buffer)
       .resize(400, 400, { fit: 'cover', position: 'centre' })
