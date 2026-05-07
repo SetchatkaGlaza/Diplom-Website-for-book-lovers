@@ -36,8 +36,9 @@
             </label>
             <span class="file-name">Файл не выбран</span>
           </div>
-          <p class="file-help">Максимальный размер: 5MB. Форматы: JPG, PNG, GIF, WEBP</p>
+          <p class="file-help">Максимальный размер: 5MB. Форматы: JPG, PNG, GIF, WEBP. Минимальный размер: 200×200px.</p>
           <p class="file-help">После выбора можно приблизить/отдалить и подвинуть изображение перед сохранением.</p>
+          <div id="avatarValidationMessage" class="avatar-validation-message" aria-live="polite"></div>
           <button type="submit" class="btn btn-primary">
             <i class="fas fa-save"></i> Загрузить
           </button>
@@ -240,6 +241,21 @@
     margin-bottom: 1rem;
   }
 
+  .avatar-validation-message {
+    display: none;
+    margin: 0 0 1rem;
+    padding: 0.75rem;
+    border-radius: var(--radius);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    background: rgba(239, 68, 68, 0.14);
+    color: #fecaca;
+    font-size: 0.9rem;
+  }
+
+  .avatar-validation-message.show {
+    display: block;
+  }
+
   .crop-modal {
     position: fixed;
     inset: 0;
@@ -305,31 +321,93 @@
 
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 <script>
-  // Отображение имени выбранного файла
+  // Отображение имени выбранного файла и проверка изображения до отправки
   const avatarInput = document.getElementById('avatar');
   const fileNameEl = document.querySelector('.file-name');
+  const validationMessage = document.getElementById('avatarValidationMessage');
   const cropModal = document.getElementById('avatarCropModal');
   const cropImage = document.getElementById('avatarCropImage');
+  const allowedAvatarTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  const maxAvatarSize = 5 * 1024 * 1024;
+  const minAvatarSide = 200;
   let cropper = null;
+  let currentObjectUrl = null;
+
+  function showAvatarError(message) {
+    validationMessage.textContent = message;
+    validationMessage.classList.add('show');
+  }
+
+  function clearAvatarError() {
+    validationMessage.textContent = '';
+    validationMessage.classList.remove('show');
+  }
+
+  function resetAvatarInput() {
+    avatarInput.value = '';
+    fileNameEl.textContent = 'Файл не выбран';
+    if (currentObjectUrl) {
+      URL.revokeObjectURL(currentObjectUrl);
+      currentObjectUrl = null;
+    }
+  }
+
+  function destroyCropper() {
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+  }
 
   avatarInput.addEventListener('change', function(e) {
+    clearAvatarError();
+    destroyCropper();
+
     const file = e.target.files[0];
     fileNameEl.textContent = file ? file.name : 'Файл не выбран';
     if (!file) return;
 
-    const url = URL.createObjectURL(file);
-    cropImage.src = url;
-    cropModal.style.display = 'flex';
+    if (!allowedAvatarTypes.includes(file.type)) {
+      showAvatarError('Неподдерживаемый формат изображения. Используйте JPG, PNG, GIF или WEBP.');
+      resetAvatarInput();
+      return;
+    }
 
-    if (cropper) cropper.destroy();
-    cropper = new Cropper(cropImage, {
-      aspectRatio: 1,
-      viewMode: 1,
-      dragMode: 'move',
-      background: false,
-      autoCropArea: 1,
-      responsive: true
-    });
+    if (file.size > maxAvatarSize) {
+      showAvatarError('Файл слишком большой. Максимальный размер аватара — 5MB.');
+      resetAvatarInput();
+      return;
+    }
+
+    currentObjectUrl = URL.createObjectURL(file);
+    const probeImage = new Image();
+
+    probeImage.onload = function() {
+      if (probeImage.naturalWidth < minAvatarSide || probeImage.naturalHeight < minAvatarSide) {
+        showAvatarError(`Изображение слишком маленькое. Минимальный размер — ${minAvatarSide}×${minAvatarSide}px.`);
+        resetAvatarInput();
+        return;
+      }
+
+      cropImage.src = currentObjectUrl;
+      cropModal.style.display = 'flex';
+
+      cropper = new Cropper(cropImage, {
+        aspectRatio: 1,
+        viewMode: 1,
+        dragMode: 'move',
+        background: false,
+        autoCropArea: 1,
+        responsive: true
+      });
+    };
+
+    probeImage.onerror = function() {
+      showAvatarError('Не удалось открыть изображение. Файл может быть повреждён.');
+      resetAvatarInput();
+    };
+
+    probeImage.src = currentObjectUrl;
   });
 
   document.getElementById('avatarZoomIn').addEventListener('click', () => cropper && cropper.zoom(0.1));
@@ -338,10 +416,8 @@
 
   document.getElementById('avatarCancelCrop').addEventListener('click', () => {
     cropModal.style.display = 'none';
-    if (cropper) cropper.destroy();
-    cropper = null;
-    avatarInput.value = '';
-    fileNameEl.textContent = 'Файл не выбран';
+    destroyCropper();
+    resetAvatarInput();
   });
 
   document.getElementById('avatarApplyCrop').addEventListener('click', () => {
@@ -354,8 +430,11 @@
       avatarInput.files = dt.files;
       fileNameEl.textContent = file.name;
       cropModal.style.display = 'none';
-      cropper.destroy();
-      cropper = null;
+      destroyCropper();
+      if (currentObjectUrl) {
+        URL.revokeObjectURL(currentObjectUrl);
+        currentObjectUrl = null;
+      }
     }, 'image/jpeg', 0.9);
   });
 </script>
