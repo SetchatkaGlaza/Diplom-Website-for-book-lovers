@@ -5,7 +5,7 @@
         <i class="fas fa-book-open"></i>
       </div>
       <h1>Добро пожаловать!</h1>
-      <p>Войдите в свой аккаунт</p>
+      <p>Введите email и пароль.</p>
     </div>
     
     <!-- Вывод ошибок -->
@@ -91,8 +91,10 @@
             type="text" 
             id="captcha" 
             name="captcha" 
-            placeholder="Введите код с картинки"
-            maxlength="6"
+            placeholder="4 цифры"
+            maxlength="4"
+            inputmode="numeric"
+            pattern="[2-9]{4}"
             autocomplete="off"
           >
         </div>
@@ -282,6 +284,12 @@ function refreshCaptcha() {
 
 .password-toggle:hover {
   color: #fbbf24;
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin-top: 0.25rem;
 }
 
 .captcha-container {

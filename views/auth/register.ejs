@@ -5,7 +5,7 @@
         <i class="fas fa-user-plus"></i>
       </div>
       <h1>Создать аккаунт</h1>
-      <p>Присоединяйтесь к сообществу книголюбов</p>
+      <p>Заполните поля ниже.</p>
     </div>
     
     <!-- Вывод ошибок -->
@@ -43,8 +43,11 @@
           value="<%= typeof name !== 'undefined' ? name : '' %>"
           required
           minlength="2"
-          autocomplete="name"
+          maxlength="30"
+          pattern="[A-Za-zА-Яа-яЁё_]+"
+          autocomplete="username"
         >
+        <small class="field-hint">Только русские/латинские буквы и нижнее подчёркивание, 2–30 символов.</small>
       </div>
       
       <!-- Email -->
@@ -60,6 +63,7 @@
           placeholder="your@email.com"
           value="<%= typeof email !== 'undefined' ? email : '' %>"
           required
+          maxlength="254"
           autocomplete="email"
         >
       </div>
@@ -78,6 +82,7 @@
             placeholder="Минимум 6 символов"
             required
             minlength="6"
+            maxlength="128"
             autocomplete="new-password"
           >
           <button type="button" class="password-toggle" onclick="togglePassword('password')">
@@ -101,6 +106,7 @@
             placeholder="Повторите пароль"
             required
             minlength="6"
+            maxlength="128"
             autocomplete="new-password"
           >
           <button type="button" class="password-toggle" onclick="togglePassword('password2')">
@@ -125,8 +131,10 @@
           type="text" 
           id="captcha" 
           name="captcha" 
-          placeholder="Введите код с картинки"
-          maxlength="6"
+          placeholder="4 цифры"
+          maxlength="4"
+          inputmode="numeric"
+          pattern="[2-9]{4}"
           autocomplete="off"
           required
         >
@@ -135,7 +143,7 @@
       <!-- Согласие с правилами -->
       <div class="form-options">
         <label class="checkbox-label">
-          <input type="checkbox" name="agree" required>
+          <input type="checkbox" name="agree" <%= locals.agree ? 'checked' : '' %> required>
           <span>Я согласен с <a href="/rules" target="_blank">правилами сайта</a></span>
         </label>
       </div>
@@ -317,6 +325,7 @@ function refreshCaptcha() {
   color: #fbbf24;
 }
 
+.field-hint,
 .password-hint {
   font-size: 0.8rem;
   opacity: 0.7;

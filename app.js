@@ -73,7 +73,6 @@ app.use((req, res, next) => {
 
 app.use(globalData);
 
-app.use('/auth/login', authLimiter);
 app.use('/auth/forgot-password', authLimiter);
 app.use('/auth/reset-password', authLimiter);
 
@@ -106,12 +105,15 @@ app.use(errorHandler.errorHandler);
 
 
 
-const ensureCloudinaryColumns = async () => {
+const ensureCompatibilityColumns = async () => {
   const queryInterface = sequelize.getQueryInterface();
 
   const checks = [
     { table: 'Books', attribute: 'cover_public_id', definition: { type: DataTypes.STRING, allowNull: true } },
-    { table: 'Users', attribute: 'avatar_public_id', definition: { type: DataTypes.STRING, allowNull: true } }
+    { table: 'Users', attribute: 'avatar_public_id', definition: { type: DataTypes.STRING, allowNull: true } },
+    { table: 'Users', attribute: 'admin_appointed_at', definition: { type: DataTypes.DATE, allowNull: true } },
+    { table: 'Users', attribute: 'admin_appointed_by', definition: { type: DataTypes.INTEGER, allowNull: true } },
+    { table: 'Users', attribute: 'admin_appointment_reason', definition: { type: DataTypes.TEXT, allowNull: true } }
   ];
 
   for (const { table, attribute, definition } of checks) {
@@ -127,7 +129,7 @@ const ensureCloudinaryColumns = async () => {
 const startServer = async () => {
   try {
     await sequelize.authenticate();
-    await ensureCloudinaryColumns();
+    await ensureCompatibilityColumns();
 
     if (!isProduction && enableSchemaSync) {
       await sequelize.sync({ alter: true });

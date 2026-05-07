@@ -42,6 +42,18 @@
     <% } %>
   </div>
 
+  <div class="admin-policy-card">
+    <div>
+      <h3><i class="fas fa-user-shield"></i> Правило назначения администраторов</h3>
+      <p>Администратором можно назначить только проверенного активного участника: аккаунт не заблокирован, зарегистрирован не менее <strong><%= adminPolicy.minAccountAgeDays %> дней</strong>, имеет минимум <strong><%= adminPolicy.minApprovedReviews %> одобренные рецензии</strong> или <strong><%= adminPolicy.minForumPosts %> сообщений форума</strong>, держит на полках минимум <strong><%= adminPolicy.minLibraryBooks %> книги</strong> и набрал индекс активности от <strong><%= adminPolicy.minActivityScore %></strong>.</p>
+      <small>Индекс: месяц на сайте ×<%= adminPolicy.weights.accountAgeMonth %>, одобренная рецензия ×<%= adminPolicy.weights.approvedReview %>, сообщение форума ×<%= adminPolicy.weights.forumPost %>, книга на полке ×<%= adminPolicy.weights.libraryBook %>. При назначении обязательно сохраняется причина — почему выбран именно этот пользователь.</small>
+    </div>
+    <div class="admin-limit">
+      <span><%= currentAdminCount %>/<%= adminPolicy.maxAdmins %></span>
+      <small>администраторов</small>
+    </div>
+  </div>
+
   <!-- Таблица пользователей -->
   <div class="table-responsive">
     <table class="modern-table">
@@ -55,6 +67,7 @@
           <th><i class="fas fa-book"></i> Книг</th>
           <th><i class="fas fa-star"></i> Рецензий</th>
           <th><i class="fas fa-calendar"></i> Регистрация</th>
+          <th><i class="fas fa-chart-line"></i> Активность</th>
           <th><i class="fas fa-cog"></i> Действия</th>
         </tr>
       </thead>
@@ -84,6 +97,18 @@
               <td><%= profileUser.reviewsCount || 0 %></td>
               <td><%= new Date(profileUser.createdAt).toLocaleDateString('ru-RU') %></td>
               <td>
+                <div class="activity-cell" title="<%= profileUser.adminEligibility.summary %>">
+                  <strong><%= profileUser.adminEligibility.activityScore %></strong>
+                  <small><%= profileUser.adminEligibility.accountAgeDays %> дн., <%= profileUser.approvedReviewsCount || 0 %>/<%= profileUser.reviewsCount || 0 %> рец., <%= profileUser.booksCount || 0 %> книг, <%= profileUser.forumPostsCount || 0 %> форум</small>
+                  <span class="badge <%= profileUser.adminEligibility.canBeAdmin ? 'badge-success' : 'badge-warning' %>">
+                    <%= profileUser.adminEligibility.canBeAdmin ? 'Кандидат в админы' : 'Не подходит' %>
+                  </span>
+                  <% if (profileUser.role === 'admin' && profileUser.admin_appointment_reason) { %>
+                    <small title="Причина назначения">Причина: <%= profileUser.admin_appointment_reason %></small>
+                  <% } %>
+                </div>
+              </td>
+              <td>
                 <div class="action-buttons">
                   <a href="/profile/<%= profileUser.id %>" target="_blank" rel="noopener" class="action-btn approve" title="Открыть профиль"><i class="fas fa-user"></i></a>
                   <% if (profileUser.id !== user.id) { %>
@@ -97,11 +122,31 @@
 
                   <% if (profileUser.role !== 'admin' || profileUser.id !== user.id) { %>
                     <select class="role-select" data-user-id="<%= profileUser.id %>"
+                            data-current-role="<%= profileUser.role %>"
                             style="padding: 0.35rem; border-radius: var(--radius-sm); background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
+                      <% if (profileUser.role === 'admin') { %>
+                        <option value="admin" selected>Администратор</option>
+                      <% } %>
                       <option value="user" <%= profileUser.role === 'user' ? 'selected' : '' %>>Пользователь</option>
                       <option value="moderator" <%= profileUser.role === 'moderator' ? 'selected' : '' %>>Модератор</option>
-                      <option value="admin" <%= profileUser.role === 'admin' ? 'selected' : '' %>>Админ</option>
                     </select>
+
+                    <% if (profileUser.role !== 'admin') { %>
+                      <% if (profileUser.adminEligibility.canBeAdmin) { %>
+                        <form action="/admin/users/<%= profileUser.id %>/role" method="POST" class="admin-appoint-form">
+                          <input type="hidden" name="role" value="admin">
+                          <textarea name="reason" minlength="<%= adminPolicy.minReasonLength %>" maxlength="<%= adminPolicy.maxReasonLength %>" required><%= `Пользователь выбран администратором, потому что ${profileUser.adminEligibility.positiveReason}.` %></textarea>
+                          <button type="submit" class="action-btn admin-promote" title="Назначить администратором">
+                            <i class="fas fa-user-shield"></i> Назначить админом
+                          </button>
+                        </form>
+                      <% } else { %>
+                        <div class="admin-denied" title="<%= profileUser.adminEligibility.summary %>">
+                          <i class="fas fa-ban"></i> Админ недоступен
+                          <small><%= profileUser.adminEligibility.summary %></small>
+                        </div>
+                      <% } %>
+                    <% } %>
                   <% } %>
                 </div>
               </td>
@@ -109,7 +154,7 @@
           <% }) %>
         <% } else { %>
           <tr>
-            <td colspan="9" style="text-align: center; padding: 3rem;">
+            <td colspan="10" style="text-align: center; padding: 3rem;">
               <i class="fas fa-users" style="font-size: 3rem; opacity: 0.3; margin-bottom: 1rem; display: block;"></i>
               <h3>Пользователи не найдены</h3>
             </td>
@@ -145,6 +190,97 @@
   <% } %>
 </div>
 
+
+<style>
+  .admin-policy-card {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--admin-radius, 12px);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .admin-policy-card h3 {
+    margin: 0 0 0.5rem;
+  }
+
+  .admin-policy-card p {
+    margin: 0 0 0.35rem;
+  }
+
+  .admin-policy-card small,
+  .activity-cell small {
+    opacity: 0.75;
+  }
+
+  .admin-limit {
+    min-width: 120px;
+    text-align: center;
+    padding: 0.75rem;
+    border-radius: var(--admin-radius, 12px);
+    background: rgba(251, 191, 36, 0.12);
+  }
+
+  .admin-limit span {
+    display: block;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #fbbf24;
+  }
+
+  .activity-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .admin-appoint-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 220px;
+  }
+
+  .admin-appoint-form textarea {
+    min-height: 64px;
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    resize: vertical;
+  }
+
+  .admin-promote {
+    width: auto;
+    background: rgba(251, 191, 36, 0.2);
+    color: #fde68a;
+    border: 1px solid rgba(251, 191, 36, 0.45);
+  }
+
+  .admin-denied {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    max-width: 240px;
+    color: #fecaca;
+  }
+
+  .badge-warning {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fde68a;
+  }
+
+  @media (max-width: 768px) {
+    .admin-policy-card {
+      flex-direction: column;
+    }
+  }
+</style>
+
 <script>
   // Обработка смены роли
   document.querySelectorAll('.role-select').forEach(select => {
@@ -152,8 +288,8 @@
       const userId = this.dataset.userId;
       const role = this.value;
 
-      if (!confirm('Изменить роль пользователя?')) {
-        this.value = this.querySelector('option[selected]')?.value || 'user';
+      if (!confirm('Изменить роль пользователя? Для администратора используйте отдельную форму с причиной назначения.')) {
+        this.value = this.dataset.currentRole || 'user';
         return;
       }
 
@@ -167,16 +303,20 @@
         });
 
         if (response.ok) {
+          const data = await response.json().catch(() => ({}));
+          if (data.message) {
+            alert(data.message);
+          }
           location.reload();
         } else {
           const data = await response.json();
           alert(data.error || 'Ошибка при изменении роли');
-          this.value = this.querySelector('option[selected]')?.value || 'user';
+          this.value = this.dataset.currentRole || 'user';
         }
       } catch (error) {
         console.error('Error:', error);
         alert('Ошибка при изменении роли');
-        this.value = this.querySelector('option[selected]')?.value || 'user';
+        this.value = this.dataset.currentRole || 'user';
       }
     });
   });
