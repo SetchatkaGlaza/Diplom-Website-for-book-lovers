@@ -44,6 +44,7 @@
         rows="10"
         required
         minlength="10"
+        maxlength="5000"
         placeholder="Напишите, что вы думаете об этой книге..."
       ><%= content ? content : review.content %></textarea>
       <small>Минимум 10 символов</small>
@@ -128,6 +129,12 @@
     color: #fbbf24;
   }
   
+  .form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+    max-height: 360px;
+  }
+
   .form-actions {
     display: flex;
     gap: 1rem;

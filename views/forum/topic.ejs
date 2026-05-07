@@ -253,6 +253,33 @@
     return { quotes, rest: text };
   }
 
+  function getSmartPreview(text, maxLength = 280) {
+    const normalized = (text || '').replace(/\s+/g, ' ').trim();
+    if (normalized.length <= maxLength) return { text: normalized, isTruncated: false };
+
+    const slice = normalized.slice(0, maxLength + 1);
+    const lastSpace = slice.lastIndexOf(' ');
+    const end = lastSpace > Math.floor(maxLength * 0.65) ? lastSpace : maxLength;
+    return { text: `${normalized.slice(0, end).trim()}…`, isTruncated: true };
+  }
+
+  function renderExpandableText(text) {
+    const preview = getSmartPreview(text);
+    const fullHtml = escapeHtml(text).replace(/\n/g, '<br>');
+
+    if (!preview.isTruncated) {
+      return `<div class="forum-post-text">${fullHtml}</div>`;
+    }
+
+    return `
+      <div class="forum-post-text">${escapeHtml(preview.text)}</div>
+      <details class="read-more-block forum-read-more">
+        <summary>Читать дальше</summary>
+        <div class="forum-post-text full-text">${fullHtml}</div>
+      </details>
+    `;
+  }
+
   function renderPostContent(rawContent) {
     const decoded = decodeRawPostContent(rawContent).trim();
     if (!decoded) return '';
@@ -265,9 +292,7 @@
       </blockquote>
     `).join('');
 
-    const mainTextHtml = rest
-      ? `<div class="forum-post-text">${escapeHtml(rest).replace(/\n/g, '<br>')}</div>`
-      : '';
+    const mainTextHtml = rest ? renderExpandableText(rest) : '';
 
     return `${quoteHtml}${mainTextHtml}`;
   }
@@ -705,6 +730,17 @@
     overflow-wrap: break-word;
     white-space: normal;
   }
+
+  .read-more-block summary {
+    color: #fbbf24;
+    cursor: pointer;
+    font-weight: 700;
+    margin-top: 0.5rem;
+  }
+
+  .forum-read-more .full-text {
+    margin-top: 0.5rem;
+  }
   .forum-quote-box {
     margin: 0 0 0.8rem;
     padding: 0.8rem 0.9rem;
@@ -890,6 +926,8 @@
     font-size: 1rem;
     line-height: 1.6;
     resize: vertical;
+    min-height: 120px;
+    max-height: 360px;
     margin-bottom: 1rem;
     font-family: inherit;
   }

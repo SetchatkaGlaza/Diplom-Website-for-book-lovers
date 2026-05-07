@@ -888,7 +888,7 @@ exports.deleteGenre = async (req, res) => {
 exports.getReviews = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = 20;
+    const limit = 3;
     const offset = (page - 1) * limit;
     const status = req.query.status || 'all';
     
