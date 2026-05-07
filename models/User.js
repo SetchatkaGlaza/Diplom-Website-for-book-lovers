@@ -1,5 +1,30 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes, Op } = require('sequelize');
 const sequelize = require('../config/database');
+
+const MAX_ADMINS = 5;
+
+function getMaxAdminsErrorMessage() {
+  return `На сайте может быть не больше ${MAX_ADMINS} администраторов`;
+}
+
+async function countAdmins(transaction) {
+  return User.count({
+    where: { role: 'admin' },
+    transaction
+  });
+}
+
+async function assertAdminSlotsAvailable(adminsToAdd, transaction) {
+  if (adminsToAdd <= 0) {
+    return;
+  }
+
+  const adminsCount = await countAdmins(transaction);
+
+  if (adminsCount + adminsToAdd > MAX_ADMINS) {
+    throw new Error(getMaxAdminsErrorMessage());
+  }
+}
 
 const User = sequelize.define('User', {
   // id создастся автоматически
@@ -53,10 +78,58 @@ const User = sequelize.define('User', {
   email_verification_token: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  admin_appointed_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  admin_appointed_by: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  admin_appointment_reason: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 }, {
   // Добавит поля createdAt и updatedAt автоматически
   timestamps: true,
+  hooks: {
+    async beforeSave(user, options) {
+      if (!user.changed('role') || user.role !== 'admin' || user.previous('role') === 'admin') {
+        return;
+      }
+
+      await assertAdminSlotsAvailable(1, options.transaction);
+    },
+
+    async beforeBulkCreate(users, options) {
+      const newAdminsCount = users.filter((user) => user.role === 'admin').length;
+      await assertAdminSlotsAvailable(newAdminsCount, options.transaction);
+    },
+
+    async beforeBulkUpdate(options) {
+      if (!options.attributes || options.attributes.role !== 'admin') {
+        return;
+      }
+
+      const targetNonAdminsCount = await User.count({
+        where: {
+          [Op.and]: [
+            options.where || {},
+            { role: { [Op.ne]: 'admin' } }
+          ]
+        },
+        transaction: options.transaction
+      });
+
+      await assertAdminSlotsAvailable(targetNonAdminsCount, options.transaction);
+    }
+  }
 });
+
+User.MAX_ADMINS = MAX_ADMINS;
+User.getMaxAdminsErrorMessage = getMaxAdminsErrorMessage;
+User.countAdmins = countAdmins;
 
 module.exports = User;

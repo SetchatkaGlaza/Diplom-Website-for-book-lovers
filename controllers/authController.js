@@ -4,9 +4,9 @@ const { fn, col, where: sequelizeWhere } = require('sequelize');
 const notificationService = require('../services/notificationService');
 
 const SALT_ROUNDS = 10;
-const MAX_LOGIN_ATTEMPTS = 5;
 const CAPTCHA_THRESHOLD = 3;
-const BLOCK_TIME = 15 * 60 * 1000; // 15 минут в миллисекундах
+const USERNAME_REGEX = /^[A-Za-zА-Яа-яЁё_]+$/u;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function normalizeEmail(email = '') {
   return email.trim().toLowerCase();
@@ -42,6 +42,85 @@ function persistLoginSession(req, user) {
   });
 }
 
+function renderLogin(res, { errors = [], email = '', showCaptcha = false } = {}) {
+  return res.render('auth/login', {
+    title: 'Вход',
+    showCaptcha,
+    errors,
+    email,
+    layout: 'layouts/main'
+  });
+}
+
+function renderRegister(res, { errors = [], name = '', email = '', agree = false } = {}) {
+  return res.render('auth/register', {
+    title: 'Регистрация',
+    errors,
+    name,
+    email,
+    agree,
+    layout: 'layouts/main'
+  });
+}
+
+function validateCaptchaInput(req, captcha) {
+  if (!captcha) {
+    return 'Введите проверочный код с картинки';
+  }
+
+  if (!req.session.captcha || !req.session.captchaExpires || req.session.captchaExpires < Date.now()) {
+    return 'Срок действия проверочного кода истёк. Обновите картинку и попробуйте снова';
+  }
+
+  if (captcha !== req.session.captcha) {
+    return 'Проверочный код введён неверно';
+  }
+
+  delete req.session.captcha;
+  delete req.session.captchaExpires;
+  return null;
+}
+
+function validateEmail(email) {
+  if (!email) {
+    return 'Введите email';
+  }
+
+  if (email.length > 254 || !EMAIL_REGEX.test(email)) {
+    return 'Введите корректный email, например name@example.com';
+  }
+
+  return null;
+}
+
+function validateUsername(name) {
+  if (!name) {
+    return 'Введите имя пользователя';
+  }
+
+  if (name.length < 2 || name.length > 30) {
+    return 'Имя пользователя должно содержать от 2 до 30 символов';
+  }
+
+  if (!USERNAME_REGEX.test(name)) {
+    return 'Имя пользователя может содержать только русские/латинские буквы и нижнее подчёркивание';
+  }
+
+  return null;
+}
+
+function validatePassword(password) {
+  if (!password) {
+    return 'Введите пароль';
+  }
+
+  if (password.length < 6 || password.length > 128) {
+    return 'Пароль должен содержать от 6 до 128 символов';
+  }
+
+  return null;
+}
+
 async function getLoginAttempt(ip, email) {
   return LoginAttempt.findOne({
     where: {
@@ -51,42 +130,13 @@ async function getLoginAttempt(ip, email) {
   });
 }
 
-async function checkLoginAttempts(ip, email) {
+async function getLoginAttempts(ip, email) {
   try {
     const attempt = await getLoginAttempt(ip, email);
-    
-    if (!attempt) {
-      return { allowed: true, attempts: 0 };
-    }
-    
-    if (attempt.blocked_until && attempt.blocked_until > new Date()) {
-      const waitMinutes = Math.ceil((attempt.blocked_until - new Date()) / (60 * 1000));
-      return { 
-        allowed: false, 
-        blocked: true, 
-        waitMinutes,
-        attempts: attempt.attempts 
-      };
-    }
-    
-    if (attempt.blocked_until && attempt.blocked_until <= new Date()) {
-      await attempt.update({
-        attempts: 0,
-        blocked_until: null,
-        last_attempt: new Date()
-      });
-      return { allowed: true, attempts: 0 };
-    }
-    
-    return {
-      allowed: true,
-      attempts: attempt.attempts,
-      remaining: MAX_LOGIN_ATTEMPTS - attempt.attempts
-    };
-    
+    return attempt ? attempt.attempts : 0;
   } catch (error) {
     console.error('Ошибка при проверке попыток входа:', error);
-    return { allowed: true, attempts: 0 };
+    return 0;
   }
 }
 
@@ -99,21 +149,21 @@ async function registerFailedLogin(ip, email) {
       ip_address: ip,
       email,
       attempts: 1,
+      blocked_until: null,
       last_attempt: now
     });
-    return { blocked: false, attempts: 1 };
+    return { attempts: 1 };
   }
 
   const nextAttempts = attempt.attempts + 1;
-  const shouldBlock = nextAttempts >= MAX_LOGIN_ATTEMPTS;
 
   await attempt.update({
     attempts: nextAttempts,
-    blocked_until: shouldBlock ? new Date(Date.now() + BLOCK_TIME) : null,
+    blocked_until: null,
     last_attempt: now
   });
 
-  return { blocked: shouldBlock, attempts: nextAttempts };
+  return { attempts: nextAttempts };
 }
 
 async function resetLoginAttempts(ip, email) {
@@ -135,111 +185,117 @@ exports.getLogin = async (req, res) => {
   }
   
   const showCaptcha = req.session.showCaptcha === true;
-  
-  res.render('auth/login', {
-    title: 'Вход',
-    showCaptcha,
-    errors: [],
-    email: '',      
-    layout: 'layouts/main'
-  });
+  return renderLogin(res, { showCaptcha });
 };
 
 exports.postLogin = async (req, res) => {
+  const email = normalizeEmail(req.body.email || '');
+  const password = req.body.password || '';
+  const captcha = (req.body.captcha || '').trim().toLowerCase();
+  const ip = req.ip;
+
   try {
-    const email = normalizeEmail(req.body.email || '');
-    const password = req.body.password || '';
-    const captcha = (req.body.captcha || '').trim().toLowerCase();
-    const ip = req.ip;
+    const errors = [];
+    const emailError = validateEmail(email);
+    const passwordError = !password ? 'Введите пароль' : null;
+    let previousAttempts = 0;
 
-    if (!email || !password) {
-      req.flash('error', 'Пожалуйста, введите email и пароль');
-      return res.redirect('/auth/login');
+    if (emailError) {
+      errors.push({ msg: emailError });
     }
-    
-    const attemptCheck = await checkLoginAttempts(ip, email);
-    
-    if (!attemptCheck.allowed) {
-      if (attemptCheck.blocked) {
-        req.flash('error', `Слишком много неудачных попыток. Попробуйте через ${attemptCheck.waitMinutes} минут.`);
-      } else {
-        req.flash('error', 'Превышено количество попыток. Попробуйте позже.');
-      }
-      return res.redirect('/auth/login');
-    }
-    
-    const shouldShowCaptcha = attemptCheck.attempts >= CAPTCHA_THRESHOLD;
 
-    if (shouldShowCaptcha) {
-      if (!captcha) {
-        req.session.showCaptcha = true;
-        req.flash('error', 'Пожалуйста, введите код с картинки');
-        return res.redirect('/auth/login');
-      }
-      
-      if (!req.session.captcha || captcha !== req.session.captcha) {
-        req.session.showCaptcha = true;
-        req.flash('error', 'Неверный код с картинки');
-        return res.redirect('/auth/login');
-      }
-      
-      delete req.session.captcha;
+    if (passwordError) {
+      errors.push({ msg: passwordError });
     }
-    
+
+    if (!emailError) {
+      previousAttempts = await getLoginAttempts(ip, email);
+    }
+
+    const shouldValidateCaptcha = req.session.showCaptcha === true || previousAttempts >= CAPTCHA_THRESHOLD;
+
+    if (shouldValidateCaptcha) {
+      const captchaError = validateCaptchaInput(req, captcha);
+      if (captchaError) {
+        req.session.showCaptcha = true;
+        errors.push({ msg: captchaError });
+      }
+    }
+
+    if (errors.length > 0) {
+      return renderLogin(res, {
+        errors,
+        email,
+        showCaptcha: req.session.showCaptcha === true || previousAttempts >= CAPTCHA_THRESHOLD
+      });
+    }
+
     const user = await findUserByEmail(email);
-    
+
     if (!user) {
       const failResult = await registerFailedLogin(ip, email);
       req.session.showCaptcha = failResult.attempts >= CAPTCHA_THRESHOLD;
-      if (failResult.blocked) {
-        req.flash('error', 'Слишком много неудачных попыток. Попробуйте через 15 минут.');
-        return res.redirect('/auth/login');
-      }
-      req.flash('error', 'Неверный email или пароль');
-      return res.redirect('/auth/login');
+
+      return renderLogin(res, {
+        errors: [{ msg: 'Пользователь с таким email не найден' }],
+        email,
+        showCaptcha: req.session.showCaptcha
+      });
     }
-    
+
     if (user.isBlocked) {
       if (user.blocked_until && user.blocked_until > new Date()) {
         const waitMinutes = Math.ceil((user.blocked_until - new Date()) / (60 * 1000));
-        req.flash('error', `Аккаунт заблокирован. Попробуйте через ${waitMinutes} минут.`);
+        errors.push({ msg: `Аккаунт заблокирован администратором. Попробуйте через ${waitMinutes} минут.` });
       } else if (user.blocked_until && user.blocked_until <= new Date()) {
         await user.update({ isBlocked: false, blocked_until: null });
       } else {
-        req.flash('error', 'Аккаунт заблокирован администратором');
+        errors.push({ msg: 'Аккаунт заблокирован администратором' });
       }
-      return res.redirect('/auth/login');
+
+      if (errors.length > 0) {
+        return renderLogin(res, {
+          errors,
+          email,
+          showCaptcha: req.session.showCaptcha === true
+        });
+      }
     }
-    
+
     const storedPasswordHash = String(user.password_hash || '').trim();
     const isMatch = await bcrypt.compare(password, storedPasswordHash);
-    
+
     if (!isMatch) {
       const failResult = await registerFailedLogin(ip, email);
       req.session.showCaptcha = failResult.attempts >= CAPTCHA_THRESHOLD;
-      if (failResult.blocked) {
-        req.flash('error', 'Слишком много неудачных попыток. Попробуйте через 15 минут.');
-        return res.redirect('/auth/login');
-      }
-      req.flash('error', 'Неверный email или пароль');
-      return res.redirect('/auth/login');
+
+      return renderLogin(res, {
+        errors: [{ msg: 'Пароль указан неверно' }],
+        email,
+        showCaptcha: req.session.showCaptcha
+      });
     }
-    
+
     await resetLoginAttempts(ip, email);
     req.session.showCaptcha = false;
-    
+    delete req.session.captcha;
+    delete req.session.captchaExpires;
+
     const redirectTo = req.session.returnTo || '/';
     await persistLoginSession(req, user);
-    
+
     req.flash('success', 'Вы успешно вошли в систему!');
-    
+
     delete req.session.returnTo;
     res.redirect(redirectTo);
-    
+
   } catch (error) {
     console.error('Ошибка при входе:', error);
-    req.flash('error', 'Произошла ошибка при входе');
-    res.redirect('/auth/login');
+    return renderLogin(res, {
+      errors: [{ msg: 'Произошла ошибка при входе. Попробуйте ещё раз' }],
+      email,
+      showCaptcha: req.session.showCaptcha === true
+    });
   }
 };
 
@@ -248,73 +304,59 @@ exports.getRegister = (req, res) => {
     return res.redirect('/');
   }
   
-  res.render('auth/register', {
-    title: 'Регистрация',
-    errors: [],
-    name: '',     
-    email: '',
-    layout: 'layouts/main'
-  });
+  return renderRegister(res);
 };
 
 exports.postRegister = async (req, res) => {
+  const name = (req.body.name || '').trim();
+  const email = normalizeEmail(req.body.email || '');
+  const password = req.body.password || '';
+  const password2 = req.body.password2 || '';
+  const captcha = (req.body.captcha || '').trim().toLowerCase();
+  const agree = req.body.agree === 'on';
+
   try {
-    const name = (req.body.name || '').trim();
-    const email = normalizeEmail(req.body.email || '');
-    const { password, password2 } = req.body;
-    const captcha = (req.body.captcha || '').trim().toLowerCase();
-    
-    if (!req.session.captcha || captcha !== req.session.captcha) {
-      req.flash('error', 'Неверный код с картинки');
-      return res.redirect('/auth/register');
-    }
-    
-    delete req.session.captcha;
-    
     const errors = [];
+    const usernameError = validateUsername(name);
+    const emailError = validateEmail(email);
+    const passwordError = validatePassword(password);
 
-    if (!name || !email || !password || !password2) {
-      errors.push({ msg: 'Пожалуйста, заполните все поля' });
+    if (usernameError) {
+      errors.push({ msg: usernameError });
     }
 
-    if (name && name.length < 2) {
-      errors.push({ msg: 'Имя должно содержать минимум 2 символа' });
+    if (emailError) {
+      errors.push({ msg: emailError });
     }
 
-    if (password && password.length < 6) {
-      errors.push({ msg: 'Пароль должен содержать минимум 6 символов' });
+    if (passwordError) {
+      errors.push({ msg: passwordError });
     }
 
-    if (password !== password2) {
+    if (!password2) {
+      errors.push({ msg: 'Повторите пароль' });
+    } else if (password && password !== password2) {
       errors.push({ msg: 'Пароли не совпадают' });
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (email && !emailRegex.test(email)) {
-      errors.push({ msg: 'Введите корректный email' });
+    if (!agree) {
+      errors.push({ msg: 'Подтвердите согласие с правилами сайта' });
+    }
+
+    const captchaError = validateCaptchaInput(req, captcha);
+    if (captchaError) {
+      errors.push({ msg: captchaError });
     }
 
     if (errors.length > 0) {
-      return res.render('auth/register', {
-        title: 'Регистрация',
-        errors,
-        name,
-        email,
-        layout: 'layouts/main'
-      });
+      return renderRegister(res, { errors, name, email, agree });
     }
 
-    const existingUser = await User.findOne({ where: { email } });
-    
+    const existingUser = await findUserByEmail(email);
+
     if (existingUser) {
       errors.push({ msg: 'Пользователь с таким email уже существует' });
-      return res.render('auth/register', {
-        title: 'Регистрация',
-        errors,
-        name,
-        email,
-        layout: 'layouts/main'
-      });
+      return renderRegister(res, { errors, name, email, agree });
     }
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
@@ -338,8 +380,12 @@ exports.postRegister = async (req, res) => {
 
   } catch (error) {
     console.error('Ошибка при регистрации:', error);
-    req.flash('error', 'Произошла ошибка при регистрации');
-    res.redirect('/auth/register');
+    return renderRegister(res, {
+      errors: [{ msg: 'Произошла ошибка при регистрации. Попробуйте ещё раз' }],
+      name,
+      email,
+      agree
+    });
   }
 };
 

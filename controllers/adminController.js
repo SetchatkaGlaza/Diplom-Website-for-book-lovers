@@ -1,4 +1,4 @@
-const { User, Book, Genre, Review, UserBook, sequelize } = require('../models');
+const { User, Book, Genre, Review, UserBook, ForumPost, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const path = require('path');
@@ -8,6 +8,139 @@ const notificationService = require('../services/notificationService');
 const uploadService = require('../services/uploadService');
 
 const SALT_ROUNDS = 10;
+const ADMIN_POLICY = {
+  maxAdmins: User.MAX_ADMINS,
+  minAccountAgeDays: 30,
+  minApprovedReviews: 3,
+  minForumPosts: 5,
+  minLibraryBooks: 3,
+  minActivityScore: 50,
+  maxReasonLength: 500,
+  minReasonLength: 20,
+  weights: {
+    accountAgeMonth: 5,
+    approvedReview: 8,
+    forumPost: 2,
+    libraryBook: 1
+  }
+};
+
+function getAccountAgeDays(createdAt) {
+  const created = new Date(createdAt);
+
+  if (Number.isNaN(created.getTime())) {
+    return 0;
+  }
+
+  return Math.max(0, Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24)));
+}
+
+function getActivityScore({ accountAgeDays = 0, approvedReviewsCount = 0, booksCount = 0, forumPostsCount = 0 }) {
+  const accountAgeMonths = Math.floor(accountAgeDays / 30);
+
+  return (accountAgeMonths * ADMIN_POLICY.weights.accountAgeMonth)
+    + (approvedReviewsCount * ADMIN_POLICY.weights.approvedReview)
+    + (forumPostsCount * ADMIN_POLICY.weights.forumPost)
+    + (booksCount * ADMIN_POLICY.weights.libraryBook);
+}
+
+function getAdminEligibility(user, stats, currentAdminCount) {
+  const accountAgeDays = getAccountAgeDays(user.createdAt);
+  const activityScore = getActivityScore({ ...stats, accountAgeDays });
+  const hasEnoughTrustedContent = stats.approvedReviewsCount >= ADMIN_POLICY.minApprovedReviews
+    || stats.forumPostsCount >= ADMIN_POLICY.minForumPosts;
+
+  const checks = [
+    {
+      passed: !user.isBlocked,
+      message: 'аккаунт не заблокирован'
+    },
+    {
+      passed: accountAgeDays >= ADMIN_POLICY.minAccountAgeDays,
+      message: `на сайте не менее ${ADMIN_POLICY.minAccountAgeDays} дней`
+    },
+    {
+      passed: hasEnoughTrustedContent,
+      message: `есть минимум ${ADMIN_POLICY.minApprovedReviews} одобренные рецензии или ${ADMIN_POLICY.minForumPosts} сообщений форума`
+    },
+    {
+      passed: stats.booksCount >= ADMIN_POLICY.minLibraryBooks,
+      message: `на полках минимум ${ADMIN_POLICY.minLibraryBooks} книги`
+    },
+    {
+      passed: activityScore >= ADMIN_POLICY.minActivityScore,
+      message: `индекс активности от ${ADMIN_POLICY.minActivityScore}`
+    }
+  ];
+
+  const hasFreeAdminSlot = user.role === 'admin' || currentAdminCount < ADMIN_POLICY.maxAdmins;
+  const missingReasons = checks.filter((check) => !check.passed).map((check) => check.message);
+
+  if (!hasFreeAdminSlot) {
+    missingReasons.push(`лимит ${ADMIN_POLICY.maxAdmins} администраторов уже достигнут`);
+  }
+
+  const positiveReason = [
+    `аккаунт существует ${accountAgeDays} дн.`,
+    `${stats.approvedReviewsCount} одобренных рецензий`,
+    `${stats.forumPostsCount} сообщений форума`,
+    `${stats.booksCount} книг на полках`,
+    `индекс активности ${activityScore}`
+  ].join(', ');
+
+  return {
+    canBeAdmin: missingReasons.length === 0,
+    accountAgeDays,
+    activityScore,
+    missingReasons,
+    positiveReason,
+    summary: missingReasons.length > 0
+      ? missingReasons.join('; ')
+      : `подходит: ${positiveReason}`
+  };
+}
+
+function validateAdminAppointmentReason(reason) {
+  const normalizedReason = String(reason || '').trim();
+
+  if (normalizedReason.length < ADMIN_POLICY.minReasonLength) {
+    return {
+      normalizedReason,
+      error: `Укажите причину назначения администратора: минимум ${ADMIN_POLICY.minReasonLength} символов`
+    };
+  }
+
+  if (normalizedReason.length > ADMIN_POLICY.maxReasonLength) {
+    return {
+      normalizedReason,
+      error: `Причина назначения администратора не должна быть длиннее ${ADMIN_POLICY.maxReasonLength} символов`
+    };
+  }
+
+  return { normalizedReason, error: null };
+}
+
+function wantsJson(req) {
+  return req.xhr || req.is('application/json') || (req.get('accept') || '').includes('application/json');
+}
+
+function sendRoleError(req, res, message, status = 400) {
+  if (wantsJson(req)) {
+    return res.status(status).json({ error: message });
+  }
+
+  req.flash('error', message);
+  return res.redirect('/admin/users');
+}
+
+function sendRoleSuccess(req, res, message) {
+  if (wantsJson(req)) {
+    return res.json({ success: true, message });
+  }
+
+  req.flash('success', message);
+  return res.redirect('/admin/users');
+}
 
 // Функция для получения публичного URL обложки
 function getCoverUrl(coverImage, coverPublicId) {
@@ -452,15 +585,20 @@ exports.getUsers = async (req, res) => {
       offset
     });
     
+    const currentAdminCount = await User.countAdmins();
+
     const usersWithStats = await Promise.all(
       users.map(async (user) => {
         const booksCount = await UserBook.count({ where: { user_id: user.id } });
         const reviewsCount = await Review.count({ where: { user_id: user.id } });
-        
+        const approvedReviewsCount = await Review.count({ where: { user_id: user.id, is_moderated: true } });
+        const forumPostsCount = await ForumPost.count({ where: { user_id: user.id } });
+        const stats = { booksCount, reviewsCount, approvedReviewsCount, forumPostsCount };
+
         return {
           ...user.toJSON(),
-          booksCount,
-          reviewsCount
+          ...stats,
+          adminEligibility: getAdminEligibility(user, stats, currentAdminCount)
         };
       })
     );
@@ -476,6 +614,8 @@ exports.getUsers = async (req, res) => {
       currentPage: 'users',
       users: usersWithStats,
       roleStats,
+      adminPolicy: ADMIN_POLICY,
+      currentAdminCount,
       search,
       currentRole: role,
       currentPageNum: page,
@@ -496,34 +636,90 @@ exports.updateUserRole = async (req, res) => {
   try {
     const userId = req.params.id;
     const { role } = req.body;
-    
+
     const allowedRoles = ['user', 'moderator', 'admin'];
     if (!allowedRoles.includes(role)) {
-      req.flash('error', 'Недопустимая роль');
-      return res.redirect('/admin/users');
+      return sendRoleError(req, res, 'Недопустимая роль');
     }
-    
+
     if (userId == req.session.user.id && role !== 'admin') {
-      req.flash('error', 'Вы не можете понизить свою роль');
-      return res.redirect('/admin/users');
+      return sendRoleError(req, res, 'Вы не можете понизить свою роль');
     }
-    
+
     const user = await User.findByPk(userId);
-    
+
     if (!user) {
-      req.flash('error', 'Пользователь не найден');
-      return res.redirect('/admin/users');
+      return sendRoleError(req, res, 'Пользователь не найден', 404);
     }
-    
-    await user.update({ role });
-    
-    req.flash('success', `Роль пользователя ${user.name} изменена на ${role}`);
-    res.redirect('/admin/users');
-    
+
+    let adminAppointmentReason = null;
+
+    if (role === 'admin' && user.role !== 'admin') {
+      const { normalizedReason, error: reasonError } = validateAdminAppointmentReason(req.body.reason);
+
+      if (reasonError) {
+        return sendRoleError(req, res, reasonError);
+      }
+
+      adminAppointmentReason = normalizedReason;
+      const currentAdminCount = await User.countAdmins();
+
+      if (currentAdminCount >= ADMIN_POLICY.maxAdmins) {
+        return sendRoleError(
+          req,
+          res,
+          `Нельзя назначить администратора: лимит ${ADMIN_POLICY.maxAdmins} администраторов уже достигнут`
+        );
+      }
+
+      const stats = {
+        booksCount: await UserBook.count({ where: { user_id: user.id } }),
+        reviewsCount: await Review.count({ where: { user_id: user.id } }),
+        approvedReviewsCount: await Review.count({ where: { user_id: user.id, is_moderated: true } }),
+        forumPostsCount: await ForumPost.count({ where: { user_id: user.id } })
+      };
+      const eligibility = getAdminEligibility(user, stats, currentAdminCount);
+
+      if (!eligibility.canBeAdmin) {
+        return sendRoleError(
+          req,
+          res,
+          `Нельзя назначить администратора: ${eligibility.summary}. Администратор должен быть проверенным активным участником сообщества.`
+        );
+      }
+    }
+
+    const updateData = { role };
+
+    if (role === 'admin' && user.role !== 'admin') {
+      updateData.admin_appointed_at = new Date();
+      updateData.admin_appointed_by = req.session.user.id;
+      updateData.admin_appointment_reason = adminAppointmentReason;
+    }
+
+    if (role !== 'admin') {
+      updateData.admin_appointed_at = null;
+      updateData.admin_appointed_by = null;
+      updateData.admin_appointment_reason = null;
+    }
+
+    await user.update(updateData);
+
+    const roleLabels = {
+      user: 'пользователь',
+      moderator: 'модератор',
+      admin: 'администратор'
+    };
+    return sendRoleSuccess(req, res, `Роль пользователя ${user.name} изменена на «${roleLabels[role]}»`);
+
   } catch (error) {
     console.error('Ошибка при изменении роли:', error);
-    req.flash('error', 'Произошла ошибка');
-    res.redirect('/admin/users');
+
+    if (error.message === User.getMaxAdminsErrorMessage()) {
+      return sendRoleError(req, res, error.message);
+    }
+
+    return sendRoleError(req, res, 'Произошла ошибка');
   }
 };
 
