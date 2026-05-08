@@ -2362,10 +2362,15 @@ body.theme-dark select {
 
 .field-error {
   display: block;
-  margin-top: 0.35rem;
-  color: var(--danger);
+  margin-top: 0.4rem;
+  color: #b91c1c;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+body.theme-dark .field-error {
+  color: #fca5a5;
 }
 
 input.is-invalid,
