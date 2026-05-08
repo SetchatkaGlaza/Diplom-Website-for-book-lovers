@@ -74,7 +74,7 @@
                 <% const userReviewPreview = truncateText(item.book.userReview.content, 180); %>
                 <p class="review-excerpt"><%= userReviewPreview.text %></p>
                 <% if (userReviewPreview.isTruncated) { %>
-                  <details class="read-more-block"><summary>Читать дальше</summary><p><%= userReviewPreview.fullText %></p></details>
+                  <details class="read-more-block"><summary><span class="more-label">Читать дальше</span><span class="less-label">Свернуть</span></summary><p><%= userReviewPreview.fullText %></p></details>
                 <% } %>
                 <a href="/reviews/<%= item.book.userReview.id %>/edit" class="btn-small btn-primary">
                   <i class="fas fa-edit"></i> Редактировать

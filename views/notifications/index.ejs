@@ -54,7 +54,7 @@
               <% const notificationPreview = truncateText(notification.message, 220); %>
               <p class="notification-message"><%= notificationPreview.text %></p>
               <% if (notificationPreview.isTruncated) { %>
-                <details class="read-more-block"><summary>Читать дальше</summary><p><%= notificationPreview.fullText %></p></details>
+                <details class="read-more-block"><summary><span class="more-label">Читать дальше</span><span class="less-label">Свернуть</span></summary><p><%= notificationPreview.fullText %></p></details>
               <% } %>
               
               <% if (notification.link) { %>
