@@ -2440,3 +2440,12 @@ body.theme-dark .view-btn {
 .books-grid.books-list-view .book-cover {
   height: 180px;
 }
+
+.pagination,
+.table-pagination {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+

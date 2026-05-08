@@ -2624,3 +2624,11 @@
     font-size: 0.8rem;
   }
 }
+.table-pagination,
+.pagination {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+

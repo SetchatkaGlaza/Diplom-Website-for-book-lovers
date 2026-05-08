@@ -66,6 +66,44 @@ document.addEventListener('DOMContentLoaded', () => {
       link.classList.add('active');
     }
   });
+
+  const setupCompactPagination = () => {
+    const paginations = document.querySelectorAll('.pagination, .table-pagination');
+
+    paginations.forEach((container) => {
+      const items = Array.from(container.querySelectorAll('.page-link, .pagination-btn'));
+      if (items.length === 0) return;
+
+      const numberedItems = items.filter((item) => /^\d+$/.test(item.textContent.trim()));
+      if (numberedItems.length === 0) return;
+
+      const activeItem = numberedItems.find((item) => item.classList.contains('active'));
+      if (!activeItem) return;
+
+      const maxVisibleNumbers = window.innerWidth <= 768 ? 3 : 7;
+      const activePage = Number(activeItem.textContent.trim());
+      const totalPages = numberedItems.length;
+
+      let start = Math.max(1, activePage - Math.floor(maxVisibleNumbers / 2));
+      let end = Math.min(totalPages, start + maxVisibleNumbers - 1);
+      start = Math.max(1, end - maxVisibleNumbers + 1);
+
+      items.forEach((item) => {
+        const text = item.textContent.trim();
+        const page = /^\d+$/.test(text) ? Number(text) : null;
+
+        if (page === null) {
+          item.style.display = '';
+          return;
+        }
+
+        item.style.display = page >= start && page <= end ? '' : 'none';
+      });
+    });
+  };
+
+  setupCompactPagination();
+  window.addEventListener('resize', setupCompactPagination);
 });
 
 window.addEventListener('scroll', () => {
