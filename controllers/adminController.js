@@ -1,4 +1,4 @@
-const { User, Book, Genre, Review, UserBook, ForumPost, sequelize } = require('../models');
+const { User, Book, Genre, Review, UserBook, ForumPost, EmailChangeRequest, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const path = require('path');
@@ -1135,5 +1135,75 @@ exports.getStatistics = async (req, res) => {
     console.error('Ошибка при загрузке статистики:', error);
     req.flash('error', 'Произошла ошибка при загрузке статистики');
     res.redirect('/admin');
+  }
+};
+
+exports.getEmailChangeRequests = async (req, res) => {
+  try {
+    const status = req.query.status || 'pending';
+    const where = ['pending', 'approved', 'rejected'].includes(status) ? { status } : {};
+    const requests = await EmailChangeRequest.findAll({
+      where,
+      include: [
+        { model: User, as: 'user', attributes: ['id', 'name', 'email'] },
+        { model: User, as: 'resolver', attributes: ['id', 'name'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.render('admin/email-change-requests', {
+      title: 'Запросы на смену email',
+      layout: 'layouts/admin',
+      currentPage: 'email-change-requests',
+      requests,
+      currentStatus: status,
+      user: req.session.user
+    });
+  } catch (error) {
+    console.error('Ошибка при загрузке запросов на смену email:', error);
+    req.flash('error', 'Не удалось загрузить запросы');
+    res.redirect('/admin');
+  }
+};
+
+exports.resolveEmailChangeRequest = async (req, res) => {
+  try {
+    const requestItem = await EmailChangeRequest.findByPk(req.params.id, { include: [{ model: User, as: 'user' }] });
+    if (!requestItem || requestItem.status !== 'pending') {
+      req.flash('error', 'Запрос не найден или уже обработан');
+      return res.redirect('/admin/email-change-requests');
+    }
+
+    const action = req.body.action === 'approve' ? 'approved' : 'rejected';
+    const noteValidation = validatePlainText(req.body.admin_note, 'Комментарий администратора', { max: 1000 });
+
+    if (noteValidation.error) {
+      req.flash('error', noteValidation.error);
+      return res.redirect('/admin/email-change-requests');
+    }
+
+    if (action === 'approved') {
+      const exists = await User.findOne({ where: { email: requestItem.new_email } });
+      if (exists && exists.id !== requestItem.user_id) {
+        req.flash('error', 'Невозможно подтвердить: email уже занят');
+        return res.redirect('/admin/email-change-requests');
+      }
+
+      await requestItem.user.update({ email: requestItem.new_email });
+    }
+
+    await requestItem.update({
+      status: action,
+      admin_note: noteValidation.value || null,
+      resolved_by: req.session.user.id,
+      resolved_at: new Date()
+    });
+
+    req.flash('success', action === 'approved' ? 'Запрос одобрен, email пользователя обновлён' : 'Запрос отклонён');
+    res.redirect('/admin/email-change-requests');
+  } catch (error) {
+    console.error('Ошибка обработки запроса на смену email:', error);
+    req.flash('error', 'Не удалось обработать запрос');
+    res.redirect('/admin/email-change-requests');
   }
 };

@@ -15,6 +15,7 @@ const ForumPost = require('./ForumPost');
 const ForumPostLike = require('./ForumPostLike');
 const ForumSubscription = require('./ForumSubscription');
 const ForumPostModeration = require('./ForumPostModeration');
+const EmailChangeRequest = require('./EmailChangeRequest');
 
 require('./associations');
 
@@ -34,5 +35,6 @@ module.exports = {
   ForumPost,
   ForumPostLike,
   ForumSubscription,
-  ForumPostModeration
+  ForumPostModeration,
+  EmailChangeRequest
 };

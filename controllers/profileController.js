@@ -1,9 +1,9 @@
-const { User, Book, Review, UserBook, Genre, ReviewLike } = require('../models');
+const { User, Book, Review, UserBook, Genre, ReviewLike, EmailChangeRequest } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const sharp = require('sharp');
 const uploadService = require('../services/uploadService');
-const { validatePersonName, validatePassword, validatePlainText } = require('../utils/validators');
+const { validatePersonName, validatePassword, validatePlainText, validateEmail } = require('../utils/validators');
 const { getAvatarUrl, getCoverUrl } = require('../utils/imageUrls');
 
 const SALT_ROUNDS = 10;
@@ -307,6 +307,71 @@ exports.postChangePassword = async (req, res) => {
     console.error('Ошибка при смене пароля:', error);
     req.flash('error', 'Произошла ошибка при смене пароля');
     res.redirect('/profile/edit');
+  }
+};
+
+
+exports.getEmailChangeForm = async (req, res) => {
+  try {
+    const pendingRequest = await EmailChangeRequest.findOne({
+      where: { user_id: req.session.user.id, status: 'pending' },
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.render('profile/email-change', {
+      title: 'Запрос на смену email',
+      user: req.session.user,
+      pendingRequest,
+      errors: []
+    });
+  } catch (error) {
+    console.error('Ошибка загрузки формы запроса email:', error);
+    req.flash('error', 'Не удалось открыть форму запроса на смену email');
+    res.redirect('/profile/edit');
+  }
+};
+
+exports.postEmailChangeRequest = async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const user = await User.findByPk(userId);
+    const emailValidation = validateEmail(req.body.new_email);
+    const reasonValidation = validatePlainText(req.body.reason, 'Причина обращения', { min: 20, max: 1000, required: true });
+    const errors = [];
+
+    if (emailValidation.error) errors.push({ msg: emailValidation.error });
+    if (reasonValidation.error) errors.push({ msg: reasonValidation.error });
+    if (emailValidation.value === user.email) errors.push({ msg: 'Новый email должен отличаться от текущего' });
+
+    const pendingRequest = await EmailChangeRequest.findOne({ where: { user_id: userId, status: 'pending' } });
+    if (pendingRequest) errors.push({ msg: 'У вас уже есть активный запрос. Дождитесь решения администратора.' });
+
+    const existingEmailOwner = await User.findOne({ where: { email: emailValidation.value } });
+    if (existingEmailOwner) errors.push({ msg: 'Этот email уже используется другим аккаунтом' });
+
+    if (errors.length > 0) {
+      return res.render('profile/email-change', {
+        title: 'Запрос на смену email',
+        user: req.session.user,
+        pendingRequest,
+        errors,
+        formData: { new_email: emailValidation.value, reason: reasonValidation.value }
+      });
+    }
+
+    await EmailChangeRequest.create({
+      user_id: userId,
+      current_email: user.email,
+      new_email: emailValidation.value,
+      reason: reasonValidation.value
+    });
+
+    req.flash('success', 'Запрос на смену email отправлен администратору');
+    res.redirect('/profile/edit');
+  } catch (error) {
+    console.error('Ошибка создания запроса на смену email:', error);
+    req.flash('error', 'Не удалось отправить запрос');
+    res.redirect('/profile/email-change');
   }
 };
 
