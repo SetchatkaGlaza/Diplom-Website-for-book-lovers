@@ -1231,6 +1231,49 @@
   }
 }
 
+@media (max-width: 768px) {
+  .table-search {
+    padding: 1rem;
+  }
+
+  .table-search form,
+  .users-filter-form {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .table-search input[type="text"],
+  .table-search input[type="search"],
+  .table-search select,
+  .users-filter-form input,
+  .users-filter-form select,
+  .users-filter-form .btn {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .filter-select {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-search {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .table-search form,
+  .users-filter-form {
+    gap: 0.5rem;
+  }
+
+  .users-filter-form .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
 /* ===== ПУСТЫЕ СОСТОЯНИЯ ===== */
 .empty-state {
   text-align: center;
@@ -1718,11 +1761,17 @@
 }
 
 .users-filter-form input[type="text"] {
-  flex: 2 1 320px;
+  flex: 2 1 240px;
+  min-width: 180px;
 }
 
 .users-filter-form .filter-select {
-  flex: 1 1 180px;
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+
+.users-filter-form .btn {
+  white-space: nowrap;
 }
 
 .admin-users .table-search input[type="text"] {
@@ -2040,14 +2089,16 @@
 }
 
 .admin-appoint-form textarea {
-  min-height: 88px;
+  min-height: 112px;
+  max-height: 112px;
   width: 100%;
   padding: 0.65rem;
   border-radius: var(--admin-radius);
   background: rgba(0, 0, 0, 0.25);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  resize: vertical;
+  resize: none;
+  overflow-y: hidden;
   font: inherit;
 }
 
@@ -2087,7 +2138,8 @@
 }
 
 .users-actions .role-select {
-  width: 100%;
+  flex: 1 1 150px;
+    width: auto;
   min-width: 150px;
 }
 
@@ -2433,14 +2485,23 @@
 }
 
 @media (max-width: 900px) {
-  .users-filter-form,
   .admin-policy-card {
     grid-template-columns: 1fr;
   }
 
+  .users-filter-form {
+    grid-template-columns: minmax(0, 1fr) minmax(140px, 180px);
+  }
+
+  .users-filter-form input[type="text"] {
+    grid-column: 1 / -1;
+  }
+
   .users-filter-form .btn {
-    width: 100%;
+    width: auto;
+    min-width: 0;
     justify-content: center;
+    padding-inline: 0.85rem;
   }
 
   .users-table tbody {
@@ -2453,8 +2514,37 @@
 }
 
 @media (max-width: 576px) {
+  .admin-users .table-search {
+    padding: 0.65rem;
+  }
   .users-filter-form {
-    gap: 0.55rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.45rem;
+  }
+
+  .users-filter-form input[type="text"],
+  .users-filter-form .filter-select {
+    grid-column: 1 / -1;
+    min-height: 34px;
+    height: 34px;
+    padding: 0.38rem 0.6rem;
+    font-size: 0.86rem;
+    line-height: 1.15;
+  }
+
+  .users-filter-form .btn {
+    min-height: 36px;
+    padding: 0.45rem 0.65rem;
+  }
+
+  .users-filter-form input[type="text"],
+  .users-filter-form .filter-select {
+    grid-column: 1 / -1;
+  }
+
+  .users-filter-form .btn {
+    min-height: 40px;
+    padding: 0.55rem 0.7rem;
   }
 
   .admin-limit,
@@ -2462,9 +2552,75 @@
     width: 100%;
   }
 
-  .users-actions form,
-  .users-actions .action-btn,
+  .users-actions {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .users-actions form {
+    width: auto;
+  }
+
+  .users-actions .action-btn {
+    width: 38px;
+    min-width: 38px;
+  }
   .users-actions .role-select {
+    flex: 1 1 150px;
+    width: auto;
+  }
+}
+
+/* Финальная компактная адаптация фильтров управления пользователями */
+@media (max-width: 768px) {
+  .admin-users .table-search {
+    padding: 0.55rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .admin-users .users-filter-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 108px;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  .admin-users .users-filter-form input[type="text"],
+  .admin-users .users-filter-form .filter-select {
+    grid-column: auto;
     width: 100%;
+    min-width: 0;
+    min-height: 32px;
+    height: 32px;
+    padding: 0.32rem 0.55rem;
+    font-size: 0.84rem;
+    line-height: 1.1;
+  }
+
+  .admin-users .users-filter-form .filter-select {
+    padding-right: 1.65rem;
+  }
+
+  .admin-users .users-filter-form .btn,
+  .admin-users .users-filter-form .btn-outline {
+    width: auto;
+    min-width: 0;
+    min-height: 32px;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.84rem;
+    line-height: 1.1;
+  }
+}
+
+@media (max-width: 380px) {
+  .admin-users .users-filter-form {
+    grid-template-columns: minmax(0, 1fr) 96px;
+  }
+
+  .admin-users .users-filter-form input[type="text"],
+  .admin-users .users-filter-form .filter-select,
+  .admin-users .users-filter-form .btn,
+  .admin-users .users-filter-form .btn-outline {
+    font-size: 0.8rem;
   }
 }

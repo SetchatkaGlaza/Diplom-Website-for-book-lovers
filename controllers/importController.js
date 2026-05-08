@@ -53,9 +53,10 @@ function readMappedValue(row, fieldName) {
   return sourceKey ? row[sourceKey] : undefined;
 }
 
-function escapeCsvValue(value) {
+function escapeCsvValue(value, delimiter = ',') {
   const stringValue = String(value ?? '');
-  if (/[",\n\r]/.test(stringValue)) {
+  const needsEscaping = stringValue.includes(delimiter) || /["\n\r]/.test(stringValue);
+  if (needsEscaping) {
     return `"${stringValue.replace(/"/g, '""')}"`;
   }
   return stringValue;
@@ -383,10 +384,11 @@ exports.downloadTemplate = (req, res) => {
     const type = req.query.type || 'csv';
     
     if (type === 'csv') {
+      const delimiter = ';';
       const headers = ['title', 'author', 'description', 'year', 'pages', 'publisher', 'isbn', 'genre'];
-      const sample = ['Война и мир', 'Лев Толстой', 'Великий роман, эпопея', '1869', '1300', 'АСТ', '978-5-17-123456-7', 'Роман'];
-      const csvRows = [headers, sample].map((row) => row.map(escapeCsvValue).join(','));
-      const csv = `\uFEFF${csvRows.join('\n')}`;
+      const sample = ['Война и мир', 'Лев Толстой', 'Великий роман-эпопея', '1869', '1300', 'АСТ', '978-5-17-123456-7', 'Роман'];
+      const csvRows = [headers, sample].map((row) => row.map((value) => escapeCsvValue(value, delimiter)).join(delimiter));
+      const csv = `\uFEFF${csvRows.join('\r\n')}`;
       
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
       res.setHeader('Content-Disposition', 'attachment; filename=books_template.csv');
