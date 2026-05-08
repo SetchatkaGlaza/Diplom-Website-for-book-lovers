@@ -263,10 +263,14 @@ function refreshCaptcha() {
 
 .password-wrapper {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.password-wrapper input {
-  padding-right: 3rem;
+.password-wrapper input,
+.password-wrapper .form-input {
+  width: 100%;
+  padding-right: 3.2rem;
 }
 
 .password-toggle {
@@ -274,6 +278,7 @@ function refreshCaptcha() {
   right: 1rem;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 2;
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.5);
