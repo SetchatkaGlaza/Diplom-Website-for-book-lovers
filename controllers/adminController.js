@@ -5,7 +5,6 @@ const path = require('path');
 const fs = require('fs').promises;
 const sharp = require('sharp');
 const notificationService = require('../services/notificationService');
-const emailService = require('../config/email');
 const uploadService = require('../services/uploadService');
 const { validatePersonName, validatePlainText, validateSearchQuery } = require('../utils/validators');
 
@@ -1210,14 +1209,6 @@ exports.resolveEmailChangeRequest = async (req, res) => {
       '/profile/email-change',
       { request_id: requestItem.id, status: action }
     );
-
-    await emailService.sendEmailChangeRequestResolved({
-      toEmail: requestItem.user.email,
-      toName: requestItem.user.name,
-      approved: action === 'approved',
-      newEmail: requestItem.new_email,
-      adminNote: noteValidation.value || ''
-    });
 
     req.flash('success', action === 'approved' ? 'Запрос одобрен, email пользователя обновлён' : 'Запрос отклонён');
     res.redirect('/admin/email-change-requests');
