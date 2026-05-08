@@ -21,11 +21,11 @@ exports.getProfile = async (req, res) => {
       booksRead: await UserBook.count({ where: { user_id: userId, status: 'read' } }),
       booksWantToRead: await UserBook.count({ where: { user_id: userId, status: 'want_to_read' } }),
       booksReading: await UserBook.count({ where: { user_id: userId, status: 'reading' } }),
-      reviewsCount: await Review.count({ where: { user_id: userId } })
+      reviewsCount: await Review.count({ where: { user_id: userId, is_moderated: true } })
     };
 
     const recentReviews = await Review.findAll({
-      where: { user_id: userId },
+      where: { user_id: userId, is_moderated: true },
       include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image', 'cover_public_id'] }],
       order: [['createdAt', 'DESC']],
       limit: 3
@@ -511,7 +511,7 @@ exports.getMyReviews = async (req, res) => {
     const offset = (page - 1) * limit;
 
     const { count, rows: reviews } = await Review.findAndCountAll({
-      where: { user_id: userId },
+      where: { user_id: userId, is_moderated: true },
       include: [
         {
           model: Book,
@@ -658,13 +658,13 @@ exports.getPublicProfile = async (req, res) => {
       UserBook.count({ where: { user_id: userId, status: 'read' } }),
       UserBook.count({ where: { user_id: userId, status: 'want_to_read' } }),
       UserBook.count({ where: { user_id: userId, status: 'reading' } }),
-      Review.count({ where: { user_id: userId } })
+      Review.count({ where: { user_id: userId, is_moderated: true } })
     ]);
 
     const stats = { booksRead, booksWantToRead, booksReading, reviewsCount };
 
     const recentReviews = await Review.findAll({
-      where: { user_id: userId },
+      where: { user_id: userId, is_moderated: true },
       include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image', 'cover_public_id'] }],
       order: [['createdAt', 'DESC']],
       limit: 3

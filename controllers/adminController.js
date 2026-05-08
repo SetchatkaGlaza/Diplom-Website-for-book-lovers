@@ -1206,7 +1206,7 @@ exports.resolveEmailChangeRequest = async (req, res) => {
       action === 'approved'
         ? 'Администратор одобрил ваш запрос на смену email. Проверьте данные профиля.'
         : 'Администратор отклонил ваш запрос на смену email. Проверьте комментарий и отправьте новый запрос при необходимости.',
-      '/profile/email-change',
+      '/profile',
       { request_id: requestItem.id, status: action }
     );
 

@@ -213,8 +213,20 @@ exports.getBookById = async (req, res) => {
     const reviewsPage = Math.max(parseInt(req.query.reviewsPage, 10) || 1, 1);
     const reviewsOffset = (reviewsPage - 1) * REVIEWS_PER_BOOK_PAGE;
 
+    const reviewVisibilityWhere = {
+      book_id: bookId,
+      ...(req.session.user
+        ? {
+          [Op.or]: [
+            { is_moderated: true },
+            { user_id: req.session.user.id }
+          ]
+        }
+        : { is_moderated: true })
+    };
+
     const { count: reviewsCount, rows: reviews } = await Review.findAndCountAll({
-      where: { book_id: bookId },
+      where: reviewVisibilityWhere,
       include: [
         {
           model: User,
