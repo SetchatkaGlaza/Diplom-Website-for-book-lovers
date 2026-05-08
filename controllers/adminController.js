@@ -1201,7 +1201,7 @@ exports.resolveEmailChangeRequest = async (req, res) => {
 
     await notificationService.create(
       requestItem.user_id,
-      'email_change_request_resolved',
+      'system',
       action === 'approved' ? 'Смена email одобрена' : 'Смена email отклонена',
       action === 'approved'
         ? 'Администратор одобрил ваш запрос на смену email. Проверьте данные профиля.'
