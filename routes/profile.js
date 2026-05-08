@@ -41,6 +41,8 @@ router.post('/edit', requireAuth, profileController.postEditProfile);
 router.post('/avatar', requireAuth, handleAvatarUpload, profileController.uploadAvatar);
 
 router.post('/change-password', requireAuth, profileController.postChangePassword);
+router.get('/email-change', requireAuth, profileController.getEmailChangeForm);
+router.post('/email-change', requireAuth, profileController.postEmailChangeRequest);
 
 router.get('/books', requireAuth, profileController.getMyBooks);
 

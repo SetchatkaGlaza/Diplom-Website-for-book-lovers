@@ -13,6 +13,7 @@ const ForumPost = require('./ForumPost');
 const ForumPostLike = require('./ForumPostLike');
 const ForumSubscription = require('./ForumSubscription');
 const ForumPostModeration = require('./ForumPostModeration');
+const EmailChangeRequest = require('./EmailChangeRequest');
 
 /**
  * Этот файл устанавливает связи между моделями
@@ -304,3 +305,19 @@ module.exports = {
   ForumSubscription,
   ForumPostModeration
 };
+
+User.hasMany(EmailChangeRequest, {
+  foreignKey: 'user_id',
+  as: 'emailChangeRequests',
+  onDelete: 'CASCADE'
+});
+
+EmailChangeRequest.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+EmailChangeRequest.belongsTo(User, {
+  foreignKey: 'resolved_by',
+  as: 'resolver'
+});

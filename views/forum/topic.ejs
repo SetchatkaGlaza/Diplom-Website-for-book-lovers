@@ -274,7 +274,7 @@
     return `
       <div class="forum-post-text">${escapeHtml(preview.text)}</div>
       <details class="read-more-block forum-read-more">
-        <summary>Читать дальше</summary>
+        <summary><span class="more-label">Читать дальше</span><span class="less-label">Свернуть</span></summary>
         <div class="forum-post-text full-text">${fullHtml}</div>
       </details>
     `;

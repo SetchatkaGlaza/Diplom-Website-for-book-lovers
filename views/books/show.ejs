@@ -186,7 +186,7 @@
               <% if (reviewPreview.isTruncated) { %>
                 <p><%= reviewPreview.text %></p>
                 <details class="read-more-block">
-                  <summary>Читать дальше</summary>
+                  <summary><span class="more-label">Читать дальше</span><span class="less-label">Свернуть</span></summary>
                   <p><%= reviewPreview.fullText %></p>
                 </details>
               <% } else { %>
