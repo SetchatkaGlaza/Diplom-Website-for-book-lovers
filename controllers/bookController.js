@@ -1,6 +1,7 @@
 const { Book, Genre, Review, User, UserBook, sequelize } = require('../models');
 const { Op } = require('sequelize'); // Операторы для сложных запросов
 const { getAvatarUrl, getCoverUrl } = require('../utils/imageUrls');
+const { validateSearchQuery } = require('../utils/validators');
 
 const BOOKS_PER_PAGE = 12;
 const BOOKS_PER_PAGE_TABLET = 10;
@@ -70,7 +71,11 @@ exports.getCatalog = async (req, res) => {
       filtersForView.genre = genre;
     }
 
-    const author = getSingleQueryValue(req.query.author).trim();
+    const authorValidation = validateSearchQuery(getSingleQueryValue(req.query.author), 'Фильтр автора');
+    if (authorValidation.error) {
+      filterWarnings.push(authorValidation.error);
+    }
+    const author = authorValidation.error ? '' : authorValidation.value;
     if (author) {
       filters.author = { [Op.iLike]: `%${author}%` };
       filtersForView.author = author;
@@ -108,7 +113,11 @@ exports.getCatalog = async (req, res) => {
       }
     }
 
-    const search = getSingleQueryValue(req.query.search).trim();
+    const searchValidation = validateSearchQuery(getSingleQueryValue(req.query.search), 'Поисковый запрос');
+    if (searchValidation.error) {
+      filterWarnings.push(searchValidation.error);
+    }
+    const search = searchValidation.error ? '' : searchValidation.value;
     if (search) {
       filters[Op.or] = [
         { title: { [Op.iLike]: `%${search}%` } },
@@ -299,9 +308,10 @@ exports.getBookById = async (req, res) => {
 
 exports.searchBooks = async (req, res) => {
   try {
-    const query = req.query.q;
+    const queryValidation = validateSearchQuery(req.query.q || '', 'Поисковый запрос');
+    const query = queryValidation.value;
     
-    if (!query || query.length < 2) {
+    if (queryValidation.error || !query || query.length < 2) {
       return res.json([]);
     }
     
@@ -330,11 +340,11 @@ exports.searchBooks = async (req, res) => {
           title: book.title,
           author: book.author,
           cover: book.cover_image,
-      cover_public_id: book.cover_public_id,
-      coverUrl: getCoverUrl(book.cover_image, book.cover_public_id),
+          cover_public_id: book.cover_public_id,
+          coverUrl: getCoverUrl(book.cover_image, book.cover_public_id),
           genre: book.genre ? book.genre.name : 'Без жанра',
           year: book.year,
-          rating
+          rating: ratingInfo.average
         };
       })
     );

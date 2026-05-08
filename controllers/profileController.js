@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const sharp = require('sharp');
 const uploadService = require('../services/uploadService');
+const { validatePersonName, validatePassword, validatePlainText } = require('../utils/validators');
 const { getAvatarUrl, getCoverUrl } = require('../utils/imageUrls');
 
 const SALT_ROUNDS = 10;
@@ -11,7 +12,7 @@ const AVATAR_MIN_SIZE = 200;
 exports.getProfile = async (req, res) => {
   try {
     const userId = req.session.user.id;
-    
+
     const user = await User.findByPk(userId, {
       attributes: { exclude: ['password_hash'] }
     });
@@ -22,25 +23,25 @@ exports.getProfile = async (req, res) => {
       booksReading: await UserBook.count({ where: { user_id: userId, status: 'reading' } }),
       reviewsCount: await Review.count({ where: { user_id: userId } })
     };
-    
+
     const recentReviews = await Review.findAll({
       where: { user_id: userId },
       include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image', 'cover_public_id'] }],
       order: [['createdAt', 'DESC']],
       limit: 3
     });
-    
+
     const recentBooks = await UserBook.findAll({
       where: { user_id: userId },
-      include: [{ 
-        model: Book, 
-        as: 'book', 
-        include: [{ model: Genre, as: 'genre' }] 
+      include: [{
+        model: Book,
+        as: 'book',
+        include: [{ model: Genre, as: 'genre' }]
       }],
       order: [['updatedAt', 'DESC']],
       limit: 5
     });
-    
+
 
     const recentReviewsWithUrls = recentReviews.map((review) => ({
       ...review.toJSON(),
@@ -63,7 +64,7 @@ exports.getProfile = async (req, res) => {
       ...user.toJSON(),
       avatarUrl: getAvatarUrl(user.avatar, user.avatar_public_id)
     };
-    
+
     res.render('profile/index', {
       title: 'Мой профиль',
       user: userWithAvatarUrl,
@@ -71,7 +72,7 @@ exports.getProfile = async (req, res) => {
       recentReviews: recentReviewsWithUrls,
       recentBooks: recentBooksWithUrls
     });
-    
+
   } catch (error) {
     console.error('Ошибка при загрузке профиля:', error);
     req.flash('error', 'Произошла ошибка при загрузке профиля');
@@ -85,18 +86,18 @@ exports.getEditProfile = async (req, res) => {
     const user = await User.findByPk(userId, {
       attributes: { exclude: ['password_hash'] }
     });
-    
+
     const userWithAvatarUrl = {
       ...user.toJSON(),
       avatarUrl: getAvatarUrl(user.avatar, user.avatar_public_id)
     };
-    
+
     res.render('profile/edit', {
       title: 'Редактирование профиля',
       user: userWithAvatarUrl,
       errors: []
     });
-    
+
   } catch (error) {
     console.error('Ошибка при загрузке формы редактирования:', error);
     req.flash('error', 'Произошла ошибка');
@@ -108,17 +109,20 @@ exports.postEditProfile = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const { name, bio } = req.body;
-    
+
     const errors = [];
-    
-    if (!name || name.length < 2) {
-      errors.push({ msg: 'Имя должно содержать минимум 2 символа' });
+
+    const nameValidation = validatePersonName(name, 'Имя');
+    const bioValidation = validatePlainText(bio, 'Биография', { max: 500 });
+
+    if (nameValidation.error) {
+      errors.push({ msg: nameValidation.error });
     }
-    
-    if (bio && bio.length > 500) {
-      errors.push({ msg: 'Биография не может быть длиннее 500 символов' });
+
+    if (bioValidation.error) {
+      errors.push({ msg: bioValidation.error });
     }
-    
+
     if (errors.length > 0) {
       const user = await User.findByPk(userId, {
         attributes: { exclude: ['password_hash'] }
@@ -131,27 +135,27 @@ exports.postEditProfile = async (req, res) => {
         title: 'Редактирование профиля',
         user: userWithAvatarUrl,
         errors,
-        name,
-        bio
+        name: nameValidation.value,
+        bio: bioValidation.value
       });
     }
-    
+
     const [updated] = await User.update(
-      { 
-        name: name.trim(),
-        bio: bio ? bio.trim() : '' 
+      {
+        name: nameValidation.value,
+        bio: bioValidation.value
       },
-      { 
+      {
         where: { id: userId },
         returning: true
       }
     );
-    
+
     if (updated) {
       const updatedUser = await User.findByPk(userId, {
         attributes: { exclude: ['password_hash'] }
       });
-      
+
       req.session.user = {
         id: updatedUser.id,
         name: updatedUser.name,
@@ -161,10 +165,10 @@ exports.postEditProfile = async (req, res) => {
         avatar_public_id: updatedUser.avatar_public_id || null
       };
     }
-    
+
     req.flash('success', 'Профиль успешно обновлён');
     res.redirect('/profile');
-    
+
   } catch (error) {
     console.error('Ошибка при обновлении профиля:', error);
     req.flash('error', 'Произошла ошибка при обновлении профиля');
@@ -175,12 +179,12 @@ exports.postEditProfile = async (req, res) => {
 exports.uploadAvatar = async (req, res) => {
   try {
     const userId = req.session.user.id;
-    
+
     if (!req.file) {
       req.flash('error', 'Пожалуйста, выберите файл');
       return res.redirect('/profile/edit');
     }
-    
+
     const user = await User.findByPk(userId);
 
     let metadata;
@@ -207,31 +211,31 @@ exports.uploadAvatar = async (req, res) => {
       .resize(400, 400, { fit: 'cover', position: 'centre' })
       .jpeg({ quality: 85 })
       .toBuffer();
-    
+
     // Загружаем в облако
     const { url, publicId } = await uploadService.uploadAvatar(processedBuffer, userId);
-    
+
     // Удаляем старый файл из облака (если не дефолтный)
     if (user.avatar_public_id && !user.avatar_public_id.includes('default')) {
       await uploadService.deleteImage(user.avatar_public_id);
     }
-    
+
     // Обновляем БД
     await User.update(
-      { 
+      {
         avatar: url,
         avatar_public_id: publicId
       },
       { where: { id: userId } }
     );
-    
+
     // Обновляем сессию
     req.session.user.avatar = url;
     req.session.user.avatar_public_id = publicId;
-    
+
     req.flash('success', 'Аватарка успешно обновлена');
     res.redirect('/profile/edit');
-    
+
   } catch (error) {
     console.error('Ошибка при загрузке аватарки:', error);
     req.flash('error', 'Произошла ошибка при загрузке аватарки');
@@ -243,21 +247,22 @@ exports.postChangePassword = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const { current_password, new_password, confirm_password } = req.body;
-    
+
     const errors = [];
-    
+
     if (!current_password || !new_password || !confirm_password) {
       errors.push({ msg: 'Пожалуйста, заполните все поля' });
     }
-    
-    if (new_password && new_password.length < 6) {
-      errors.push({ msg: 'Новый пароль должен содержать минимум 6 символов' });
+
+    const passwordError = new_password ? validatePassword(new_password).error : null;
+    if (passwordError) {
+      errors.push({ msg: passwordError });
     }
-    
+
     if (new_password !== confirm_password) {
       errors.push({ msg: 'Пароли не совпадают' });
     }
-    
+
     if (errors.length > 0) {
       const user = await User.findByPk(userId);
       const userWithAvatarUrl = {
@@ -270,11 +275,11 @@ exports.postChangePassword = async (req, res) => {
         errors
       });
     }
-    
+
     const user = await User.findByPk(userId);
-    
+
     const isMatch = await bcrypt.compare(current_password, user.password_hash);
-    
+
     if (!isMatch) {
       errors.push({ msg: 'Неверный текущий пароль' });
       const userWithAvatarUrl = {
@@ -287,17 +292,17 @@ exports.postChangePassword = async (req, res) => {
         errors
       });
     }
-    
+
     const hashedPassword = await bcrypt.hash(new_password, SALT_ROUNDS);
-    
+
     await User.update(
       { password_hash: hashedPassword },
       { where: { id: userId } }
     );
-    
+
     req.flash('success', 'Пароль успешно изменён');
     res.redirect('/profile/edit');
-    
+
   } catch (error) {
     console.error('Ошибка при смене пароля:', error);
     req.flash('error', 'Произошла ошибка при смене пароля');
@@ -309,16 +314,16 @@ exports.getMyBooks = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const status = req.query.status || 'all';
-    
+
     const page = parseInt(req.query.page) || 1;
     const limit = 12;
     const offset = (page - 1) * limit;
-    
+
     const where = { user_id: userId };
     if (status !== 'all') {
       where.status = status;
     }
-    
+
     const { count, rows: userBooks } = await UserBook.findAndCountAll({
       where,
       include: [
@@ -332,7 +337,7 @@ exports.getMyBooks = async (req, res) => {
       limit,
       offset
     });
-    
+
     const booksWithDetails = await Promise.all(
       userBooks.map(async (ub) => {
         const book = ub.book;
@@ -340,7 +345,7 @@ exports.getMyBooks = async (req, res) => {
         const userReview = await Review.findOne({
           where: { user_id: userId, book_id: book.id }
         });
-        
+
         return {
           ...ub.toJSON(),
           book: {
@@ -355,14 +360,14 @@ exports.getMyBooks = async (req, res) => {
         };
       })
     );
-    
+
     const counts = {
       all: await UserBook.count({ where: { user_id: userId } }),
       read: await UserBook.count({ where: { user_id: userId, status: 'read' } }),
       want_to_read: await UserBook.count({ where: { user_id: userId, status: 'want_to_read' } }),
       reading: await UserBook.count({ where: { user_id: userId, status: 'reading' } })
     };
-    
+
     res.render('profile/books', {
       title: 'Мои книги',
       books: booksWithDetails,
@@ -372,7 +377,7 @@ exports.getMyBooks = async (req, res) => {
       totalPages: Math.ceil(count / limit),
       totalBooks: count
     });
-    
+
   } catch (error) {
     console.error('Ошибка при загрузке моих книг:', error);
     req.flash('error', 'Произошла ошибка при загрузке книг');
@@ -384,16 +389,16 @@ exports.updateBookStatus = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const { book_id, status } = req.body;
-    
+
     const book = await Book.findByPk(book_id);
     if (!book) {
       return res.status(404).json({ error: 'Книга не найдена' });
     }
-    
+
     const userBook = await UserBook.findOne({
       where: { user_id: userId, book_id }
     });
-    
+
     if (userBook) {
       await userBook.update({ status });
     } else {
@@ -403,9 +408,9 @@ exports.updateBookStatus = async (req, res) => {
         status
       });
     }
-    
+
     res.json({ success: true, status });
-    
+
   } catch (error) {
     console.error('Ошибка при обновлении статуса книги:', error);
     res.status(500).json({ error: 'Ошибка сервера' });
@@ -416,14 +421,14 @@ exports.removeBookFromShelf = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const bookId = req.params.bookId;
-    
+
     await UserBook.destroy({
       where: { user_id: userId, book_id: bookId }
     });
-    
+
     req.flash('success', 'Книга удалена с полки');
     res.redirect('/profile/books');
-    
+
   } catch (error) {
     console.error('Ошибка при удалении книги:', error);
     req.flash('error', 'Произошла ошибка');
@@ -434,11 +439,11 @@ exports.removeBookFromShelf = async (req, res) => {
 exports.getMyReviews = async (req, res) => {
   try {
     const userId = req.session.user.id;
-    
+
     const page = parseInt(req.query.page) || 1;
     const limit = 3;
     const offset = (page - 1) * limit;
-    
+
     const { count, rows: reviews } = await Review.findAndCountAll({
       where: { user_id: userId },
       include: [
@@ -452,14 +457,14 @@ exports.getMyReviews = async (req, res) => {
       limit,
       offset
     });
-    
+
     const reviewsWithStats = reviews.map(review => ({
       ...review.toJSON(),
       helpful_percent: review.likes_count + review.dislikes_count > 0
         ? Math.round((review.likes_count / (review.likes_count + review.dislikes_count)) * 100)
         : 0
     }));
-    
+
     res.render('profile/reviews', {
       title: 'Мои рецензии',
       reviews: reviewsWithStats,
@@ -467,7 +472,7 @@ exports.getMyReviews = async (req, res) => {
       totalPages: Math.ceil(count / limit),
       totalReviews: count
     });
-    
+
   } catch (error) {
     console.error('Ошибка при загрузке рецензий:', error);
     req.flash('error', 'Произошла ошибка');
@@ -479,22 +484,22 @@ exports.getEditReview = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const reviewId = req.params.reviewId;
-    
+
     const review = await Review.findOne({
       where: { id: reviewId, user_id: userId },
       include: [{ model: Book, as: 'book' }]
     });
-    
+
     if (!review) {
       req.flash('error', 'Рецензия не найдена');
       return res.redirect('/profile/reviews');
     }
-    
+
     res.render('profile/edit-review', {
       title: 'Редактирование рецензии',
       review
     });
-    
+
   } catch (error) {
     console.error('Ошибка при загрузке рецензии:', error);
     req.flash('error', 'Произошла ошибка');
@@ -507,17 +512,17 @@ exports.postEditReview = async (req, res) => {
     const userId = req.session.user.id;
     const reviewId = req.params.reviewId;
     const { rating, content } = req.body;
-    
+
     const errors = [];
-    
+
     if (!rating || rating < 1 || rating > 5) {
       errors.push({ msg: 'Оценка должна быть от 1 до 5' });
     }
-    
+
     if (!content || content.length < 10) {
       errors.push({ msg: 'Рецензия должна содержать минимум 10 символов' });
     }
-    
+
     if (errors.length > 0) {
       const review = await Review.findByPk(reviewId, {
         include: [{ model: Book, as: 'book' }]
@@ -530,15 +535,15 @@ exports.postEditReview = async (req, res) => {
         content
       });
     }
-    
+
     await Review.update(
       { rating, content },
       { where: { id: reviewId, user_id: userId } }
     );
-    
+
     req.flash('success', 'Рецензия успешно обновлена');
     res.redirect('/profile/reviews');
-    
+
   } catch (error) {
     console.error('Ошибка при обновлении рецензии:', error);
     req.flash('error', 'Произошла ошибка');
@@ -550,14 +555,14 @@ exports.deleteReview = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const reviewId = req.params.reviewId;
-    
+
     await Review.destroy({
       where: { id: reviewId, user_id: userId }
     });
-    
+
     req.flash('success', 'Рецензия удалена');
     res.redirect('/profile/reviews');
-    
+
   } catch (error) {
     console.error('Ошибка при удалении рецензии:', error);
     req.flash('error', 'Произошла ошибка');
@@ -573,16 +578,16 @@ exports.getPublicProfile = async (req, res) => {
     if (currentUserId && currentUserId === userId) {
       return res.redirect('/profile');
     }
-    
+
     const user = await User.findByPk(userId, {
       attributes: ['id', 'name', 'avatar', 'avatar_public_id', 'bio', 'createdAt', 'role']
     });
-    
+
     if (!user) {
       req.flash('error', 'Пользователь не найден');
       return res.redirect('/');
     }
-    
+
     const [booksRead, booksWantToRead, booksReading, reviewsCount] = await Promise.all([
       UserBook.count({ where: { user_id: userId, status: 'read' } }),
       UserBook.count({ where: { user_id: userId, status: 'want_to_read' } }),
@@ -591,7 +596,7 @@ exports.getPublicProfile = async (req, res) => {
     ]);
 
     const stats = { booksRead, booksWantToRead, booksReading, reviewsCount };
-    
+
     const recentReviews = await Review.findAll({
       where: { user_id: userId },
       include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image', 'cover_public_id'] }],
@@ -609,7 +614,7 @@ exports.getPublicProfile = async (req, res) => {
       order: [['updatedAt', 'DESC']],
       limit: 12
     });
-    
+
     const recentReviewsWithUrls = recentReviews.map((review) => ({
       ...review.toJSON(),
       book: {
@@ -631,7 +636,7 @@ exports.getPublicProfile = async (req, res) => {
       ...user.toJSON(),
       avatarUrl: getAvatarUrl(user.avatar, user.avatar_public_id)
     };
-    
+
     res.render('profile/public', {
       title: `Профиль ${user.name}`,
       profileUser: profileUserWithAvatarUrl,
@@ -639,7 +644,7 @@ exports.getPublicProfile = async (req, res) => {
       recentReviews: recentReviewsWithUrls,
       recentBooks: recentBooksWithUrls
     });
-    
+
   } catch (error) {
     console.error('Ошибка при загрузке публичного профиля:', error);
     req.flash('error', 'Произошла ошибка');
