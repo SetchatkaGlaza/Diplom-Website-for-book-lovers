@@ -9,10 +9,10 @@
   </header>
 
   <section class="admin-card">
-    <h2><%= topic.title %></h2>
+    <h2 class="forum-topic-heading"><%= topic.title %></h2>
     <p class="item-meta">
-      <span><strong>Категория:</strong> <%= topic.category ? topic.category.name : '—' %></span>
-      <span><strong>Автор:</strong> <%= topic.user ? topic.user.name : '—' %></span>
+      <span><strong>Категория:</strong> <%= topic.category ? topic.category.name : '–' %></span>
+      <span><strong>Автор:</strong> <%= topic.user ? topic.user.name : '–' %></span>
       <span><strong>Статус:</strong> <%= topic.is_locked ? 'Закрыт' : 'Открыт' %>, <%= topic.is_pinned ? 'Закреплён' : 'Обычный' %></span>
     </p>
 
@@ -35,7 +35,7 @@
             <p class="item-meta">
               <span><strong>#<%= index + 1 %></strong></span>
               <span><strong>Автор:</strong> <%= post.user ? post.user.name : 'Неизвестно' %></span>
-              <span><strong>Email:</strong> <%= post.user ? post.user.email : '—' %></span>
+              <span><strong>Email:</strong> <%= post.user ? post.user.email : '–' %></span>
               <span><strong>Дата:</strong> <%= new Date(post.createdAt).toLocaleString('ru-RU') %></span>
             </p>
             <% const postPreview = truncateText(post.content, 260); %>
