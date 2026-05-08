@@ -576,6 +576,10 @@ background-size: 100% 25px; /* имитация линованной бумаг�
   align-items: center;
   gap: 0.5rem;
   margin: 3rem 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .page-link {
@@ -592,6 +596,12 @@ background-size: 100% 25px; /* имитация линованной бумаг�
   color: white;
   text-decoration: none;
   transition: var(--transition);
+  flex: 0 0 auto;
+}
+
+.pagination-ellipsis {
+  cursor: default;
+  pointer-events: none;
 }
 
 .page-link:hover,
@@ -2448,4 +2458,3 @@ body.theme-dark .view-btn {
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 }
-

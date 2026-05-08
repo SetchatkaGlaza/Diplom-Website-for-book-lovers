@@ -30,6 +30,39 @@ const isProduction = process.env.NODE_ENV === 'production';
 const enableSchemaSync = process.env.DB_SYNC_ALTER === 'true';
 const HOME_PAGE_TITLE = 'Главная';
 
+const buildPaginationRange = (currentPage, totalPages, maxVisible = 7) => {
+  const current = Math.max(1, Number(currentPage) || 1);
+  const total = Math.max(1, Number(totalPages) || 1);
+  const visible = Math.max(5, Number(maxVisible) || 7);
+
+  if (total <= visible) {
+    return Array.from({ length: total }, (_, index) => index + 1);
+  }
+
+  const innerVisible = visible - 2;
+  const half = Math.floor(innerVisible / 2);
+  let start = Math.max(2, current - half);
+  let end = Math.min(total - 1, start + innerVisible - 1);
+  start = Math.max(2, end - innerVisible + 1);
+
+  const range = [1];
+
+  if (start > 2) {
+    range.push('ellipsis-left');
+  }
+
+  for (let page = start; page <= end; page++) {
+    range.push(page);
+  }
+
+  if (end < total - 1) {
+    range.push('ellipsis-right');
+  }
+
+  range.push(total);
+  return range;
+};
+
 if (isProduction) app.set('trust proxy', 1);
 
 app.set('view engine', 'ejs');
@@ -70,6 +103,7 @@ app.use((req, res, next) => {
   res.locals.getAvatarUrl = getAvatarUrl;
   res.locals.getCoverUrl = getCoverUrl;
   res.locals.truncateText = truncateText;
+  res.locals.buildPaginationRange = buildPaginationRange;
   next();
 });
 

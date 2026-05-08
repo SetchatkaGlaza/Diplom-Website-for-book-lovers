@@ -248,8 +248,10 @@
               <i class="fas fa-chevron-left"></i>
             </a>
           <% } %>
-          <% for(let i = 1; i <= reviewsPagination.totalPages; i++) { %>
-            <% if (i === reviewsPagination.currentPage) { %>
+          <% for (const i of buildPaginationRange(reviewsPagination.currentPage, reviewsPagination.totalPages)) { %>
+            <% if (typeof i !== 'number') { %>
+              <span class="page-link pagination-ellipsis">…</span>
+            <% } else if (i === reviewsPagination.currentPage) { %>
               <span class="page-link active"><%= i %></span>
             <% } else { %>
               <a href="?reviewsPage=<%= i %>#reviews" class="page-link"><%= i %></a>

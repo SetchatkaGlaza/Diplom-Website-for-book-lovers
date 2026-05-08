@@ -116,8 +116,10 @@
         </a>
       <% } %>
       
-      <% for(let i = 1; i <= totalPages; i++) { %>
-        <% if (i === currentPageNum) { %>
+      <% for (const i of buildPaginationRange(currentPageNum, totalPages)) { %>
+        <% if (typeof i !== 'number') { %>
+          <span class="pagination-btn pagination-ellipsis">…</span>
+        <% } else if (i === currentPageNum) { %>
           <span class="pagination-btn active"><%= i %></span>
         <% } else { %>
           <a href="?page=<%= i %><%= status !== 'all' ? '&status=' + status : '' %>" class="pagination-btn"><%= i %></a>

@@ -616,7 +616,10 @@
   align-items: center;
   gap: 0.5rem;
   margin: 2rem 0;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .pagination-btn {
@@ -633,6 +636,12 @@
   text-decoration: none;
   transition: var(--admin-transition);
   font-weight: 500;
+  flex: 0 0 auto;
+}
+
+.pagination-ellipsis {
+  pointer-events: none;
+  cursor: default;
 }
 
 .pagination-btn:hover {
@@ -2631,4 +2640,3 @@
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 }
-

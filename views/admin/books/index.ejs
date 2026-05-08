@@ -75,8 +75,10 @@
       <% if (currentPage > 1) { %>
         <a href="?page=<%= currentPage - 1 %><%= search ? '&search=' + search : '' %>" class="pagination-btn"><i class="fas fa-chevron-left"></i></a>
       <% } %>
-      <% for(let i = 1; i <= totalPages; i++) { %>
-        <% if (i === currentPage) { %>
+      <% for (const i of buildPaginationRange(currentPage, totalPages)) { %>
+        <% if (typeof i !== 'number') { %>
+          <span class="pagination-btn pagination-ellipsis">…</span>
+        <% } else if (i === currentPage) { %>
           <span class="pagination-btn active"><%= i %></span>
         <% } else { %>
           <a href="?page=<%= i %><%= search ? '&search=' + search : '' %>" class="pagination-btn"><%= i %></a>

@@ -154,8 +154,10 @@
             <a href="?<%= new URLSearchParams({...filters, page: currentPage - 1, sort}).toString() %>" class="page-link" data-page-nav="prev">←</a>
           <% } %>
           
-          <% for(let i = 1; i <= totalPages; i++) { %>
-            <% if (i === currentPage) { %>
+          <% for (const i of buildPaginationRange(currentPage, totalPages)) { %>
+            <% if (typeof i !== 'number') { %>
+              <span class="page-link pagination-ellipsis">…</span>
+            <% } else if (i === currentPage) { %>
               <span class="page-link active" data-page-number="<%= i %>"><%= i %></span>
             <% } else { %>
               <a href="?<%= new URLSearchParams({...filters, page: i, sort}).toString() %>" class="page-link" data-page-number="<%= i %>"><%= i %></a>
