@@ -128,10 +128,57 @@ const ensureCompatibilityColumns = async () => {
   }
 };
 
+
+
+const ensureEmailChangeRequestsTable = async () => {
+  const queryInterface = sequelize.getQueryInterface();
+  const allTablesRaw = await queryInterface.showAllTables();
+  const allTables = allTablesRaw.map((table) => (typeof table === 'string' ? table : table.tableName));
+
+  if (!allTables.includes('email_change_requests')) {
+    await queryInterface.createTable('email_change_requests', {
+      id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true
+      },
+      user_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: { model: 'Users', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
+      current_email: { type: DataTypes.STRING(254), allowNull: false },
+      new_email: { type: DataTypes.STRING(254), allowNull: false },
+      reason: { type: DataTypes.TEXT, allowNull: false },
+      status: { type: DataTypes.ENUM('pending', 'approved', 'rejected'), allowNull: false, defaultValue: 'pending' },
+      admin_note: { type: DataTypes.TEXT, allowNull: true },
+      resolved_by: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: { model: 'Users', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL'
+      },
+      resolved_at: { type: DataTypes.DATE, allowNull: true },
+      createdAt: { type: DataTypes.DATE, allowNull: false, defaultValue: sequelize.literal('CURRENT_TIMESTAMP') },
+      updatedAt: { type: DataTypes.DATE, allowNull: false, defaultValue: sequelize.literal('CURRENT_TIMESTAMP') }
+    });
+
+    await queryInterface.addIndex('email_change_requests', ['user_id', 'status']);
+    await queryInterface.addIndex('email_change_requests', ['status']);
+
+    console.warn('Создана отсутствующая таблица email_change_requests для совместимости схемы.');
+  }
+};
+
 const startServer = async () => {
   try {
     await sequelize.authenticate();
     await ensureCompatibilityColumns();
+    await ensureEmailChangeRequestsTable();
 
     if (!isProduction && enableSchemaSync) {
       await sequelize.sync({ alter: true });

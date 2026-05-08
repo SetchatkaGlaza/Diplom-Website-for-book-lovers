@@ -74,7 +74,7 @@
                 <% const userReviewPreview = truncateText(item.book.userReview.content, 180); %>
                 <p class="review-excerpt"><%= userReviewPreview.text %></p>
                 <% if (userReviewPreview.isTruncated) { %>
-                  <details class="read-more-block"><summary>Читать дальше</summary><p><%= userReviewPreview.fullText %></p></details>
+                  <details class="read-more-block"><summary><span class="more-label">Читать дальше</span><span class="less-label">Свернуть</span></summary><p><%= userReviewPreview.fullText %></p></details>
                 <% } %>
                 <a href="/reviews/<%= item.book.userReview.id %>/edit" class="btn-small btn-primary">
                   <i class="fas fa-edit"></i> Редактировать
@@ -328,7 +328,30 @@
     display: inline;
   }
   
-  @media (max-width: 768px) {
+  
+ .empty-state p a {
+  color: #fdba74;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  transition: all 0.3s ease;
+}
+
+.empty-state p a:hover {
+  color: #fdba74;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 6px;
+}
+
+body.theme-dark .empty-state p a {
+  color: #fdba74;
+}
+
+body.theme-dark .empty-state p a:hover {
+  color: #fed7aa;
+}
+@media (max-width: 768px) {
     .book-detailed-card {
       grid-template-columns: 1fr;
     }

@@ -44,7 +44,7 @@
             <% const reviewPreview = truncateText(review.content, 240); %>
               <% if (reviewPreview.isTruncated) { %>
                 <p><%= reviewPreview.text %></p>
-                <details class="read-more-block"><summary>Читать дальше</summary><p><%= reviewPreview.fullText %></p></details>
+                <details class="read-more-block"><summary><span class="more-label">Читать дальше</span><span class="less-label">Свернуть</span></summary><p><%= reviewPreview.fullText %></p></details>
               <% } else { %>
                 <p><%= reviewPreview.fullText %></p>
               <% } %>

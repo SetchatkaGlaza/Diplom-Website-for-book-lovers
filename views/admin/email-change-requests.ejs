@@ -1,0 +1,99 @@
+<div class="email-admin-page">
+  <div class="page-header">
+    <h1><i class="fas fa-envelope-open-text"></i> Запросы на смену email</h1>
+    <p>Проверяйте обращения пользователей и принимайте решение с комментарием.</p>
+  </div>
+
+  <div class="status-tabs">
+    <a href="/admin/email-change-requests?status=pending" class="tab-chip <%= currentStatus === 'pending' ? 'active' : '' %>">Ожидают</a>
+    <a href="/admin/email-change-requests?status=approved" class="tab-chip <%= currentStatus === 'approved' ? 'active' : '' %>">Одобрены</a>
+    <a href="/admin/email-change-requests?status=rejected" class="tab-chip <%= currentStatus === 'rejected' ? 'active' : '' %>">Отклонены</a>
+  </div>
+
+  <% if (!requests || requests.length === 0) { %>
+    <div class="request-card empty-state">Нет запросов в этом статусе.</div>
+  <% } %>
+
+  <% requests.forEach(item => { %>
+    <article class="request-card">
+      <div class="request-grid">
+        <p><strong>Пользователь:</strong> <%= item.user?.name %> (#<%= item.user?.id %>)</p>
+        <p><strong>Текущий email:</strong> <span class="break"><%= item.current_email %></span></p>
+        <p><strong>Новый email:</strong> <span class="break"><%= item.new_email %></span></p>
+      </div>
+
+      <div class="reason-box">
+        <h4>Причина обращения</h4>
+        <p class="break"><%= item.reason %></p>
+      </div>
+
+      <% if (item.admin_note) { %>
+        <div class="reason-box note">
+          <h4>Комментарий администратора</h4>
+          <p class="break"><%= item.admin_note %></p>
+        </div>
+      <% } %>
+
+      <% if (item.status === 'pending') { %>
+        <form action="/admin/email-change-requests/<%= item.id %>/resolve" method="POST" class="resolve-form">
+          <div class="form-group">
+            <label for="note-<%= item.id %>">Комментарий (необязательно)</label>
+            <textarea id="note-<%= item.id %>" name="admin_note" rows="4" maxlength="1000" placeholder="Укажите причину решения"></textarea>
+          </div>
+          <div class="actions">
+            <button type="submit" name="action" value="approve" class="btn btn-success">Одобрить и сменить email</button>
+            <button type="submit" name="action" value="reject" class="btn btn-danger">Отклонить</button>
+          </div>
+        </form>
+      <% } %>
+    </article>
+  <% }) %>
+</div>
+
+<style>
+  .email-admin-page { display: grid; gap: 1rem; }
+  .page-header p { opacity: .85; margin-top: .35rem; }
+  .status-tabs { display:flex; gap:.6rem; flex-wrap:wrap; }
+  .tab-chip {
+    padding: .5rem .85rem;
+    border: 1px solid rgba(255,255,255,.24);
+    border-radius: 999px;
+    color: white;
+    text-decoration: none;
+    background: rgba(255,255,255,.08);
+  }
+  .tab-chip.active { background: rgba(99,102,241,.35); border-color: rgba(99,102,241,.8); }
+  .request-card {
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(255,255,255,.06);
+    display: grid;
+    gap: .9rem;
+  }
+  .request-grid { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:.5rem 1rem; }
+  .reason-box { padding:.8rem; border-radius: var(--radius); background: rgba(0,0,0,.2); }
+  .reason-box h4 { margin:0 0 .35rem; color: var(--accent); }
+  .reason-box p { margin:0; }
+  .resolve-form textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 100px;
+    max-height: 300px;
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,.24);
+    background: rgba(255,255,255,.08);
+    color: white;
+    padding: .75rem .85rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .actions { display:flex; gap:.6rem; flex-wrap:wrap; }
+  .break { overflow-wrap:anywhere; word-break: break-word; }
+  .empty-state { text-align:center; }
+  @media (max-width: 900px) {
+    .request-grid { grid-template-columns: 1fr; }
+  }
+</style>

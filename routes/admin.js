@@ -93,6 +93,8 @@ router.get('/import/template', requireSuperAdmin, importController.downloadTempl
 router.get('/users', requireSuperAdmin, adminController.getUsers);
 router.post('/users/:id/role', requireSuperAdmin, adminController.updateUserRole);
 router.post('/users/:id/toggle-block', requireSuperAdmin, adminController.toggleUserBlock);
+router.get('/email-change-requests', requireSuperAdmin, adminController.getEmailChangeRequests);
+router.post('/email-change-requests/:id/resolve', requireSuperAdmin, adminController.resolveEmailChangeRequest);
 
 // ===== УПРАВЛЕНИЕ ЖАНРАМИ =====
 router.get('/genres', requireSuperAdmin, adminController.getGenres);
