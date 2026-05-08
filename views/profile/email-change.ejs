@@ -20,12 +20,12 @@
 
     <div class="form-group">
       <label for="new_email">Новый email</label>
-      <input type="email" id="new_email" name="new_email" maxlength="254" required value="<%= formData?.new_email || '' %>">
+      <input type="email" id="new_email" name="new_email" maxlength="254" required value="<%= (typeof formData !== 'undefined' && formData && formData.new_email) ? formData.new_email : '' %>">
     </div>
 
     <div class="form-group">
       <label for="reason">Причина обращения</label>
-      <textarea id="reason" name="reason" rows="6" minlength="20" maxlength="1000" required placeholder="Кратко опишите, почему нужен перенос email"><%= formData?.reason || '' %></textarea>
+      <textarea id="reason" name="reason" rows="6" minlength="20" maxlength="1000" required placeholder="Кратко опишите, почему нужен перенос email"><%= (typeof formData !== 'undefined' && formData && formData.reason) ? formData.reason : '' %></textarea>
     </div>
 
     <div style="display:flex;gap:.75rem;flex-wrap:wrap;">

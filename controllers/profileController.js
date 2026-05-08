@@ -322,7 +322,8 @@ exports.getEmailChangeForm = async (req, res) => {
       title: 'Запрос на смену email',
       user: req.session.user,
       pendingRequest,
-      errors: []
+      errors: [],
+      formData: { new_email: '', reason: '' }
     });
   } catch (error) {
     console.error('Ошибка загрузки формы запроса email:', error);
