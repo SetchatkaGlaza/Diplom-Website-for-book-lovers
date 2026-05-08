@@ -27,7 +27,7 @@ exports.getProfile = async (req, res) => {
       where: { user_id: userId },
       include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image', 'cover_public_id'] }],
       order: [['createdAt', 'DESC']],
-      limit: 5
+      limit: 3
     });
     
     const recentBooks = await UserBook.findAll({
@@ -198,7 +198,7 @@ exports.uploadAvatar = async (req, res) => {
     }
 
     if (metadata.width < AVATAR_MIN_SIZE || metadata.height < AVATAR_MIN_SIZE) {
-      req.flash('error', `Изображение слишком маленькое. Минимальный размер аватара — ${AVATAR_MIN_SIZE}×${AVATAR_MIN_SIZE}px.`);
+      req.flash('error', `Изображение слишком маленькое. Минимальный размер аватара – ${AVATAR_MIN_SIZE}×${AVATAR_MIN_SIZE}px.`);
       return res.redirect('/profile/edit');
     }
 
@@ -596,7 +596,7 @@ exports.getPublicProfile = async (req, res) => {
       where: { user_id: userId },
       include: [{ model: Book, as: 'book', attributes: ['id', 'title', 'author', 'cover_image', 'cover_public_id'] }],
       order: [['createdAt', 'DESC']],
-      limit: 10
+      limit: 3
     });
 
     const recentBooks = await UserBook.findAll({

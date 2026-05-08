@@ -51,12 +51,12 @@
           <tbody>
             <% topics.forEach(topic => { %>
               <tr>
-                <td>
-                  <strong><a href="/forum/topic/<%= topic.id %>" target="_blank"><%= topic.title %></a></strong>
+                <td class="forum-topic-title-cell">
+                  <strong><a class="forum-topic-title-link" href="/forum/topic/<%= topic.id %>" target="_blank"><%= topic.title %></a></strong>
                   <div class="muted"><%= new Date(topic.createdAt).toLocaleString('ru-RU') %></div>
                 </td>
-                <td><%= topic.category ? topic.category.name : '—' %></td>
-                <td><%= topic.user ? topic.user.name : '—' %></td>
+                <td><%= topic.category ? topic.category.name : '–' %></td>
+                <td><%= topic.user ? topic.user.name : '–' %></td>
                 <td><%= topic.replies_count %></td>
                 <td>
                   <% if (topic.is_pinned) { %><span class="badge badge-warning">Закреплён</span><% } %>

@@ -285,7 +285,7 @@ function refreshCaptcha() {
   background: rgba(255, 255, 255, 0.05);
   color: white;
   font-size: 1rem;
-  transition: all 0.3s;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   width: 100%;
 }
 
@@ -365,7 +365,7 @@ function refreshCaptcha() {
 .captcha-refresh:hover {
   background: #fbbf24;
   border-color: #fbbf24;
-  transform: rotate(180deg);
+  color: #111827;
 }
 
 .form-options {
@@ -470,7 +470,9 @@ function refreshCaptcha() {
   }
   
   .captcha-container {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 52px;
+    align-items: stretch;
   }
   
   .captcha-image {
@@ -478,7 +480,8 @@ function refreshCaptcha() {
   }
   
   .captcha-refresh {
-    width: 100%;
+    width: 52px;
+    height: 60px;
   }
 }
 </style>

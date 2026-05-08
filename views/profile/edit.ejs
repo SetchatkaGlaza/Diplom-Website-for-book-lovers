@@ -374,7 +374,7 @@
     }
 
     if (file.size > maxAvatarSize) {
-      showAvatarError('Файл слишком большой. Максимальный размер аватара — 5MB.');
+      showAvatarError('Файл слишком большой. Максимальный размер аватара – 5MB.');
       resetAvatarInput();
       return;
     }
@@ -384,7 +384,7 @@
 
     probeImage.onload = function() {
       if (probeImage.naturalWidth < minAvatarSide || probeImage.naturalHeight < minAvatarSide) {
-        showAvatarError(`Изображение слишком маленькое. Минимальный размер — ${minAvatarSide}×${minAvatarSide}px.`);
+        showAvatarError(`Изображение слишком маленькое. Минимальный размер – ${minAvatarSide}×${minAvatarSide}px.`);
         resetAvatarInput();
         return;
       }

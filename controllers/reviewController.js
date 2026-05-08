@@ -29,7 +29,7 @@ async function updateBookRating(bookId) {
     });
     
   } catch (error) {
-    console.error(`❌ Ошибка при обновлении рейтинга книги ${bookId}:`, error);
+    console.error(`Ошибка при обновлении рейтинга книги ${bookId}:`, error);
   }
 }
 

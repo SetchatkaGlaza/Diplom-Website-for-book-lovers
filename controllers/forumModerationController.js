@@ -99,7 +99,7 @@ exports.getDashboard = async (req, res) => {
     ]);
 
     res.render('admin/forum-dashboard', {
-      title: 'Форум — обзор',
+      title: 'Форум – обзор',
       stats: {
         totalCategories,
         activeCategories,
@@ -153,7 +153,7 @@ exports.getModerationQueue = async (req, res) => {
     });
 
     res.render('admin/forum-moderation', {
-      title: 'Форум — модерация',
+      title: 'Форум – модерация',
       pendingTopics,
       filters: { search },
       stats: {
@@ -222,7 +222,7 @@ exports.getTopicsManagement = async (req, res) => {
     ]);
 
     res.render('admin/forum-topics', {
-      title: 'Форум — управление топиками',
+      title: 'Форум – управление топиками',
       topics,
       categories,
       filters: {
@@ -448,7 +448,7 @@ exports.deleteTopicPost = async (req, res) => {
       post.topic,
       post,
       false,
-      `${reason}. Если не согласны — отправьте объяснение модератору.`,
+      `${reason}. Если не согласны – отправьте объяснение модератору.`,
       moderationCase.id
     );
     await post.destroy();
@@ -487,7 +487,7 @@ exports.getAppeals = async (req, res) => {
     }));
 
     res.render('admin/forum-appeals', {
-      title: 'Форум — обращения по удалённым сообщениям',
+      title: 'Форум – обращения по удалённым сообщениям',
       cases: normalizedCases,
       currentStatus: status,
       user: req.session.user,
@@ -541,7 +541,7 @@ exports.resolveAppeal = async (req, res) => {
       await notificationService.create(
         moderationCase.user_id,
         'forum_moderated',
-        '✅ Сообщение восстановлено',
+        'Сообщение восстановлено',
         `Ваше обращение рассмотрено. Сообщение в теме "${moderationCase.topic?.title || 'форум'}" восстановлено.`,
         `/forum/topic/${moderationCase.topic_id}`
       );
@@ -556,7 +556,7 @@ exports.resolveAppeal = async (req, res) => {
       await notificationService.create(
         moderationCase.user_id,
         'forum_moderated',
-        'ℹ️ Обращение рассмотрено',
+        'Обращение рассмотрено',
         `Ваше обращение рассмотрено. Решение модератора по сообщению оставлено без изменений.`,
         `/forum/topic/${moderationCase.topic_id}`
       );
@@ -670,7 +670,7 @@ exports.getCategories = async (req, res) => {
     });
 
     res.render('admin/forum-categories', {
-      title: 'Форум — категории',
+      title: 'Форум – категории',
       categories: mappedCategories,
       user: req.session.user,
       layout: 'layouts/admin',

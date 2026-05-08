@@ -82,7 +82,7 @@ exports.getCatalog = async (req, res) => {
     let yearTo = parseInt(yearToRaw, 10);
 
     if (!Number.isNaN(yearFrom) && yearFrom < minCatalogYear) {
-      filterWarnings.push(`Минимальный год в каталоге — ${minCatalogYear}. Поиск начат с этого года.`);
+      filterWarnings.push(`Минимальный год в каталоге – ${minCatalogYear}. Поиск начат с этого года.`);
       yearFrom = minCatalogYear;
     }
 

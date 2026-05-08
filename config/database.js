@@ -27,7 +27,7 @@ const missingLocalVars = ['DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_PO
   .filter((key) => !process.env[key]);
 
 if (missingLocalVars.length > 0) {
-  console.warn(`⚠️ Отсутствуют переменные окружения БД: ${missingLocalVars.join(', ')}`);
+  console.warn(`Отсутствуют переменные окружения БД: ${missingLocalVars.join(', ')}`);
 }
 
 module.exports = new Sequelize(
