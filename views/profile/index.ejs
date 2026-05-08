@@ -86,8 +86,7 @@
                 </span>
                 <span class="review-date"><%= new Date(review.createdAt).toLocaleDateString('ru-RU') %></span>
               </p>
-              <% const reviewPreview = truncateText(review.content, 180); %>
-              <p class="review-excerpt"><%= reviewPreview.text %></p>
+               <p class="review-excerpt"><%= review.content.substring(0, 150) %>...</p>
             </div>
           </div>
         <% }) %>
@@ -312,6 +311,10 @@
     object-fit: cover;
     border-radius: var(--radius-sm);
   }
+
+  .review-content {
+    min-width: 0;
+  }
   
   .review-content h3 {
     font-size: 1rem;
@@ -409,6 +412,21 @@
     text-align: center;
     padding: 2rem;
     opacity: 0.6;
+  }
+
+  @media (min-width: 769px) {
+    .recent-review-card {
+      align-items: flex-start;
+    }
+
+    .review-content {
+      flex: 1;
+      text-align: left;
+    }
+
+    .review-meta {
+      justify-content: flex-start;
+    }
   }
   
   @media (max-width: 768px) {
