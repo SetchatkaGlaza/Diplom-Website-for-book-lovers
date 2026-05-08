@@ -92,13 +92,15 @@ window.addEventListener('scroll', () => {
 
   const setError = (field, message) => {
     field.classList.toggle('is-invalid', Boolean(message));
-    let error = field.parentElement?.querySelector(`.field-error[data-for="${field.name || field.id}"]`);
+    const fieldKey = field.name || field.id;
+    const container = field.closest('.password-wrapper') || field;
+    let error = container.parentElement?.querySelector(`.field-error[data-for="${fieldKey}"]`);
 
     if (!error && message) {
       error = document.createElement('small');
       error.className = 'field-error';
-      error.dataset.for = field.name || field.id;
-      field.insertAdjacentElement('afterend', error);
+      error.dataset.for = fieldKey;
+      container.insertAdjacentElement('afterend', error);
     }
 
     if (error) {
@@ -236,10 +238,15 @@ window.addEventListener('scroll', () => {
 document.addEventListener('DOMContentLoaded', () => {
   const catalogGrid = document.querySelector('.books-grid');
   const viewButtons = document.querySelectorAll('.view-btn[data-view]');
+  const isCatalogPage = window.location.pathname.startsWith('/catalog');
+
+  if (!isCatalogPage || !catalogGrid || viewButtons.length === 0) {
+    return;
+  }
+
   const savedView = localStorage.getItem('catalogView') || 'grid';
 
   const applyCatalogView = (view) => {
-    if (!catalogGrid) return;
     catalogGrid.classList.toggle('books-list-view', view === 'list');
     viewButtons.forEach((button) => button.classList.toggle('active', button.dataset.view === view));
     localStorage.setItem('catalogView', view);

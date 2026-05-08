@@ -302,10 +302,13 @@ function refreshCaptcha() {
 
 .password-wrapper {
   position: relative;
+  width: 100%;
 }
 
-.password-wrapper input {
-  padding-right: 3rem;
+.password-wrapper input,
+.password-wrapper .form-input {
+  width: 100%;
+  padding-right: 3.2rem;
 }
 
 .password-toggle {
@@ -313,12 +316,18 @@ function refreshCaptcha() {
   right: 1rem;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 2;
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   transition: color 0.3s;
-  padding: 0.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
 }
 
 .password-toggle:hover {
@@ -482,6 +491,19 @@ function refreshCaptcha() {
   .captcha-refresh {
     width: 52px;
     height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .password-wrapper input,
+  .password-wrapper .form-input {
+    padding-right: 2.75rem;
+  }
+
+  .password-toggle {
+    right: 0.75rem;
+    width: 2rem;
+    height: 2rem;
   }
 }
 </style>
