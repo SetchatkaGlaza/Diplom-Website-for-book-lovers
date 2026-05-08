@@ -192,3 +192,35 @@ exports.sendReplyEmail = async (toEmail, toName, subject, message) => {
     return { success: false, error };
   }
 };
+
+
+exports.sendEmailChangeRequestResolved = async ({ toEmail, toName, approved, newEmail, adminNote }) => {
+  try {
+    const subject = approved ? 'Запрос на смену email одобрен - Книгоманы' : 'Запрос на смену email отклонён - Книгоманы';
+    const statusText = approved ? 'одобрен' : 'отклонён';
+    const details = approved
+      ? `<p>Ваш email в аккаунте изменён на: <strong>${newEmail}</strong>.</p>`
+      : '<p>Email в аккаунте не изменён.</p>';
+
+    const noteBlock = adminNote ? `<p><strong>Комментарий администратора:</strong><br>${adminNote.replace(/\n/g, '<br>')}</p>` : '';
+
+    await sendEmail({
+      from: `"Книгоманы" <${process.env.EMAIL_USER || 'noreply@bookLovers.ru'}>`,
+      to: toEmail,
+      subject,
+      html: `
+        <h2>Здравствуйте, ${toName}!</h2>
+        <p>Ваш запрос на смену email был <strong>${statusText}</strong>.</p>
+        ${details}
+        ${noteBlock}
+        <hr>
+        <p>С уважением, команда Книгоманы</p>
+      `
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Ошибка отправки уведомления о решении по смене email:', error);
+    return { success: false, error };
+  }
+};

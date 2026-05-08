@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const sharp = require('sharp');
 const notificationService = require('../services/notificationService');
+const emailService = require('../config/email');
 const uploadService = require('../services/uploadService');
 const { validatePersonName, validatePlainText, validateSearchQuery } = require('../utils/validators');
 
@@ -1197,6 +1198,25 @@ exports.resolveEmailChangeRequest = async (req, res) => {
       admin_note: noteValidation.value || null,
       resolved_by: req.session.user.id,
       resolved_at: new Date()
+    });
+
+    await notificationService.create(
+      requestItem.user_id,
+      'email_change_request_resolved',
+      action === 'approved' ? 'Смена email одобрена' : 'Смена email отклонена',
+      action === 'approved'
+        ? 'Администратор одобрил ваш запрос на смену email. Проверьте данные профиля.'
+        : 'Администратор отклонил ваш запрос на смену email. Проверьте комментарий и отправьте новый запрос при необходимости.',
+      '/profile/email-change',
+      { request_id: requestItem.id, status: action }
+    );
+
+    await emailService.sendEmailChangeRequestResolved({
+      toEmail: requestItem.user.email,
+      toName: requestItem.user.name,
+      approved: action === 'approved',
+      newEmail: requestItem.new_email,
+      adminNote: noteValidation.value || ''
     });
 
     req.flash('success', action === 'approved' ? 'Запрос одобрен, email пользователя обновлён' : 'Запрос отклонён');
