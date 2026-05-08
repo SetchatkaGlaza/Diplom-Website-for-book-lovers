@@ -1,36 +1,87 @@
-<div class="edit-profile">
-  <h1><i class="fas fa-envelope-open-text"></i> Запрос на смену email</h1>
-
-  <% if (errors && errors.length > 0) { %>
-    <div class="alert alert-danger"><ul><% errors.forEach(error => { %><li><%= error.msg %></li><% }) %></ul></div>
-  <% } %>
-
-  <% if (pendingRequest) { %>
-    <div class="alert alert-info">
-      У вас уже есть активный запрос от <strong><%= new Date(pendingRequest.createdAt).toLocaleString('ru-RU') %></strong>.
-      Новый запрос можно отправить после решения администратора.
-    </div>
-  <% } %>
-
-  <form action="/profile/email-change" method="POST" class="edit-form">
-    <div class="form-group">
-      <label>Текущий email</label>
-      <input type="email" value="<%= user.email %>" disabled>
+<div class="email-change-page">
+  <div class="email-change-card">
+    <div class="email-change-header">
+      <h1><i class="fas fa-envelope-open-text"></i> Запрос на смену email</h1>
+      <p>Отправьте обращение администратору. После проверки вы получите решение по запросу.</p>
     </div>
 
-    <div class="form-group">
-      <label for="new_email">Новый email</label>
-      <input type="email" id="new_email" name="new_email" maxlength="254" required value="<%= (typeof formData !== 'undefined' && formData && formData.new_email) ? formData.new_email : '' %>">
-    </div>
+    <% if (errors && errors.length > 0) { %>
+      <div class="alert alert-danger"><ul><% errors.forEach(error => { %><li><%= error.msg %></li><% }) %></ul></div>
+    <% } %>
 
-    <div class="form-group">
-      <label for="reason">Причина обращения</label>
-      <textarea id="reason" name="reason" rows="6" minlength="20" maxlength="1000" required placeholder="Кратко опишите, почему нужен перенос email"><%= (typeof formData !== 'undefined' && formData && formData.reason) ? formData.reason : '' %></textarea>
-    </div>
+    <% if (pendingRequest) { %>
+      <div class="alert alert-info">
+        У вас уже есть активный запрос от <strong><%= new Date(pendingRequest.createdAt).toLocaleString('ru-RU') %></strong>.
+        Новый запрос можно отправить после решения администратора.
+      </div>
+    <% } %>
 
-    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
-      <button type="submit" class="btn btn-primary" <%= pendingRequest ? 'disabled' : '' %>>Отправить запрос</button>
-      <a href="/profile/edit" class="btn btn-outline">Назад</a>
-    </div>
-  </form>
+    <form action="/profile/email-change" method="POST" class="email-change-form">
+      <div class="form-group">
+        <label>Текущий email</label>
+        <input type="email" value="<%= user.email %>" disabled>
+      </div>
+
+      <div class="form-group">
+        <label for="new_email">Новый email</label>
+        <input type="email" id="new_email" name="new_email" maxlength="254" required value="<%= (typeof formData !== 'undefined' && formData && formData.new_email) ? formData.new_email : '' %>">
+      </div>
+
+      <div class="form-group">
+        <label for="reason">Причина обращения</label>
+        <textarea id="reason" name="reason" rows="6" minlength="20" maxlength="1000" required placeholder="Кратко опишите, почему нужен перенос email"><%= (typeof formData !== 'undefined' && formData && formData.reason) ? formData.reason : '' %></textarea>
+        <small>От 20 до 1000 символов. Поддерживается перенос длинных слов и ссылок.</small>
+      </div>
+
+      <div class="email-change-actions">
+        <button type="submit" class="btn btn-primary" <%= pendingRequest ? 'disabled' : '' %>>Отправить запрос</button>
+        <a href="/profile/edit" class="btn btn-outline">Назад</a>
+      </div>
+    </form>
+  </div>
 </div>
+
+<style>
+  .email-change-page { margin: 2rem 0; }
+  .email-change-card {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .email-change-header h1 { display:flex; gap:.75rem; align-items:center; margin-bottom:.5rem; }
+  .email-change-header p { opacity:.85; margin-bottom:1.25rem; }
+  .email-change-form .form-group { margin-bottom: 1rem; }
+  .email-change-form input,
+  .email-change-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 100%;
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,.25);
+    background: rgba(255,255,255,.08);
+    color: white;
+    padding: .9rem 1rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .email-change-form textarea {
+    resize: vertical;
+    min-height: 150px;
+    max-height: 420px;
+  }
+  .email-change-form input:focus,
+  .email-change-form textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.25);
+  }
+  .email-change-actions { display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1rem; }
+  @media (max-width: 768px) {
+    .email-change-card { padding: 1.25rem; }
+  }
+</style>
