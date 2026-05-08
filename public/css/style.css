@@ -2503,8 +2503,9 @@ body.theme-dark .view-btn {
 .table-pagination {
   flex-wrap: nowrap;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: visible;
   -webkit-overflow-scrolling: touch;
+  align-items: center;
 }
 
 .pagination-ellipsis {
