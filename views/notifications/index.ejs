@@ -78,31 +78,6 @@
         <% }) %>
       </div>
       
-      <!-- Пагинация -->
-      <% if (totalPages > 1) { %>
-        <div class="pagination">
-          <% if (currentPage > 1) { %>
-            <a href="?page=<%= currentPage - 1 %>" class="page-link">
-              <i class="fas fa-chevron-left"></i>
-            </a>
-          <% } %>
-          
-          <% for(let i = 1; i <= totalPages; i++) { %>
-            <% if (i === currentPage) { %>
-              <span class="page-link active"><%= i %></span>
-            <% } else { %>
-              <a href="?page=<%= i %>" class="page-link"><%= i %></a>
-            <% } %>
-          <% } %>
-          
-          <% if (currentPage < totalPages) { %>
-            <a href="?page=<%= currentPage + 1 %>" class="page-link">
-              <i class="fas fa-chevron-right"></i>
-            </a>
-          <% } %>
-        </div>
-      <% } %>
-      
     <% } else { %>
       <div class="empty-state">
         <i class="fas fa-bell-slash fa-4x"></i>
@@ -114,6 +89,31 @@
       </div>
     <% } %>
   </div>
+
+  <% if (notifications && notifications.length > 0 && totalPages > 1) { %>
+    <div class="pagination notifications-pagination">
+      <% if (currentPage > 1) { %>
+        <a href="?page=<%= currentPage - 1 %>" class="page-link">
+          <i class="fas fa-chevron-left"></i>
+        </a>
+      <% } %>
+
+      <% for(let i = 1; i <= totalPages; i++) { %>
+        <% if (i === currentPage) { %>
+          <span class="page-link active"><%= i %></span>
+        <% } else { %>
+          <a href="?page=<%= i %>" class="page-link"><%= i %></a>
+        <% } %>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+        <a href="?page=<%= currentPage + 1 %>" class="page-link">
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      <% } %>
+    </div>
+  <% } %>
+
 </div>
 
 <script>
@@ -256,7 +256,7 @@
 
   .notifications-list-container {
     overflow: visible;
-    min-height: 920px;
+    min-height: auto;
   }
   
   
@@ -377,12 +377,9 @@
   }
   
   
-  .notifications-list-container .pagination {
-    margin-top: 2.5rem;
-    padding-top: 1rem;
-    position: relative;
-    z-index: 2;
-    clear: both;
+  .notifications-pagination {
+    margin-top: 2rem;
+    padding-top: 0.75rem;
   }
 .empty-state {
     text-align: center;
@@ -410,7 +407,7 @@
   
   @media (max-width: 768px) {
     .notifications-list-container {
-      min-height: 760px;
+      min-height: auto;
     }
     .page-header {
       flex-direction: column;
