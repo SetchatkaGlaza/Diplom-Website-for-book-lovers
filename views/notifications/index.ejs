@@ -254,7 +254,8 @@
   }
 
   .notifications-list-container {
-    overflow-x: hidden;
+    overflow: visible;
+    min-height: 660px;
   }
   
   
@@ -399,6 +400,9 @@
   }
   
   @media (max-width: 768px) {
+    .notifications-list-container {
+      min-height: 520px;
+    }
     .page-header {
       flex-direction: column;
       align-items: flex-start;
