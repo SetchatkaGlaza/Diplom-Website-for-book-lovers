@@ -6,6 +6,7 @@ const fs = require('fs').promises;
 const sharp = require('sharp');
 const notificationService = require('../services/notificationService');
 const uploadService = require('../services/uploadService');
+const { validatePersonName, validatePlainText, validateSearchQuery } = require('../utils/validators');
 
 const SALT_ROUNDS = 10;
 const ADMIN_POLICY = {
@@ -261,7 +262,11 @@ exports.getBooks = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const offset = (page - 1) * limit;
-    const search = req.query.search || '';
+    const searchValidation = validateSearchQuery(req.query.search || '', 'Поисковый запрос');
+    const search = searchValidation.error ? '' : searchValidation.value;
+    if (searchValidation.error) {
+      req.flash('error', searchValidation.error);
+    }
     
     const where = search ? {
       [Op.or]: [
@@ -343,16 +348,38 @@ exports.postAddBook = async (req, res) => {
     
     const errors = [];
     
-    if (!title || title.length < 1) {
-      errors.push({ msg: 'Название обязательно' });
+    const titleValidation = validatePlainText(title, 'Название', { required: true, min: 1, max: 255 });
+    const authorValidation = validatePersonName(author, 'Автор');
+    const descriptionValidation = validatePlainText(description, 'Описание', { max: 5000 });
+    const publisherValidation = validatePlainText(publisher, 'Издательство', { max: 255 });
+    const isbnValidation = validateSearchQuery(isbn, 'ISBN');
+
+    if (titleValidation.error) {
+      errors.push({ msg: titleValidation.error });
     }
-    
-    if (!author || author.length < 2) {
-      errors.push({ msg: 'Автор обязателен' });
+
+    if (authorValidation.error) {
+      errors.push({ msg: authorValidation.error });
+    }
+
+    if (descriptionValidation.error) {
+      errors.push({ msg: descriptionValidation.error });
+    }
+
+    if (publisherValidation.error) {
+      errors.push({ msg: publisherValidation.error });
+    }
+
+    if (isbnValidation.error) {
+      errors.push({ msg: isbnValidation.error });
     }
     
     if (year && (year < 1000 || year > new Date().getFullYear() + 1)) {
-      errors.push({ msg: 'Некорректный год' });
+      errors.push({ msg: 'Год издания должен быть в диапазоне от 1000 до следующего года' });
+    }
+
+    if (pages && (pages < 1 || pages > 10000)) {
+      errors.push({ msg: 'Количество страниц должно быть от 1 до 10000' });
     }
     
     if (errors.length > 0) {
@@ -385,16 +412,16 @@ exports.postAddBook = async (req, res) => {
     }
     
     const newBook = await Book.create({
-      title,
-      author,
-      description,
+      title: titleValidation.value,
+      author: authorValidation.value,
+      description: descriptionValidation.value,
       year: year || null,
       pages: pages || null,
-      publisher: publisher || null,
+      publisher: publisherValidation.value || null,
       genre_id: genre_id || null,
       cover_image: coverUrl,
       cover_public_id: coverPublicId,
-      isbn: isbn || null
+      isbn: isbnValidation.value || null
     });
     
     req.flash('success', 'Книга успешно добавлена');
@@ -459,16 +486,38 @@ exports.postEditBook = async (req, res) => {
     
     const errors = [];
     
-    if (!title || title.length < 1) {
-      errors.push({ msg: 'Название обязательно' });
+    const titleValidation = validatePlainText(title, 'Название', { required: true, min: 1, max: 255 });
+    const authorValidation = validatePersonName(author, 'Автор');
+    const descriptionValidation = validatePlainText(description, 'Описание', { max: 5000 });
+    const publisherValidation = validatePlainText(publisher, 'Издательство', { max: 255 });
+    const isbnValidation = validateSearchQuery(isbn, 'ISBN');
+
+    if (titleValidation.error) {
+      errors.push({ msg: titleValidation.error });
     }
-    
-    if (!author || author.length < 2) {
-      errors.push({ msg: 'Автор обязателен' });
+
+    if (authorValidation.error) {
+      errors.push({ msg: authorValidation.error });
+    }
+
+    if (descriptionValidation.error) {
+      errors.push({ msg: descriptionValidation.error });
+    }
+
+    if (publisherValidation.error) {
+      errors.push({ msg: publisherValidation.error });
+    }
+
+    if (isbnValidation.error) {
+      errors.push({ msg: isbnValidation.error });
     }
     
     if (year && (year < 1000 || year > new Date().getFullYear() + 1)) {
-      errors.push({ msg: 'Некорректный год' });
+      errors.push({ msg: 'Год издания должен быть в диапазоне от 1000 до следующего года' });
+    }
+
+    if (pages && (pages < 1 || pages > 10000)) {
+      errors.push({ msg: 'Количество страниц должно быть от 1 до 10000' });
     }
     
     if (errors.length > 0) {
@@ -485,14 +534,14 @@ exports.postEditBook = async (req, res) => {
     }
     
     const updateData = {
-      title,
-      author,
-      description,
+      title: titleValidation.value,
+      author: authorValidation.value,
+      description: descriptionValidation.value,
       year: year || null,
       pages: pages || null,
-      publisher: publisher || null,
+      publisher: publisherValidation.value || null,
       genre_id: genre_id || null,
-      isbn: isbn || null
+      isbn: isbnValidation.value || null
     };
     
     // Обновление обложки
@@ -561,7 +610,11 @@ exports.getUsers = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const offset = (page - 1) * limit;
-    const search = req.query.search || '';
+    const searchValidation = validateSearchQuery(req.query.search || '', 'Поисковый запрос');
+    const search = searchValidation.error ? '' : searchValidation.value;
+    if (searchValidation.error) {
+      req.flash('error', searchValidation.error);
+    }
     const role = req.query.role || 'all';
     
     const where = {};
@@ -788,10 +841,11 @@ exports.getGenres = async (req, res) => {
 
 exports.addGenre = async (req, res) => {
   try {
-    const { name } = req.body;
+    const nameValidation = validatePlainText(req.body.name, 'Название жанра', { required: true, min: 2, max: 80 });
+    const name = nameValidation.value;
     
-    if (!name || name.length < 2) {
-      req.flash('error', 'Название жанра должно содержать минимум 2 символа');
+    if (nameValidation.error) {
+      req.flash('error', nameValidation.error);
       return res.redirect('/admin/genres');
     }
     
@@ -817,7 +871,8 @@ exports.addGenre = async (req, res) => {
 exports.editGenre = async (req, res) => {
   try {
     const genreId = req.params.id;
-    const { name } = req.body;
+    const nameValidation = validatePlainText(req.body.name, 'Название жанра', { required: true, min: 2, max: 80 });
+    const name = nameValidation.value;
     
     const genre = await Genre.findByPk(genreId);
     
@@ -826,8 +881,8 @@ exports.editGenre = async (req, res) => {
       return res.redirect('/admin/genres');
     }
     
-    if (!name || name.length < 2) {
-      req.flash('error', 'Название жанра должно содержать минимум 2 символа');
+    if (nameValidation.error) {
+      req.flash('error', nameValidation.error);
       return res.redirect('/admin/genres');
     }
     

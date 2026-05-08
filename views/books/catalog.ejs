@@ -101,6 +101,10 @@
         <option value="year_desc" <%= sort === 'year_desc' ? 'selected' : '' %>>По году (сначала новые)</option>
         <option value="year_asc" <%= sort === 'year_asc' ? 'selected' : '' %>>По году (сначала старые)</option>
       </select>
+      <div class="view-switch" aria-label="Переключение вида каталога">
+        <button type="button" class="view-btn active" data-view="grid"><i class="fas fa-th-large"></i> Плитка</button>
+        <button type="button" class="view-btn" data-view="list"><i class="fas fa-list"></i> Список</button>
+      </div>
     </div>
     
     <!-- Сетка книг - 4 колонки -->

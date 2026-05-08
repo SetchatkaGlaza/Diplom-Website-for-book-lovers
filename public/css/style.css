@@ -2311,3 +2311,95 @@ canvas {
     font-size: 16px;
   }
 }
+
+/* ===== ПЕРЕКЛЮЧЕНИЕ ТЕМЫ И ВАЛИДАЦИЯ ===== */
+.theme-toggle {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+body.theme-dark {
+  color: #f8fafc;
+  background: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
+}
+
+body.theme-dark .header,
+body.theme-dark .card,
+body.theme-dark .book-card,
+body.theme-dark .review-card,
+body.theme-dark .profile-card,
+body.theme-dark .form-container,
+body.theme-dark .catalog-filters,
+body.theme-dark .forum-card,
+body.theme-dark .topic-card,
+body.theme-dark .post-card {
+  background: rgba(15, 23, 42, 0.92);
+  color: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+body.theme-dark input,
+body.theme-dark textarea,
+body.theme-dark select {
+  background: #111827;
+  color: #f8fafc;
+  border-color: #475569;
+}
+
+.field-error {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--danger);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+input.is-invalid,
+textarea.is-invalid,
+select.is-invalid {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+.view-switch {
+  display: inline-flex;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+.view-btn {
+  border: 1px solid var(--gray-light);
+  border-radius: var(--radius);
+  padding: 0.45rem 0.75rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--dark);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.view-btn.active,
+.view-btn:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.books-grid.books-list-view {
+  grid-template-columns: 1fr;
+}
+
+.books-grid.books-list-view .book-card {
+  animation: fadeIn 0.35s ease;
+}
+
+.books-grid.books-list-view .book-link {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.books-grid.books-list-view .book-cover {
+  height: 180px;
+}

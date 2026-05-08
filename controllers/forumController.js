@@ -10,6 +10,7 @@ const {
 const { Op } = require('sequelize');
 const slugify = require('slugify');
 const notificationService = require('../services/notificationService');
+const { validatePlainText, validateSearchQuery } = require('../utils/validators');
 
 exports.getIndex = async (req, res) => {
   try {
@@ -284,12 +285,15 @@ exports.postNewTopic = async (req, res) => {
       errors.push({ msg: 'Выберите категорию' });
     }
     
-    if (!title || title.length < 5) {
-      errors.push({ msg: 'Заголовок должен содержать минимум 5 символов' });
+    const titleValidation = validatePlainText(title, 'Заголовок', { required: true, min: 5, max: 120 });
+    const contentValidation = validatePlainText(content, 'Сообщение', { required: true, min: 10, max: 10000 });
+
+    if (titleValidation.error) {
+      errors.push({ msg: titleValidation.error });
     }
-    
-    if (!content || content.length < 10) {
-      errors.push({ msg: 'Сообщение должно содержать минимум 10 символов' });
+
+    if (contentValidation.error) {
+      errors.push({ msg: contentValidation.error });
     }
     
     if (errors.length > 0) {
@@ -302,20 +306,20 @@ exports.postNewTopic = async (req, res) => {
         title: 'Создать тему',
         categories,
         errors,                       // <-- передаём ошибки
-        formData: { category_id, title, content }, // <-- передаём введённые данные
+        formData: { category_id, title: titleValidation.value, content: contentValidation.value }, // <-- передаём введённые данные
         user: req.session.user,
         layout: 'layouts/main'
       });
     }
     
-    const slug = require('slugify')(title, { lower: true, strict: true }) + '-' + Date.now();
+    const slug = slugify(titleValidation.value, { lower: true, strict: true }) + '-' + Date.now();
     
     const topic = await ForumTopic.create({
       category_id,
       user_id: userId,
-      title,
+      title: titleValidation.value,
       slug,
-      content,
+      content: contentValidation.value,
       last_reply_user_id: userId,
       is_moderated: false
     });
@@ -323,7 +327,7 @@ exports.postNewTopic = async (req, res) => {
     await ForumPost.create({
       topic_id: topic.id,
       user_id: userId,
-      content,
+      content: contentValidation.value,
       is_moderated: false,
       ip_address: req.ip
     });
@@ -356,12 +360,13 @@ exports.postReply = async (req, res) => {
       return res.redirect(`/forum/topic/${topicId}`);
     }
     
-    if (!content || content.trim().length < 2) {
-      req.flash('error', 'Сообщение не может быть пустым');
+    const contentValidation = validatePlainText(content, 'Сообщение', { required: true, min: 2, max: 10000 });
+    if (contentValidation.error) {
+      req.flash('error', contentValidation.error);
       return res.redirect(`/forum/topic/${topicId}`);
     }
     
-    content = content.trim();
+    content = contentValidation.value;
     
     const post = await ForumPost.create({
       topic_id: topicId,
@@ -560,13 +565,14 @@ exports.postEditPost = async (req, res) => {
       return res.redirect(`/forum/topic/${post.topic_id}`);
     }
     
-    if (!content || content.length < 2) {
-      req.flash('error', 'Сообщение не может быть пустым');
+    const contentValidation = validatePlainText(content, 'Сообщение', { required: true, min: 2, max: 10000 });
+    if (contentValidation.error) {
+      req.flash('error', contentValidation.error);
       return res.redirect(`/forum/post/${postId}/edit`);
     }
     
     await post.update({
-      content,
+      content: contentValidation.value,
       is_edited: true,
       edited_by: userId,
       edited_at: new Date()
@@ -584,16 +590,18 @@ exports.postEditPost = async (req, res) => {
 
 exports.search = async (req, res) => {
   try {
-    const query = (req.query.q || '').trim();
+    const queryValidation = validateSearchQuery(req.query.q || '', 'Поисковый запрос');
+    const query = queryValidation.value;
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const offset = (page - 1) * limit;
     
-    if (!query || query.length < 3) {
+    if (queryValidation.error || !query || query.length < 3) {
       return res.render('forum/search', {
         title: 'Поиск по форуму',
         query,
         results: [],
+        errors: queryValidation.error ? [{ msg: queryValidation.error }] : [],
         user: req.session.user || null,
         layout: 'layouts/main'
       });
@@ -693,8 +701,9 @@ exports.postPostAppealForm = async (req, res) => {
     const userId = req.session.user.id;
     const explanation = (req.body.explanation || '').trim();
 
-    if (explanation.length < 10) {
-      req.flash('error', 'Опишите ситуацию подробнее (минимум 10 символов)');
+    const explanationValidation = validatePlainText(explanation, 'Объяснение', { required: true, min: 10, max: 2000 });
+    if (explanationValidation.error) {
+      req.flash('error', explanationValidation.error);
       return res.redirect(`/forum/post-moderation/${caseId}/appeal`);
     }
 
@@ -713,7 +722,7 @@ exports.postPostAppealForm = async (req, res) => {
     }
 
     await moderationCase.update({
-      user_explanation: explanation,
+      user_explanation: explanationValidation.value,
       status: 'appealed'
     });
 

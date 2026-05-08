@@ -2,11 +2,10 @@ const bcrypt = require('bcrypt');
 const { User, LoginAttempt } = require('../models');
 const { fn, col, where: sequelizeWhere } = require('sequelize');
 const notificationService = require('../services/notificationService');
+const { validateEmail: validateEmailInput, validatePersonName, validatePassword: validatePasswordInput } = require('../utils/validators');
 
 const SALT_ROUNDS = 10;
 const CAPTCHA_THRESHOLD = 3;
-const USERNAME_REGEX = /^[A-Za-zА-Яа-яЁё_]+$/u;
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function normalizeEmail(email = '') {
   return email.trim().toLowerCase();
@@ -82,44 +81,17 @@ function validateCaptchaInput(req, captcha) {
 }
 
 function validateEmail(email) {
-  if (!email) {
-    return 'Введите email';
-  }
-
-  if (email.length > 254 || !EMAIL_REGEX.test(email)) {
-    return 'Введите корректный email, например name@example.com';
-  }
-
-  return null;
+  return validateEmailInput(email).error;
 }
 
 function validateUsername(name) {
-  if (!name) {
-    return 'Введите имя пользователя';
-  }
-
-  if (name.length < 2 || name.length > 30) {
-    return 'Имя пользователя должно содержать от 2 до 30 символов';
-  }
-
-  if (!USERNAME_REGEX.test(name)) {
-    return 'Имя пользователя может содержать только русские/латинские буквы и нижнее подчёркивание';
-  }
-
-  return null;
+  return validatePersonName(name, 'Имя пользователя').error;
 }
 
 function validatePassword(password) {
-  if (!password) {
-    return 'Введите пароль';
-  }
-
-  if (password.length < 6 || password.length > 128) {
-    return 'Пароль должен содержать от 6 до 128 символов';
-  }
-
-  return null;
+  return validatePasswordInput(password).error;
 }
+
 
 async function getLoginAttempt(ip, email) {
   return LoginAttempt.findOne({
@@ -362,7 +334,7 @@ exports.postRegister = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
     const newUser = await User.create({
-      name,
+      name: validatePersonName(name, 'Имя пользователя').value,
       email,
       password_hash: hashedPassword,
       role: 'user',

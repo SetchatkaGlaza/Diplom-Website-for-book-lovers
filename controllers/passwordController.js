@@ -1,6 +1,7 @@
 const { User, PasswordReset, LoginAttempt } = require('../models');
 const { Op, fn, col, where: sequelizeWhere } = require('sequelize');
 const bcrypt = require('bcrypt');
+const { validatePassword } = require('../utils/validators');
 
 const SALT_ROUNDS = 10;
 
@@ -101,8 +102,9 @@ exports.postForgotPassword = async (req, res) => {
       errors.push({ msg: 'Введите имя пользователя или email аккаунта' });
     }
 
-    if (!password || password.length < 6) {
-      errors.push({ msg: 'Новый пароль должен содержать минимум 6 символов' });
+    const passwordError = validatePassword(password).error;
+    if (passwordError) {
+      errors.push({ msg: passwordError });
     }
 
     if (password !== passwordConfirm) {
@@ -215,8 +217,9 @@ exports.postResetPassword = async (req, res) => {
     
     const errors = [];
     
-    if (!password || password.length < 6) {
-      errors.push({ msg: 'Пароль должен содержать минимум 6 символов' });
+    const passwordError = validatePassword(password).error;
+    if (passwordError) {
+      errors.push({ msg: passwordError });
     }
     
     if (password !== password_confirm) {

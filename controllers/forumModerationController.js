@@ -1,6 +1,7 @@
 const { ForumCategory, ForumTopic, ForumPost, ForumPostModeration, User } = require('../models');
 const { Op } = require('sequelize');
 const notificationService = require('../services/notificationService');
+const { validatePlainText, validateSearchQuery } = require('../utils/validators');
 
 const escapeHtml = (text = '') => text
   .replace(/&/g, '&amp;')
@@ -130,7 +131,11 @@ exports.getModerationQueue = async (req, res) => {
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     const limit = 15;
     const offset = (page - 1) * limit;
-    const search = (req.query.q || '').trim();
+    const searchValidation = validateSearchQuery(req.query.q || '', 'Поисковый запрос');
+    const search = searchValidation.error ? '' : searchValidation.value;
+    if (searchValidation.error) {
+      req.flash('error', searchValidation.error);
+    }
 
     const topicWhere = { is_moderated: false };
 
@@ -178,7 +183,11 @@ exports.getTopicsManagement = async (req, res) => {
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     const limit = 20;
     const offset = (page - 1) * limit;
-    const search = (req.query.q || '').trim();
+    const searchValidation = validateSearchQuery(req.query.q || '', 'Поисковый запрос');
+    const search = searchValidation.error ? '' : searchValidation.value;
+    if (searchValidation.error) {
+      req.flash('error', searchValidation.error);
+    }
     const lockFilter = req.query.locked === 'yes' ? true : req.query.locked === 'no' ? false : null;
     const pinFilter = req.query.pinned === 'yes' ? true : req.query.pinned === 'no' ? false : null;
     const categoryId = parseInt(req.query.category_id, 10) || null;
@@ -309,10 +318,11 @@ exports.approveTopic = async (req, res) => {
 exports.rejectTopic = async (req, res) => {
   try {
     const topicId = req.params.id;
-    const reason = (req.body.reason || '').trim();
+    const reasonValidation = validatePlainText(req.body.reason, 'Причина отклонения темы', { required: true, min: 5, max: 500 });
+    const reason = reasonValidation.value;
 
-    if (!reason) {
-      req.flash('error', 'Укажите причину отклонения темы');
+    if (reasonValidation.error) {
+      req.flash('error', reasonValidation.error);
       return res.redirect('/admin/forum/moderation?tab=topics');
     }
 
@@ -363,10 +373,11 @@ exports.approvePost = async (req, res) => {
 exports.rejectPost = async (req, res) => {
   try {
     const postId = req.params.id;
-    const reason = (req.body.reason || '').trim();
+    const reasonValidation = validatePlainText(req.body.reason, 'Причина отклонения сообщения', { required: true, min: 5, max: 500 });
+    const reason = reasonValidation.value;
 
-    if (!reason) {
-      req.flash('error', 'Укажите причину отклонения сообщения');
+    if (reasonValidation.error) {
+      req.flash('error', reasonValidation.error);
       return res.redirect('/admin/forum/moderation?tab=posts');
     }
 
@@ -408,10 +419,11 @@ exports.rejectPost = async (req, res) => {
 exports.deleteTopicPost = async (req, res) => {
   try {
     const postId = req.params.id;
-    const reason = (req.body.reason || '').trim();
+    const reasonValidation = validatePlainText(req.body.reason, 'Причина удаления сообщения', { required: true, min: 5, max: 500 });
+    const reason = reasonValidation.value;
 
-    if (!reason) {
-      req.flash('error', 'Удаление сообщения возможно только с указанием причины');
+    if (reasonValidation.error) {
+      req.flash('error', reasonValidation.error);
       return res.redirect('back');
     }
 
@@ -685,13 +697,15 @@ exports.getCategories = async (req, res) => {
 
 exports.createCategory = async (req, res) => {
   try {
-    const name = (req.body.name || '').trim();
-    const description = (req.body.description || '').trim();
+    const nameValidation = validatePlainText(req.body.name, 'Название категории', { required: true, min: 3, max: 80 });
+    const descriptionValidation = validatePlainText(req.body.description, 'Описание категории', { max: 500 });
+    const name = nameValidation.value;
+    const description = descriptionValidation.value;
     const icon = (req.body.icon || 'fa-comments').trim();
     const sortOrder = Number.parseInt(req.body.sort_order, 10) || 0;
 
-    if (name.length < 3) {
-      req.flash('error', 'Название должно содержать минимум 3 символа');
+    if (nameValidation.error || descriptionValidation.error) {
+      req.flash('error', nameValidation.error || descriptionValidation.error);
       return res.redirect('/admin/forum/categories');
     }
 
@@ -722,13 +736,15 @@ exports.createCategory = async (req, res) => {
 exports.updateCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
-    const name = (req.body.name || '').trim();
-    const description = (req.body.description || '').trim();
+    const nameValidation = validatePlainText(req.body.name, 'Название категории', { required: true, min: 3, max: 80 });
+    const descriptionValidation = validatePlainText(req.body.description, 'Описание категории', { max: 500 });
+    const name = nameValidation.value;
+    const description = descriptionValidation.value;
     const icon = (req.body.icon || 'fa-comments').trim();
     const sortOrder = Number.parseInt(req.body.sort_order, 10) || 0;
 
-    if (name.length < 3) {
-      req.flash('error', 'Название должно содержать минимум 3 символа');
+    if (nameValidation.error || descriptionValidation.error) {
+      req.flash('error', nameValidation.error || descriptionValidation.error);
       return res.redirect('/admin/forum/categories');
     }
 
