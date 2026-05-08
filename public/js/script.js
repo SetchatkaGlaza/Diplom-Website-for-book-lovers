@@ -236,11 +236,11 @@ window.addEventListener('scroll', () => {
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
-  const catalogGrid = document.querySelector('.books-grid');
-  const viewButtons = document.querySelectorAll('.view-btn[data-view]');
-  const isCatalogPage = window.location.pathname.startsWith('/catalog');
+  const catalogRoot = document.querySelector('.catalog-content');
+  const catalogGrid = catalogRoot?.querySelector('.books-grid');
+  const viewButtons = catalogRoot?.querySelectorAll('.view-btn[data-view]');
 
-  if (!isCatalogPage || !catalogGrid || viewButtons.length === 0) {
+  if (!catalogRoot || !catalogGrid || !viewButtons || viewButtons.length === 0) {
     return;
   }
 
