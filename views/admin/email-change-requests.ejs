@@ -18,7 +18,6 @@
     <article class="request-card">
       <div class="request-grid">
         <p><strong>Пользователь:</strong> <%= item.user?.name %> (#<%= item.user?.id %>)</p>
-        <p><strong>Статус:</strong> <span class="status status-<%= item.status %>"><%= item.status %></span></p>
         <p><strong>Текущий email:</strong> <span class="break"><%= item.current_email %></span></p>
         <p><strong>Новый email:</strong> <span class="break"><%= item.new_email %></span></p>
       </div>
@@ -93,10 +92,6 @@
   }
   .actions { display:flex; gap:.6rem; flex-wrap:wrap; }
   .break { overflow-wrap:anywhere; word-break: break-word; }
-  .status { padding:.2rem .55rem; border-radius: 999px; font-size:.85rem; }
-  .status-pending { background: rgba(251,191,36,.2); color:#fde68a; }
-  .status-approved { background: rgba(16,185,129,.2); color:#6ee7b7; }
-  .status-rejected { background: rgba(239,68,68,.2); color:#fca5a5; }
   .empty-state { text-align:center; }
   @media (max-width: 900px) {
     .request-grid { grid-template-columns: 1fr; }
