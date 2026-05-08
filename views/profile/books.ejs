@@ -328,7 +328,26 @@
     display: inline;
   }
   
-  @media (max-width: 768px) {
+  
+  .empty-state p a {
+    color: #1d4ed8;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .empty-state p a:hover {
+    color: #1e40af;
+  }
+
+  body.theme-dark .empty-state p a {
+    color: #93c5fd;
+  }
+
+  body.theme-dark .empty-state p a:hover {
+    color: #bfdbfe;
+  }
+@media (max-width: 768px) {
     .book-detailed-card {
       grid-template-columns: 1fr;
     }

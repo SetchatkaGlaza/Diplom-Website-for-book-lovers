@@ -257,7 +257,8 @@
     overflow-x: hidden;
   }
   
-  .notification-card {
+  
+.notification-card {
     display: flex;
     gap: 1.5rem;
     padding: 1.5rem;
@@ -323,7 +324,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    color: #111827;
+    color: #312e81;
     background: linear-gradient(135deg, #fde68a, #f59e0b);
     border-radius: 999px;
     padding: 0.5rem 0.9rem;
@@ -338,6 +339,10 @@
     transform: translateX(5px);
     background: linear-gradient(135deg, #fef3c7, #fbbf24);
     text-decoration: none;
+  }
+
+  body.theme-dark .notification-link {
+    color: #1e1b4b;
   }
   
   .notification-actions {
