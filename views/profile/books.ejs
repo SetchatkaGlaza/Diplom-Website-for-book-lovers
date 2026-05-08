@@ -70,7 +70,7 @@
             <!-- Информация о рецензии -->
             <% if (item.book.userReview) { %>
               <div class="user-review-info">
-                <p><strong>Ваша рецензия:</strong> <%= item.book.userReview.rating %> ★</p>
+                <p><strong>Ваша рецензия:</strong> <%= item.book.userReview.rating %> <i class="fas fa-star"></i></p>
                 <% const userReviewPreview = truncateText(item.book.userReview.content, 180); %>
                 <p class="review-excerpt"><%= userReviewPreview.text %></p>
                 <% if (userReviewPreview.isTruncated) { %>

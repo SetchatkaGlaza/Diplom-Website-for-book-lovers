@@ -2245,3 +2245,226 @@
     width: 100%;
   }
 }
+
+/* Улучшения форм и таблиц администрирования форума */
+.moderation-filter-form {
+  width: 100%;
+}
+
+.moderation-toolbar .toolbar-row {
+  align-items: stretch;
+  margin-top: 0;
+}
+
+.moderation-toolbar input[type='search'],
+.moderation-toolbar select,
+.reject-form-inline input {
+  min-height: 44px;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--admin-radius);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--admin-dark);
+  font: inherit;
+}
+
+.moderation-toolbar input[type='search']::placeholder,
+.reject-form-inline input::placeholder {
+  color: #64748b;
+}
+
+.moderation-toolbar input[type='search']:focus,
+.moderation-toolbar select:focus,
+.reject-form-inline input:focus {
+  outline: none;
+  border-color: var(--admin-warning);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.forum-topic-title-link {
+  color: #fff;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.forum-topic-title-link:hover {
+  color: #fde68a;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.forum-topic-title-cell,
+.forum-topic-heading {
+  max-width: 520px;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+.reject-form-inline {
+  align-items: stretch;
+}
+
+.reject-form-inline .btn {
+  justify-content: center;
+  min-height: 44px;
+}
+
+@media (max-width: 768px) {
+  .moderation-toolbar input[type='search'],
+  .moderation-toolbar select,
+  .reject-form-inline input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .forum-topic-title-cell,
+  .forum-topic-heading {
+    max-width: none;
+  }
+}
+
+/* Обновленная страница управления пользователями */
+.admin-users .table-search,
+.admin-policy-card,
+.users-table-card {
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.82), rgba(15, 23, 42, 0.9));
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: var(--admin-radius-lg);
+  box-shadow: 0 16px 30px rgba(2, 6, 23, 0.24);
+}
+
+.admin-users .table-search {
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.users-filter-form {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) 220px auto auto;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.users-filter-form input,
+.users-filter-form select {
+  min-height: 44px;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--admin-radius);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--admin-dark);
+  font: inherit;
+}
+
+.users-filter-form input:focus,
+.users-filter-form select:focus {
+  outline: none;
+  border-color: var(--admin-warning);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.admin-policy-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.1rem;
+  margin: 1rem 0;
+}
+
+.admin-policy-card h3 {
+  margin: 0 0 0.45rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.admin-policy-card p,
+.admin-policy-card small {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.admin-limit,
+.admin-limit-inline {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(251, 191, 36, 0.34);
+  background: rgba(251, 191, 36, 0.12);
+  color: #fde68a;
+  border-radius: var(--admin-radius-md);
+}
+
+.admin-limit span {
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.users-table-card {
+  overflow: hidden;
+}
+
+.users-table th,
+.users-table td {
+  overflow-wrap: anywhere;
+}
+
+.users-table .badge {
+  white-space: normal;
+  text-align: center;
+}
+
+.users-actions .action-btn {
+  width: 38px;
+  min-width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+}
+
+.users-actions form {
+  width: auto;
+}
+
+@media (max-width: 1100px) {
+  .users-filter-form {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .users-filter-form,
+  .admin-policy-card {
+    grid-template-columns: 1fr;
+  }
+
+  .users-filter-form .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .users-table tbody {
+    background: transparent;
+  }
+
+  .users-actions form {
+    width: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .users-filter-form {
+    gap: 0.55rem;
+  }
+
+  .admin-limit,
+  .admin-limit-inline {
+    width: 100%;
+  }
+
+  .users-actions form,
+  .users-actions .action-btn,
+  .users-actions .role-select {
+    width: 100%;
+  }
+}

@@ -29,7 +29,7 @@ exports.validateBookCover = async (req, res, next) => {
     next();
     
   } catch (error) {
-    console.error('❌ Ошибка при валидации изображения:', error);
+    console.error('Ошибка при валидации изображения:', error);
     
     // Удаляем проблемный файл
     if (req.file && req.file.path) {
@@ -72,11 +72,11 @@ exports.autoCropBookCover = async (req, res, next) => {
       req.file.mimetype = 'image/jpeg';
     }
     
-    console.log('✅ Изображение обрезано до 600x900');
+    console.log('Изображение обрезано до 600x900');
     next();
     
   } catch (error) {
-    console.error('❌ Ошибка при обрезке изображения:', error);
+    console.error('Ошибка при обрезке изображения:', error);
     next();
   }
 };

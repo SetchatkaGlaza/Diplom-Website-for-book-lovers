@@ -144,7 +144,7 @@ function sendRoleSuccess(req, res, message) {
 
 // Функция для получения публичного URL обложки
 function getCoverUrl(coverImage, coverPublicId) {
-  // Если есть URL из облака — возвращаем его
+  // Если есть URL из облака – возвращаем его
   if (coverImage && coverImage.startsWith('http')) {
     return coverImage;
   }
@@ -519,7 +519,7 @@ exports.postEditBook = async (req, res) => {
     res.redirect('/admin/books');
     
   } catch (error) {
-    console.error('❌ Ошибка при обновлении книги:', error);
+    console.error('Ошибка при обновлении книги:', error);
     req.flash('error', 'Произошла ошибка при обновлении книги');
     res.redirect(`/admin/books/${req.params.id}/edit`);
   }

@@ -31,7 +31,7 @@ exports.getNotifications = async (req, res) => {
     });
     
   } catch (error) {
-    console.error('❌ Ошибка при загрузке уведомлений:', error);
+    console.error('Ошибка при загрузке уведомлений:', error);
     if (req.xhr) {
       res.status(500).json({ error: 'Ошибка сервера' });
     } else {
@@ -53,7 +53,7 @@ exports.getUnreadCount = async (req, res) => {
     res.json({ count });
     
   } catch (error) {
-    console.error('❌ Ошибка при подсчёте уведомлений:', error);
+    console.error('Ошибка при подсчёте уведомлений:', error);
     res.status(500).json({ error: 'Ошибка сервера', count: 0 });
   }
 };
@@ -76,7 +76,7 @@ exports.markAsRead = async (req, res) => {
     }
     
   } catch (error) {
-    console.error('❌ Ошибка при отметке уведомления:', error);
+    console.error('Ошибка при отметке уведомления:', error);
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 };
@@ -94,7 +94,7 @@ exports.markAllAsRead = async (req, res) => {
     res.json({ success: true });
     
   } catch (error) {
-    console.error('❌ Ошибка при отметке всех уведомлений:', error);
+    console.error('Ошибка при отметке всех уведомлений:', error);
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 };
@@ -117,7 +117,7 @@ exports.deleteNotification = async (req, res) => {
     }
     
   } catch (error) {
-    console.error('❌ Ошибка при удалении уведомления:', error);
+    console.error('Ошибка при удалении уведомления:', error);
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 };

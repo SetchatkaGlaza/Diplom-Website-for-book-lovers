@@ -17,11 +17,11 @@ cloudinary.config({
 
 // Проверка подключения (опционально, для отладки)
 if (process.env.NODE_ENV !== 'production') {
-  console.log('☁️ Cloudinary настроен для облака:', process.env.CLOUDINARY_CLOUD_NAME);
+  console.log('Cloudinary настроен для облака:', process.env.CLOUDINARY_CLOUD_NAME);
 }
 
 module.exports = cloudinary;
 
 if (!cloudName || !apiKey || !apiSecret) {
-  console.warn('⚠️ Cloudinary env переменные заполнены не полностью.');
+  console.warn('Cloudinary env переменные заполнены не полностью.');
 }

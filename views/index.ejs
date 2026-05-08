@@ -85,10 +85,15 @@
       const container = document.getElementById('popular-books');
       container.innerHTML = '';
       
+      const renderStars = (rating) => Array.from({ length: 5 }, (_, index) => {
+        const star = index + 1;
+        if (star <= Math.floor(rating)) return '<i class="fas fa-star"></i>';
+        if (star - 0.5 <= rating) return '<i class="fas fa-star-half-alt"></i>';
+        return '<i class="far fa-star"></i>';
+      }).join('');
+      
       books.forEach(book => {
-  const stars = '★'.repeat(Math.floor(book.averageRating)) + 
-                (book.averageRating % 1 >= 0.5 ? '½' : '') + 
-                '☆'.repeat(5 - Math.ceil(book.averageRating));
+        const stars = renderStars(book.averageRating);
   
   container.innerHTML += `
     <div class="book-card">
@@ -126,7 +131,10 @@
       .then(response => response.json())
       .then(book => {
         if (book) {
-          const stars = '★'.repeat(Math.floor(book.rating)) + '☆'.repeat(5 - Math.floor(book.rating));
+          const stars = Array.from({ length: 5 }, (_, index) => {
+            const star = index + 1;
+            return star <= Math.floor(book.rating) ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+          }).join('');
           
           container.innerHTML = `
             <a href="/books/${book.id}" class="random-book-link">

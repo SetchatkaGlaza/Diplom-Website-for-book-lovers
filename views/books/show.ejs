@@ -212,11 +212,11 @@
                 
                 <% if (user && user.id === review.user_id) { %>
                   <div class="review-owner-actions">
-                    <a href="/reviews/<%= review.id %>/edit" class="btn-small">
+                    <a href="/reviews/<%= review.id %>/edit" class="review-action-btn edit-review-btn">
                       <i class="fas fa-edit"></i> Редактировать
                     </a>
                     <form action="/reviews/<%= review.id %>?_method=DELETE" method="POST" class="inline-form">
-                      <button type="submit" class="btn-small btn-danger" onclick="return confirm('Удалить рецензию?')">
+                      <button type="submit" class="review-action-btn delete-review-btn" onclick="return confirm('Удалить рецензию?')">
                         <i class="fas fa-trash"></i> Удалить
                       </button>
                     </form>
@@ -227,11 +227,11 @@
               <div class="review-footer">
                 <p class="moderation-message"><i class="fas fa-clock"></i> Рецензия ожидает модерации</p>
                 <div class="review-owner-actions">
-                  <a href="/reviews/<%= review.id %>/edit" class="btn-small">
+                  <a href="/reviews/<%= review.id %>/edit" class="review-action-btn edit-review-btn">
                     <i class="fas fa-edit"></i> Редактировать
                   </a>
                   <form action="/reviews/<%= review.id %>?_method=DELETE" method="POST" class="inline-form">
-                    <button type="submit" class="btn-small btn-danger" onclick="return confirm('Удалить рецензию?')">
+                    <button type="submit" class="review-action-btn delete-review-btn" onclick="return confirm('Удалить рецензию?')">
                       <i class="fas fa-trash"></i> Удалить
                     </button>
                   </form>
@@ -291,7 +291,7 @@
                 <p class="book-author"><%= book.author %></p>
                 <div class="book-rating">
                   <% if (book.averageRating > 0) { %>
-                    <span class="rating-value"><%= book.averageRating %> ★</span>
+                    <span class="rating-value"><%= book.averageRating %> <i class="fas fa-star"></i></span>
                   <% } %>
                 </div>
               </div>
@@ -655,28 +655,56 @@
   
   .review-owner-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.6rem;
     margin-left: auto;
+    flex-wrap: wrap;
   }
-  
-  .btn-small {
+
+  .review-action-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.4rem 0.8rem;
+    justify-content: center;
+    gap: 0.45rem;
+    min-width: 132px;
+    min-height: 40px;
+    padding: 0.55rem 0.9rem;
     border-radius: var(--radius);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     font-size: 0.9rem;
+    font-weight: 700;
+    font-family: inherit;
+    line-height: 1.2;
     text-decoration: none;
     color: white;
+    cursor: pointer;
     transition: var(--transition);
   }
-  
-  .btn-small:hover {
-    transform: translateY(-2px);
+
+  .edit-review-btn {
+    background: rgba(59, 130, 246, 0.24);
+    border-color: rgba(59, 130, 246, 0.42);
+    color: #bfdbfe;
   }
-  
-  .btn-small.btn-danger {
-    background: var(--danger);
+
+  .delete-review-btn {
+    background: rgba(239, 68, 68, 0.24);
+    border-color: rgba(239, 68, 68, 0.42);
+    color: #fecaca;
+  }
+
+  .review-action-btn:hover {
+    transform: translateY(-2px);
+    color: white;
+  }
+
+  .edit-review-btn:hover {
+    background: #3b82f6;
+    border-color: #3b82f6;
+  }
+
+  .delete-review-btn:hover {
+    background: #ef4444;
+    border-color: #ef4444;
   }
   
   .moderation-message {
@@ -760,6 +788,11 @@
     
     .review-owner-actions {
       margin-left: 0;
+      width: 100%;
+    }
+
+    .review-owner-actions .inline-form,
+    .review-action-btn {
       width: 100%;
     }
     

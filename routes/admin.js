@@ -79,7 +79,7 @@ router.get('/import/example-genres', requireSuperAdmin, importController.downloa
 router.get('/import', requireSuperAdmin, importController.getImportPage);
 router.post('/import', requireSuperAdmin, uploadImport.single('file'), (err, req, res, next) => {
   if (err) {
-    console.error('❌ Ошибка при загрузке файла:', err);
+    console.error('Ошибка при загрузке файла:', err);
     req.flash('error', err.message || 'Ошибка при загрузке файла');
     return res.redirect('/admin/import');
   }

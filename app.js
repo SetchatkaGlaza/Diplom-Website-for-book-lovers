@@ -123,7 +123,7 @@ const ensureCompatibilityColumns = async () => {
 
     if (!tableDescription[attribute]) {
       await queryInterface.addColumn(table, attribute, definition);
-      console.warn(`⚠️ Добавлена отсутствующая колонка ${table}.${attribute} для совместимости схемы.`);
+      console.warn(`Добавлена отсутствующая колонка ${table}.${attribute} для совместимости схемы.`);
     }
   }
 };
@@ -141,7 +141,7 @@ const startServer = async () => {
       console.log(`Сервер запущен на http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error('❌ Ошибка запуска приложения:', error);
+    console.error('Ошибка запуска приложения:', error);
     process.exitCode = 1;
   }
 };

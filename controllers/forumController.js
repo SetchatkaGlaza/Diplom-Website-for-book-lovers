@@ -584,7 +584,7 @@ exports.postEditPost = async (req, res) => {
 
 exports.search = async (req, res) => {
   try {
-    const query = req.query.q;
+    const query = (req.query.q || '').trim();
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const offset = (page - 1) * limit;
@@ -626,6 +626,8 @@ exports.search = async (req, res) => {
         { 
           model: ForumTopic, 
           as: 'topic',
+          where: { is_moderated: true },
+          required: true,
           include: [{ model: ForumCategory, as: 'category' }]
         }
       ],

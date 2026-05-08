@@ -47,7 +47,7 @@ async function sendViaResend(mailOptions) {
 
 async function sendEmail(mailOptions) {
   if (isRailway) {
-    console.log(`📧 [MOCK] Письмо для ${mailOptions.to}: ${mailOptions.subject}`);
+    console.log(`[MOCK] Письмо для ${mailOptions.to}: ${mailOptions.subject}`);
     console.log(`   Текст: ${mailOptions.html?.substring(0, 200)}...`);
     return; // Не отправляем реально
   }
@@ -85,7 +85,7 @@ exports.sendPasswordResetEmail = async (toEmail, toName, resetLink) => {
         <body>
           <div class="container">
             <div class="header">
-              <h1>📚 Книгоманы</h1>
+              <h1>Книгоманы</h1>
             </div>
             <div class="content">
               <h2>Здравствуйте, ${toName}!</h2>

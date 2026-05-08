@@ -22,7 +22,7 @@ const handleAvatarUpload = (req, res, next) => {
 
     if (error instanceof multer.MulterError) {
       const message = error.code === 'LIMIT_FILE_SIZE'
-        ? 'Файл слишком большой. Максимальный размер аватара — 5MB.'
+        ? 'Файл слишком большой. Максимальный размер аватара – 5MB.'
         : `Ошибка загрузки изображения: ${error.message}`;
       req.flash('error', message);
       return res.redirect('/profile/edit');

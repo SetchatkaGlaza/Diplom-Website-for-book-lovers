@@ -10,7 +10,7 @@ class NotificationService {
    */
   async create(userId, type, title, message, link = null, data = null) {
     try {
-      console.log(`📨 Создание уведомления для пользователя ${userId}: ${title}`);
+      console.log(`Создание уведомления для пользователя ${userId}: ${title}`);
       
       const notification = await Notification.create({
         user_id: userId,
@@ -22,10 +22,10 @@ class NotificationService {
         is_read: false
       });
       
-      console.log(`✅ Уведомление создано, ID: ${notification.id}`);
+      console.log(`Уведомление создано, ID: ${notification.id}`);
       return notification;
     } catch (error) {
-      console.error('❌ Ошибка при создании уведомления:', error);
+      console.error('Ошибка при создании уведомления:', error);
       return null;
     }
   }
@@ -45,7 +45,7 @@ class NotificationService {
         }
       });
     } catch (error) {
-      console.error('❌ Ошибка при удалении старых уведомлений:', error);
+      console.error('Ошибка при удалении старых уведомлений:', error);
       return 0;
     }
   }
@@ -68,7 +68,7 @@ class NotificationService {
         notifications: rows
       };
     } catch (error) {
-      console.error('❌ Ошибка при получении уведомлений:', error);
+      console.error('Ошибка при получении уведомлений:', error);
       return { total: 0, unread: 0, notifications: [] };
     }
   }
@@ -85,7 +85,7 @@ class NotificationService {
         }
       });
     } catch (error) {
-      console.error('❌ Ошибка при подсчёте уведомлений:', error);
+      console.error('Ошибка при подсчёте уведомлений:', error);
       return 0;
     }
   }
@@ -108,7 +108,7 @@ class NotificationService {
       }
       return false;
     } catch (error) {
-      console.error('❌ Ошибка при отметке уведомления:', error);
+      console.error('Ошибка при отметке уведомления:', error);
       return false;
     }
   }
@@ -129,7 +129,7 @@ class NotificationService {
       );
       return true;
     } catch (error) {
-      console.error('❌ Ошибка при отметке всех уведомлений:', error);
+      console.error('Ошибка при отметке всех уведомлений:', error);
       return false;
     }
   }
@@ -143,7 +143,7 @@ class NotificationService {
     return this.create(
       userId,
       'welcome',
-      '🎉 Добро пожаловать в Книгоманы!',
+      'Добро пожаловать в Книгоманы!',
       `${userName}, спасибо за регистрацию! Здесь вы найдёте множество книг и сможете делиться впечатлениями.`,
       '/books',
       { welcome: true }
@@ -160,11 +160,11 @@ class NotificationService {
       });
       
       if (!review) {
-        console.error('❌ Рецензия не найдена:', reviewId);
+        console.error('Рецензия не найдена:', reviewId);
         return;
       }
       
-      const title = approved ? '✅ Рецензия одобрена' : '❌ Рецензия отклонена';
+      const title = approved ? 'Рецензия одобрена' : 'Рецензия отклонена';
       const message = approved 
         ? `Ваша рецензия на книгу "${review.book?.title || 'книгу'}" прошла модерацию и опубликована.`
         : `Ваша рецензия на книгу "${review.book?.title || 'книгу'}" не прошла модерацию. Пожалуйста, ознакомьтесь с правилами.`;
@@ -178,9 +178,9 @@ class NotificationService {
         { review_id: review.id, book_id: review.book_id, approved }
       );
       
-      console.log(`✅ Уведомление о модерации отправлено пользователю ${review.user_id}`);
+      console.log(`Уведомление о модерации отправлено пользователю ${review.user_id}`);
     } catch (error) {
-      console.error('❌ Ошибка при создании уведомления о модерации:', error);
+      console.error('Ошибка при создании уведомления о модерации:', error);
     }
   }
   
@@ -195,7 +195,7 @@ class NotificationService {
       });
       
       if (!book || !review) {
-        console.error('❌ Книга или рецензия не найдены');
+        console.error('Книга или рецензия не найдены');
         return;
       }
       
@@ -214,16 +214,16 @@ class NotificationService {
         await this.create(
           userBook.user_id,
           'new_review',
-          '📝 Новая рецензия',
+          'Новая рецензия',
           `На книгу "${book.title}", которую вы прочитали, появилась новая рецензия от ${review.user?.name || 'пользователя'}.`,
           `/books/${bookId}`,
           { book_id: bookId, review_id: reviewId, reviewer: review.user?.name }
         );
         
-        console.log(`✅ Уведомление о новой рецензии отправлено пользователю ${userBook.user_id}`);
+        console.log(`Уведомление о новой рецензии отправлено пользователю ${userBook.user_id}`);
       }
     } catch (error) {
-      console.error('❌ Ошибка при создании уведомления о новой рецензии:', error);
+      console.error('Ошибка при создании уведомления о новой рецензии:', error);
     }
   }
   
@@ -239,17 +239,17 @@ class NotificationService {
       const liker = await User.findByPk(likerId);
       
       if (!review || !liker) {
-        console.error('❌ Рецензия или пользователь не найдены');
+        console.error('Рецензия или пользователь не найдены');
         return;
       }
       
       // Не уведомляем, если лайк поставил сам автор
       if (review.user_id === likerId) {
-        console.log('⏭️ Автор лайкнул свою рецензию - уведомление не нужно');
+        console.log('Автор лайкнул свою рецензию - уведомление не нужно');
         return;
       }
       
-      const title = likeType === 'like' ? '👍 Лайк на рецензию' : '👎 Дизлайк на рецензию';
+      const title = likeType === 'like' ? ' Лайк на рецензию' : ' Дизлайк на рецензию';
       const message = likeType === 'like'
         ? `Пользователю ${liker.name} понравилась ваша рецензия на книгу "${review.book?.title || 'книгу'}".`
         : `Пользователь ${liker.name} поставил дизлайк на вашу рецензию на книгу "${review.book?.title || 'книгу'}".`;
@@ -263,9 +263,9 @@ class NotificationService {
         { review_id: review.id, book_id: review.book_id, liker: liker.name, type: likeType }
       );
       
-      console.log(`✅ Уведомление о ${likeType} отправлено автору рецензии ${review.user_id}`);
+      console.log(`Уведомление о ${likeType} отправлено автору рецензии ${review.user_id}`);
     } catch (error) {
-      console.error('❌ Ошибка при создании уведомления о лайке:', error);
+      console.error('Ошибка при создании уведомления о лайке:', error);
     }
   }
   
@@ -274,7 +274,7 @@ class NotificationService {
    */
   async booksImported(adminId, stats) {
     try {
-      const title = stats.success > 0 ? '📚 Импорт книг завершён' : '❌ Ошибка импорта';
+      const title = stats.success > 0 ? 'Импорт книг завершён' : 'Ошибка импорта';
       const message = stats.success > 0
         ? `Успешно импортировано ${stats.success} книг. ${stats.errors} ошибок, ${stats.skipped} пропущено.`
         : `Не удалось импортировать книги. Проверьте файл и попробуйте снова.`;
@@ -288,9 +288,9 @@ class NotificationService {
         stats
       );
       
-      console.log(`✅ Уведомление об импорте отправлено администратору ${adminId}`);
+      console.log(`Уведомление об импорте отправлено администратору ${adminId}`);
     } catch (error) {
-      console.error('❌ Ошибка при создании уведомления об импорте:', error);
+      console.error('Ошибка при создании уведомления об импорте:', error);
     }
   }
   /**
@@ -298,7 +298,7 @@ class NotificationService {
  */
 async forumNewReply(userId, topic, post, replierName) {
   try {
-    const title = '📝 Новый ответ в теме';
+    const title = 'Новый ответ в теме';
     const message = `Пользователь ${replierName} ответил в теме "${topic.title}"`;
     
     await this.create(
@@ -319,7 +319,7 @@ async forumNewReply(userId, topic, post, replierName) {
  */
 async forumPostLiked(userId, topic, post, likerName) {
   try {
-    const title = '❤️ Лайк на сообщение';
+    const title = ' Лайк на сообщение';
     const message = `Пользователь ${likerName} оценил ваше сообщение в теме "${topic.title}"`;
     
     await this.create(
@@ -340,7 +340,7 @@ async forumPostLiked(userId, topic, post, likerName) {
  */
 async forumTopicModerated(userId, topic, approved, reason = null) {
   try {
-    const title = approved ? '✅ Тема одобрена' : '❌ Тема отклонена';
+    const title = approved ? 'Тема одобрена' : 'Тема отклонена';
     const message = approved 
       ? `Ваша тема "${topic.title}" прошла модерацию и опубликована.`
       : `Ваша тема "${topic.title}" не прошла модерацию. ${reason ? 'Причина: ' + reason : ''}`;
@@ -363,7 +363,7 @@ async forumTopicModerated(userId, topic, approved, reason = null) {
  */
 async forumPostModerated(userId, topic, post, approved, reason = null, moderationCaseId = null) {
   try {
-    const title = approved ? '✅ Сообщение одобрено' : '❌ Сообщение отклонено';
+    const title = approved ? 'Сообщение одобрено' : 'Сообщение отклонено';
     const message = approved 
       ? `Ваше сообщение в теме "${topic.title}" прошло модерацию.`
       : `Ваше сообщение в теме "${topic.title}" не прошло модерацию. ${reason ? 'Причина: ' + reason : ''}`;

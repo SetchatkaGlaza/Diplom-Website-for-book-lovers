@@ -28,7 +28,8 @@
               <div class="review-helpfulness">
                 <span class="helpful-percent"><%= review.helpful_percent %>%</span>
                 <span class="helpful-counts">
-                  👍 <%= review.likes_count %> 👎 <%= review.dislikes_count %>
+                  <i class="far fa-thumbs-up"></i> <%= review.likes_count %>
+                  <i class="far fa-thumbs-down"></i> <%= review.dislikes_count %>
                 </span>
               </div>
               
@@ -132,15 +133,16 @@
   }
   
   .review-detailed-card {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(15, 23, 42, 0.48);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     transition: var(--transition);
   }
   
   .review-detailed-card:hover {
-    transform: translateX(10px);
-    background: rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+    background: rgba(15, 23, 42, 0.62);
   }
   
   .review-detailed-header {
@@ -157,6 +159,11 @@
   .review-book-info {
     display: flex;
     gap: 1rem;
+    min-width: 0;
+  }
+
+  .review-book-info > div {
+    min-width: 0;
   }
   
   .review-book-cover {
@@ -173,6 +180,7 @@
   .review-book-info h3 a {
     color: white;
     text-decoration: none;
+    overflow-wrap: anywhere;
   }
   
   .review-book-info h3 a:hover {
@@ -203,8 +211,15 @@
   }
   
   .helpful-counts {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     font-size: 0.9rem;
-    opacity: 0.7;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .helpful-counts i {
+    color: #c4b5fd;
   }
   
   .review-date {
@@ -215,6 +230,8 @@
   .review-detailed-content {
     margin-bottom: 1.5rem;
     line-height: 1.8;
+    color: rgba(255, 255, 255, 0.9);
+    overflow-wrap: anywhere;
   }
   
   /* ===== ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ КНОПОК ===== */
@@ -250,8 +267,8 @@
   
   /* Кнопка Редактировать */
   .btn-edit {
-    background: rgba(59, 130, 246, 0.15);
-    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.22);
+    color: #bfdbfe;
     border: 1px solid rgba(59, 130, 246, 0.3);
   }
   
@@ -264,8 +281,8 @@
   
   /* Кнопка Удалить */
   .btn-delete {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
+    background: rgba(239, 68, 68, 0.22);
+    color: #fecaca;
     border: 1px solid rgba(239, 68, 68, 0.3);
   }
   
@@ -278,8 +295,8 @@
   
   /* Кнопка К книге */
   .btn-view {
-    background: rgba(251, 191, 36, 0.15);
-    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.2);
+    color: #fde68a;
     border: 1px solid rgba(251, 191, 36, 0.3);
   }
   

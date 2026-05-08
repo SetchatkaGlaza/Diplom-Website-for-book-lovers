@@ -27,10 +27,10 @@
         <% pendingTopics.forEach(topic => { %>
           <article class="moderation-item">
             <div class="moderation-main">
-              <h3><%= topic.title %></h3>
+              <h3 class="forum-topic-heading"><%= topic.title %></h3>
               <p class="item-meta">
                 <span><strong>Автор:</strong> <%= topic.user ? topic.user.name : 'Неизвестно' %></span>
-                <span><strong>Категория:</strong> <%= topic.category ? topic.category.name : '—' %></span>
+                <span><strong>Категория:</strong> <%= topic.category ? topic.category.name : '–' %></span>
                 <span><strong>Дата:</strong> <%= new Date(topic.createdAt).toLocaleString('ru-RU') %></span>
               </p>
               <% const topicPreview = truncateText(topic.content, 260); %>

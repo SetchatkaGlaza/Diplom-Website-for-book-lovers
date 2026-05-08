@@ -6,7 +6,7 @@
   <!-- Поиск и фильтры -->
   <div class="table-search">
     <form action="/admin/users" method="GET" class="users-filter-form">
-      <input type="text" name="search" placeholder="🔍 Поиск по имени или email..." value="<%= search || '' %>">
+      <input type="text" name="search" placeholder="Поиск по имени или email..." value="<%= search || '' %>">
 
       <select name="role" class="filter-select">
         <option value="all" <%= currentRole === 'all' ? 'selected' : '' %>>Все роли</option>
@@ -45,7 +45,7 @@
     <div>
       <h3><i class="fas fa-user-shield"></i> Правило назначения администраторов</h3>
       <p>Администратором можно назначить только проверенного активного участника: аккаунт не заблокирован, зарегистрирован не менее <strong><%= adminPolicy.minAccountAgeDays %> дней</strong>, имеет минимум <strong><%= adminPolicy.minApprovedReviews %> одобренные рецензии</strong> или <strong><%= adminPolicy.minForumPosts %> сообщений форума</strong>, держит на полках минимум <strong><%= adminPolicy.minLibraryBooks %> книги</strong> и набрал индекс активности от <strong><%= adminPolicy.minActivityScore %></strong>.</p>
-      <small>Индекс: месяц на сайте ×<%= adminPolicy.weights.accountAgeMonth %>, одобренная рецензия ×<%= adminPolicy.weights.approvedReview %>, сообщение форума ×<%= adminPolicy.weights.forumPost %>, книга на полке ×<%= adminPolicy.weights.libraryBook %>. При назначении обязательно сохраняется причина — почему выбран именно этот пользователь.</small>
+      <small>Индекс: месяц на сайте ×<%= adminPolicy.weights.accountAgeMonth %>, одобренная рецензия ×<%= adminPolicy.weights.approvedReview %>, сообщение форума ×<%= adminPolicy.weights.forumPost %>, книга на полке ×<%= adminPolicy.weights.libraryBook %>. При назначении обязательно сохраняется причина – почему выбран именно этот пользователь.</small>
     </div>
     <div class="admin-limit">
       <span><%= currentAdminCount %>/<%= adminPolicy.maxAdmins %></span>
@@ -58,7 +58,7 @@
     <div class="users-table-headline">
       <div>
         <h2><i class="fas fa-address-book"></i> Пользователи</h2>
-        <p>Роли, активность и назначение администраторов в одном списке.</p>
+        <p>Таблица разделяет управление ролями, блокировки и отдельное назначение администраторов с причиной.</p>
       </div>
       <span class="admin-limit-inline"><%= currentAdminCount %>/<%= adminPolicy.maxAdmins %> админов</span>
     </div>

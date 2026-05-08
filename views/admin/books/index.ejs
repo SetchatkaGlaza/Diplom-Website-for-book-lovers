@@ -43,9 +43,9 @@
               <td><%= book.id %></td>
               <td><a href="/books/<%= book.id %>" target="_blank" rel="noopener"><%= book.title %></a></td>
               <td><%= book.author %></td>
-              <td><%= book.genre ? book.genre.name : '—' %></td>
-              <td><%= book.year || '—' %></td>
-              <td><%= book.avgRating > 0 ? book.avgRating : '—' %></td>
+              <td><%= book.genre ? book.genre.name : '–' %></td>
+              <td><%= book.year || '–' %></td>
+              <td><%= book.avgRating > 0 ? book.avgRating : '–' %></td>
               <td><%= book.reviewsCount || 0 %></td>
               <td><%= book.inUserBooks || 0 %></td>
               <td>
@@ -96,4 +96,37 @@
   .simple-books-table tr { height: 52px; }
   .simple-books-table td { word-break: break-word; }
   .simple-books-table a { color: white; text-decoration: underline; text-underline-offset: 2px; }
+</style>
+<style>
+  .simple-books-table .action-buttons {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+  }
+
+  .simple-books-table .action-buttons form {
+    display: inline-flex !important;
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  .simple-books-table .action-btn {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    padding: 0;
+  }
+
+  @media (max-width: 768px) {
+    .simple-books-table .action-buttons,
+    .simple-books-table .action-buttons > *,
+    .simple-books-table .action-buttons form,
+    .simple-books-table .action-btn {
+      width: auto;
+    }
+
+    .simple-books-table .action-buttons {
+      gap: 0.4rem;
+    }
+  }
 </style>

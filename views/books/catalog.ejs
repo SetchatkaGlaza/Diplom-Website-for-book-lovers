@@ -124,11 +124,11 @@
                     <span class="rating-stars">
                       <% for(let i = 1; i <= 5; i++) { %>
                         <% if (i <= Math.floor(book.averageRating)) { %>
-                          ★
+                          <i class="fas fa-star"></i>
                         <% } else if (i - 0.5 <= book.averageRating) { %>
-                          ½
+                          <i class="fas fa-star-half-alt"></i>
                         <% } else { %>
-                          ☆
+                          <i class="far fa-star"></i>
                         <% } %>
                       <% } %>
                     </span>
@@ -188,7 +188,7 @@
     const selectedYear = Number(yearFromInput.value);
 
     if (Number.isFinite(minYear) && Number.isFinite(selectedYear) && selectedYear < minYear) {
-      yearFromInput.setCustomValidity(`Минимальный год в каталоге — ${minYear}`);
+      yearFromInput.setCustomValidity(`Минимальный год в каталоге – ${minYear}`);
       yearFromInput.reportValidity();
       return false;
     }
