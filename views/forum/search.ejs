@@ -6,6 +6,18 @@
     </a>
   </div>
   
+
+  <% if (locals.errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-circle"></i>
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error.msg %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+
   <form action="/forum/search" method="GET" class="search-form">
     <div class="search-input-group">
       <input 
