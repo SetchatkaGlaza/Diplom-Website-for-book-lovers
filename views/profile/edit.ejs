@@ -68,7 +68,9 @@
             <textarea 
               id="bio" 
               name="bio" 
-              rows="5"
+              rows="7"
+              maxlength="500"
+              class="bio-textarea"
               placeholder="Расскажите немного о себе..."
             ><%= bio ? bio : (user.bio || '') %></textarea>
             <small>Максимум 500 символов</small>
@@ -295,6 +297,12 @@
   
   .edit-form {
     max-width: 500px;
+  }
+
+  .form-group textarea.bio-textarea {
+    width: clamp(320px, 100%, 640px);
+    min-height: 180px;
+    max-height: 320px;
   }
   
   .email-info {
