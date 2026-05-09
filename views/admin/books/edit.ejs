@@ -147,10 +147,34 @@
   coverInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
-    coverCropImage.src = URL.createObjectURL(file);
-    coverCropModal.style.display = 'flex';
-    if (coverCropper) coverCropper.destroy();
-    coverCropper = new Cropper(coverCropImage, { aspectRatio: 2 / 3, viewMode: 1, dragMode: 'move', autoCropArea: 1, background: false });
+
+    const objectUrl = URL.createObjectURL(file);
+    const probeImage = new Image();
+
+    probeImage.onload = function() {
+      const minWidth = 200;
+      const minHeight = 300;
+
+      if (probeImage.naturalWidth < minWidth || probeImage.naturalHeight < minHeight) {
+        alert(`Изображение слишком маленькое. Минимальный размер: ${minWidth}x${minHeight} пикселей.`);
+        coverInput.value = '';
+        URL.revokeObjectURL(objectUrl);
+        return;
+      }
+
+      coverCropImage.src = objectUrl;
+      coverCropModal.style.display = 'flex';
+      if (coverCropper) coverCropper.destroy();
+      coverCropper = new Cropper(coverCropImage, { aspectRatio: 2 / 3, viewMode: 1, dragMode: 'move', autoCropArea: 1, background: false });
+    };
+
+    probeImage.onerror = function() {
+      alert('Не удалось прочитать изображение. Выберите другой файл.');
+      coverInput.value = '';
+      URL.revokeObjectURL(objectUrl);
+    };
+
+    probeImage.src = objectUrl;
   });
 
   document.getElementById('coverZoomIn').addEventListener('click', () => coverCropper && coverCropper.zoom(0.1));
