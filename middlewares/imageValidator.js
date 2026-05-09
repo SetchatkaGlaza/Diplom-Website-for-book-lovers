@@ -1,6 +1,9 @@
 const sharp = require('sharp');
 const fs = require('fs');
 
+const MIN_COVER_WIDTH = 200;
+const MIN_COVER_HEIGHT = 300;
+
 /**
  * Валидация изображения для обложки книги
  * Базовая проверка:
@@ -23,6 +26,18 @@ exports.validateBookCover = async (req, res, next) => {
         fs.unlinkSync(req.file.path);
       }
       req.flash('error', 'Не удалось определить размеры изображения.');
+      return res.redirect(req.get('referer') || '/admin/books');
+    }
+
+    if (width < MIN_COVER_WIDTH || height < MIN_COVER_HEIGHT) {
+      if (req.file.path && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      req.flash(
+        'error',
+        `Изображение слишком маленькое. Минимальный размер обложки: ${MIN_COVER_WIDTH}x${MIN_COVER_HEIGHT} пикселей.`
+      );
       return res.redirect(req.get('referer') || '/admin/books');
     }
 

@@ -6,7 +6,7 @@
   --primary-dark: #4f46e5;
   --secondary: #8b5cf6;
   --accent: #ec4899;
-  --success: #10b981;
+  --success: #047857;
   --danger: #ef4444;
   --warning: #f59e0b;
   --dark: #1f2937;
@@ -2496,4 +2496,15 @@ body.theme-dark .view-btn {
 
 .books-grid.books-list-view .book-cover {
   height: 180px;
+}
+
+
+/* Accessibility contrast tune */
+.btn-primary,
+.page-link.active {
+  color: #f8fafc;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3730a3, #4338ca);
 }

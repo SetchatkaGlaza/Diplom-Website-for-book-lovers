@@ -4,8 +4,8 @@
 
 /* ===== ОСНОВНЫЕ ПЕРЕМЕННЫЕ ===== */
 :root {
-  --admin-primary: #3b82f6;
-  --admin-success: #10b981;
+  --admin-primary: #1d4ed8;
+  --admin-success: #047857;
   --admin-warning: #f59e0b;
   --admin-danger: #ef4444;
   --admin-info: #8b5cf6;
@@ -1889,8 +1889,8 @@
 }
 
 .users-table {
-  min-width: 1120px;
-  table-layout: fixed;
+  width: 100%;
+  table-layout: auto;
 }
 
 .users-table th:nth-child(1) { width: 24%; }
@@ -2623,4 +2623,40 @@
   .admin-users .users-filter-form .btn-outline {
     font-size: 0.8rem;
   }
+}
+
+.admin-books,
+.admin-users {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.pagination .page-link {
+  flex: 0 0 auto;
+}
+
+
+/* Accessibility contrast overrides */
+.admin-body .btn-primary,
+.admin-body .pagination .page-link.active {
+  color: #f8fafc;
+  background: linear-gradient(135deg, #1e40af, #1d4ed8);
+}
+
+.admin-body .btn-primary:hover {
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
+}
+
+.admin-body .stat-card.success {
+  background: linear-gradient(135deg, #065f46, #047857);
 }

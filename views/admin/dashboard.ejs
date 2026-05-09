@@ -23,9 +23,6 @@
       <div class="stat-content">
         <span class="stat-value"><%= stats.totalUsers %></span>
         <span class="stat-label">Пользователей</span>
-        <div class="stat-trend positive">
-          <i class="fas fa-arrow-up"></i> +<%= stats.newUsersToday %> сегодня
-        </div>
       </div>
     </div>
     
@@ -36,9 +33,6 @@
       <div class="stat-content">
         <span class="stat-value"><%= stats.totalBooks %></span>
         <span class="stat-label">Книг</span>
-        <div class="stat-trend positive">
-          <i class="fas fa-arrow-up"></i> +<%= stats.newBooksToday %> сегодня
-        </div>
       </div>
     </div>
     
@@ -49,9 +43,6 @@
       <div class="stat-content">
         <span class="stat-value"><%= stats.totalReviews %></span>
         <span class="stat-label">Рецензий</span>
-        <div class="stat-trend positive">
-          <i class="fas fa-arrow-up"></i> +<%= stats.newReviewsToday %> сегодня
-        </div>
       </div>
     </div>
     
@@ -707,6 +698,32 @@
     background: rgba(255, 255, 255, 0.1);
     transform: translateX(5px);
   }
+
+  .review-list-item {
+    overflow: hidden;
+  }
+
+  .review-header,
+  .review-user,
+  .review-book,
+  .review-footer {
+    min-width: 0;
+  }
+
+  .reviewer-name,
+  .review-book-title {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+  }
+
+  .review-preview {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
   
   .review-header {
     display: flex;
@@ -965,6 +982,11 @@
     .user-info,
     .book-info {
       width: calc(100% - 52px);
+    }
+
+    .reviewer-name,
+    .review-book-title {
+      max-width: 220px;
     }
   }
 

@@ -171,7 +171,7 @@
                           <option value="admin" selected>Администратор</option>
                         <% } %>
                         <option value="user" <%= profileUser.role === 'user' ? 'selected' : '' %>>Пользователь</option>
-                        <option value="moderator" <%= profileUser.role === 'moderator' ? 'selected' : '' %>>Модератор</option>
+                        <option value="moderator" <%= profileUser.role === 'moderator' ? 'selected' : '' %> <%= (!profileUser.moderatorEligibility?.canBeModerator && profileUser.role !== 'moderator') ? 'disabled' : '' %>>Модератор<%= (!profileUser.moderatorEligibility?.canBeModerator && profileUser.role !== 'moderator') ? ' (недоступно)' : '' %></option>
                       </select>
                     <% } %>
                   </div>
@@ -193,23 +193,23 @@
 
   <!-- Пагинация -->
   <% if (totalPages > 1) { %>
-    <div class="table-pagination">
-      <% if (currentPage > 1) { %>
-        <a href="?page=<%= currentPage - 1 %><%= search ? '&search=' + search : '' %><%= currentRole !== 'all' ? '&role=' + currentRole : '' %>" class="pagination-btn">
+    <div class="pagination">
+      <% if (currentPageNum > 1) { %>
+        <a href="?page=<%= currentPageNum - 1 %><%= search ? '&search=' + search : '' %><%= currentRole !== 'all' ? '&role=' + currentRole : '' %>" class="page-link">
           <i class="fas fa-chevron-left"></i>
         </a>
       <% } %>
 
       <% for(let i = 1; i <= totalPages; i++) { %>
-        <% if (i === currentPage) { %>
-          <span class="pagination-btn active"><%= i %></span>
+        <% if (i === currentPageNum) { %>
+          <span class="page-link active" data-page-number="<%= i %>"><%= i %></span>
         <% } else { %>
-          <a href="?page=<%= i %><%= search ? '&search=' + search : '' %><%= currentRole !== 'all' ? '&role=' + currentRole : '' %>" class="pagination-btn"><%= i %></a>
+          <a href="?page=<%= i %><%= search ? '&search=' + search : '' %><%= currentRole !== 'all' ? '&role=' + currentRole : '' %>" class="page-link" data-page-number="<%= i %>"><%= i %></a>
         <% } %>
       <% } %>
 
-      <% if (currentPage < totalPages) { %>
-        <a href="?page=<%= currentPage + 1 %><%= search ? '&search=' + search : '' %><%= currentRole !== 'all' ? '&role=' + currentRole : '' %>" class="pagination-btn">
+      <% if (currentPageNum < totalPages) { %>
+        <a href="?page=<%= currentPageNum + 1 %><%= search ? '&search=' + search : '' %><%= currentRole !== 'all' ? '&role=' + currentRole : '' %>" class="page-link">
           <i class="fas fa-chevron-right"></i>
         </a>
       <% } %>
@@ -219,16 +219,115 @@
 
 
 
+<style>
+
+  .users-table tbody tr,
+  .users-table tbody tr:hover,
+  .users-table tbody tr:focus-within {
+    transform: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+    background: inherit !important;
+  }
+
+
+  .pagination {
+    gap: 0.35rem;
+  }
+
+  .pagination .page-link {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 0.45rem;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 768px) {
+    .pagination .page-link {
+      min-width: 30px;
+      height: 30px;
+      font-size: 0.82rem;
+      padding: 0 0.35rem;
+    }
+  }
+
+
+  .pagination .page-link,
+  .pagination .page-link:hover,
+  .pagination .page-link:focus,
+  .pagination .page-link:active,
+  .pagination .page-link.active {
+    transform: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+
+  .pagination .page-link:hover,
+  .pagination .page-link:focus,
+  .pagination .page-link:active {
+    background: var(--admin-card-bg) !important;
+    border-color: var(--admin-card-border) !important;
+  }
+
+</style>
+
 <script>
+
+  (function limitVisibleAdminUsersPagination() {
+    const pagination = document.querySelector('.pagination');
+    if (!pagination) return;
+
+    const pageLinks = Array.from(pagination.querySelectorAll('[data-page-number]'));
+    const activeElement = pagination.querySelector('.page-link.active[data-page-number]');
+    const currentPage = activeElement ? Number(activeElement.dataset.pageNumber) : 1;
+
+    const getMaxVisiblePages = () => {
+      if (window.innerWidth <= 480) return 2;
+      if (window.innerWidth <= 768) return 3;
+      if (window.innerWidth <= 1024) return 5;
+      return 7;
+    };
+
+    const updateVisiblePages = () => {
+      const maxVisiblePages = getMaxVisiblePages();
+      const half = Math.floor(maxVisiblePages / 2);
+      let start = Math.max(1, currentPage - half);
+      let end = start + maxVisiblePages - 1;
+      const total = pageLinks.length;
+
+      if (end > total) {
+        end = total;
+        start = Math.max(1, end - maxVisiblePages + 1);
+      }
+
+      pageLinks.forEach((link) => {
+        const pageNumber = Number(link.dataset.pageNumber);
+        link.style.display = (pageNumber >= start && pageNumber <= end) ? '' : 'none';
+      });
+    };
+
+    updateVisiblePages();
+    window.addEventListener('resize', updateVisiblePages);
+  })();
+
   // Обработка смены роли
   document.querySelectorAll('.role-select').forEach(select => {
     select.addEventListener('change', async function() {
       const userId = this.dataset.userId;
       const role = this.value;
+      let reason = null;
 
       if (!confirm('Изменить роль пользователя? Для администратора используйте отдельную форму с причиной назначения.')) {
         this.value = this.dataset.currentRole || 'user';
         return;
+      }
+
+      if (role === 'moderator' && this.dataset.currentRole !== 'moderator') {
+        reason = prompt('Укажите причину назначения модератора (минимум 10 символов):', 'Активный и ответственный участник сообщества.');
+        if (reason === null) {
+          this.value = this.dataset.currentRole || 'user';
+          return;
+        }
       }
 
       try {
@@ -237,7 +336,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ role })
+          body: JSON.stringify({ role, reason })
         });
 
         if (response.ok) {
