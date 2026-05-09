@@ -707,6 +707,32 @@
     background: rgba(255, 255, 255, 0.1);
     transform: translateX(5px);
   }
+
+  .review-list-item {
+    overflow: hidden;
+  }
+
+  .review-header,
+  .review-user,
+  .review-book,
+  .review-footer {
+    min-width: 0;
+  }
+
+  .reviewer-name,
+  .review-book-title {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+  }
+
+  .review-preview {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
   
   .review-header {
     display: flex;
@@ -965,6 +991,11 @@
     .user-info,
     .book-info {
       width: calc(100% - 52px);
+    }
+
+    .reviewer-name,
+    .review-book-title {
+      max-width: 220px;
     }
   }
 
