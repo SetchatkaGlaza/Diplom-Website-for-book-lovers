@@ -178,6 +178,22 @@
   .books-pagination { margin-top: 1.2rem; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.2rem; }
   .books-pagination .page-link { flex: 0 0 auto; }
 
+  .books-table tbody tr,
+  .books-table tbody tr:hover {
+    transform: none !important;
+    transition: none !important;
+    background: transparent;
+  }
+
+  .books-pagination .page-link,
+  .books-pagination .page-link:hover,
+  .books-pagination .page-link:active,
+  .books-pagination .page-link.active {
+    transform: none !important;
+    transition: none !important;
+  }
+
+
   @media (max-width: 992px) {
     .books-admin-page { max-width: 100%; }
     .books-table { min-width: 1040px; }
