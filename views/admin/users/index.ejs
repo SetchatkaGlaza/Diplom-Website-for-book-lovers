@@ -171,7 +171,7 @@
                           <option value="admin" selected>Администратор</option>
                         <% } %>
                         <option value="user" <%= profileUser.role === 'user' ? 'selected' : '' %>>Пользователь</option>
-                        <option value="moderator" <%= profileUser.role === 'moderator' ? 'selected' : '' %>>Модератор</option>
+                        <option value="moderator" <%= profileUser.role === 'moderator' ? 'selected' : '' %> <%= (!profileUser.moderatorEligibility?.canBeModerator && profileUser.role !== 'moderator') ? 'disabled' : '' %>>Модератор<%= (!profileUser.moderatorEligibility?.canBeModerator && profileUser.role !== 'moderator') ? ' (недоступно)' : '' %></option>
                       </select>
                     <% } %>
                   </div>
@@ -315,10 +315,19 @@
     select.addEventListener('change', async function() {
       const userId = this.dataset.userId;
       const role = this.value;
+      let reason = null;
 
       if (!confirm('Изменить роль пользователя? Для администратора используйте отдельную форму с причиной назначения.')) {
         this.value = this.dataset.currentRole || 'user';
         return;
+      }
+
+      if (role === 'moderator' && this.dataset.currentRole !== 'moderator') {
+        reason = prompt('Укажите причину назначения модератора (минимум 10 символов):', 'Активный и ответственный участник сообщества.');
+        if (reason === null) {
+          this.value = this.dataset.currentRole || 'user';
+          return;
+        }
       }
 
       try {
@@ -327,7 +336,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ role })
+          body: JSON.stringify({ role, reason })
         });
 
         if (response.ok) {

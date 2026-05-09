@@ -26,6 +26,15 @@ const ADMIN_POLICY = {
   }
 };
 
+const MODERATOR_POLICY = {
+  minAccountAgeDays: 14,
+  minApprovedReviews: 1,
+  minForumPosts: 3,
+  minActivityScore: 20,
+  minReasonLength: 10,
+  maxReasonLength: 500
+};
+
 function getAccountAgeDays(createdAt) {
   const created = new Date(createdAt);
 
@@ -99,6 +108,45 @@ function getAdminEligibility(user, stats, currentAdminCount) {
       ? missingReasons.join('; ')
       : `подходит: ${positiveReason}`
   };
+}
+
+
+function getModeratorEligibility(user, stats) {
+  const accountAgeDays = getAccountAgeDays(user.createdAt);
+  const activityScore = getActivityScore({ ...stats, accountAgeDays });
+
+  const checks = [
+    { passed: !user.isBlocked, message: 'аккаунт не заблокирован' },
+    { passed: accountAgeDays >= MODERATOR_POLICY.minAccountAgeDays, message: `на сайте не менее ${MODERATOR_POLICY.minAccountAgeDays} дней` },
+    { passed: stats.approvedReviewsCount >= MODERATOR_POLICY.minApprovedReviews || stats.forumPostsCount >= MODERATOR_POLICY.minForumPosts, message: `есть минимум ${MODERATOR_POLICY.minApprovedReviews} одобренная рецензия или ${MODERATOR_POLICY.minForumPosts} сообщений форума` },
+    { passed: activityScore >= MODERATOR_POLICY.minActivityScore, message: `индекс активности от ${MODERATOR_POLICY.minActivityScore}` }
+  ];
+
+  const missingReasons = checks.filter((check) => !check.passed).map((check) => check.message);
+
+  return {
+    canBeModerator: missingReasons.length === 0,
+    accountAgeDays,
+    activityScore,
+    missingReasons,
+    summary: missingReasons.length > 0
+      ? missingReasons.join('; ')
+      : `подходит: аккаунт существует ${accountAgeDays} дн., индекс активности ${activityScore}`
+  };
+}
+
+function validateModeratorAppointmentReason(reason) {
+  const normalizedReason = String(reason || '').trim();
+
+  if (normalizedReason.length < MODERATOR_POLICY.minReasonLength) {
+    return { normalizedReason, error: `Укажите причину назначения модератора: минимум ${MODERATOR_POLICY.minReasonLength} символов` };
+  }
+
+  if (normalizedReason.length > MODERATOR_POLICY.maxReasonLength) {
+    return { normalizedReason, error: `Причина назначения модератора не должна быть длиннее ${MODERATOR_POLICY.maxReasonLength} символов` };
+  }
+
+  return { normalizedReason, error: null };
 }
 
 function validateAdminAppointmentReason(reason) {
@@ -651,7 +699,8 @@ exports.getUsers = async (req, res) => {
         return {
           ...user.toJSON(),
           ...stats,
-          adminEligibility: getAdminEligibility(user, stats, currentAdminCount)
+          adminEligibility: getAdminEligibility(user, stats, currentAdminCount),
+          moderatorEligibility: getModeratorEligibility(user, stats)
         };
       })
     );
@@ -668,6 +717,7 @@ exports.getUsers = async (req, res) => {
       users: usersWithStats,
       roleStats,
       adminPolicy: ADMIN_POLICY,
+      moderatorPolicy: MODERATOR_POLICY,
       currentAdminCount,
       search,
       currentRole: role,
@@ -706,6 +756,28 @@ exports.updateUserRole = async (req, res) => {
     }
 
     let adminAppointmentReason = null;
+    let moderatorAppointmentReason = null;
+
+    if (role === 'moderator' && user.role !== 'moderator' && user.role !== 'admin') {
+      const { normalizedReason, error: reasonError } = validateModeratorAppointmentReason(req.body.reason);
+
+      if (reasonError) {
+        return sendRoleError(req, res, reasonError);
+      }
+
+      moderatorAppointmentReason = normalizedReason;
+      const stats = {
+        booksCount: await UserBook.count({ where: { user_id: user.id } }),
+        reviewsCount: await Review.count({ where: { user_id: user.id } }),
+        approvedReviewsCount: await Review.count({ where: { user_id: user.id, is_moderated: true } }),
+        forumPostsCount: await ForumPost.count({ where: { user_id: user.id } })
+      };
+      const eligibility = getModeratorEligibility(user, stats);
+
+      if (!eligibility.canBeModerator) {
+        return sendRoleError(req, res, `Нельзя назначить модератора: ${eligibility.summary}.`);
+      }
+    }
 
     if (role === 'admin' && user.role !== 'admin') {
       const { normalizedReason, error: reasonError } = validateAdminAppointmentReason(req.body.reason);
@@ -743,6 +815,27 @@ exports.updateUserRole = async (req, res) => {
     }
 
     const updateData = { role };
+
+    if (role === 'moderator' && user.role !== 'moderator' && user.role !== 'admin') {
+      const { normalizedReason, error: reasonError } = validateModeratorAppointmentReason(req.body.reason);
+
+      if (reasonError) {
+        return sendRoleError(req, res, reasonError);
+      }
+
+      moderatorAppointmentReason = normalizedReason;
+      const stats = {
+        booksCount: await UserBook.count({ where: { user_id: user.id } }),
+        reviewsCount: await Review.count({ where: { user_id: user.id } }),
+        approvedReviewsCount: await Review.count({ where: { user_id: user.id, is_moderated: true } }),
+        forumPostsCount: await ForumPost.count({ where: { user_id: user.id } })
+      };
+      const eligibility = getModeratorEligibility(user, stats);
+
+      if (!eligibility.canBeModerator) {
+        return sendRoleError(req, res, `Нельзя назначить модератора: ${eligibility.summary}.`);
+      }
+    }
 
     if (role === 'admin' && user.role !== 'admin') {
       updateData.admin_appointed_at = new Date();
