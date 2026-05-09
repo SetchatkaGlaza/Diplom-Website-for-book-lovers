@@ -2624,3 +2624,23 @@
     font-size: 0.8rem;
   }
 }
+
+.admin-books,
+.admin-users {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.pagination .page-link {
+  flex: 0 0 auto;
+}

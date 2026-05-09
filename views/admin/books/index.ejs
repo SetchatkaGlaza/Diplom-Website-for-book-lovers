@@ -40,15 +40,15 @@
         <% if (books && books.length > 0) { %>
           <% books.forEach(book => { %>
             <tr>
-              <td><%= book.id %></td>
-              <td><a href="/books/<%= book.id %>" target="_blank" rel="noopener"><%= book.title %></a></td>
-              <td><%= book.author %></td>
-              <td><%= book.genre ? book.genre.name : '–' %></td>
-              <td><%= book.year || '–' %></td>
-              <td><%= book.avgRating > 0 ? book.avgRating : '–' %></td>
-              <td><%= book.reviewsCount || 0 %></td>
-              <td><%= book.inUserBooks || 0 %></td>
-              <td>
+              <td data-label="ID"><%= book.id %></td>
+              <td data-label="Название"><a href="/books/<%= book.id %>" target="_blank" rel="noopener"><%= book.title %></a></td>
+              <td data-label="Автор"><%= book.author %></td>
+              <td data-label="Жанр"><%= book.genre ? book.genre.name : '–' %></td>
+              <td data-label="Год"><%= book.year || '–' %></td>
+              <td data-label="Рейтинг"><%= book.avgRating > 0 ? book.avgRating : '–' %></td>
+              <td data-label="Рецензий"><%= book.reviewsCount || 0 %></td>
+              <td data-label="На полках"><%= book.inUserBooks || 0 %></td>
+              <td data-label="Действия">
                 <div class="action-buttons">
                   <a href="/books/<%= book.id %>" class="action-btn view" target="_blank" title="Просмотр"><i class="fas fa-eye"></i></a>
                   <a href="/admin/books/<%= book.id %>/edit" class="action-btn edit" title="Редактировать"><i class="fas fa-edit"></i></a>
@@ -71,19 +71,19 @@
   </div>
 
   <% if (totalPages > 1) { %>
-    <div class="table-pagination">
-      <% if (currentPage > 1) { %>
-        <a href="?page=<%= currentPage - 1 %><%= search ? '&search=' + search : '' %>" class="pagination-btn"><i class="fas fa-chevron-left"></i></a>
+    <div class="pagination">
+      <% if (currentPageNum > 1) { %>
+        <a href="?page=<%= currentPageNum - 1 %><%= search ? '&search=' + search : '' %>" class="page-link"><i class="fas fa-chevron-left"></i></a>
       <% } %>
       <% for(let i = 1; i <= totalPages; i++) { %>
-        <% if (i === currentPage) { %>
-          <span class="pagination-btn active" data-page-number="<%= i %>"><%= i %></span>
+        <% if (i === currentPageNum) { %>
+          <span class="page-link active" data-page-number="<%= i %>"><%= i %></span>
         <% } else { %>
-          <a href="?page=<%= i %><%= search ? '&search=' + search : '' %>" class="pagination-btn" data-page-number="<%= i %>"><%= i %></a>
+          <a href="?page=<%= i %><%= search ? '&search=' + search : '' %>" class="page-link" data-page-number="<%= i %>"><%= i %></a>
         <% } %>
       <% } %>
-      <% if (currentPage < totalPages) { %>
-        <a href="?page=<%= currentPage + 1 %><%= search ? '&search=' + search : '' %>" class="pagination-btn"><i class="fas fa-chevron-right"></i></a>
+      <% if (currentPageNum < totalPages) { %>
+        <a href="?page=<%= currentPageNum + 1 %><%= search ? '&search=' + search : '' %>" class="page-link"><i class="fas fa-chevron-right"></i></a>
       <% } %>
     </div>
   <% } %>
@@ -91,11 +91,11 @@
 
 <script>
   (function limitVisibleAdminBooksPagination() {
-    const pagination = document.querySelector('.table-pagination');
+    const pagination = document.querySelector('.pagination');
     if (!pagination) return;
 
     const pageLinks = Array.from(pagination.querySelectorAll('[data-page-number]'));
-    const activeElement = pagination.querySelector('.pagination-btn.active[data-page-number]');
+    const activeElement = pagination.querySelector('.page-link.active[data-page-number]');
     const currentPage = activeElement ? Number(activeElement.dataset.pageNumber) : 1;
 
     const getMaxVisiblePages = () => {
@@ -128,8 +128,9 @@
 </script>
 
 <style>
-  .simple-table-wrap { padding: 0; }
-  .simple-books-table { width: 100%; table-layout: auto; }
+  .simple-table-wrap { padding: 0; overflow-x: visible; }
+  .admin-books { max-width: 1600px; margin: 0 auto; }
+  .simple-books-table { width: calc(100% + 80px); margin-right: -80px; table-layout: auto; }
   .simple-books-table th, .simple-books-table td { padding: 10px 8px; vertical-align: middle; }
   .simple-books-table tr { height: 52px; }
   .simple-books-table td { word-break: break-word; }
@@ -166,5 +167,16 @@
     .simple-books-table .action-buttons {
       gap: 0.4rem;
     }
+  }
+</style>
+
+<style>
+  @media (max-width: 900px) {
+    .simple-books-table { width: 100%; margin-right: 0; }
+    .simple-books-table, .simple-books-table thead, .simple-books-table tbody, .simple-books-table tr, .simple-books-table td { display: block; width: 100%; }
+    .simple-books-table thead { display: none; }
+    .simple-books-table tr { padding: 0.9rem; border-bottom: 1px solid rgba(255,255,255,.12); }
+    .simple-books-table td { position: relative; padding: 0.5rem 0.5rem 0.5rem 48%; min-height: 34px; }
+    .simple-books-table td::before { content: attr(data-label); position: absolute; left: 0.5rem; width: 44%; color: rgba(255,255,255,.7); font-weight: 600; }
   }
 </style>

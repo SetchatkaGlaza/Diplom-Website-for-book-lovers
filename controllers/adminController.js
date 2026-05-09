@@ -608,7 +608,7 @@ exports.deleteBook = async (req, res) => {
 exports.getUsers = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = 20;
+    const limit = 8;
     const offset = (page - 1) * limit;
     const searchValidation = validateSearchQuery(req.query.search || '', 'Поисковый запрос');
     const search = searchValidation.error ? '' : searchValidation.value;
