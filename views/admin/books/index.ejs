@@ -1,14 +1,15 @@
-<div class="admin-books">
-  <div class="admin-header">
+<div class="admin-books books-admin-page">
+  <link rel="stylesheet" href="/css/admin.css">
+
+  <div class="admin-header books-admin-header">
     <h1><i class="fas fa-book"></i> Управление книгами</h1>
     <a href="/admin/books/add" class="btn btn-primary">
       <i class="fas fa-plus"></i> Добавить книгу
     </a>
-    <link rel="stylesheet" href="/css/admin.css">
   </div>
 
   <div class="table-search">
-    <form action="/admin/books" method="GET" style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
+    <form action="/admin/books" method="GET" class="books-search-form">
       <input type="text" name="search" placeholder="Поиск по названию или автору" value="<%= search || '' %>">
       <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Найти</button>
       <% if (search) { %>
@@ -21,60 +22,63 @@
     <div class="stat-pill"><i class="fas fa-book"></i><span><%= totalBooks %></span> книг всего</div>
   </div>
 
-  <div class="table-responsive simple-table-wrap">
-    <table class="modern-table simple-books-table">
-      <thead>
-        <tr>
-          <th style="width: 60px;">ID</th>
-          <th>Название</th>
-          <th>Автор</th>
-          <th style="width: 140px;">Жанр</th>
-          <th style="width: 90px;">Год</th>
-          <th style="width: 90px;">Рейтинг</th>
-          <th style="width: 100px;">Рецензий</th>
-          <th style="width: 100px;">На полках</th>
-          <th style="width: 180px;">Действия</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (books && books.length > 0) { %>
-          <% books.forEach(book => { %>
-            <tr>
-              <td data-label="ID"><%= book.id %></td>
-              <td data-label="Название"><a href="/books/<%= book.id %>" target="_blank" rel="noopener"><%= book.title %></a></td>
-              <td data-label="Автор"><%= book.author %></td>
-              <td data-label="Жанр"><%= book.genre ? book.genre.name : '–' %></td>
-              <td data-label="Год"><%= book.year || '–' %></td>
-              <td data-label="Рейтинг"><%= book.avgRating > 0 ? book.avgRating : '–' %></td>
-              <td data-label="Рецензий"><%= book.reviewsCount || 0 %></td>
-              <td data-label="На полках"><%= book.inUserBooks || 0 %></td>
-              <td data-label="Действия">
-                <div class="action-buttons">
-                  <a href="/books/<%= book.id %>" class="action-btn view" target="_blank" title="Просмотр"><i class="fas fa-eye"></i></a>
-                  <a href="/admin/books/<%= book.id %>/edit" class="action-btn edit" title="Редактировать"><i class="fas fa-edit"></i></a>
-                  <form action="/admin/books/<%= book.id %>?_method=DELETE" method="POST" style="display: inline;">
-                    <button type="submit" class="action-btn delete" onclick="return confirm('Удалить книгу? Это также удалит все рецензии.')" title="Удалить">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </form>
-                </div>
-              </td>
-            </tr>
-          <% }) %>
-        <% } else { %>
+  <div class="books-table-card">
+    <div class="table-responsive books-table-wrap">
+      <table class="modern-table books-table">
+        <thead>
           <tr>
-            <td colspan="9" style="text-align:center; padding:2rem;">Книги не найдены</td>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Автор</th>
+            <th>Жанр</th>
+            <th>Год</th>
+            <th>Рейтинг</th>
+            <th>Рецензий</th>
+            <th>На полках</th>
+            <th>Действия</th>
           </tr>
-        <% } %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% if (books && books.length > 0) { %>
+            <% books.forEach(book => { %>
+              <tr>
+                <td><%= book.id %></td>
+                <td class="title-cell"><a href="/books/<%= book.id %>" target="_blank" rel="noopener"><%= book.title %></a></td>
+                <td><%= book.author %></td>
+                <td><%= book.genre ? book.genre.name : '–' %></td>
+                <td><%= book.year || '–' %></td>
+                <td><%= book.avgRating > 0 ? book.avgRating : '–' %></td>
+                <td><%= book.reviewsCount || 0 %></td>
+                <td><%= book.inUserBooks || 0 %></td>
+                <td>
+                  <div class="action-buttons">
+                    <a href="/books/<%= book.id %>" class="action-btn view" target="_blank" title="Просмотр"><i class="fas fa-eye"></i></a>
+                    <a href="/admin/books/<%= book.id %>/edit" class="action-btn edit" title="Редактировать"><i class="fas fa-edit"></i></a>
+                    <form action="/admin/books/<%= book.id %>?_method=DELETE" method="POST" class="delete-form-inline">
+                      <button type="submit" class="action-btn delete" onclick="return confirm('Удалить книгу? Это также удалит все рецензии.')" title="Удалить">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="9" class="books-empty">Книги не найдены</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <% if (totalPages > 1) { %>
-    <div class="pagination">
+    <div class="pagination books-pagination">
       <% if (currentPageNum > 1) { %>
         <a href="?page=<%= currentPageNum - 1 %><%= search ? '&search=' + search : '' %>" class="page-link"><i class="fas fa-chevron-left"></i></a>
       <% } %>
+
       <% for(let i = 1; i <= totalPages; i++) { %>
         <% if (i === currentPageNum) { %>
           <span class="page-link active" data-page-number="<%= i %>"><%= i %></span>
@@ -82,6 +86,7 @@
           <a href="?page=<%= i %><%= search ? '&search=' + search : '' %>" class="page-link" data-page-number="<%= i %>"><%= i %></a>
         <% } %>
       <% } %>
+
       <% if (currentPageNum < totalPages) { %>
         <a href="?page=<%= currentPageNum + 1 %><%= search ? '&search=' + search : '' %>" class="page-link"><i class="fas fa-chevron-right"></i></a>
       <% } %>
@@ -90,8 +95,8 @@
 </div>
 
 <script>
-  (function limitVisibleAdminBooksPagination() {
-    const pagination = document.querySelector('.pagination');
+  (function limitVisiblePagination() {
+    const pagination = document.querySelector('.books-pagination');
     if (!pagination) return;
 
     const pageLinks = Array.from(pagination.querySelectorAll('[data-page-number]'));
@@ -128,55 +133,59 @@
 </script>
 
 <style>
-  .simple-table-wrap { padding: 0; overflow-x: visible; }
-  .admin-books { max-width: 1600px; margin: 0 auto; }
-  .simple-books-table { width: calc(100% + 80px); margin-right: -80px; table-layout: auto; }
-  .simple-books-table th, .simple-books-table td { padding: 10px 8px; vertical-align: middle; }
-  .simple-books-table tr { height: 52px; }
-  .simple-books-table td { word-break: break-word; }
-  .simple-books-table a { color: white; text-decoration: underline; text-underline-offset: 2px; }
-</style>
-<style>
-  .simple-books-table .action-buttons {
-    flex-wrap: nowrap;
-    justify-content: flex-start;
+  .books-admin-page { max-width: 1700px; margin: 0 auto; }
+  .books-admin-header { align-items: center; }
+  .books-search-form { display: flex; gap: 1rem; width: 100%; flex-wrap: wrap; }
+
+  .books-table-card {
+    border: 1px solid var(--admin-card-border);
+    border-radius: var(--admin-radius-lg);
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
   }
 
-  .simple-books-table .action-buttons form {
-    display: inline-flex !important;
-    width: auto;
-    flex: 0 0 auto;
-  }
-
-  .simple-books-table .action-btn {
-    width: 36px;
-    min-width: 36px;
-    height: 36px;
-    flex: 0 0 36px;
+  .books-table-wrap {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
     padding: 0;
+    overflow-x: auto;
+  }
+
+  .books-table { min-width: 1180px; table-layout: fixed; }
+  .books-table th:nth-child(1) { width: 70px; }
+  .books-table th:nth-child(2) { width: 23%; }
+  .books-table th:nth-child(3) { width: 18%; }
+  .books-table th:nth-child(4) { width: 14%; }
+  .books-table th:nth-child(5) { width: 85px; }
+  .books-table th:nth-child(6) { width: 95px; }
+  .books-table th:nth-child(7) { width: 100px; }
+  .books-table th:nth-child(8) { width: 100px; }
+  .books-table th:nth-child(9) { width: 150px; }
+
+  .books-table td, .books-table th { vertical-align: middle; }
+  .books-table .title-cell a {
+    color: white;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    word-break: break-word;
+  }
+
+  .delete-form-inline { display: inline-flex; }
+  .books-empty { text-align:center; padding:2rem; }
+
+  .books-pagination { margin-top: 1.2rem; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.2rem; }
+  .books-pagination .page-link { flex: 0 0 auto; }
+
+  @media (max-width: 992px) {
+    .books-admin-page { max-width: 100%; }
+    .books-table { min-width: 1040px; }
   }
 
   @media (max-width: 768px) {
-    .simple-books-table .action-buttons,
-    .simple-books-table .action-buttons > *,
-    .simple-books-table .action-buttons form,
-    .simple-books-table .action-btn {
-      width: auto;
-    }
-
-    .simple-books-table .action-buttons {
-      gap: 0.4rem;
-    }
-  }
-</style>
-
-<style>
-  @media (max-width: 900px) {
-    .simple-books-table { width: 100%; margin-right: 0; }
-    .simple-books-table, .simple-books-table thead, .simple-books-table tbody, .simple-books-table tr, .simple-books-table td { display: block; width: 100%; }
-    .simple-books-table thead { display: none; }
-    .simple-books-table tr { padding: 0.9rem; border-bottom: 1px solid rgba(255,255,255,.12); }
-    .simple-books-table td { position: relative; padding: 0.5rem 0.5rem 0.5rem 48%; min-height: 34px; }
-    .simple-books-table td::before { content: attr(data-label); position: absolute; left: 0.5rem; width: 44%; color: rgba(255,255,255,.7); font-weight: 600; }
+    .books-search-form input,
+    .books-search-form .btn { width: 100%; }
+    .books-table-wrap { border-top: 1px solid rgba(255,255,255,.08); }
   }
 </style>
