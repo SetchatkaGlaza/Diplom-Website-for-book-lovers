@@ -230,6 +230,27 @@
     background: inherit !important;
   }
 
+
+  .pagination {
+    gap: 0.35rem;
+  }
+
+  .pagination .page-link {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 0.45rem;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 768px) {
+    .pagination .page-link {
+      min-width: 30px;
+      height: 30px;
+      font-size: 0.82rem;
+      padding: 0 0.35rem;
+    }
+  }
+
 </style>
 
 <script>
@@ -243,9 +264,10 @@
     const currentPage = activeElement ? Number(activeElement.dataset.pageNumber) : 1;
 
     const getMaxVisiblePages = () => {
-      if (window.innerWidth <= 480) return 3;
-      if (window.innerWidth <= 768) return 5;
-      return 9;
+      if (window.innerWidth <= 480) return 2;
+      if (window.innerWidth <= 768) return 3;
+      if (window.innerWidth <= 1024) return 5;
+      return 7;
     };
 
     const updateVisiblePages = () => {
