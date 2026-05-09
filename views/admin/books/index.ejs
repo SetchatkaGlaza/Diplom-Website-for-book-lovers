@@ -179,18 +179,29 @@
   .books-pagination .page-link { flex: 0 0 auto; }
 
   .books-table tbody tr,
-  .books-table tbody tr:hover {
+  .books-table tbody tr:hover,
+  .books-table tbody tr:focus-within {
     transform: none !important;
     transition: none !important;
-    background: transparent;
+    background: inherit !important;
+    box-shadow: none !important;
   }
 
   .books-pagination .page-link,
   .books-pagination .page-link:hover,
+  .books-pagination .page-link:focus,
   .books-pagination .page-link:active,
   .books-pagination .page-link.active {
     transform: none !important;
     transition: none !important;
+    box-shadow: none !important;
+  }
+
+  .books-pagination .page-link:hover,
+  .books-pagination .page-link:focus,
+  .books-pagination .page-link:active {
+    background: var(--admin-card-bg) !important;
+    border-color: var(--admin-card-border) !important;
   }
 
 
