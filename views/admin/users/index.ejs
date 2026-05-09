@@ -202,9 +202,9 @@
 
       <% for(let i = 1; i <= totalPages; i++) { %>
         <% if (i === currentPage) { %>
-          <span class="pagination-btn active"><%= i %></span>
+          <span class="pagination-btn active" data-page-number="<%= i %>"><%= i %></span>
         <% } else { %>
-          <a href="?page=<%= i %><%= search ? '&search=' + search : '' %><%= currentRole !== 'all' ? '&role=' + currentRole : '' %>" class="pagination-btn"><%= i %></a>
+          <a href="?page=<%= i %><%= search ? '&search=' + search : '' %><%= currentRole !== 'all' ? '&role=' + currentRole : '' %>" class="pagination-btn" data-page-number="<%= i %>"><%= i %></a>
         <% } %>
       <% } %>
 
@@ -220,6 +220,43 @@
 
 
 <script>
+
+  (function limitVisibleAdminUsersPagination() {
+    const pagination = document.querySelector('.table-pagination');
+    if (!pagination) return;
+
+    const pageLinks = Array.from(pagination.querySelectorAll('[data-page-number]'));
+    const activeElement = pagination.querySelector('.pagination-btn.active[data-page-number]');
+    const currentPage = activeElement ? Number(activeElement.dataset.pageNumber) : 1;
+
+    const getMaxVisiblePages = () => {
+      if (window.innerWidth <= 480) return 3;
+      if (window.innerWidth <= 768) return 5;
+      return 9;
+    };
+
+    const updateVisiblePages = () => {
+      const maxVisiblePages = getMaxVisiblePages();
+      const half = Math.floor(maxVisiblePages / 2);
+      let start = Math.max(1, currentPage - half);
+      let end = start + maxVisiblePages - 1;
+      const total = pageLinks.length;
+
+      if (end > total) {
+        end = total;
+        start = Math.max(1, end - maxVisiblePages + 1);
+      }
+
+      pageLinks.forEach((link) => {
+        const pageNumber = Number(link.dataset.pageNumber);
+        link.style.display = (pageNumber >= start && pageNumber <= end) ? '' : 'none';
+      });
+    };
+
+    updateVisiblePages();
+    window.addEventListener('resize', updateVisiblePages);
+  })();
+
   // Обработка смены роли
   document.querySelectorAll('.role-select').forEach(select => {
     select.addEventListener('change', async function() {

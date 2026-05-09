@@ -1889,8 +1889,8 @@
 }
 
 .users-table {
-  min-width: 1120px;
-  table-layout: fixed;
+  width: 100%;
+  table-layout: auto;
 }
 
 .users-table th:nth-child(1) { width: 24%; }
