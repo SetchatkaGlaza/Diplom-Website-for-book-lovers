@@ -18,11 +18,24 @@ const getSingleQueryValue = (value, fallback = '') => {
   return value || fallback;
 };
 
+const titleSortExpression = `regexp_replace(btrim(lower("Book"."title")), '^[^0-9a-zа-яё]+', '')`;
+const authorSortExpression = `regexp_replace(btrim(lower("Book"."author")), '^[^0-9a-zа-яё]+', '')`;
+
+const titleSortGroup = sequelize.literal(`CASE
+  WHEN ${titleSortExpression} ~ '^[а-яё]' THEN 1
+  WHEN ${titleSortExpression} ~ '^[a-z]' THEN 2
+  WHEN ${titleSortExpression} ~ '^[0-9]' THEN 3
+  ELSE 4
+END`);
+const normalizedTitleSort = sequelize.literal(`replace(${titleSortExpression}, 'ё', 'е')`);
+const normalizedAuthorSort = sequelize.literal(`replace(${authorSortExpression}, 'ё', 'е')`);
+
+
 const SORT_OPTIONS = {
   newest: [['createdAt', 'DESC'], ['id', 'DESC']],
   popular: [['views_count', 'DESC'], ['createdAt', 'DESC'], ['id', 'DESC']],
-  title_asc: [['title', 'ASC'], ['author', 'ASC'], ['id', 'ASC']],
-  title_desc: [['title', 'DESC'], ['author', 'DESC'], ['id', 'DESC']],
+  title_asc: [[titleSortGroup, 'ASC'], [normalizedTitleSort, 'ASC'], [normalizedAuthorSort, 'ASC'], ['id', 'ASC']],
+  title_desc: [[titleSortGroup, 'ASC'], [normalizedTitleSort, 'DESC'], [normalizedAuthorSort, 'DESC'], ['id', 'DESC']],
   year_desc: [['year', 'DESC NULLS LAST'], ['createdAt', 'DESC'], ['id', 'DESC']],
   year_asc: [['year', 'ASC NULLS LAST'], ['createdAt', 'DESC'], ['id', 'DESC']],
   rating: [[sequelize.literal('average_rating'), 'DESC'], [sequelize.literal('approved_reviews_count'), 'DESC'], ['createdAt', 'DESC'], ['id', 'DESC']]

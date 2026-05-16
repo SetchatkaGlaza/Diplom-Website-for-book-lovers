@@ -1004,26 +1004,53 @@ exports.editGenre = async (req, res) => {
 };
 
 exports.deleteGenre = async (req, res) => {
+   const transaction = await sequelize.transaction();
+
   try {
     const genreId = req.params.id;
     
-    const booksCount = await Book.count({ where: { genre_id: genreId } });
-    
-    if (booksCount > 0) {
-      req.flash('error', 'Нельзя удалить жанр, в котором есть книги');
-      return res.redirect('/admin/genres');
-    }
-    
-    const genre = await Genre.findByPk(genreId);
+    const replacementGenreId = req.body.replacement_genre_id || null;
+
+    const genre = await Genre.findByPk(genreId, { transaction });
     
     if (!genre) {
+      await transaction.rollback();
       req.flash('error', 'Жанр не найден');
       return res.redirect('/admin/genres');
     }
     
-    await genre.destroy();
-    
-    req.flash('success', 'Жанр успешно удалён');
+    const booksCount = await Book.count({ where: { genre_id: genreId }, transaction });
+    let replacementGenre = null;
+
+    if (booksCount > 0) {
+      if (!replacementGenreId || String(replacementGenreId) === String(genreId)) {
+        await transaction.rollback();
+        req.flash('error', 'Перед удалением жанра с книгами выберите другой жанр для переноса книг');
+        return res.redirect('/admin/genres');
+      }
+
+      replacementGenre = await Genre.findByPk(replacementGenreId, { transaction });
+
+      if (!replacementGenre || String(replacementGenre.id) === String(genreId)) {
+        await transaction.rollback();
+        req.flash('error', 'Жанр для переноса книг не найден');
+        return res.redirect('/admin/genres');
+      }
+
+      await Book.update(
+        { genre_id: replacementGenre.id },
+        { where: { genre_id: genreId }, transaction }
+      );
+    }
+
+    await genre.destroy({ transaction });
+    await transaction.commit();
+
+    if (booksCount > 0) {
+      req.flash('success', `Жанр «${genre.name}» удалён, ${booksCount} книг перенесено в жанр «${replacementGenre.name}»`);
+    } else {
+      req.flash('success', 'Жанр успешно удалён');
+    }
     res.redirect('/admin/genres');
     
   } catch (error) {
