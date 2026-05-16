@@ -41,9 +41,16 @@
             <% const postPreview = truncateText(post.content, 260); %>
             <div class="content-preview"><%= postPreview.text %></div>
 
-            <form action="/admin/forum/post/<%= post.id %>/delete" method="POST" class="reject-form-inline" onsubmit="return confirm('Удалить это сообщение?')">
-              <input type="text" name="reason" required placeholder="Причина удаления (обязательно)">
-              <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Удалить сообщение</button>
+            <form action="/admin/forum/post/<%= post.id %>/delete" method="POST" class="reject-form-inline delete-post-form">
+              <input
+                type="text"
+                name="reason"
+                required
+                minlength="5"
+                maxlength="500"
+                placeholder="Причина удаления (минимум 5 символов)"
+              >
+              <button type="submit" class="btn btn-danger" disabled><i class="fas fa-trash"></i> Удалить сообщение</button>
             </form>
           </article>
         <% }) %>
@@ -53,3 +60,33 @@
     <% } %>
   </section>
 </div>
+
+<script>
+  document.querySelectorAll('.delete-post-form').forEach((form) => {
+    const reasonInput = form.querySelector('input[name="reason"]');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const minLength = Number(reasonInput?.getAttribute('minlength')) || 5;
+
+    const updateSubmitState = () => {
+      const canSubmit = reasonInput.value.trim().length >= minLength;
+      submitButton.disabled = !canSubmit;
+    };
+
+    updateSubmitState();
+    reasonInput.addEventListener('input', updateSubmitState);
+
+    form.addEventListener('submit', (event) => {
+      updateSubmitState();
+
+      if (submitButton.disabled) {
+        event.preventDefault();
+        reasonInput.reportValidity();
+        return;
+      }
+
+      if (!confirm('Удалить это сообщение?')) {
+        event.preventDefault();
+      }
+    });
+  });
+</script>

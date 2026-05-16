@@ -293,6 +293,21 @@ exports.postChangePassword = async (req, res) => {
       });
     }
 
+    const isSameAsCurrentPassword = await bcrypt.compare(new_password, user.password_hash);
+
+    if (isSameAsCurrentPassword) {
+      errors.push({ msg: 'Вы не можете установить этот пароль, так как он уже используется в вашем аккаунте' });
+      const userWithAvatarUrl = {
+        ...user.toJSON(),
+        avatarUrl: getAvatarUrl(user.avatar, user.avatar_public_id)
+      };
+      return res.render('profile/edit', {
+        title: 'Редактирование профиля',
+        user: userWithAvatarUrl,
+        errors
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(new_password, SALT_ROUNDS);
 
     await User.update(

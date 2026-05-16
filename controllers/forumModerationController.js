@@ -29,6 +29,28 @@ const buildRedirectUrl = (basePath, query = {}) => {
   return queryString ? `${basePath}?${queryString}` : basePath;
 };
 
+const getSafeBackUrl = (req, fallback = '/admin/forum/topics') => {
+  const referrer = req.get('Referrer') || req.get('Referer');
+
+  if (!referrer) {
+    return fallback;
+  }
+
+  try {
+    const referrerUrl = new URL(referrer, `${req.protocol}://${req.get('host')}`);
+
+    if (referrerUrl.host === req.get('host')) {
+      return `${referrerUrl.pathname}${referrerUrl.search}${referrerUrl.hash}`;
+    }
+  } catch (error) {
+    if (referrer.startsWith('/')) {
+      return referrer;
+    }
+  }
+
+  return fallback;
+};
+
 const refreshTopicReplyStats = async (topicId) => {
   const topic = await ForumTopic.findByPk(topicId);
 
@@ -424,7 +446,7 @@ exports.deleteTopicPost = async (req, res) => {
 
     if (reasonValidation.error) {
       req.flash('error', reasonValidation.error);
-      return res.redirect('back');
+      return res.redirect(getSafeBackUrl(req));
     }
 
     const post = await ForumPost.findByPk(postId, {

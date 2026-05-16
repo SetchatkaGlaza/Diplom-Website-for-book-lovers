@@ -1,6 +1,9 @@
 <div class="admin-genres">
   <div class="admin-header">
     <h1><i class="fas fa-tags"></i> Управление жанрами</h1>
+    <p class="genre-management-note">
+      Если в удаляемом жанре есть книги, сначала выберите жанр-приёмник. Система перенесёт все книги в выбранный жанр и только после этого удалит старый, поэтому в карточках книг не появится пустой жанр.
+    </p>
   </div>
   
   <!-- Форма добавления жанра -->
@@ -33,10 +36,6 @@
                     <i class="fas fa-trash"></i>
                   </button>
                 </form>
-              <% } else { %>
-                <button class="genre-action-btn delete disabled" disabled title="Нельзя удалить жанр с книгами">
-                  <i class="fas fa-trash"></i>
-                </button>
               <% } %>
             </div>
           </div>
@@ -62,6 +61,31 @@
               </form>
             </div>
           </div>
+
+          <% const replacementGenres = genres.filter(item => item.id !== genre.id); %>
+            <% if (genre.booksCount > 0) { %>
+              <form action="/admin/genres/<%= genre.id %>?_method=DELETE" method="POST" class="genre-transfer-form" data-genre-name="<%= genre.name %>" data-books-count="<%= genre.booksCount %>">
+                <label for="replacement-genre-<%= genre.id %>">
+                  Перед удалением перенести книги в:
+                </label>
+                <div class="transfer-controls">
+                  <select id="replacement-genre-<%= genre.id %>" name="replacement_genre_id" required <%= replacementGenres.length === 0 ? 'disabled' : '' %>>
+                    <option value="">Выберите другой жанр</option>
+                    <% replacementGenres.forEach(replacement => { %>
+                      <option value="<%= replacement.id %>"><%= replacement.name %></option>
+                    <% }) %>
+                  </select>
+                  <button type="submit" class="btn-icon danger" title="Перенести книги и удалить жанр" <%= replacementGenres.length === 0 ? 'disabled' : '' %>>
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                <% if (replacementGenres.length === 0) { %>
+                  <small class="transfer-warning">Создайте ещё один жанр, чтобы было куда перенести книги.</small>
+                <% } else { %>
+                  <small>Будет перенесено книг: <%= genre.booksCount %>.</small>
+                <% } %>
+              </form>
+            <% } %>
           
           <div class="genre-card-footer">
             <div class="genre-stats">
@@ -100,6 +124,12 @@
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-lg);
+  }
+
+  .genre-management-note {
+    margin: 0.75rem 0 0;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.5;
   }
   
   .add-genre-card {
@@ -292,6 +322,53 @@
     transform: scale(1.1);
     box-shadow: 0 0 10px #ef4444;
   }
+
+  .genre-transfer-form {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: var(--radius);
+    background: rgba(239, 68, 68, 0.08);
+  }
+
+  .genre-transfer-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .genre-transfer-form small {
+    display: block;
+    margin-top: 0.5rem;
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  .transfer-controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .transfer-controls select {
+    flex: 1;
+    min-width: 0;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius);
+    background: rgba(15, 23, 42, 0.95);
+    color: white;
+  }
+
+  .transfer-controls .btn-icon:disabled,
+  .transfer-controls select:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .transfer-warning {
+    color: #fca5a5 !important;
+  }
   
   .genre-card-footer {
     display: flex;
@@ -356,6 +433,28 @@
       const id = this.dataset.id;
       document.getElementById(`name-display-${id}`).style.display = 'block';
       document.getElementById(`edit-form-${id}`).style.display = 'none';
+    });
+  });
+
+  // Удаление жанра с переносом книг в другой жанр
+  document.querySelectorAll('.genre-transfer-form').forEach(form => {
+    form.addEventListener('submit', function(event) {
+      const replacementSelect = this.querySelector('select[name="replacement_genre_id"]');
+
+      if (!replacementSelect.value) {
+        event.preventDefault();
+        replacementSelect.reportValidity();
+        return;
+      }
+
+      const genreName = this.dataset.genreName;
+      const booksCount = this.dataset.booksCount;
+      const replacementName = replacementSelect.options[replacementSelect.selectedIndex].text;
+      const message = `Удалить жанр «${genreName}» и перенести ${booksCount} книг в жанр «${replacementName}»?`;
+
+      if (!confirm(message)) {
+        event.preventDefault();
+      }
     });
   });
 </script>
