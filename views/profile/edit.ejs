@@ -324,8 +324,53 @@
   }
   
   @media (max-width: 768px) {
+    .edit-profile {
+      padding: 1.25rem;
+      margin: 1rem 0;
+    }
+
+    .edit-profile h1 {
+      font-size: 1.5rem;
+      gap: 0.75rem;
+    }
+
     .edit-layout {
       grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .edit-sidebar,
+    .edit-section {
+      padding: 1rem;
+    }
+
+    .current-avatar {
+      width: 160px;
+      height: 160px;
+    }
+
+    .edit-form {
+      max-width: none;
+    }
+
+    .form-group textarea.bio-textarea {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .edit-profile {
+      padding: 1rem;
+    }
+
+    .email-info {
+      align-items: flex-start;
+      overflow-wrap: anywhere;
+    }
+
+    .crop-actions .btn {
+      width: auto;
     }
   }
 </style>
