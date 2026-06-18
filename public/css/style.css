@@ -2148,6 +2148,11 @@ canvas {
     gap: 0.75rem;
   }
 
+  .navbar .logo span,
+  .navbar .dropdown-toggle span {
+    display: none;
+  }
+
   .catalog-header,
   .sort-bar,
   .review-moderation-header,
