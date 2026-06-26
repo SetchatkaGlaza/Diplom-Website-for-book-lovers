@@ -30,6 +30,99 @@
   </div>
 </div>
 
+<% const bookOfDay = homeData.bookOfDay || { title: 'Мастер и Маргарита', author: 'Михаил Булгаков', coverUrl: '/images/covers/default-book-cover.jpg', reason: 'Культовый роман для разговоров о добре, свободе и цене выбора.', id: null }; %>
+<section class="home-live-grid">
+  <article class="home-panel book-of-day" data-book-id="<%= bookOfDay.id || '' %>">
+    <div class="panel-kicker"><i class="fas fa-sun"></i> Книга дня</div>
+    <div class="book-of-day-layout">
+      <a href="<%= bookOfDay.id ? `/books/${bookOfDay.id}` : '/books' %>" class="book-of-day-cover">
+        <img src="<%= bookOfDay.coverUrl %>" alt="<%= bookOfDay.title %>">
+      </a>
+      <div>
+        <h2><%= bookOfDay.title %></h2>
+        <p class="book-author"><%= bookOfDay.author %></p>
+        <p class="choice-reason"><strong>Почему сегодня:</strong> <%= bookOfDay.reason %></p>
+        <div class="book-of-day-actions">
+          <% if (user && bookOfDay.id) { %>
+            <button class="btn btn-primary shelf-action" data-status="want_to_read"><i class="fas fa-bookmark"></i> Хочу прочитать</button>
+            <button class="btn btn-outline shelf-action" data-status="read"><i class="fas fa-check"></i> Уже читал</button>
+            <button class="btn btn-outline dismiss-book"><i class="fas fa-times"></i> Не интересно</button>
+          <% } else { %>
+            <a href="/auth/login" class="btn btn-primary"><i class="fas fa-bookmark"></i> Хочу прочитать</a>
+            <a href="/books" class="btn btn-outline"><i class="fas fa-compass"></i> В каталог</a>
+          <% } %>
+        </div>
+        <p class="shelf-feedback" aria-live="polite"></p>
+      </div>
+    </div>
+  </article>
+
+  <% const personal = homeData.personal; %>
+  <% if (user && personal) { %>
+    <aside class="home-panel personal-panel">
+      <div class="panel-kicker"><i class="fas fa-user-check"></i> Ваш читательский пульт</div>
+      <h2>Продолжайте без паузы</h2>
+      <ul class="personal-list">
+        <li><i class="fas fa-book-open"></i> <% if (personal.continueReading) { %><a href="<%= personal.continueReading.url %>"><%= personal.continueReading.title %></a><span><%= personal.continueReading.author %></span><% } else { %><a href="/profile/books?status=reading">Выберите книгу для текущего чтения</a><span>Мы закрепим её здесь.</span><% } %></li>
+        <li><i class="fas fa-bullseye"></i> <strong><%= personal.weeklyGoal %></strong><span>Цель недели</span></li>
+        <li><i class="fas fa-lightbulb"></i> <strong><%= personal.shelfRecommendation %></strong><span>Рекомендация по полке</span></li>
+      </ul>
+    </aside>
+  <% } %>
+</section>
+
+<section class="home-columns">
+  <div class="home-panel">
+    <div class="panel-kicker"><i class="fas fa-comments"></i> Сегодня обсуждают</div>
+    <div class="compact-feed">
+      <% const fallbackTopics = [{ title: 'Какая книга вернула вам любовь к чтению?', url: '/forum', meta: 'новая тема дня' }, { title: 'Экранизация или оригинал: что выбираете?', url: '/forum', meta: 'горячая дискуссия' }, { title: 'Советуем короткие книги на выходные', url: '/forum', meta: 'подборка сообщества' }]; %>
+      <% (homeData.discussedTopics.length ? homeData.discussedTopics : fallbackTopics).forEach((topic) => { %>
+        <a href="<%= topic.url %>" class="feed-item"><strong><%= topic.title %></strong><span><%= topic.meta %></span></a>
+      <% }) %>
+    </div>
+  </div>
+
+  <div class="home-panel">
+    <div class="panel-kicker"><i class="fas fa-trophy"></i> Топ рецензий недели</div>
+    <div class="review-list">
+      <% const fallbackReviews = [{ rating: 5, author: 'Редакция', bookTitle: 'Лучшие открытия недели', bookUrl: '/reviews', excerpt: 'Собрали рецензии, которые вдохновляют спорить, перечитывать и пополнять полку.', likes: 0 }]; %>
+      <% (homeData.weeklyTopReviews.length ? homeData.weeklyTopReviews : fallbackReviews).forEach((review) => { %>
+        <a href="<%= review.bookUrl %>" class="review-mini"><span class="rating-stars"><%= '★'.repeat(review.rating) %></span><strong><%= review.bookTitle %></strong><p><%= review.excerpt %></p><small><%= review.author %> · <%= review.likes %> лайков</small></a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<section class="home-panel challenge-editorial">
+  <div>
+    <div class="panel-kicker"><i class="fas fa-flag-checkered"></i> Читательские челленджи</div>
+    <div class="challenge-grid">
+      <a href="/profile/books" class="challenge-card"><strong>7 дней чтения подряд</strong><span>Отмечайте прогресс каждый день и не теряйте темп.</span></a>
+      <a href="/books?search=классика" class="challenge-card"><strong>Классика месяца</strong><span>Выберите произведение, которое давно откладывали.</span></a>
+      <a href="/reviews/new" class="challenge-card"><strong>Рецензия недели</strong><span>Расскажите, кому точно стоит открыть вашу последнюю книгу.</span></a>
+    </div>
+  </div>
+  <div>
+    <div class="panel-kicker"><i class="fas fa-wand-magic-sparkles"></i> Подборки редакции</div>
+    <div class="collection-tags">
+      <a href="/books?search=вечер">Для дождливого вечера</a>
+      <a href="/books?pages_to=200">Книги на 200 страниц</a>
+      <a href="/books?search=Достоевский">Если понравился Достоевский</a>
+      <a href="/books?search=уют">Уютное чтение</a>
+    </div>
+  </div>
+</section>
+
+<section class="home-panel activity-panel">
+  <div class="panel-kicker"><i class="fas fa-signal"></i> Активность сообщества в реальном времени</div>
+  <div class="activity-ticker" id="community-activity-ticker">
+    <% const fallbackActivity = [{ userName: 'Анна', action: 'добавила в планы', bookTitle: 'новый роман', bookUrl: '/books' }, { userName: 'Игорь', action: 'оценил', bookTitle: 'классику', bookUrl: '/books' }, { userName: 'Мария', action: 'прочитала', bookTitle: 'детектив недели', bookUrl: '/books' }]; %>
+    <% (homeData.communityActivity.length ? homeData.communityActivity : fallbackActivity).forEach((activity) => { %>
+      <a href="<%= activity.bookUrl %>" class="activity-pill"><span class="pulse-dot"></span><strong><%= activity.userName %></strong> <%= activity.action %> «<%= activity.bookTitle %>»</a>
+    <% }) %>
+  </div>
+</section>
+
 <h2 class="section-title">Популярные книги</h2>
 <div class="books-grid" id="popular-books">
   <!-- Сюда подгрузятся книги через JavaScript -->
@@ -78,6 +171,65 @@
 </div>
 
 <script>
+  document.querySelectorAll('.shelf-action').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const card = button.closest('.book-of-day');
+      const bookId = card?.dataset.bookId;
+      const feedback = card?.querySelector('.shelf-feedback');
+      if (!bookId) return;
+
+      try {
+        const response = await fetch('/profile/books/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ book_id: bookId, status: button.dataset.status })
+        });
+        if (!response.ok) throw new Error('Не удалось обновить полку');
+        if (feedback) feedback.textContent = button.dataset.status === 'read' ? 'Отметили как прочитанную.' : 'Добавили в «Хочу прочитать».';
+      } catch (error) {
+        if (feedback) feedback.textContent = 'Не получилось обновить полку. Попробуйте позже.';
+      }
+    });
+  });
+
+  document.querySelector('.dismiss-book')?.addEventListener('click', (event) => {
+    const card = event.currentTarget.closest('.book-of-day');
+    const feedback = card?.querySelector('.shelf-feedback');
+    if (feedback) feedback.textContent = 'Поняли — сегодня предложим другую книгу в каталоге.';
+  });
+
+  const renderCommunityActivity = (activities) => {
+    const ticker = document.getElementById('community-activity-ticker');
+    if (!ticker || !Array.isArray(activities) || activities.length === 0) return;
+
+    ticker.innerHTML = '';
+    activities.forEach((activity) => {
+      const link = document.createElement('a');
+      link.className = 'activity-pill';
+      link.href = activity.bookUrl || '/books';
+
+      const dot = document.createElement('span');
+      dot.className = 'pulse-dot';
+      link.appendChild(dot);
+
+      const name = document.createElement('strong');
+      name.textContent = activity.userName || 'Читатель';
+      link.appendChild(name);
+
+      link.append(` ${activity.action || 'обновил(а) полку'} «${activity.bookTitle || 'книгу'}»`);
+      ticker.appendChild(link);
+    });
+  };
+
+  const refreshCommunityActivity = () => {
+    fetch('/api/home/community-activity')
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error('Activity request failed')))
+      .then((data) => renderCommunityActivity(data.activity))
+      .catch((error) => console.error('Error refreshing community activity:', error));
+  };
+
+  setInterval(refreshCommunityActivity, 45000);
+
   // Загружаем популярные книги
   fetch('/books/popular?limit=6')
     .then(response => response.json())
@@ -323,6 +475,193 @@
     padding: 3rem;
     opacity: 0.7;
   }
+
+  .home-live-grid,
+  .home-columns,
+  .challenge-editorial {
+    display: grid;
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .home-live-grid {
+    grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.75fr);
+  }
+
+  .home-columns,
+  .challenge-editorial {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-panel {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    color: white;
+    box-shadow: var(--shadow);
+  }
+
+  .panel-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: #fef3c7;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.82rem;
+  }
+
+  .book-of-day-layout {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .book-of-day-cover img {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .book-of-day h2,
+  .personal-panel h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .choice-reason {
+    margin: 1rem 0;
+    opacity: 0.92;
+  }
+
+  .book-of-day-actions,
+  .collection-tags,
+  .activity-ticker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .shelf-feedback {
+    min-height: 1.4rem;
+    margin-top: 0.75rem;
+    color: #bbf7d0;
+    font-weight: 600;
+  }
+
+  .personal-list,
+  .compact-feed,
+  .review-list {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .personal-list {
+    list-style: none;
+  }
+
+  .personal-list li,
+  .feed-item,
+  .review-mini,
+  .challenge-card,
+  .activity-pill {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: var(--radius-md);
+    color: white;
+    text-decoration: none;
+    transition: var(--transition);
+  }
+
+  .personal-list li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 0.75rem;
+    padding: 0.9rem;
+  }
+
+  .personal-list li span {
+    grid-column: 2;
+    opacity: 0.75;
+    font-size: 0.9rem;
+  }
+
+  .personal-list a,
+  .collection-tags a {
+    color: white;
+    font-weight: 700;
+  }
+
+  .feed-item,
+  .review-mini,
+  .challenge-card {
+    display: block;
+    padding: 1rem;
+  }
+
+  .feed-item:hover,
+  .review-mini:hover,
+  .challenge-card:hover,
+  .activity-pill:hover,
+  .collection-tags a:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  .feed-item span,
+  .challenge-card span,
+  .review-mini small {
+    display: block;
+    margin-top: 0.35rem;
+    opacity: 0.75;
+  }
+
+  .review-mini p {
+    margin: 0.35rem 0;
+    opacity: 0.88;
+  }
+
+  .challenge-grid {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .collection-tags a,
+  .activity-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.75rem 0.95rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    text-decoration: none;
+  }
+
+  .activity-panel {
+    margin: 2rem 0;
+  }
+
+  .pulse-dot {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 999px;
+    background: #22c55e;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    animation: pulseLive 1.8s infinite;
+  }
+
+  @keyframes pulseLive {
+    70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  }
   
   @media (max-width: 768px) {
     .search-btn-text {
@@ -342,7 +681,11 @@
       justify-content: center;
       text-align: center;
     }
-
+    
+    .home-live-grid,
+    .home-columns,
+    .challenge-editorial,
+    .book-of-day-layout,
     .random-book-link {
       grid-template-columns: 1fr;
       text-align: center;

@@ -9,6 +9,7 @@ const rateLimit = require('express-rate-limit');
 const { DataTypes } = require('sequelize');
 const sequelize = require('./config/database');
 const { EMPTY_STATS, getSiteStats } = require('./services/statsService');
+const { getCommunityActivity, getHomePageData } = require('./services/homeService');
 const authRoutes = require('./routes/auth');
 const bookRoutes = require('./routes/books');
 const profileRoutes = require('./routes/profile');
@@ -88,17 +89,40 @@ app.use('/forum', forumRoutes);
 app.use('/admin/forum', adminForumRoutes);
 app.use('/', pageRoutes);
 
-const renderHomePage = (res, stats) => res.render('index', {
+app.get('/api/home/community-activity', async (req, res) => {
+  try {
+    const activity = await getCommunityActivity();
+    res.json({ activity });
+  } catch (error) {
+    console.error('Ошибка при загрузке активности сообщества:', error);
+    res.status(500).json({ activity: [] });
+  }
+});
+
+const EMPTY_HOME_PAGE_DATA = {
+  bookOfDay: null,
+  discussedTopics: [],
+  weeklyTopReviews: [],
+  communityActivity: [],
+  personal: null
+};
+
+const renderHomePage = (req, res, stats, homeData = EMPTY_HOME_PAGE_DATA) => res.render('index', {
   title: HOME_PAGE_TITLE,
-  stats
+  stats,
+  homeData
 });
 
 app.get('/', async (req, res) => {
   try {
-    renderHomePage(res, await getSiteStats());
+    const [stats, homeData] = await Promise.all([
+      getSiteStats(),
+      getHomePageData(req.session.user?.id)
+    ]);
+    renderHomePage(req, res, stats, homeData);
   } catch (error) {
     console.error('Ошибка при загрузке главной страницы:', error);
-    renderHomePage(res, EMPTY_STATS);
+    renderHomePage(req, res, EMPTY_STATS);
   }
 });
 

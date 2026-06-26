@@ -125,6 +125,38 @@ exports.getCatalog = async (req, res) => {
         filtersForView.year_to = String(yearTo);
       }
     }
+    
+    const pagesFromRaw = getSingleQueryValue(req.query.pages_from);
+    const pagesToRaw = getSingleQueryValue(req.query.pages_to);
+    let pagesFrom = parseInt(pagesFromRaw, 10);
+    let pagesTo = parseInt(pagesToRaw, 10);
+
+    if (!Number.isNaN(pagesFrom) && pagesFrom < 1) {
+      filterWarnings.push('Минимальное количество страниц – 1. Значение скорректировано.');
+      pagesFrom = 1;
+    }
+
+    if (!Number.isNaN(pagesTo) && pagesTo < 1) {
+      filterWarnings.push('Максимальное количество страниц не может быть меньше 1. Значение скорректировано.');
+      pagesTo = 1;
+    }
+
+    if (!Number.isNaN(pagesFrom) && !Number.isNaN(pagesTo) && pagesFrom > pagesTo) {
+      filterWarnings.push('Диапазон страниц был указан наоборот, поэтому значения поменяны местами.');
+      [pagesFrom, pagesTo] = [pagesTo, pagesFrom];
+    }
+
+    if (!Number.isNaN(pagesFrom) || !Number.isNaN(pagesTo)) {
+      filters.pages = {};
+      if (!Number.isNaN(pagesFrom)) {
+        filters.pages[Op.gte] = pagesFrom;
+        filtersForView.pages_from = String(pagesFrom);
+      }
+      if (!Number.isNaN(pagesTo)) {
+        filters.pages[Op.lte] = pagesTo;
+        filtersForView.pages_to = String(pagesTo);
+      }
+    }
 
     const searchValidation = validateSearchQuery(getSingleQueryValue(req.query.search), 'Поисковый запрос');
     if (searchValidation.error) {
