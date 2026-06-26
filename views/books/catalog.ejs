@@ -11,10 +11,10 @@
     <form action="/books" method="GET" id="filter-form">
       <div class="filter-group">
         <label for="search">Поиск по названию</label>
-        <input 
-          type="text" 
-          id="search" 
-          name="search" 
+       <input
+          type="text"
+          id="search"
+          name="search"
           value="<%= filters.search || '' %>"
           placeholder="Введите название..."
         >
@@ -38,9 +38,9 @@
       <div class="filter-group">
         <label for="author">Автор</label>
         <input 
-          type="text" 
-          id="author" 
-          name="author" 
+          type="text"
+          id="author"
+          name="author"
           value="<%= filters.author || '' %>"
           placeholder="Фамилия автора..."
         >
@@ -69,6 +69,27 @@
           >
         </div>
         <small class="filter-hint">Минимальный год в каталоге: <strong><%= minCatalogYear %></strong></small>
+      </div>
+
+      <div class="filter-group">
+        <label>Количество страниц</label>
+        <div class="range-inputs">
+          <input
+            type="number"
+            name="pages_from"
+            placeholder="От"
+            value="<%= filters.pages_from || '' %>"
+            min="1"
+          >
+          <input
+            type="number"
+            name="pages_to"
+            placeholder="До"
+            value="<%= filters.pages_to || '' %>"
+            min="1"
+          >
+        </div>
+        <small class="filter-hint">Например: до 200 страниц для коротких подборок.</small>
       </div>
 
       <% if (filterWarnings && filterWarnings.length > 0) { %>
