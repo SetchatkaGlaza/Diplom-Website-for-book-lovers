@@ -193,15 +193,22 @@ window.addEventListener('scroll', () => {
     const themeToggle = document.getElementById('theme-toggle');
     const savedTheme = localStorage.getItem('theme');
 
-    if (savedTheme === 'dark') {
-      document.body.classList.add('theme-dark');
-    }
+    const applyTheme = (theme) => {
+      const isDark = theme === 'dark';
+      document.body.classList.toggle('theme-dark', isDark);
+      document.body.dataset.theme = isDark ? 'dark' : 'light';
+      document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+      themeToggle?.setAttribute('aria-pressed', String(isDark));
+      const icon = themeToggle?.querySelector('i');
+      if (icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    };
+
+    applyTheme(savedTheme || 'light');
 
     themeToggle?.addEventListener('click', () => {
-      document.body.classList.toggle('theme-dark');
-      const isDark = document.body.classList.contains('theme-dark');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      themeToggle.querySelector('i').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+      const nextTheme = document.body.classList.contains('theme-dark') ? 'light' : 'dark';
+      applyTheme(nextTheme);
+      localStorage.setItem('theme', nextTheme);
     });
 
     document.querySelectorAll('input[type="tel"]').forEach(setupPhoneMask);
@@ -255,3 +262,66 @@ document.addEventListener('DOMContentLoaded', () => {
   applyCatalogView(savedView);
   viewButtons.forEach((button) => button.addEventListener('click', () => applyCatalogView(button.dataset.view)));
 });
+
+// Toast notifications and shared micro-interactions
+(() => {
+  const hideToast = (toast) => {
+    if (!toast || toast.classList.contains('is-hiding')) return;
+    toast.classList.add('is-hiding');
+    setTimeout(() => toast.remove(), 260);
+  };
+
+  const enhanceToast = (toast) => {
+    toast.querySelector('.toast-close')?.addEventListener('click', () => hideToast(toast));
+    setTimeout(() => hideToast(toast), 6000);
+  };
+
+  window.showToast = ({ type = 'success', title, message }) => {
+    const region = document.getElementById('toast-region') || document.body.appendChild(Object.assign(document.createElement('div'), {
+      className: 'toast-region',
+      id: 'toast-region'
+    }));
+    region.setAttribute('aria-live', 'polite');
+    region.setAttribute('aria-atomic', 'true');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.setAttribute('role', type === 'danger' ? 'alert' : 'status');
+    toast.dataset.toast = '';
+    toast.innerHTML = `
+      <i class="fas ${type === 'danger' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+      <div class="toast-content"><strong>${title || (type === 'danger' ? 'Ошибка' : 'Готово')}</strong><span></span></div>
+      <button type="button" class="toast-close" aria-label="Закрыть уведомление"><i class="fas fa-times"></i></button>
+    `;
+    toast.querySelector('.toast-content span').textContent = message || '';
+    region.appendChild(toast);
+    enhanceToast(toast);
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-toast]').forEach(enhanceToast);
+
+    document.querySelectorAll('form').forEach((form) => {
+      form.addEventListener('submit', (event) => {
+        if (event.defaultPrevented) return;
+        const submitter = event.submitter || form.querySelector('.btn[type="submit"], button[type="submit"]');
+        submitter?.classList.add('is-loading');
+        submitter?.setAttribute('aria-busy', 'true');
+      });
+    });
+
+    window.addEventListener('pageshow', () => {
+      document.querySelectorAll('.is-loading[aria-busy="true"]').forEach((button) => {
+        button.classList.remove('is-loading');
+        button.removeAttribute('aria-busy');
+      });
+    });
+
+    document.querySelectorAll('.btn-success, [data-success-animation]').forEach((button) => {
+      button.addEventListener('click', () => {
+        button.classList.remove('success-pulse');
+        void button.offsetWidth;
+        button.classList.add('success-pulse');
+      });
+    });
+  });
+})();
