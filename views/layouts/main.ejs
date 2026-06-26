@@ -12,24 +12,37 @@
 <link rel="icon" type="image/png" sizes="512x512" href="/images/icons/android-chrome-512x512.png">
 <link rel="manifest" href="/images/icons/site.webmanifest">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script>
+    (() => {
+      try {
+        const theme = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+      } catch (error) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
+<body data-theme="light">
   <%- include('../partials/header') %>
 
-  <% if (success_msg && success_msg.length > 0) { %>
-    <div class="alert alert-success">
-      <i class="fas fa-check-circle"></i>
-      <%= success_msg %>
-    </div>
-  <% } %>
-  
-  <% if (error_msg && error_msg.length > 0) { %>
-    <div class="alert alert-danger">
-      <i class="fas fa-exclamation-circle"></i>
-      <%= error_msg %>
-    </div>
-  <% } %>
+  <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true">
+    <% if (success_msg && success_msg.length > 0) { %>
+      <div class="toast toast-success" role="status" data-toast>
+        <i class="fas fa-check-circle"></i>
+        <div class="toast-content"><strong>Готово</strong><span><%= Array.isArray(success_msg) ? success_msg.join(' ') : success_msg %></span></div>
+        <button type="button" class="toast-close" aria-label="Закрыть уведомление"><i class="fas fa-times"></i></button>
+      </div>
+    <% } %>
+    <% if (error_msg && error_msg.length > 0) { %>
+      <div class="toast toast-danger" role="alert" data-toast>
+        <i class="fas fa-exclamation-circle"></i>
+        <div class="toast-content"><strong>Ошибка</strong><span><%= Array.isArray(error_msg) ? error_msg.join(' ') : error_msg %></span></div>
+        <button type="button" class="toast-close" aria-label="Закрыть уведомление"><i class="fas fa-times"></i></button>
+      </div>
+    <% } %>
+  </div>
 
   <main class="container">
     <%- body %>
