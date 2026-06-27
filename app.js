@@ -23,7 +23,7 @@ const adminForumRoutes = require('./routes/adminForum');
 const globalData = require('./middlewares/globalData');
 const errorHandler = require('./middlewares/errorHandler');
 const { getAvatarUrl, getCoverUrl } = require('./utils/imageUrls');
-const { truncateText } = require('./utils/textUtils');
+const { truncateText, pluralizeRu, formatRuCount } = require('./utils/textUtils');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -71,6 +71,8 @@ app.use((req, res, next) => {
   res.locals.getAvatarUrl = getAvatarUrl;
   res.locals.getCoverUrl = getCoverUrl;
   res.locals.truncateText = truncateText;
+  res.locals.pluralizeRu = pluralizeRu;
+  res.locals.formatRuCount = formatRuCount;
   next();
 });
 

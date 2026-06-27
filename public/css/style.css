@@ -2724,3 +2724,199 @@ h6, .text-h6 { font-size: 1rem; line-height: 1.4; font-weight: 700; text-transfo
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: var(--space-5);
 }
+/* ===== AUDIT POLISH: depth, contrast and glass surfaces ===== */
+:root {
+  --site-bg:
+    radial-gradient(circle at 12% 7%, rgba(219, 39, 119, .20), transparent 30rem),
+    radial-gradient(circle at 86% 10%, rgba(79, 70, 229, .24), transparent 32rem),
+    radial-gradient(circle at 50% 62%, rgba(14, 165, 233, .08), transparent 38rem),
+    linear-gradient(180deg, #293157 0%, #202642 38%, #161b31 72%, #101426 100%);
+  --glass-bg: linear-gradient(145deg, rgba(31, 41, 75, .78), rgba(16, 22, 42, .66));
+  --glass-border: rgba(199, 210, 254, .24);
+  --color-text: #f8fafc;
+  --color-muted: #d8e0ef;
+  --color-surface: rgba(22, 30, 55, .72);
+  --color-surface-strong: rgba(15, 23, 42, .92);
+}
+
+body,
+body.theme-dark,
+body[data-theme="dark"] {
+  color: var(--color-text);
+  background: var(--site-bg) fixed;
+}
+
+body::before {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035) 0%, transparent 34%, rgba(0,0,0,.28) 100%),
+    radial-gradient(circle at 50% 100%, rgba(0,0,0,.38), transparent 42rem);
+}
+
+.header,
+.footer,
+.dropdown-menu,
+.home-panel,
+.cta-section,
+.welcome-back-section,
+.random-book-card,
+.filters-sidebar,
+.book-page,
+.auth-form,
+.card,
+.book-card,
+.review-card,
+.profile-card,
+.forum-card,
+.topic-card,
+.post-card,
+.form-container,
+.catalog-filters {
+  background: var(--glass-bg) !important;
+  border-color: var(--glass-border) !important;
+  color: var(--color-text) !important;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, .26), inset 0 1px rgba(255, 255, 255, .12) !important;
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+}
+
+.book-card:hover,
+.review-card:hover,
+.topic-card:hover,
+.profile-card:hover,
+.forum-card:hover,
+.home-panel:hover,
+.challenge-card:hover,
+.feed-item:hover,
+.review-mini:hover,
+.quick-action-card:hover {
+  background: linear-gradient(145deg, rgba(43, 54, 95, .86), rgba(18, 26, 50, .76)) !important;
+  box-shadow: 0 26px 72px rgba(0, 0, 0, .34), inset 0 1px rgba(255,255,255,.16) !important;
+}
+
+.book-link,
+.random-book-link,
+.feed-item,
+.review-mini,
+.challenge-card,
+.collection-tags a,
+.activity-pill,
+.quick-action-card,
+.personal-list a,
+.dropdown-menu li a {
+  color: #f8fafc !important;
+}
+
+.book-author,
+.book-meta,
+.book-year,
+.rating-count,
+.review-date,
+.book-description,
+.personal-list li span,
+.review-mini p,
+.review-mini small,
+.feed-item span,
+.challenge-card span,
+.text-meta,
+.meta,
+.caption,
+.text-caption,
+.filter-hint,
+.books-count {
+  color: #d8e0ef !important;
+  opacity: 1 !important;
+}
+
+.rating-stars,
+.star-small.filled { color: #facc15 !important; }
+.star-small { color: rgba(226, 232, 240, .52) !important; }
+.book-genre,
+.review-badge,
+.badge {
+  background: rgba(129, 140, 248, .22) !important;
+  color: #eef2ff !important;
+  border: 1px solid rgba(199, 210, 254, .28) !important;
+}
+
+.book-cover,
+.book-cover-large,
+.random-book-cover,
+.book-of-day-cover {
+  background: rgba(2, 6, 23, .42);
+}
+
+.book-cover img,
+.book-cover-large img,
+.random-book-cover img,
+.book-of-day-cover img,
+.review-book-cover {
+  filter: brightness(.88) saturate(.92) contrast(.98);
+}
+
+.book-card:hover .book-cover img,
+.book-of-day-cover:hover img,
+.random-book-link:hover img {
+  filter: brightness(.95) saturate(.98) contrast(1);
+}
+
+input,
+textarea,
+select,
+.filter-group input,
+.filter-group select,
+.sort-bar select,
+.search-form input {
+  background: rgba(8, 13, 28, .72) !important;
+  color: #f8fafc !important;
+  border-color: rgba(199, 210, 254, .30) !important;
+}
+
+input::placeholder,
+textarea::placeholder { color: #b8c4d9 !important; }
+select option { background: #111827; color: #f8fafc; }
+
+.btn-outline,
+.btn.btn-outline,
+.view-switch,
+.page-link,
+.btn-like,
+.btn-dislike,
+.review-action-btn,
+.action-btn {
+  background: rgba(15, 23, 42, .68) !important;
+  color: #f8fafc !important;
+  border-color: rgba(199, 210, 254, .32) !important;
+}
+
+.btn-outline:hover,
+.btn.btn-outline:hover,
+.page-link:hover,
+.view-btn:hover,
+.view-btn.active {
+  background: linear-gradient(135deg, #4338ca, #7c3aed) !important;
+  color: #fff !important;
+}
+
+.btn-like.active,
+.btn-like:hover { background: #047857 !important; color: #fff !important; }
+.btn-dislike.active,
+.btn-dislike:hover { background: #b91c1c !important; color: #fff !important; }
+.likes-count,
+.dislikes-count { color: inherit !important; font-weight: 800; }
+
+.loading,
+.no-books,
+.error { color: #f8fafc !important; }
+.skeleton::after,
+.skeleton-card::after,
+.skeleton-row::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,.20), transparent); }
+
+@media (max-width: 768px) {
+  .home-live-grid,
+  .home-columns,
+  .challenge-editorial { gap: 1rem; }
+  .home-panel,
+  .random-book-card,
+  .cta-section,
+  .welcome-back-section { padding: 1.1rem; }
+}
