@@ -116,6 +116,7 @@
       
       const badge = document.getElementById('notificationBadge');
       const mobileBadge = document.getElementById('notificationBadgeMobile');
+      const bottomBadge = document.getElementById('notificationBadgeBottom');
       if (badge) {
         if (data.unread > 0) {
           badge.style.display = 'inline';
@@ -124,14 +125,15 @@
           badge.style.display = 'none';
         }
       }
-      if (mobileBadge) {
+      [mobileBadge, bottomBadge].forEach((targetBadge) => {
+        if (!targetBadge) return;
         if (data.unread > 0) {
-          mobileBadge.style.display = 'inline';
-          mobileBadge.textContent = data.unread > 9 ? '9+' : data.unread;
+          targetBadge.style.display = 'inline-flex';
+          targetBadge.textContent = data.unread > 9 ? '9+' : data.unread;
         } else {
-          mobileBadge.style.display = 'none';
+          targetBadge.style.display = 'none';
         }
-      }
+      });
       
       const list = document.getElementById('notificationsList');
       if (list) {
