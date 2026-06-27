@@ -156,7 +156,7 @@
     <% if (reviews.length > 0) { %>
       <div class="reviews-list">
         <% reviews.forEach(review => { %>
-          <div class="review-card" data-review-id="<%= review.id %>">
+          <div class="review-card" id="review-<%= review.id %>" data-review-id="<%= review.id %>">
             <div class="review-header">
               <div class="reviewer-info">
                 <img src="<%= review.user.avatarUrl || '/images/avatars/default-avatar.png' %>" alt="<%= review.user.name %>" class="reviewer-avatar">

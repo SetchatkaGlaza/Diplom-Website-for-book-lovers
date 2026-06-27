@@ -79,9 +79,26 @@ exports.getCatalog = async (req, res) => {
     const filtersForView = {};
 
     const genre = getSingleQueryValue(req.query.genre);
+    const genreNameRaw = getSingleQueryValue(req.query.genre_name);
     if (genre) {
       filters.genre_id = genre;
       filtersForView.genre = genre;
+    } else if (genreNameRaw) {
+      const genreNameValidation = validateSearchQuery(genreNameRaw, 'Фильтр жанра');
+      if (genreNameValidation.error) {
+        filterWarnings.push(genreNameValidation.error);
+      } else {
+        const matchedGenre = await Genre.findOne({
+          where: { name: { [Op.iLike]: `%${genreNameValidation.value}%` } }
+        });
+
+        if (matchedGenre) {
+          filters.genre_id = matchedGenre.id;
+          filtersForView.genre = String(matchedGenre.id);
+        } else {
+          filterWarnings.push(`Жанр «${genreNameValidation.value}» пока не найден. Показан весь каталог.`);
+        }
+      }
     }
 
     const authorValidation = validateSearchQuery(getSingleQueryValue(req.query.author), 'Фильтр автора');

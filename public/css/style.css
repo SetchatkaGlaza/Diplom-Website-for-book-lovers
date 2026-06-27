@@ -45,10 +45,7 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   line-height: 1.6;
   color: var(--dark);
-  background:
-    radial-gradient(circle at 12% 8%, rgba(219, 39, 119, .18), transparent 28rem),
-    radial-gradient(circle at 88% 12%, rgba(79, 70, 229, .20), transparent 30rem),
-    linear-gradient(180deg, #2d345b 0%, #212744 45%, #14182b 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -62,8 +59,8 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 40%, rgba(0,0,0,0.12) 100%);
-  background-size: 100% 40px;
+  background: linear-gradient(180deg, transparent 95%, rgba(0,0,0,0.1) 95%);
+background-size: 100% 25px; /* имитация линованной бумаги */
   z-index: -1;
 }
 
@@ -2570,7 +2567,7 @@ body {
   background:
     radial-gradient(circle at 12% 8%, rgba(219, 39, 119, .22), transparent 28rem),
     radial-gradient(circle at 88% 12%, rgba(79, 70, 229, .24), transparent 30rem),
-    linear-gradient(180deg, #2d345b 0%, #212744 45%, #14182b 100%);
+    linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 46%, var(--color-background) 100%);
   font-family: var(--font-display);
 }
 
@@ -2723,4 +2720,190 @@ h6, .text-h6 { font-size: 1rem; line-height: 1.4; font-weight: 700; text-transfo
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: var(--space-5);
+}
+/* ===== AUDIT POLISH: preserve 7694b9e light palette with safer contrast ===== */
+:root {
+  --color-surface: rgba(255, 255, 255, 0.72);
+  --glass-bg: linear-gradient(145deg, rgba(255,255,255,.76), rgba(255,255,255,.54));
+  --glass-border: rgba(255,255,255,.58);
+}
+
+body:not(.theme-dark):not([data-theme="dark"]) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) fixed;
+}
+
+body:not(.theme-dark):not([data-theme="dark"])::before {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(255,255,255,.16), transparent 28rem),
+    radial-gradient(circle at 85% 12%, rgba(255,255,255,.10), transparent 30rem),
+    linear-gradient(180deg, rgba(255,255,255,.03) 0%, transparent 48%, rgba(31,41,55,.14) 100%);
+  background-size: auto;
+}
+
+body.theme-dark,
+body[data-theme="dark"] {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(219, 39, 119, .18), transparent 28rem),
+    radial-gradient(circle at 88% 12%, rgba(79, 70, 229, .22), transparent 30rem),
+    linear-gradient(180deg, #111827 0%, #1e1b4b 52%, #090e1f 100%) fixed;
+}
+
+body.theme-dark::before,
+body[data-theme="dark"]::before {
+  background: linear-gradient(180deg, rgba(255,255,255,.035) 0%, transparent 40%, rgba(0,0,0,.26) 100%);
+  background-size: auto;
+}
+
+.card, .book-card, .review-card, .profile-card, .forum-card, .topic-card, .post-card, .form-container, .catalog-filters,
+.home-panel, .random-book-card, .cta-section, .welcome-back-section, .filters-sidebar, .book-page {
+  box-shadow: 0 18px 45px rgba(31, 41, 55, .18), inset 0 1px rgba(255,255,255,.32);
+}
+
+body:not(.theme-dark):not([data-theme="dark"]) .home-panel,
+body:not(.theme-dark):not([data-theme="dark"]) .random-book-card,
+body:not(.theme-dark):not([data-theme="dark"]) .cta-section,
+body:not(.theme-dark):not([data-theme="dark"]) .welcome-back-section {
+  background: linear-gradient(145deg, rgba(255,255,255,.22), rgba(255,255,255,.11));
+  border: 1px solid rgba(255,255,255,.30);
+  color: #fff;
+}
+
+.book-cover img,
+.book-cover-large img,
+.random-book-cover img,
+.book-of-day-cover img,
+.review-book-cover {
+  filter: brightness(.94) saturate(.96) contrast(.99);
+}
+
+body.theme-dark .book-cover img,
+body[data-theme="dark"] .book-cover img,
+body.theme-dark .book-cover-large img,
+body[data-theme="dark"] .book-cover-large img,
+body.theme-dark .random-book-cover img,
+body[data-theme="dark"] .random-book-cover img,
+body.theme-dark .book-of-day-cover img,
+body[data-theme="dark"] .book-of-day-cover img,
+body.theme-dark .review-book-cover,
+body[data-theme="dark"] .review-book-cover {
+  filter: brightness(.88) saturate(.92) contrast(.98);
+}
+
+.book-card:hover .book-cover img,
+.random-book-link:hover img,
+.book-of-day-cover:hover img {
+  filter: brightness(1) saturate(1) contrast(1);
+}
+
+.btn-like,
+.btn-dislike,
+.page-link,
+.view-btn,
+.btn-outline,
+.btn.btn-outline {
+  font-weight: 700;
+}
+
+.btn-like.active,
+.btn-like:hover { background: #047857; color: #fff; border-color: #047857; }
+.btn-dislike.active,
+.btn-dislike:hover { background: #b91c1c; color: #fff; border-color: #b91c1c; }
+.likes-count,
+.dislikes-count { color: inherit; font-weight: 800; }
+
+.filter-group select option,
+.sort-bar select option,
+select option {
+  background: #ffffff;
+  color: #172033;
+}
+
+body.theme-dark select option,
+body[data-theme="dark"] select option {
+  background: #111827;
+  color: #f8fafc;
+}
+
+/* ===== AUDIT POLISH: warmer mature palette, no silver cards ===== */
+:root {
+  --color-primary: #5b4bdb;
+  --color-primary-strong: #4338ca;
+  --color-secondary: #8b5cf6;
+  --color-accent: #d9468f;
+  --color-background: #fff4e6;
+  --color-surface: rgba(255, 246, 234, .80);
+  --color-surface-strong: #fffaf2;
+  --color-text: #211a32;
+  --color-muted: #675a78;
+  --glass-bg: linear-gradient(145deg, rgba(255, 247, 237, .84), rgba(250, 232, 255, .58));
+  --glass-border: rgba(255, 224, 196, .72);
+}
+
+body.theme-dark,
+body[data-theme="dark"] {
+  --color-primary: #8b9cff;
+  --color-primary-strong: #6d72f6;
+  --color-secondary: #b692ff;
+  --color-accent: #ff7ab8;
+  --color-background: #0b1020;
+  --color-surface: rgba(20, 26, 48, .82);
+  --color-surface-strong: #111827;
+  --color-text: #f8fafc;
+  --color-muted: #cbd5e1;
+  --glass-bg: linear-gradient(145deg, rgba(17, 24, 39, .92), rgba(38, 31, 73, .72));
+  --glass-border: rgba(167, 139, 250, .30);
+}
+
+.card, .book-card, .review-card, .profile-card, .forum-card, .topic-card, .post-card, .form-container, .catalog-filters,
+.filters-sidebar, .book-page {
+  background: var(--glass-bg) !important;
+  border-color: var(--glass-border) !important;
+  color: var(--color-text) !important;
+}
+
+body:not(.theme-dark):not([data-theme="dark"]) .home-panel,
+body:not(.theme-dark):not([data-theme="dark"]) .random-book-card,
+body:not(.theme-dark):not([data-theme="dark"]) .cta-section,
+body:not(.theme-dark):not([data-theme="dark"]) .welcome-back-section {
+  background: linear-gradient(145deg, rgba(92, 74, 219, .30), rgba(217, 70, 143, .16));
+  border-color: rgba(255, 224, 196, .42);
+}
+
+.book-link,
+.review-content,
+.forum-post-text,
+.topic-title,
+.profile-card,
+.review-card { color: var(--color-text) !important; }
+
+.book-author,
+.book-meta,
+.book-year,
+.review-date,
+.rating-count,
+.text-meta,
+.meta,
+.caption,
+.text-caption { color: var(--color-muted) !important; opacity: 1 !important; }
+
+.home-empty-state {
+  display: grid;
+  gap: var(--space-3);
+  place-items: center;
+  text-align: center;
+  padding: var(--space-5);
+  border: 1px dashed rgba(255,255,255,.42);
+  border-radius: var(--radius-xl);
+  background: rgba(33, 26, 50, .16);
+  color: #fff;
+}
+
+.home-empty-state i { font-size: 2rem; color: #fde68a; }
+.home-empty-state span { color: rgba(255,255,255,.84); }
+.challenge-card-muted { cursor: default; opacity: .88; }
+.challenge-card-muted:hover { transform: none; }
+
+.review-card:target {
+  outline: 3px solid var(--color-accent);
+  box-shadow: 0 0 0 8px rgba(217, 70, 143, .18), 0 18px 45px rgba(31, 41, 55, .18);
 }
