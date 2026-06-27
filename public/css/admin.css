@@ -2660,3 +2660,27 @@
 .admin-body .stat-card.success {
   background: linear-gradient(135deg, #065f46, #047857);
 }
+
+/* Audit polish: keep the 7694b9e admin palette, but clarify contrast. */
+.admin-body .admin-card,
+.admin-body .stat-card,
+.admin-body .users-table-card,
+.admin-body .admin-policy-card,
+.admin-body .import-card,
+.admin-body .appeal-card,
+.admin-body .genre-card,
+.admin-body .book-form,
+.admin-body .filters-card {
+  box-shadow: 0 18px 45px rgba(31, 41, 55, .18), inset 0 1px rgba(255,255,255,.26);
+}
+
+.admin-body select option {
+  background: #ffffff;
+  color: #172033;
+}
+
+.admin-body[data-theme="dark"] select option,
+.admin-body.theme-dark select option {
+  background: #111827;
+  color: #f8fafc;
+}

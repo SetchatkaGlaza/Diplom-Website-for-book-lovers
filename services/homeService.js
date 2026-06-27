@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { Book, ForumTopic, Review, User, UserBook } = require('../models');
 const { getCoverUrl } = require('../utils/imageUrls');
+const { formatRuCount } = require('../utils/textUtils');
 
 const fallbackBook = {
   id: null,
@@ -42,7 +43,7 @@ async function getDiscussedTopics() {
 
   return topics.map((topic) => ({
     title: topic.title,
-    url: `/forum/topic/${topic.slug}`,
+    url: `/forum/topic/${topic.id}`,
     meta: `${topic.replies_count || 0} ответов · ${topic.user?.name || 'читатель'}`
   }));
 }
@@ -62,10 +63,12 @@ async function getWeeklyTopReviews() {
   });
 
   return reviews.map((review) => ({
+    id: review.id,
     rating: review.rating,
     author: review.user?.name || 'читатель',
     bookTitle: review.book?.title || 'Книга',
     bookUrl: review.book ? `/books/${review.book.id}` : '/books',
+    reviewUrl: review.book ? `/books/${review.book.id}#review-${review.id}` : '/books',
     excerpt: `${review.content.slice(0, 135)}${review.content.length > 135 ? '...' : ''}`,
     likes: review.likes_count || 0
   }));
@@ -118,7 +121,7 @@ async function getPersonalBlock(userId) {
     continueReading: reading?.book ? { title: reading.book.title, author: reading.book.author, url: `/books/${reading.book.id}` } : null,
     weeklyGoal: `${readThisWeekCount}/2 книги на этой неделе`,
     shelfRecommendation: wantToReadCount > 0
-      ? `На полке «Хочу прочитать» ждёт ${wantToReadCount} книг — выберите одну на вечер.`
+      ? `На полке «Хочу прочитать» ждёт ${formatRuCount(wantToReadCount, ['книга', 'книги', 'книг'])} — выберите одну на вечер.`
       : 'Добавьте книги в «Хочу прочитать», и мы подскажем следующий шаг.'
   };
 }
