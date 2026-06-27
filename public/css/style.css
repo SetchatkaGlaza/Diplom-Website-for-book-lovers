@@ -45,10 +45,7 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   line-height: 1.6;
   color: var(--dark);
-  background:
-    radial-gradient(circle at 12% 8%, rgba(219, 39, 119, .18), transparent 28rem),
-    radial-gradient(circle at 88% 12%, rgba(79, 70, 229, .20), transparent 30rem),
-    linear-gradient(180deg, #2d345b 0%, #212744 45%, #14182b 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -62,8 +59,8 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 40%, rgba(0,0,0,0.12) 100%);
-  background-size: 100% 40px;
+  background: linear-gradient(180deg, transparent 95%, rgba(0,0,0,0.1) 95%);
+background-size: 100% 25px; /* имитация линованной бумаги */
   z-index: -1;
 }
 
@@ -2570,7 +2567,7 @@ body {
   background:
     radial-gradient(circle at 12% 8%, rgba(219, 39, 119, .22), transparent 28rem),
     radial-gradient(circle at 88% 12%, rgba(79, 70, 229, .24), transparent 30rem),
-    linear-gradient(180deg, #2d345b 0%, #212744 45%, #14182b 100%);
+    linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 46%, var(--color-background) 100%);
   font-family: var(--font-display);
 }
 
@@ -2724,125 +2721,51 @@ h6, .text-h6 { font-size: 1rem; line-height: 1.4; font-weight: 700; text-transfo
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: var(--space-5);
 }
-/* ===== AUDIT POLISH: depth, contrast and glass surfaces ===== */
+/* ===== AUDIT POLISH: preserve 7694b9e light palette with safer contrast ===== */
 :root {
-  --site-bg:
-    radial-gradient(circle at 12% 7%, rgba(219, 39, 119, .20), transparent 30rem),
-    radial-gradient(circle at 86% 10%, rgba(79, 70, 229, .24), transparent 32rem),
-    radial-gradient(circle at 50% 62%, rgba(14, 165, 233, .08), transparent 38rem),
-    linear-gradient(180deg, #293157 0%, #202642 38%, #161b31 72%, #101426 100%);
-  --glass-bg: linear-gradient(145deg, rgba(31, 41, 75, .78), rgba(16, 22, 42, .66));
-  --glass-border: rgba(199, 210, 254, .24);
-  --color-text: #f8fafc;
-  --color-muted: #d8e0ef;
-  --color-surface: rgba(22, 30, 55, .72);
-  --color-surface-strong: rgba(15, 23, 42, .92);
+  --color-surface: rgba(255, 255, 255, 0.72);
+  --glass-bg: linear-gradient(145deg, rgba(255,255,255,.76), rgba(255,255,255,.54));
+  --glass-border: rgba(255,255,255,.58);
 }
 
-body,
+body:not(.theme-dark):not([data-theme="dark"]) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) fixed;
+}
+
+body:not(.theme-dark):not([data-theme="dark"])::before {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(255,255,255,.16), transparent 28rem),
+    radial-gradient(circle at 85% 12%, rgba(255,255,255,.10), transparent 30rem),
+    linear-gradient(180deg, rgba(255,255,255,.03) 0%, transparent 48%, rgba(31,41,55,.14) 100%);
+  background-size: auto;
+}
+
 body.theme-dark,
 body[data-theme="dark"] {
-  color: var(--color-text);
-  background: var(--site-bg) fixed;
-}
-
-body::before {
   background:
-    linear-gradient(180deg, rgba(255,255,255,.035) 0%, transparent 34%, rgba(0,0,0,.28) 100%),
-    radial-gradient(circle at 50% 100%, rgba(0,0,0,.38), transparent 42rem);
+    radial-gradient(circle at 12% 8%, rgba(219, 39, 119, .18), transparent 28rem),
+    radial-gradient(circle at 88% 12%, rgba(79, 70, 229, .22), transparent 30rem),
+    linear-gradient(180deg, #111827 0%, #1e1b4b 52%, #090e1f 100%) fixed;
 }
 
-.header,
-.footer,
-.dropdown-menu,
-.home-panel,
-.cta-section,
-.welcome-back-section,
-.random-book-card,
-.filters-sidebar,
-.book-page,
-.auth-form,
-.card,
-.book-card,
-.review-card,
-.profile-card,
-.forum-card,
-.topic-card,
-.post-card,
-.form-container,
-.catalog-filters {
-  background: var(--glass-bg) !important;
-  border-color: var(--glass-border) !important;
-  color: var(--color-text) !important;
-  box-shadow: 0 18px 55px rgba(0, 0, 0, .26), inset 0 1px rgba(255, 255, 255, .12) !important;
-  backdrop-filter: blur(18px) saturate(135%);
-  -webkit-backdrop-filter: blur(18px) saturate(135%);
+body.theme-dark::before,
+body[data-theme="dark"]::before {
+  background: linear-gradient(180deg, rgba(255,255,255,.035) 0%, transparent 40%, rgba(0,0,0,.26) 100%);
+  background-size: auto;
 }
 
-.book-card:hover,
-.review-card:hover,
-.topic-card:hover,
-.profile-card:hover,
-.forum-card:hover,
-.home-panel:hover,
-.challenge-card:hover,
-.feed-item:hover,
-.review-mini:hover,
-.quick-action-card:hover {
-  background: linear-gradient(145deg, rgba(43, 54, 95, .86), rgba(18, 26, 50, .76)) !important;
-  box-shadow: 0 26px 72px rgba(0, 0, 0, .34), inset 0 1px rgba(255,255,255,.16) !important;
+.card, .book-card, .review-card, .profile-card, .forum-card, .topic-card, .post-card, .form-container, .catalog-filters,
+.home-panel, .random-book-card, .cta-section, .welcome-back-section, .filters-sidebar, .book-page {
+  box-shadow: 0 18px 45px rgba(31, 41, 55, .18), inset 0 1px rgba(255,255,255,.32);
 }
 
-.book-link,
-.random-book-link,
-.feed-item,
-.review-mini,
-.challenge-card,
-.collection-tags a,
-.activity-pill,
-.quick-action-card,
-.personal-list a,
-.dropdown-menu li a {
-  color: #f8fafc !important;
-}
-
-.book-author,
-.book-meta,
-.book-year,
-.rating-count,
-.review-date,
-.book-description,
-.personal-list li span,
-.review-mini p,
-.review-mini small,
-.feed-item span,
-.challenge-card span,
-.text-meta,
-.meta,
-.caption,
-.text-caption,
-.filter-hint,
-.books-count {
-  color: #d8e0ef !important;
-  opacity: 1 !important;
-}
-
-.rating-stars,
-.star-small.filled { color: #facc15 !important; }
-.star-small { color: rgba(226, 232, 240, .52) !important; }
-.book-genre,
-.review-badge,
-.badge {
-  background: rgba(129, 140, 248, .22) !important;
-  color: #eef2ff !important;
-  border: 1px solid rgba(199, 210, 254, .28) !important;
-}
-
-.book-cover,
-.book-cover-large,
-.random-book-cover,
-.book-of-day-cover {
-  background: rgba(2, 6, 23, .42);
+body:not(.theme-dark):not([data-theme="dark"]) .home-panel,
+body:not(.theme-dark):not([data-theme="dark"]) .random-book-card,
+body:not(.theme-dark):not([data-theme="dark"]) .cta-section,
+body:not(.theme-dark):not([data-theme="dark"]) .welcome-back-section {
+  background: linear-gradient(145deg, rgba(255,255,255,.22), rgba(255,255,255,.11));
+  border: 1px solid rgba(255,255,255,.30);
+  color: #fff;
 }
 
 .book-cover img,
@@ -2850,73 +2773,53 @@ body::before {
 .random-book-cover img,
 .book-of-day-cover img,
 .review-book-cover {
+  filter: brightness(.94) saturate(.96) contrast(.99);
+}
+
+body.theme-dark .book-cover img,
+body[data-theme="dark"] .book-cover img,
+body.theme-dark .book-cover-large img,
+body[data-theme="dark"] .book-cover-large img,
+body.theme-dark .random-book-cover img,
+body[data-theme="dark"] .random-book-cover img,
+body.theme-dark .book-of-day-cover img,
+body[data-theme="dark"] .book-of-day-cover img,
+body.theme-dark .review-book-cover,
+body[data-theme="dark"] .review-book-cover {
   filter: brightness(.88) saturate(.92) contrast(.98);
 }
 
 .book-card:hover .book-cover img,
-.book-of-day-cover:hover img,
-.random-book-link:hover img {
-  filter: brightness(.95) saturate(.98) contrast(1);
+.random-book-link:hover img,
+.book-of-day-cover:hover img {
+  filter: brightness(1) saturate(1) contrast(1);
 }
 
-input,
-textarea,
-select,
-.filter-group input,
-.filter-group select,
-.sort-bar select,
-.search-form input {
-  background: rgba(8, 13, 28, .72) !important;
-  color: #f8fafc !important;
-  border-color: rgba(199, 210, 254, .30) !important;
-}
-
-input::placeholder,
-textarea::placeholder { color: #b8c4d9 !important; }
-select option { background: #111827; color: #f8fafc; }
-
-.btn-outline,
-.btn.btn-outline,
-.view-switch,
-.page-link,
 .btn-like,
 .btn-dislike,
-.review-action-btn,
-.action-btn {
-  background: rgba(15, 23, 42, .68) !important;
-  color: #f8fafc !important;
-  border-color: rgba(199, 210, 254, .32) !important;
-}
-
-.btn-outline:hover,
-.btn.btn-outline:hover,
-.page-link:hover,
-.view-btn:hover,
-.view-btn.active {
-  background: linear-gradient(135deg, #4338ca, #7c3aed) !important;
-  color: #fff !important;
+.page-link,
+.view-btn,
+.btn-outline,
+.btn.btn-outline {
+  font-weight: 700;
 }
 
 .btn-like.active,
-.btn-like:hover { background: #047857 !important; color: #fff !important; }
+.btn-like:hover { background: #047857; color: #fff; border-color: #047857; }
 .btn-dislike.active,
-.btn-dislike:hover { background: #b91c1c !important; color: #fff !important; }
+.btn-dislike:hover { background: #b91c1c; color: #fff; border-color: #b91c1c; }
 .likes-count,
-.dislikes-count { color: inherit !important; font-weight: 800; }
+.dislikes-count { color: inherit; font-weight: 800; }
 
-.loading,
-.no-books,
-.error { color: #f8fafc !important; }
-.skeleton::after,
-.skeleton-card::after,
-.skeleton-row::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,.20), transparent); }
+.filter-group select option,
+.sort-bar select option,
+select option {
+  background: #ffffff;
+  color: #172033;
+}
 
-@media (max-width: 768px) {
-  .home-live-grid,
-  .home-columns,
-  .challenge-editorial { gap: 1rem; }
-  .home-panel,
-  .random-book-card,
-  .cta-section,
-  .welcome-back-section { padding: 1.1rem; }
+body.theme-dark select option,
+body[data-theme="dark"] select option {
+  background: #111827;
+  color: #f8fafc;
 }
