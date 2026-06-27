@@ -66,6 +66,17 @@ document.addEventListener('DOMContentLoaded', () => {
       link.classList.add('active');
     }
   });
+
+  const bottomNavLinks = document.querySelectorAll('.bottom-nav__item');
+  bottomNavLinks.forEach(link => {
+    const href = link.getAttribute('href');
+    const isExact = href === currentLocation;
+    const isSection = href !== '/' && currentLocation.startsWith(href);
+    const isBooksSearch = href === '/books' && currentLocation.startsWith('/books');
+    if (isExact || isSection || isBooksSearch) {
+      link.classList.add('active');
+    }
+  });
 });
 
 window.addEventListener('scroll', () => {

@@ -2823,3 +2823,290 @@ body[data-theme="dark"] select option {
   background: #111827;
   color: #f8fafc;
 }
+
+/* ===== MOBILE UX PASS: header, catalog, book/profile/forum pages and bottom nav ===== */
+.bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: calc(82px + env(safe-area-inset-bottom));
+  }
+
+  .container {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .header {
+    padding: 0;
+  }
+
+  .navbar {
+    min-height: 58px;
+    padding: 0.45rem 14px;
+  }
+
+  .logo {
+    font-size: 1.18rem;
+    min-width: 0;
+  }
+
+  .logo i {
+    font-size: 1.45rem;
+  }
+
+  .mobile-menu-btn {
+    width: 44px;
+    height: 44px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .nav-menu {
+    top: 58px;
+    height: calc(100dvh - 58px);
+    padding: 1rem 14px calc(96px + env(safe-area-inset-bottom));
+    gap: 0.45rem;
+  }
+
+  .nav-menu li,
+  .nav-link,
+  .theme-toggle.nav-link {
+    width: 100%;
+  }
+
+  .nav-link {
+    justify-content: flex-start;
+    min-height: 46px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .bottom-nav {
+    position: fixed;
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    bottom: max(8px, env(safe-area-inset-bottom));
+    z-index: 1500;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.25rem;
+    padding: 0.45rem;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 1.25rem;
+    background: rgba(17, 24, 39, 0.88);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .bottom-nav__item {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 0.18rem;
+    min-width: 0;
+    min-height: 56px;
+    padding: 0.35rem 0.12rem;
+    border-radius: 0.95rem;
+    color: rgba(255, 255, 255, 0.74);
+    text-decoration: none;
+    font-size: clamp(0.58rem, 2.45vw, 0.72rem);
+    line-height: 1.1;
+  }
+
+  .bottom-nav__item i,
+  .bottom-nav__icon-wrap {
+    font-size: 1.12rem;
+  }
+
+  .bottom-nav__item.active,
+  .bottom-nav__item:focus-visible {
+    color: #fff;
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.82), rgba(99, 102, 241, 0.82));
+    outline: none;
+  }
+
+  .bottom-nav__icon-wrap {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .bottom-nav__badge {
+    position: absolute;
+    top: -9px;
+    right: -12px;
+  }
+
+  .catalog-header,
+  .book-page,
+  .filters-sidebar,
+  .profile-card,
+  .forum-topic,
+  .topic-card,
+  .post-card,
+  .form-container {
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  .catalog-header,
+  .sort-bar,
+  .book-actions,
+  .profile-header,
+  .profile-actions,
+  .topic-header,
+  .post-header,
+  .forum-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .filters-sidebar {
+    position: static;
+  }
+
+  .filters-sidebar form {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .filter-group {
+    margin-bottom: 0;
+  }
+
+  .filter-group input,
+  .filter-group select,
+  .sort-bar select,
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    min-height: 46px;
+    font-size: 16px;
+  }
+
+  .range-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .books-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin: 1rem 0;
+  }
+
+  .book-info {
+    padding: 0.85rem;
+  }
+
+  .book-title {
+    font-size: 0.95rem;
+  }
+
+  .book-author,
+  .no-rating {
+    font-size: 0.8rem;
+  }
+
+  .book-meta,
+  .book-rating {
+    gap: 0.35rem;
+    font-size: 0.72rem;
+  }
+
+  .book-main {
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .book-cover-large {
+    width: min(68vw, 240px);
+  }
+
+  .book-details h1 {
+    font-size: clamp(1.45rem, 7vw, 2rem);
+  }
+
+  .book-details h2 {
+    font-size: 1.1rem;
+  }
+
+  .book-meta-large,
+  .rating-distribution,
+  .review-item,
+  .profile-stats,
+  .forum-post,
+  .topic-post,
+  .reply-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .rating-row {
+    grid-template-columns: 42px 1fr 68px;
+    gap: 0.45rem;
+  }
+
+  .post-avatar,
+  .topic-avatar,
+  .profile-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .post-actions,
+  .topic-actions,
+  .pagination,
+  .tabs,
+  .profile-tabs {
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: 0.25rem;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (min-width: 320px) and (max-width: 430px) {
+  .books-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .book-cover {
+    padding-top: 142%;
+  }
+
+  .book-info {
+    padding: 0.7rem;
+  }
+
+  .book-title {
+    font-size: 0.88rem;
+    line-height: 1.28;
+  }
+
+  .book-author {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .range-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-nav {
+    left: 6px;
+    right: 6px;
+    padding: 0.35rem;
+  }
+}
