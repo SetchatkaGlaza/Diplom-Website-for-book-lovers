@@ -83,7 +83,7 @@ exports.getCatalog = async (req, res) => {
     if (genre) {
       filters.genre_id = genre;
       filtersForView.genre = genre;
-    } else if (genreNameRaw) {
+      } else if (genreNameRaw) {
       const genreNameValidation = validateSearchQuery(genreNameRaw, 'Фильтр жанра');
       if (genreNameValidation.error) {
         filterWarnings.push(genreNameValidation.error);

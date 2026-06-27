@@ -121,7 +121,7 @@ async function getPersonalBlock(userId) {
     continueReading: reading?.book ? { title: reading.book.title, author: reading.book.author, url: `/books/${reading.book.id}` } : null,
     weeklyGoal: `${readThisWeekCount}/2 книги на этой неделе`,
     shelfRecommendation: wantToReadCount > 0
-      ? `На полке «Хочу прочитать» ждёт ${formatRuCount(wantToReadCount, ['книга', 'книги', 'книг'])} — выберите одну на вечер.`
+        ? `На полке «Хочу прочитать» ждёт ${formatRuCount(wantToReadCount, ['книга', 'книги', 'книг'])} — выберите одну на вечер.`
       : 'Добавьте книги в «Хочу прочитать», и мы подскажем следующий шаг.'
   };
 }

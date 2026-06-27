@@ -85,18 +85,10 @@
   <div class="home-panel">
     <div class="panel-kicker"><i class="fas fa-trophy"></i> Топ рецензий недели</div>
     <div class="review-list">
-      <% if (homeData.weeklyTopReviews.length) { %>
-        <% homeData.weeklyTopReviews.forEach((review) => { %>
-          <a href="<%= review.reviewUrl || review.bookUrl %>" class="review-mini"><span class="rating-stars"><%= '★'.repeat(review.rating) %></span><strong><%= review.bookTitle %></strong><p><%= review.excerpt %></p><small><%= review.author %> · <%= formatRuCount(review.likes, ['лайк', 'лайка', 'лайков']) %></small></a>
-        <% }) %>
-      <% } else { %>
-        <div class="home-empty-state">
-          <i class="fas fa-feather-alt"></i>
-          <strong>На этой неделе ещё нет рецензий</strong>
-          <span>Как только читатели опубликуют новые отзывы, лучшие появятся здесь.</span>
-          <a href="/books?sort=rating" class="btn btn-ghost">Выбрать книгу для рецензии</a>
-        </div>
-      <% } %>
+      <% const fallbackReviews = [{ rating: 5, author: 'Редакция', bookTitle: 'Лучшие открытия недели', bookUrl: '/books?sort=rating', excerpt: 'Собрали рецензии, которые вдохновляют спорить, перечитывать и пополнять полку.', likes: 0 }]; %>
+      <% (homeData.weeklyTopReviews.length ? homeData.weeklyTopReviews : fallbackReviews).forEach((review) => { %>
+        <a href="<%= review.bookUrl %>" class="review-mini"><span class="rating-stars"><%= '★'.repeat(review.rating) %></span><strong><%= review.bookTitle %></strong><p><%= review.excerpt %></p><small><%= review.author %> · <%= review.likes %> лайков</small></a>
+      <% }) %>
     </div>
   </div>
 </section>
@@ -108,11 +100,7 @@
     <div class="challenge-grid">
       <a href="/profile/books" class="challenge-card"><strong>7 дней чтения подряд</strong><span>Отмечайте прогресс каждый день и не теряйте темп.</span></a>
       <a href="/books?genre_name=классика&sort=rating" class="challenge-card"><strong>Классика месяца</strong><span>Выберите произведение, которое давно откладывали.</span></a>
-      <% if (reviewOfWeek) { %>
-        <a href="<%= reviewOfWeek.reviewUrl || reviewOfWeek.bookUrl %>" class="challenge-card"><strong>Рецензия недели</strong><span><%= reviewOfWeek.author %> о книге «<%= reviewOfWeek.bookTitle %>»: <%= reviewOfWeek.excerpt %></span></a>
-      <% } else { %>
-        <span class="challenge-card challenge-card-muted"><strong>Рецензия недели</strong><span>Пока ждём первую яркую рецензию недели — она появится здесь автоматически.</span></span>
-      <% } %>
+      <a href="/books?sort=rating#popular-books" class="challenge-card"><strong>Рецензия недели</strong><span>Расскажите, кому точно стоит открыть вашу последнюю книгу.</span></a>
     </div>
   </div>
   <div>
