@@ -63,10 +63,12 @@ async function getWeeklyTopReviews() {
   });
 
   return reviews.map((review) => ({
+    id: review.id,
     rating: review.rating,
     author: review.user?.name || 'читатель',
     bookTitle: review.book?.title || 'Книга',
     bookUrl: review.book ? `/books/${review.book.id}` : '/books',
+    reviewUrl: review.book ? `/books/${review.book.id}#review-${review.id}` : '/books',
     excerpt: `${review.content.slice(0, 135)}${review.content.length > 135 ? '...' : ''}`,
     likes: review.likes_count || 0
   }));
