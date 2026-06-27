@@ -85,7 +85,7 @@
   <div class="home-panel">
     <div class="panel-kicker"><i class="fas fa-trophy"></i> Топ рецензий недели</div>
     <div class="review-list">
-      <% const fallbackReviews = [{ rating: 5, author: 'Редакция', bookTitle: 'Лучшие открытия недели', bookUrl: '/reviews', excerpt: 'Собрали рецензии, которые вдохновляют спорить, перечитывать и пополнять полку.', likes: 0 }]; %>
+      <% const fallbackReviews = [{ rating: 5, author: 'Редакция', bookTitle: 'Лучшие открытия недели', bookUrl: '/books?sort=rating', excerpt: 'Собрали рецензии, которые вдохновляют спорить, перечитывать и пополнять полку.', likes: 0 }]; %>
       <% (homeData.weeklyTopReviews.length ? homeData.weeklyTopReviews : fallbackReviews).forEach((review) => { %>
         <a href="<%= review.bookUrl %>" class="review-mini"><span class="rating-stars"><%= '★'.repeat(review.rating) %></span><strong><%= review.bookTitle %></strong><p><%= review.excerpt %></p><small><%= review.author %> · <%= review.likes %> лайков</small></a>
       <% }) %>
@@ -98,17 +98,17 @@
     <div class="panel-kicker"><i class="fas fa-flag-checkered"></i> Читательские челленджи</div>
     <div class="challenge-grid">
       <a href="/profile/books" class="challenge-card"><strong>7 дней чтения подряд</strong><span>Отмечайте прогресс каждый день и не теряйте темп.</span></a>
-      <a href="/books?search=классика" class="challenge-card"><strong>Классика месяца</strong><span>Выберите произведение, которое давно откладывали.</span></a>
-      <a href="/reviews/new" class="challenge-card"><strong>Рецензия недели</strong><span>Расскажите, кому точно стоит открыть вашу последнюю книгу.</span></a>
+      <a href="/books?genre_name=классика&sort=rating" class="challenge-card"><strong>Классика месяца</strong><span>Выберите произведение, которое давно откладывали.</span></a>
+      <a href="/books?sort=rating#popular-books" class="challenge-card"><strong>Рецензия недели</strong><span>Расскажите, кому точно стоит открыть вашу последнюю книгу.</span></a>
     </div>
   </div>
   <div>
     <div class="panel-kicker"><i class="fas fa-wand-magic-sparkles"></i> Подборки редакции</div>
     <div class="collection-tags">
-      <a href="/books?search=вечер">Для дождливого вечера</a>
+      <a href="/books?pages_to=300&sort=rating">Для дождливого вечера</a>
       <a href="/books?pages_to=200">Книги на 200 страниц</a>
-      <a href="/books?search=Достоевский">Если понравился Достоевский</a>
-      <a href="/books?search=уют">Уютное чтение</a>
+      <a href="/books?genre_name=классика&author=Достоевский&sort=rating">Если понравился Достоевский</a>
+      <a href="/books?genre_name=современная&pages_to=350&sort=rating">Уютное чтение</a>
     </div>
   </div>
 </section>
