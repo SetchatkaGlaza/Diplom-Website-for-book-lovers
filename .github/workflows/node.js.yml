@@ -16,7 +16,9 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        # 18.x убран: в package.json стоит engines >=20, и тесты на 18 падают
+        # ещё на установке. Своя же декларация должна совпадать с проверкой.
+        node-version: [20.x, 22.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
