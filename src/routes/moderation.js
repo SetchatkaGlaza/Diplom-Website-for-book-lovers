@@ -262,6 +262,75 @@ module.exports = function moderationRoutes({ models, services, auth }) {
     }
   });
 
+  // ---------- Партнёрства: клубы и библиотеки ----------
+
+  const PARTNER_KINDS = ['книжный клуб', 'библиотека', 'школа или вуз', 'издательство', 'другое'];
+
+  /**
+   * Страница для клубов и библиотек.
+   *
+   * Зачем отдельная страница, а не письмо «напишите нам»: партнёру нужно
+   * понять, что он получит и что от него требуется, ещё до разговора.
+   * Форма короткая — три обязательных поля, — потому что длинные анкеты
+   * на этапе «мы только присматриваемся» никто не заполняет.
+   */
+  router.get('/klubam-i-bibliotekam', (req, res) => res.render('legal/partners', {
+    title: 'Клубам и библиотекам',
+    description: 'Книгоманы для книжных клубов и библиотек: страница клуба, расписание встреч, списки книг и статистика чтения. Заявка на партнёрство.',
+    errors: {},
+    formData: {},
+    kinds: PARTNER_KINDS,
+    sent: false
+  }));
+
+  router.post('/klubam-i-bibliotekam', contactLimiter(), async (req, res, next) => {
+    try {
+      const result = await moderationService.partnershipRequest({
+        name: req.body.name,
+        organization: req.body.organization,
+        email: req.body.email,
+        kind: req.body.kind,
+        text: req.body.text
+      });
+
+      if (result.errors) {
+        return res.status(422).render('legal/partners', {
+          title: 'Клубам и библиотекам',
+          description: 'Заявка на партнёрство с Книгоманами.',
+          errors: result.errors,
+          formData: req.body,
+          kinds: PARTNER_KINDS,
+          sent: false
+        });
+      }
+
+      return res.render('legal/partners', {
+        title: 'Заявка отправлена',
+        description: 'Заявка на партнёрство с Книгоманами отправлена.',
+        errors: {},
+        formData: {},
+        kinds: PARTNER_KINDS,
+        sent: true
+      });
+    } catch (error) {
+      return next(error);
+    }
+  });
+
+  /** Заявки в админке: то, что нельзя показать в общей обратной связи. */
+  router.get('/admin/partnerstva', requireStaff, async (req, res, next) => {
+    try {
+      const items = await moderationService.partnershipList({ limit: 200 });
+      return res.render('admin/partnerships', {
+        title: 'Партнёрства',
+        description: 'Заявки от клубов, библиотек и школ.',
+        items
+      });
+    } catch (error) {
+      return next(error);
+    }
+  });
+
   // ---------- Правообладателям ----------
 
   router.get('/pravoobladatelyam', (req, res) => res.render('legal/copyright', {

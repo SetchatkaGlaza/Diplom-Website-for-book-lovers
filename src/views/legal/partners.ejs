@@ -1,0 +1,120 @@
+<section class="section">
+  <div class="container container--narrow">
+    <div class="section-head">
+      <p class="micro-label">Партнёрам</p>
+      <hr class="rule">
+      <a class="micro-label" href="/kluby">клубы на сайте →</a>
+    </div>
+
+    <h1 class="page-title">Клубам и библиотекам</h1>
+    <p class="lede">
+      Книгоманы — не магазин и не рекомендательный сервис. Это дневник чтения,
+      в котором книжный клуб получает свою страницу: расписание встреч, текущая
+      книга и список «кто что читает». Бесплатно, без рекламы и без передачи
+      вам чьих-либо адресов.
+    </p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container container--narrow">
+    <div class="section-head">
+      <p class="micro-label">Что получает клуб</p>
+      <hr class="rule">
+    </div>
+    <ul class="stack">
+      <li><strong>Страница клуба</strong> с описанием, текущей книгой и расписанием: видно, что читаем и когда обсуждаем.</li>
+      <li><strong>Запись на встречи</strong> внутри клуба — без чатов в мессенджерах и потерянных сообщений.</li>
+      <li><strong>Итоги чтения</strong>: сколько книг клуб прочитал за год, что дочитывают, что бросают.</li>
+      <li><strong>Подборки</strong>: список клуба можно положить на сайт как редакционную подборку — её увидят все читатели.</li>
+    </ul>
+
+    <div class="section-head">
+      <p class="micro-label">Что получает библиотека</p>
+      <hr class="rule">
+    </div>
+    <ul class="stack">
+      <li><strong>Свой клуб или несколько</strong> — по одному на читательское объединение.</li>
+      <li><strong>Афиша встреч</strong>, которую можно дать на страницу библиотеки ссылкой.</li>
+      <li><strong>Анонимная статистика</strong> по своим клубам: сколько людей записано, сколько дочитывает. Без имён и адресов.</li>
+    </ul>
+
+    <div class="section-head">
+      <p class="micro-label">Что мы не делаем</p>
+      <hr class="rule">
+    </div>
+    <ul class="stack">
+      <li>Не продаём книги и не ставим партнёрские ссылки на магазины.</li>
+      <li>Не передаём участникам рекламу и не пишем им без согласия.</li>
+      <li>Не публикуем полные тексты книг и не даём ссылок на пиратские копии.</li>
+      <li>Не забираем контакты участников: список остаётся у клуба, а переписка — внутри сайта.</li>
+    </ul>
+
+    <p class="hint-text">
+      Клуб создаётся за пару минут в разделе «Клубы». Если нужен закрытый клуб
+      по заявкам или несколько клубов сразу — напишите ниже: сделаем вместе.
+    </p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container container--narrow">
+    <% if (sent) { %>
+      <div class="card card--success">
+        <h2 class="settings__title">Заявка у нас</h2>
+        <p>Ответим на адрес, который вы указали, — обычно в течение двух рабочих дней. Если за это время ничего не пришло, проверьте «Спам»: письмо могло попасть туда.</p>
+        <p>
+          <a class="btn btn--primary" href="/kluby">Посмотреть клубы</a>
+          <a class="btn btn--ghost" href="/">На главную</a>
+        </p>
+      </div>
+    <% } else { %>
+      <form class="card" method="post" action="/klubam-i-bibliotekam" novalidate>
+        <h2 class="settings__title">Заявка</h2>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <div class="field">
+          <label class="field__label" for="kind">Кто вы</label>
+          <select class="field__input" id="kind" name="kind">
+            <% kinds.forEach((item) => { %>
+              <option value="<%= item %>" <%= formData.kind === item ? 'selected' : '' %>><%= item %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="organization">Название клуба или организации</label>
+          <input class="field__input<%= errors.organization ? ' field__input--invalid' : '' %>" id="organization" name="organization"
+                 type="text" maxlength="200" required value="<%= formData.organization || '' %>">
+          <% if (errors.organization) { %><p class="field__error"><%= errors.organization %></p><% } %>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="name">Как к вам обращаться</label>
+          <input class="field__input<%= errors.name ? ' field__input--invalid' : '' %>" id="name" name="name"
+                 type="text" maxlength="120" required value="<%= formData.name || '' %>">
+          <% if (errors.name) { %><p class="field__error"><%= errors.name %></p><% } %>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="email">E-mail для ответа</label>
+          <input class="field__input<%= errors.email ? ' field__input--invalid' : '' %>" id="email" name="email"
+                 type="email" maxlength="254" required value="<%= formData.email || '' %>">
+          <p class="field__hint">Нужен, чтобы ответить. Никуда не передаём и в рассылку не добавляем.</p>
+          <% if (errors.email) { %><p class="field__error"><%= errors.email %></p><% } %>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="text">Что задумали</label>
+          <textarea class="field__input<%= errors.text ? ' field__input--invalid' : '' %>" id="text" name="text"
+                    rows="6" maxlength="4000" required><%= formData.text || '' %></textarea>
+          <p class="field__hint">Сколько у вас участников, что читаете сейчас и чем был бы полезен сайт.</p>
+          <% if (errors.text) { %><p class="field__error"><%= errors.text %></p><% } %>
+        </div>
+
+        <button class="btn btn--primary" type="submit">Отправить заявку</button>
+        <p class="micro-label">Отвечает человек, а не робот: обычно в течение двух рабочих дней.</p>
+      </form>
+    <% } %>
+  </div>
+</section>

@@ -465,6 +465,68 @@ function createModerationService({
     return { entry };
   }
 
+  /**
+   * Заявка на партнёрство: клуб, библиотека, школа, издательство.
+   *
+   * Отличается от обратной связи не формой, а тем, кто её читает и что
+   * происходит дальше: партнёрство — это договорённость о встрече или
+   * совместном списке книг, а не «что-то не работает». Поэтому отдельное
+   * действие в журнале и отдельный список в админке.
+   *
+   * Организация обязательна: «хочу сотрудничать» без названия клуба
+   * невозможно проверить и неловко переспрашивать.
+   */
+  async function partnershipRequest({ name, organization, email, kind, text }) {
+    const errors = {};
+    const KINDS = ['книжный клуб', 'библиотека', 'школа или вуз', 'издательство', 'другое'];
+
+    const cleanName = String(name || '').trim();
+    const cleanOrganization = String(organization || '').trim();
+    const cleanEmail = String(email || '').trim();
+    const cleanText = String(text || '').trim();
+    const cleanKind = KINDS.includes(kind) ? kind : 'другое';
+
+    if (cleanName.length < 2) errors.name = 'Как к вам обращаться';
+    if (cleanOrganization.length < 2) errors.organization = 'Название клуба, библиотеки или организации';
+    if (!cleanEmail) errors.email = 'Нужен адрес: без него не сможем ответить';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail)) errors.email = 'Похоже, в адресе опечатка';
+    if (cleanText.length < 20) errors.text = 'Напишите чуть подробнее: что задумали и как это может работать';
+    if (cleanText.length > 4000) errors.text = 'Слишком длинно: до 4000 символов';
+
+    if (Object.keys(errors).length) return { errors };
+
+    const entry = {
+      name: cleanName.slice(0, 120),
+      organization: cleanOrganization.slice(0, 200),
+      email: cleanEmail.slice(0, 254),
+      kind: cleanKind,
+      text: cleanText.slice(0, 4000),
+      receivedAt: new Date().toISOString()
+    };
+
+    await log({
+      actorId: null,
+      action: 'partnership.create',
+      subjectType: 'partnership',
+      subjectId: null,
+      note: `${cleanKind}: ${cleanOrganization} — ${cleanText.slice(0, 160)}`,
+      meta: entry
+    });
+
+    return { entry };
+  }
+
+  async function partnershipList({ limit = 100 } = {}) {
+    if (!ModerationLog) return [];
+    const rows = await ModerationLog.findAll({
+      where: { action: 'partnership.create' },
+      order: [['createdAt', 'DESC']],
+      limit: Math.min(500, Math.max(1, limit)),
+      raw: false
+    });
+    return rows.map((row) => ({ id: row.id, createdAt: row.createdAt, ...(row.meta || {}) }));
+  }
+
   async function feedbackList({ limit = 100 } = {}) {
     if (!ModerationLog) return [];
     const rows = await ModerationLog.findAll({
@@ -505,6 +567,8 @@ function createModerationService({
     copyrightClaim,
     feedback,
     feedbackList,
+    partnershipRequest,
+    partnershipList,
     copyrightClaims,
     TRUST_LEVELS,
     REASONS
