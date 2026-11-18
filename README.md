@@ -5,7 +5,7 @@
 старый сайт был каталогом с отзывами, новый — дневник, в который возвращаются.
 
 - 18 пользовательских сценариев от гостя до удаления аккаунта
-- 219 тестов, покрытие 91% строк
+- 324 теста, покрытие 92% строк
 - один сервер на Node.js + Postgres, без SPA и без сборки фронтенда
 
 ---
@@ -42,7 +42,7 @@
 | Сессии | express-session + Postgres-хранилище |
 | Пароли | bcrypt (12 раундов) |
 | Почта | Resend или SMTP, nodemailer |
-| Картинки | sharp (PNG «Книжного года») |
+| Картинки | sharp: обложки, аватары, портреты, PNG «Книжного года» |
 | Тесты | `node --test` + supertest, база PGlite |
 | Безопасность | helmet, CSP с nonce, CSRF на сессии, свои лимиты |
 
@@ -80,23 +80,25 @@
 ## Быстрый старт
 
 Нужен только Node.js 22. Postgres ставить не обязательно: для разработки есть
-PGlite — настоящий Postgres внутри процесса.
+PGlite — настоящий Postgres внутри Node.
 
 ```bash
 git clone https://github.com/SetchatkaGlaza/Diplom-Website-for-book-lovers.git
 cd Diplom-Website-for-book-lovers
-npm ci
-
-# база в памяти + демо-данные
-DB_DRIVER=pglite npm run dev
+./start.sh                # Windows: двойной щелчок по start.bat
 ```
 
-Сайт: <http://localhost:3000>. Вход для демо: `anna@example.com` / `reader2026`
-(админ), остальные читатели — `boris@`, `vera@`, `gleb@`, `dina@example.com`
-с тем же паролем.
+Скрипт поставит зависимости, поднимет базу в папке `.data`, зальёт демо-данные
+и запустит сайт. Адрес: <http://localhost:3000>. Вход: `anna@example.com` /
+`reader2026` (админ), остальные читатели — `boris@`, `vera@`, `gleb@`,
+`dina@example.com` с тем же паролем.
 
-Данные в режиме PGlite живут в памяти и исчезают при остановке — это сделано
-специально, чтобы не тащить за собой мусор от экспериментов.
+Данные в `.data` переживают перезапуск; `./start.sh --reset` начинает с чистой
+базы. Полный каталог на 345 книг: `DB_DRIVER=pglite PGLITE_DATA_DIR="$PWD/.data"
+npm run content:load` (сайт должен быть остановлен).
+
+Подробная инструкция для Git Bash — **`docs/LOCAL.md`**: установка, запуск,
+тестовые записи, сценарий проверки на 15 минут и частые ошибки.
 
 ### С настоящим Postgres
 
@@ -112,7 +114,7 @@ npm run dev
 ## Тесты
 
 ```bash
-npm test             # 219 тестов, ~5 минут
+npm test             # 324 теста, ~7 минут
 npm run test:unit    # только утилиты, секунды
 npm run test:coverage
 ```

@@ -18,6 +18,8 @@ public/uploads/
 # Database
 *.sqlite
 *.db
+# Локальная база PGlite (запуск через start.bat / start.sh)
+.data/
 
 # OS files
 .DS_Store
