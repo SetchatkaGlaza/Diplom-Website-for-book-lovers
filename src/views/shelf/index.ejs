@@ -1,0 +1,195 @@
+<section class="section section--tight">
+  <div class="container">
+    <div class="catalog-head">
+      <div>
+        <p class="micro-label">01 / Полка</p>
+        <h1 class="catalog-head__title"><%= activeLabel || 'Моя полка' %></h1>
+        <p class="catalog-head__count">Всего книг на полке: <%= counts.all %></p>
+      </div>
+      <a class="btn btn--ghost" href="/knigi">Найти книгу →</a>
+    </div>
+
+    <div class="stat-strip">
+      <% countsByStatus.forEach((item) => { %>
+        <a class="stat stat--link <%= activeStatus === item.key ? 'stat--active' : '' %>"
+           href="/polka?status=<%= item.key %>"
+           <%= activeStatus === item.key ? 'aria-current="page"' : '' %>>
+          <p class="numeral stat__value"><%= item.count %></p>
+          <p class="micro-label stat__label"><%= item.short %></p>
+        </a>
+      <% }) %>
+    </div>
+
+    <nav class="genre-bar" aria-label="Статусы">
+      <a class="pill <%= !activeStatus ? 'pill--amber' : '' %>" href="/polka">Все</a>
+      <% countsByStatus.forEach((item) => { %>
+        <a class="pill <%= activeStatus === item.key ? 'pill--amber' : '' %>" href="/polka?status=<%= item.key %>">
+          <%= item.label %> <span class="pill__count"><%= item.count %></span>
+        </a>
+      <% }) %>
+    </nav>
+  </div>
+</section>
+
+<%# --- цель на год --- %>
+<section class="section section--tight">
+  <div class="container">
+    <div class="card goal-card">
+      <div class="goal-card__head">
+        <div>
+          <p class="micro-label">02 / Цель на <%= goal.year %> год</p>
+          <% if (goal.hasGoal) { %>
+            <p class="goal-card__value">
+              <span class="numeral"><%= goal.finished %></span>
+              <span class="goal-card__of">из <%= goal.target %> книг</span>
+            </p>
+          <% } else { %>
+            <p class="goal-card__value">Цель пока не задана</p>
+          <% } %>
+        </div>
+        <form class="goal-card__form" method="post" action="/polka/tsel">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <label class="field__label" for="target">Сколько книг за год</label>
+          <div class="cluster">
+            <input class="field__input goal-card__input" id="target" name="target" type="number"
+                   min="1" max="1000" value="<%= goal.hasGoal ? goal.target : 12 %>" required>
+            <button class="btn btn--ghost" type="submit">Сохранить</button>
+          </div>
+        </form>
+      </div>
+      <% if (goal.hasGoal) { %>
+        <div class="progress goal-card__progress"><div class="progress__bar <%= progressClass(goal.percent) %>"></div></div>
+        <p class="progress__meta">
+          <span><%= goal.percent %>%</span>
+          <span><%= goal.finished >= goal.target ? 'Цель выполнена!' : `Осталось ${goal.target - goal.finished}` %></span>
+        </p>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <% if (!items.length) { %>
+      <div class="empty-state">
+        <h2 class="empty-state__title"><%= activeStatus ? 'Здесь пока пусто' : 'Полка ждёт первую книгу' %></h2>
+        <p class="empty-state__text">
+          <% if (activeStatus) { %>
+            В этом статусе книг нет. Можно посмотреть остальные разделы полки.
+          <% } else { %>
+            Найдите книгу в каталоге и нажмите «Хочу прочитать» — дальше всё пойдёт само.
+          <% } %>
+        </p>
+        <div class="empty-state__actions">
+          <a class="btn btn--primary" href="/knigi">Открыть каталог ↗</a>
+          <% if (activeStatus) { %><a class="btn btn--ghost" href="/polka">Вся полка</a><% } %>
+        </div>
+      </div>
+
+      <% if (suggestions && suggestions.length) { %>
+        <div class="suggest-block">
+          <div class="section-head">
+            <p class="micro-label">С чего начать</p>
+            <hr class="rule">
+            <a class="micro-label" href="/start">настроить дневник за 3 шага →</a>
+          </div>
+          <ul class="suggest-list list-clean">
+            <% suggestions.forEach((book) => { %>
+              <li class="suggest-item">
+                <a class="suggest-item__title" href="/knigi/<%= book.slug %>"><%= book.title %></a>
+                <p class="suggest-item__meta micro-label">
+                  <%= book.author %><% if (book.pages) { %> · <%= book.pages %> стр.<% } %>
+                  <% if (book.rating) { %> · ★ <%= String(book.rating).replace('.', ',') %><% } %>
+                </p>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+      <% } %>
+    <% } else { %>
+      <ul class="shelf-list list-clean">
+        <% items.forEach((item) => { %>
+          <li class="shelf-item" data-book="<%= item.book.slug %>">
+            <a class="shelf-item__cover" href="/knigi/<%= item.book.slug %>" aria-hidden="true" tabindex="-1">
+              <span class="shelf-item__letter"><%= item.book.title.slice(0, 1) %></span>
+            </a>
+
+            <div class="shelf-item__main">
+              <div class="shelf-item__head">
+                <a class="shelf-item__title" href="/knigi/<%= item.book.slug %>"><%= item.book.title %></a>
+                <span class="pill <%= item.status === 'read' ? 'pill--green' : item.status === 'reading' ? 'pill--amber' : '' %>">
+                  <%= item.statusLabel %>
+                </span>
+                <% if (item.isFavorite) { %><span class="pill" title="В любимых">♥</span><% } %>
+                <% if (item.rereadCount) { %><span class="micro-label">перечитываний: <%= item.rereadCount %></span><% } %>
+              </div>
+              <p class="shelf-item__author"><%= item.book.author %></p>
+
+              <% if (item.status === 'reading' || item.status === 'read' || item.status === 'dnf') { %>
+                <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                     aria-valuenow="<%= item.percent %>" aria-label="Прочитано: <%= item.percent %>%">
+                  <div class="progress__bar <%= progressClass(item.percent) %>" data-progress-bar></div>
+                </div>
+                <p class="progress__meta">
+                  <span data-progress-percent><%= item.percent %>%</span>
+                  <span data-progress-pages><%= item.progressPages %><%= item.totalPages ? ` из ${item.totalPages}` : '' %> стр.</span>
+                </p>
+              <% } %>
+
+              <div class="shelf-item__actions">
+                <form class="progress-form" method="post" action="/polka/<%= item.book.slug %>/progress" data-progress-form>
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="return_to" value="/polka<%= activeStatus ? `?status=${activeStatus}` : '' %>">
+                  <label class="sr-only" for="pages-<%= item.id %>">Страница, на которой вы остановились</label>
+                  <input class="field__input field__input--inline" id="pages-<%= item.id %>" name="pages"
+                         type="number" min="0" max="<%= item.totalPages || 100000 %>" value="<%= item.progressPages %>"
+                         inputmode="numeric">
+                  <button class="btn btn--ghost btn--sm" type="submit">Отметить</button>
+                </form>
+
+                <details class="shelf-item__menu">
+                  <summary class="btn btn--ghost btn--sm">Ещё</summary>
+                  <div class="shelf-item__menu-body">
+                    <form method="post" action="/polka/<%= item.book.slug %>/status">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <input type="hidden" name="return_to" value="/polka">
+                      <p class="micro-label">Статус</p>
+                      <div class="cluster cluster--tight">
+                        <% countsByStatus.forEach((status) => { %>
+                          <button class="btn <%= item.status === status.key ? 'btn--solid' : 'btn--ghost' %> btn--sm"
+                                  type="submit" name="status" value="<%= status.key %>"><%= status.label %></button>
+                        <% }) %>
+                      </div>
+                    </form>
+
+                    <form method="post" action="/polka/<%= item.book.slug %>/favorite">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <input type="hidden" name="return_to" value="/polka">
+                      <button class="btn btn--ghost btn--sm" type="submit">
+                        <%= item.isFavorite ? 'Убрать из любимых' : 'В любимые ♥' %>
+                      </button>
+                    </form>
+
+                    <% if (item.status === 'read') { %>
+                      <form method="post" action="/polka/<%= item.book.slug %>/reread">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="return_to" value="/polka">
+                        <button class="btn btn--ghost btn--sm" type="submit">Перечитываю</button>
+                      </form>
+                    <% } %>
+
+                    <form method="post" action="/polka/<%= item.book.slug %>/remove">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <input type="hidden" name="return_to" value="/polka">
+                      <button class="btn btn--ghost btn--sm" type="submit">Убрать с полки</button>
+                    </form>
+                  </div>
+                </details>
+              </div>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>

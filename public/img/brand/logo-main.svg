@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="120" viewBox="0 0 560 120" role="img" aria-label="Книгоманы">
+  <title>Книгоманы — читательский дневник</title>
+  <g transform="translate(12 14)">
+    <rect width="92" height="92" rx="20" fill="#121314"/>
+    <rect x="24" y="22" width="10" height="48" rx="3" fill="#f5b935"/>
+    <rect x="41" y="22" width="10" height="48" rx="3" fill="#f5b935"/>
+    <rect x="58" y="22" width="9" height="48" rx="3" fill="#2b5041"/>
+    <rect x="24" y="74" width="43" height="3" rx="1.5" fill="#fbfaf7" opacity="0.55"/>
+  </g>
+  <text x="124" y="72" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="42" font-weight="700"
+        fill="#121314" letter-spacing="-1.2">Книгоманы</text>
+  <circle cx="404" cy="62" r="6" fill="#f5b935"/>
+  <text x="124" y="96" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="14"
+        fill="#6b655c" letter-spacing="3.2">ЧИТАТЕЛЬСКИЙ ДНЕВНИК</text>
+</svg>

@@ -1,0 +1,241 @@
+<section class="section section--tight">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Хлебные крошки">
+      <a href="/">Главная</a> <span aria-hidden="true">/</span> <span>Витрина стилей</span>
+    </nav>
+    <p class="micro-label">00 / Дизайн-система</p>
+    <h1>Витрина стилей</h1>
+    <p class="quote">Страница для проверки глазами: все элементы сайта на одном экране — и на телефоне, и на компьютере.</p>
+  </div>
+</section>
+
+<!-- 01. ЦВЕТА -->
+<section class="styleguide__block">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">01 / Цвета</p>
+      <hr class="rule">
+    </div>
+    <div class="styleguide__row">
+      <% [
+        ['Чернила', '--ink', '#121314', 'тёмные блоки, текст'],
+        ['Бумага', '--paper', '#FBFAF7', 'основной фон'],
+        ['Тёплая бумага', '--paper-warm', '#F4F1EA', 'подложки'],
+        ['Янтарь', '--amber', '#F5B935', 'главное действие'],
+        ['Зелёный', '--green', '#2B5041', 'прогресс, вторая кнопка'],
+        ['Линия', '--line', '#E6E1D7', 'границы'],
+        ['Вторичный текст', '--muted', '#6B655C', 'подписи'],
+        ['Ошибка', '--danger', '#C2453A', 'удаление']
+      ].forEach(([name, token, hex, use]) => { %>
+        <div class="swatch">
+          <div class="swatch__color swatch--<%= token.replace('--', '') %>"></div>
+          <div class="swatch__meta"><strong><%= name %></strong><%= token %><br><%= hex %> · <%= use %></div>
+        </div>
+      <% }) %>
+    </div>
+    <p class="micro-label">Контраст: основной текст 17.8:1, вторичный 5.5:1, амбер на чернилах 10.5:1 — выше нормы 4.5:1.</p>
+  </div>
+</section>
+
+<!-- 02. ТИПОГРАФИКА -->
+<section class="styleguide__block">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">02 / Шрифты</p>
+      <hr class="rule">
+    </div>
+    <div class="type-sample"><p class="micro-label">Micro — 11 px, капс, разрядка</p></div>
+    <div class="type-sample"><h1>Заголовок первого уровня</h1></div>
+    <div class="type-sample"><h2>Заголовок второго уровня</h2></div>
+    <div class="type-sample"><h3>Заголовок третьего уровня</h3></div>
+    <div class="type-sample"><p>Обычный текст: 16 px, межстрочный 1.6. Хорошо читается на телефоне и на большом экране.</p></div>
+    <div class="type-sample"><p class="quote">Цитата из книги — засечный курсив, как закладка в бумажной книге.</p></div>
+    <div class="styleguide__row">
+      <p class="numeral demo-numeral">1 284</p>
+      <p class="numeral demo-numeral demo-numeral--green">97%</p>
+      <p class="numeral demo-numeral demo-numeral--amber">24</p>
+    </div>
+  </div>
+</section>
+
+<!-- 03. КНОПКИ -->
+<section class="styleguide__block">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">03 / Кнопки и ссылки</p>
+      <hr class="rule">
+    </div>
+    <div class="styleguide__row">
+      <button class="btn btn--primary" type="button">Главное действие ↗</button>
+      <button class="btn btn--ghost" type="button">Второстепенное</button>
+      <button class="btn btn--solid" type="button">Зелёная</button>
+      <button class="btn btn--danger" type="button">Удалить</button>
+      <button class="btn btn--ghost" type="button" disabled>Недоступно</button>
+    </div>
+    <div class="styleguide__row">
+      <a class="link-arrow" href="/knigi">Смотреть все →</a>
+      <a class="link-quiet" href="/knigi">Тихая ссылка</a>
+      <span class="pill">Жанр</span>
+      <span class="pill pill--amber">Читаю</span>
+      <span class="pill pill--green">Прочитано</span>
+    </div>
+  </div>
+</section>
+
+<!-- 04. ДАННЫЕ -->
+<section class="styleguide__block">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">04 / Цифры и прогресс</p>
+      <hr class="rule">
+    </div>
+    <div class="stat-strip">
+      <div class="stat"><p class="numeral stat__value">42</p><p class="micro-label stat__label">книги за год</p></div>
+      <div class="stat"><p class="numeral stat__value">11 380</p><p class="micro-label stat__label">страниц</p></div>
+      <div class="stat"><p class="numeral stat__value">17</p><p class="micro-label stat__label">дней подряд</p></div>
+      <div class="stat"><p class="numeral stat__value">4.3</p><p class="micro-label stat__label">средняя оценка</p></div>
+    </div>
+
+    <div class="stack demo-block">
+      <div>
+        <div class="progress"><div class="progress__bar demo-progress--62"></div></div>
+        <p class="progress__meta"><span>62%</span><span>217 из 350 страниц</span></p>
+      </div>
+      <div>
+        <div class="progress progress--amber"><div class="progress__bar demo-progress--35"></div></div>
+        <p class="progress__meta"><span>35%</span><span>глава 7 из 20</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05. КАРТОЧКИ -->
+<section class="styleguide__block">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">05 / Карточки книг</p>
+      <hr class="rule">
+    </div>
+    <div class="auto-grid styleguide__grid">
+      <% const demoBooks = [
+        ['Мастер и Маргарита', 'Михаил Булгаков'],
+        ['Пикник на обочине', 'Аркадий и Борис Стругацкие'],
+        ['Тень ветра', 'Карлос Руис Сафон'],
+        ['Книга без обложки', 'Неизвестный автор']
+      ]; %>
+      <% demoBooks.forEach(([title, author], index) => { %>
+        <a class="book-card" href="/knigi">
+          <div class="book-card__cover<%= index === 3 ? ' book-card__cover--empty' : '' %>">
+            <% if (index === 3) { %>
+              Обложки пока нет
+            <% } else { %>
+              <div class="book-card__cover--empty"><%= title %></div>
+            <% } %>
+          </div>
+          <p class="book-card__title"><%= title %></p>
+          <p class="book-card__author"><%= author %></p>
+        </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- 06. ФОРМЫ -->
+<section class="styleguide__block">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">06 / Формы</p>
+      <hr class="rule">
+    </div>
+    <div class="settings">
+      <form class="card" method="get" action="/stil">
+        <div class="field">
+          <label class="field__label" for="demo-name">Название книги</label>
+          <input class="field__input" id="demo-name" name="demo-name" type="text" value="Мастер и Маргарита">
+        </div>
+        <div class="field field--invalid">
+          <label class="field__label" for="demo-email">E-mail</label>
+          <input class="field__input" id="demo-email" name="demo-email" type="email"
+                 value="anna@example" aria-invalid="true" aria-describedby="demo-email-error">
+          <p class="field__error" id="demo-email-error">Похоже, в адресе опечатка</p>
+        </div>
+        <div class="field">
+          <label class="field__label" for="demo-note">Заметка</label>
+          <textarea class="field__input field__input--area" id="demo-note" name="demo-note"></textarea>
+          <p class="field__hint">До 2000 знаков. Без спойлеров — для них есть отдельная кнопка.</p>
+        </div>
+        <label class="field__check">
+          <input type="checkbox" checked>
+          <span>Показывать мою полку другим людям</span>
+        </label>
+        <p class="form-error" role="alert">Так форма выглядит, когда что-то пошло не так.</p>
+        <button class="btn btn--primary btn--block" type="button">Сохранить</button>
+      </form>
+
+      <div class="stack">
+        <div class="card">
+          <h3 class="card__title">Строка активности</h3>
+          <div class="activity-row">
+            <span class="avatar" aria-hidden="true">А</span>
+            <span>Анна прочитала «Тень ветра»</span>
+            <span class="activity-row__time">2 часа назад</span>
+          </div>
+          <div class="activity-row">
+            <span class="avatar avatar--lg" aria-hidden="true">Б</span>
+            <span>Борис поставил 4.5★</span>
+            <span class="activity-row__time">вчера</span>
+          </div>
+        </div>
+
+        <div class="empty-state">
+          <h3 class="empty-state__title">Пока пусто</h3>
+          <p class="empty-state__text">Добавьте первую книгу — дальше полка заполнится сама.</p>
+          <div class="empty-state__actions">
+            <a class="btn btn--primary" href="/knigi">Найти книгу ↗</a>
+            <a class="btn btn--ghost" href="/stil">Как это работает</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07. ТЁМНЫЕ БЛОКИ -->
+<section class="styleguide__block styleguide__dark">
+  <div class="section section--dark">
+    <div class="container">
+      <div class="section-head">
+        <p class="micro-label micro-label--amber">07 / Тёмный блок</p>
+        <hr class="rule">
+      </div>
+      <h2 class="section-head__title">Читай. Считай. Обсуждай.</h2>
+      <div class="stat-strip stat-strip--dark demo-stats">
+        <div class="stat"><p class="numeral stat__value">42</p><p class="micro-label micro-label--onDark stat__label">книги</p></div>
+        <div class="stat"><p class="numeral stat__value">11 380</p><p class="micro-label micro-label--onDark stat__label">страниц</p></div>
+        <div class="stat"><p class="numeral stat__value">17</p><p class="micro-label micro-label--onDark stat__label">дней подряд</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="banner">
+    <div class="container banner__inner">
+      <p class="banner__title">Готовы начать дневник?</p>
+      <a class="link-arrow" href="/registratsiya">Регистрация за минуту →</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">08 / Проверка</p>
+      <hr class="rule">
+    </div>
+    <ul class="stack styleguide__list">
+      <li>Кнопки и поля не меньше 44 px по высоте — попадать пальцем удобно.</li>
+      <li>Тёмная тема переключается кнопкой ☾ в шапке и запоминается.</li>
+      <li>На телефоне снизу появляется панель разделов, меню прячется за ☰.</li>
+      <li>Стили лежат только в файлах: ни одной встроенной таблицы стилей.</li>
+    </ul>
+  </div>
+</section>

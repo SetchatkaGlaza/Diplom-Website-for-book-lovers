@@ -1,0 +1,132 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Админка / Рассылка</p>
+      <hr class="rule">
+      <a class="micro-label" href="/admin/svodka">сводка →</a>
+      <a class="micro-label" href="/admin/obratnaya-svyaz">обратная связь →</a>
+    </div>
+
+    <h1 class="page-title">Письма</h1>
+    <p class="lede">
+      Одно письмо в неделю: что человек дочитал и сколько осталось до цели.
+      Пишем только тем, кто включил письма и подтвердил адрес, — остальным
+      не пишем даже «полезное».
+    </p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="stat-grid stat-grid--compact">
+      <div class="stat">
+        <p class="micro-label">За 30 дней отправлено</p>
+        <p class="stat__value"><%= stats.sent %></p>
+      </div>
+      <div class="stat">
+        <p class="micro-label">Ошибок</p>
+        <p class="stat__value"><%= stats.failed %></p>
+      </div>
+      <div class="stat">
+        <p class="micro-label">Пропущено (уже писали)</p>
+        <p class="stat__value"><%= stats.skipped %></p>
+      </div>
+      <div class="stat">
+        <p class="micro-label">Отписались</p>
+        <p class="stat__value"><%= stats.unsubscribed %></p>
+      </div>
+      <div class="stat">
+        <p class="micro-label">Можно написать сейчас</p>
+        <p class="stat__value"><%= readyCount %></p>
+      </div>
+    </div>
+
+    <% if (result === 'dry') { %>
+      <p class="hint-text">Пробный прогон завершён: письма собраны, но не отправлены. Тексты — в журнале писем после настоящей отправки.</p>
+    <% } else if (result === 'sent') { %>
+      <p class="hint-text">Рассылка выполнена. Ниже — что ушло и что сломалось.</p>
+    <% } %>
+
+    <h2 class="empty-state__title">Запустить</h2>
+    <form method="post" action="/admin/rassylka" class="stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <label class="field">
+        <span class="field__label">Тип письма</span>
+        <select class="field__input" name="kind">
+          <option value="weekly">Недельный итог</option>
+          <option value="comeback">«Вас давно не было»</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Сколько человек</span>
+        <input class="field__input" type="number" name="limit" value="<%= rules.batchSize %>" min="1" max="500">
+      </label>
+
+      <label class="check">
+        <input type="checkbox" name="dryRun" value="1" checked>
+        <span>Пробный прогон — собрать, но не отправлять</span>
+      </label>
+
+      <button class="btn btn--primary" type="submit">Запустить</button>
+    </form>
+
+    <p class="micro-label">
+      Правила: молчание дольше <%= rules.comebackDays %> дней — для письма «вас давно не было»;
+      повторно такое письмо не чаще раза в <%= rules.comebackCooldownDays %> дней;
+      в недельном письме не больше <%= rules.booksInLetter %> книг.
+    </p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Журнал писем</p>
+      <hr class="rule">
+      <p class="micro-label">последние 30</p>
+    </div>
+
+    <% if (!recent.length) { %>
+      <div class="empty-state">
+        <p class="empty-state__title">Писем ещё не было</p>
+        <p class="empty-state__text">Сначала соберите пробный прогон: он покажет, кому и что уйдёт.</p>
+      </div>
+    <% } else { %>
+      <table class="data-table">
+        <thead>
+          <tr><th>№</th><th>Кому</th><th>Тип</th><th>Статус</th><th>Когда</th><th>Ошибка</th></tr>
+        </thead>
+        <tbody>
+          <% recent.forEach((item) => { %>
+            <tr>
+              <td><%= item.id %></td>
+              <td><%= item.user ? item.user.name : '—' %><br><span class="micro-label"><%= item.user ? item.user.email : '' %></span></td>
+              <td><%= item.kind %></td>
+              <td><%= item.status %></td>
+              <td><%= item.sentAt ? new Date(item.sentAt).toISOString().slice(0, 16).replace('T', ' ') : '—' %></td>
+              <td class="micro-label"><%= item.error ? item.error.slice(0, 80) : '' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Как это работает</p>
+      <hr class="rule">
+    </div>
+    <ul class="stack">
+      <li>Рассылка не запускается сама: её дёргает cron или эта кнопка. При нескольких инстансах дважды письма не уйдут — период записан в журнал.</li>
+      <li>Команда для cron: <code>node src/db/digest-cli.js run --kind weekly</code></li>
+      <li>Пробный прогон без отправки: <code>node src/db/digest-cli.js run --dry-run</code></li>
+      <li>В каждом письме есть ссылка отписки — она работает без входа в аккаунт.</li>
+      <li>Письма уходят только на подтверждённый адрес. Если человек не подтвердил почту, он не получит ничего.</li>
+    </ul>
+  </div>
+</section>

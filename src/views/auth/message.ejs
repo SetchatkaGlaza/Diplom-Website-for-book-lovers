@@ -1,0 +1,12 @@
+<section class="auth">
+  <div class="container auth__inner">
+    <div class="auth__intro">
+      <p class="micro-label">Книгоманы</p>
+      <h1 class="auth__title"><%= heading %></h1>
+      <p class="auth__lead"><%= message %></p>
+      <% if (typeof link !== 'undefined' && link) { %>
+        <p><a class="btn btn--ghost" href="<%= link.href %>"><%= link.label %></a></p>
+      <% } %>
+    </div>
+  </div>
+</section>

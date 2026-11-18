@@ -1,0 +1,28 @@
+<%# Карточка книги: используется в каталоге, подборках и на странице автора.
+    book — книга, badge — необязательная подпись сверху (например, «в подборке №4»).
+    Обложку рисует сервер (/kartinki/oblozhka/<slug>): она есть у любой книги,
+    даже если файл не загружали. %>
+<li>
+  <a class="book-card" href="/knigi/<%= book.slug %>">
+    <div class="book-card__cover">
+      <% if (book.cover && book.cover !== 'default-cover.svg' && !book.cover.startsWith('covers/')) { %>
+        <img class="book-card__image" src="/assets/img/<%= book.cover %>" alt="Обложка: <%= book.title %>"
+             width="600" height="900" loading="lazy" decoding="async">
+      <% } else { %>
+        <img class="book-card__image" src="/kartinki/oblozhka/<%= book.slug %>"
+             alt="Обложка: <%= book.title %>" width="600" height="900" loading="lazy" decoding="async">
+      <% } %>
+      <% if (typeof badge !== 'undefined' && badge) { %><span class="book-card__badge"><%= badge %></span><% } %>
+    </div>
+    <p class="book-card__title"><%= book.title %></p>
+    <p class="book-card__author"><%= book.author %></p>
+    <p class="book-card__meta">
+      <% if (book.rating) { %>
+        <span class="book-card__rating"><%= book.rating %> ★</span>
+      <% } else { %>
+        <span>без оценки</span>
+      <% } %>
+      <% if (book.year) { %><span>· <%= book.year %></span><% } %>
+    </p>
+  </a>
+</li>

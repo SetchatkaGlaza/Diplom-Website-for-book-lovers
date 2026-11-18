@@ -1,0 +1,84 @@
+<script type="application/ld+json" nonce="<%= cspNonce %>"><%- jsonLd({
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: article.title,
+  description: article.description,
+  articleSection: article.topic,
+  wordCount: article.words,
+  inLanguage: 'ru',
+  datePublished: article.datePublished || undefined,
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  author: { '@type': 'Organization', name: siteName },
+  publisher: { '@type': 'Organization', name: siteName, url: seoBase }
+}) %></script>
+<script type="application/ld+json" nonce="<%= cspNonce %>"><%- jsonLd({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: seoBase + '/' },
+    { '@type': 'ListItem', position: 2, name: 'Журнал', item: seoBase + '/zhurnal' },
+    { '@type': 'ListItem', position: 3, name: article.title, item: canonical }
+  ]
+}) %></script>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">04 / Журнал · <%= article.topic %></p>
+      <hr class="rule">
+      <a class="micro-label" href="/zhurnal">← все статьи</a>
+    </div>
+
+    <article class="article">
+      <header class="article__head">
+        <h1 class="article__title"><%= article.title %></h1>
+        <p class="article__lede lede"><%= article.description %></p>
+        <p class="micro-label">
+          <% if (publishedLabel) { %><%= publishedLabel %> · <% } %><%= article.readingMinutes %> <%= t.plural(article.readingMinutes, ['минута чтения', 'минуты чтения', 'минут чтения']) %>
+        </p>
+      </header>
+
+      <% article.sections.forEach((section, index) => { %>
+        <section class="article__section">
+          <h2 class="article__heading"><span class="article__number"><%= String(index + 1).padStart(2, '0') %></span> <%= section.heading %></h2>
+          <% section.paragraphs.forEach((paragraph) => { %>
+            <p class="article__paragraph"><%= paragraph %></p>
+          <% }) %>
+        </section>
+      <% }) %>
+
+      <footer class="article__footer">
+        <p class="article__note">Текст написан для Книгоманов. Мы не публикуем отрывки книг целиком и не даём ссылок на пиратские копии — только короткие цитаты с указанием автора.</p>
+        <div class="article__actions">
+          <a class="btn btn--primary" href="/registratsiya">Завести дневник чтения</a>
+          <a class="btn" href="/podborki">Подборки по мотивам</a>
+        </div>
+      </footer>
+    </article>
+  </div>
+</section>
+
+<% if (related.length) { %>
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Читайте также</p>
+      <hr class="rule">
+    </div>
+    <ul class="journal-list journal-list--compact list-clean">
+      <% related.forEach((item) => { %>
+        <li class="journal-item">
+          <a class="journal-item__link" href="/zhurnal/<%= item.slug %>">
+            <div class="journal-item__meta">
+              <span class="micro-label"><%= item.topic %></span>
+              <span class="micro-label"><%= item.readingMinutes %> мин</span>
+            </div>
+            <h2 class="journal-item__title"><%= item.title %></h2>
+            <p class="journal-item__text"><%= item.description %></p>
+          </a>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+<% } %>

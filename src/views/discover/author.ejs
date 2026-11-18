@@ -1,0 +1,42 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">03 / Авторы</p>
+      <hr class="rule">
+      <a class="micro-label" href="/avtory">← все авторы</a>
+    </div>
+
+    <div class="author-hero">
+      <img class="author-hero__portrait" src="/kartinki/avtor/<%= author.slug %>"
+           alt="Портрет: <%= author.name %>" width="480" height="480" loading="lazy">
+      <div class="author-hero__body">
+        <h1 class="page-title"><%= author.name %></h1>
+        <% if (author.years) { %><p class="micro-label"><%= author.years %></p><% } %>
+        <% if (author.bio) { %><p class="lede"><%= author.bio %></p><% } %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">В каталоге</p>
+      <hr class="rule">
+      <span class="micro-label"><%= books.length %> <%= t.plural(books.length, ['книга', 'книги', 'книг']) %></span>
+    </div>
+
+    <% if (!books.length) { %>
+      <div class="empty-state">
+        <p class="empty-state__text">Книг этого автора в каталоге пока нет.</p>
+        <div class="empty-state__actions"><a class="btn btn--ghost" href="/knigi">Посмотреть весь каталог</a></div>
+      </div>
+    <% } else { %>
+      <ul class="book-grid list-clean">
+        <% books.forEach((book) => { %>
+          <%- include('../partials/book-card', { book }) %>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>

@@ -1,0 +1,112 @@
+<section class="section">
+  <div class="container container--narrow">
+    <div class="section-head">
+      <p class="micro-label">01 / Импорт</p>
+      <hr class="rule">
+      <a class="micro-label" href="/eksport">скачать свою полку</a>
+    </div>
+
+    <h1 class="page-title">Перенести полку</h1>
+    <p class="lead">
+      Подойдёт выгрузка из Goodreads (Goodreads → My Books → Import/Export) и LiveLib.
+      Файл читаем построчно: непонятные строки не ломают импорт, а попадают в отчёт.
+    </p>
+
+    <% if (errors.file) { %>
+      <p class="form-error" role="alert"><%= errors.file %></p>
+    <% } %>
+
+    <form class="card" method="post" action="/import">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="field">
+        <label class="field__label" for="file">CSV-файл</label>
+        <textarea class="field__input field__input--area" id="file" name="file" rows="8"
+                  placeholder="Вставьте сюда содержимое CSV — или перетащите файл в поле"></textarea>
+        <p class="field__hint">До 5 МБ и 5000 строк. Кодировка UTF-8, разделитель — запятая или точка с запятой.</p>
+      </div>
+
+      <div class="cluster">
+        <button class="btn btn--ghost" type="submit" name="dryRun" value="1">Сначала проверить</button>
+        <button class="btn btn--primary" type="submit">Импортировать</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<% if (preview) { %>
+<section class="section section--tight">
+  <div class="container container--narrow">
+    <div class="section-head">
+      <p class="micro-label">02 / Проверка</p>
+      <hr class="rule">
+      <span class="micro-label">ничего не записано</span>
+    </div>
+
+    <div class="import-report">
+      <p class="import-report__line">Строк в файле: <strong><%= preview.total %></strong></p>
+      <p class="import-report__line">Нашли в каталоге: <strong><%= preview.matched %></strong></p>
+      <p class="import-report__line">Не нашли: <strong><%= preview.notFound %></strong></p>
+    </div>
+
+    <% if (preview.preview.length) { %>
+      <ul class="list-clean year-books">
+        <% preview.preview.forEach((book) => { %>
+          <li class="year-books__item">
+            <span class="year-books__title"><%= book.title %></span>
+            <span class="year-books__author"><%= book.author %></span>
+            <span class="year-books__pages"><%= book.shelf %></span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <% if (preview.reasons.length) { %>
+      <ul class="list-clean import-reasons">
+        <% preview.reasons.forEach((item) => { %>
+          <li><%= item.reason %>: <%= item.count %></li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <p class="field__hint">Если всё верно — нажмите «Импортировать» ещё раз, уже без проверки.</p>
+  </div>
+</section>
+<% } %>
+
+<% if (report) { %>
+<section class="section section--tight section--warm">
+  <div class="container container--narrow">
+    <div class="section-head">
+      <p class="micro-label">02 / Готово</p>
+      <hr class="rule">
+      <span class="micro-label">отчёт</span>
+    </div>
+
+    <div class="import-report">
+      <p class="import-report__line">
+        Добавлено <strong><%= report.added %></strong> из <strong><%= report.total %></strong>
+      </p>
+      <p class="import-report__line">Обновлено записей: <strong><%= report.updated %></strong></p>
+      <p class="import-report__line">Рецензий перенесено: <strong><%= report.reviews %></strong></p>
+      <p class="import-report__line">Не нашли в каталоге: <strong><%= report.notFound %></strong></p>
+    </div>
+
+    <% if (report.notFoundRows.length) { %>
+      <details class="import-details">
+        <summary>Какие книги не нашли</summary>
+        <ul class="list-clean import-reasons">
+          <% report.notFoundRows.forEach((row) => { %>
+            <li>Строка <%= row.row %>: <%= row.title || '—' %> — <%= row.reason %></li>
+          <% }) %>
+        </ul>
+      </details>
+    <% } %>
+
+    <div class="cluster">
+      <a class="btn btn--primary" href="/polka">Открыть полку</a>
+      <a class="btn btn--ghost" href="/eksport">Скачать всё в CSV</a>
+    </div>
+  </div>
+</section>
+<% } %>

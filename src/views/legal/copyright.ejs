@@ -1,0 +1,83 @@
+<section class="section">
+  <div class="container container--narrow">
+    <div class="section-head">
+      <p class="micro-label">Правообладателям</p>
+      <hr class="rule">
+      <a class="micro-label" href="/pravila">правила сообщества →</a>
+    </div>
+
+    <h1 class="page-title">Если ваши права нарушены</h1>
+    <p class="lead">
+      Мы не публикуем полные тексты книг — только короткие цитаты до 300 знаков со ссылкой на источник.
+      Если что-то всё же нарушает ваши права, напишите нам: разбираем обращения в течение 48 часов.
+    </p>
+
+    <div class="legal-block">
+      <h2 class="legal-block__title">Что мы делаем</h2>
+      <ol class="legal-list">
+        <li>Подтверждаем получение обращения письмом на указанный e-mail.</li>
+        <li>В течение 48 часов проверяем страницу, о которой идёт речь.</li>
+        <li>Удаляем или ограничиваем доступ к спорному материалу, если права подтверждены.</li>
+        <li>Сообщаем о результате и объясняем, если оснований для удаления нет.</li>
+      </ol>
+    </div>
+
+    <div class="legal-block">
+      <h2 class="legal-block__title">Что указать в обращении</h2>
+      <ul class="legal-list">
+        <li>Ссылку на страницу с материалом.</li>
+        <li>Название произведения и правообладателя.</li>
+        <li>Чем подтверждаются ваши права (договор, издание, доверенность).</li>
+        <li>Контакт для ответа.</li>
+      </ul>
+      <p class="field__hint">
+        Форма ниже — для быстрой связи. Если удобнее почта, пишите на
+        <a href="mailto:pravo@knigomany.ru">pravo@knigomany.ru</a>: тот же срок ответа.
+      </p>
+    </div>
+
+    <% if (sent) { %>
+      <div class="card card--success">
+        <h2 class="settings__title">Обращение принято</h2>
+        <p>Записали и передали модератору. Ответим на указанный e-mail в течение 48 часов.</p>
+      </div>
+    <% } else { %>
+      <form class="card" method="post" action="/pravoobladatelyam" novalidate>
+        <h2 class="settings__title">Форма обращения</h2>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <div class="field">
+          <label class="field__label" for="name">Имя или организация</label>
+          <input class="field__input<%= errors.name ? ' field__input--invalid' : '' %>" id="name" name="name"
+                 type="text" maxlength="120" required value="<%= formData.name || '' %>">
+          <% if (errors.name) { %><p class="field__error"><%= errors.name %></p><% } %>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="email">E-mail для ответа</label>
+          <input class="field__input<%= errors.email ? ' field__input--invalid' : '' %>" id="email" name="email"
+                 type="email" maxlength="254" required value="<%= formData.email || '' %>">
+          <% if (errors.email) { %><p class="field__error"><%= errors.email %></p><% } %>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="subject">Что нарушает права</label>
+          <input class="field__input<%= errors.subject ? ' field__input--invalid' : '' %>" id="subject" name="subject"
+                 type="text" maxlength="200" required value="<%= formData.subject || '' %>"
+                 placeholder="Название книги и ссылка на страницу">
+          <% if (errors.subject) { %><p class="field__error"><%= errors.subject %></p><% } %>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="text">Подробности</label>
+          <textarea class="field__input field__input--area<%= errors.text ? ' field__input--invalid' : '' %>"
+                    id="text" name="text" rows="6" maxlength="2000" required><%= formData.text || '' %></textarea>
+          <% if (errors.text) { %><p class="field__error"><%= errors.text %></p><% } %>
+          <p class="field__hint">Не прикладывайте документы здесь — попросим их отдельно в ответном письме.</p>
+        </div>
+
+        <button class="btn btn--primary" type="submit">Отправить обращение</button>
+      </form>
+    <% } %>
+  </div>
+</section>

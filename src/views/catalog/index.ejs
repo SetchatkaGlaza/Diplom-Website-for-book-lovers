@@ -1,0 +1,103 @@
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">01 / Каталог</p>
+      <hr class="rule">
+    </div>
+
+    <div class="catalog-head">
+      <div>
+        <h1 class="catalog-head__title"><%= activeGenre ? activeGenre.name : 'Все книги' %></h1>
+        <p class="catalog-head__count">
+          <%= result.total %> <%= t.plural(result.total, ['книга', 'книги', 'книг']) %>
+          <% if (result.query) { %>по запросу «<%= result.query %>»<% } %>
+        </p>
+      </div>
+      <a class="btn btn--ghost" href="/knigi/novaya">Добавить книгу +</a>
+    </div>
+
+    <form class="search-form" method="get" action="/knigi" role="search">
+      <div class="field">
+        <label class="field__label" for="q">Поиск по названию или автору</label>
+        <input class="field__input" id="q" name="q" type="search" value="<%= result.query %>"
+               placeholder="Например, Булгаков или Дюна" autocomplete="off">
+      </div>
+      <% if (activeGenre) { %><input type="hidden" name="zhanr" value="<%= activeGenre.slug %>"><% } %>
+      <div class="field field--auto">
+        <label class="field__label" for="sort">Порядок</label>
+        <select class="field__input" id="sort" name="sort">
+          <% sorts.forEach((item) => { %>
+            <option value="<%= item.key %>" <%= result.sort === item.key ? 'selected' : '' %>><%= item.label %></option>
+          <% }) %>
+        </select>
+      </div>
+      <button class="btn btn--primary" type="submit">Найти</button>
+    </form>
+
+    <nav class="genre-bar" aria-label="Жанры">
+      <a class="pill <%= !result.genreSlug ? 'pill--amber' : '' %>" href="/knigi<%= result.query ? `?q=${encodeURIComponent(result.query)}` : '' %>">Все</a>
+      <% genres.filter((genre) => genre.booksCount > 0).forEach((genre) => { %>
+        <a class="pill <%= result.genreSlug === genre.slug ? 'pill--amber' : '' %>"
+           href="/knigi?zhanr=<%= genre.slug %><%= result.query ? `&q=${encodeURIComponent(result.query)}` : '' %>">
+          <%= genre.name %> <span class="pill__count"><%= genre.booksCount %></span>
+        </a>
+      <% }) %>
+    </nav>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <% if (result.genreMissing) { %>
+      <div class="empty-state">
+        <h2 class="empty-state__title">Такого жанра нет</h2>
+        <p class="empty-state__text">Возможно, ссылка устарела. В каталоге есть все жанры — выберите из списка.</p>
+        <div class="empty-state__actions"><a class="btn btn--primary" href="/knigi">Весь каталог</a></div>
+      </div>
+    <% } else if (!result.items.length) { %>
+      <div class="empty-state">
+        <h2 class="empty-state__title">Ничего не нашлось</h2>
+        <p class="empty-state__text">
+          <% if (result.query) { %>
+            По запросу «<%= result.query %>» книг нет. Попробуйте другое слово — например, только фамилию автора.
+          <% } else { %>
+            Здесь пока пусто. Можно добавить книгу самому — она сразу появится в каталоге.
+          <% } %>
+        </p>
+        <div class="empty-state__actions">
+          <a class="btn btn--primary" href="/knigi/novaya">Добавить книгу ↗</a>
+          <% if (result.query || activeGenre) { %><a class="btn btn--ghost" href="/knigi">Сбросить фильтры</a><% } %>
+        </div>
+      </div>
+    <% } else { %>
+      <ul class="book-grid list-clean">
+        <% result.items.forEach((book) => { %>
+          <%- include('../partials/book-card', { book }) %>
+        <% }) %>
+      </ul>
+
+      <% if (result.pages > 1) { %>
+        <nav class="pager" aria-label="Страницы каталога">
+          <% const base = (page) => {
+            const params = new URLSearchParams();
+            if (result.query) params.set('q', result.query);
+            if (result.genreSlug) params.set('zhanr', result.genreSlug);
+            if (result.sort !== defaultSort) params.set('sort', result.sort);
+            if (page > 1) params.set('page', String(page));
+            const tail = params.toString();
+            return `/knigi${tail ? `?${tail}` : ''}`;
+          }; %>
+          <% if (result.page > 1) { %>
+            <a class="pager__link" href="<%= base(result.page - 1) %>" rel="prev">← Назад</a>
+          <% } else { %><span class="pager__link pager__link--off">← Назад</span><% } %>
+
+          <span class="pager__info">Страница <%= result.page %> из <%= result.pages %></span>
+
+          <% if (result.page < result.pages) { %>
+            <a class="pager__link" href="<%= base(result.page + 1) %>" rel="next">Вперёд →</a>
+          <% } else { %><span class="pager__link pager__link--off">Вперёд →</span><% } %>
+        </nav>
+      <% } %>
+    <% } %>
+  </div>
+</section>

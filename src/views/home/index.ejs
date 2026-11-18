@@ -1,0 +1,111 @@
+<section class="hero">
+  <div class="container hero__inner">
+    <p class="micro-label">01 / Читательский дневник</p>
+    <h1 class="hero__title">Читай.<br>Считай.<br>Обсуждай.</h1>
+    <p class="hero__lead">
+      Полка, прогресс, статистика и люди рядом. Мы не продаём книги и не показываем
+      полные тексты — только то, что вы прочитали и что об этом думаете.
+    </p>
+    <div class="hero__actions">
+      <a class="btn btn--primary" href="/registratsiya">Начать читать ↗</a>
+      <a class="btn btn--ghost" href="/knigi">Смотреть каталог →</a>
+    </div>
+
+    <% if (typeof shelf !== 'undefined' && shelf && shelf.length) { %>
+      <%# Живая полка: настоящие обложки из каталога, лёгкий наклон.
+          Это чистая декорация, поэтому aria-hidden — скринридеру она не нужна. %>
+      <div class="hero-shelf" aria-hidden="true">
+        <% shelf.forEach((item, index) => { %>
+          <img class="hero-shelf__item hero-shelf__item--<%= index + 1 %>"
+               src="/kartinki/oblozhka/<%= item.slug %>" alt="" width="600" height="900"
+               loading="<%= index < 3 ? 'eager' : 'lazy' %>" decoding="async">
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="stat-strip">
+      <div class="stat">
+        <p class="numeral stat__value" data-count="4">4</p>
+        <p class="micro-label stat__label">полки: хочу, читаю, прочитал, бросил</p>
+      </div>
+      <div class="stat">
+        <p class="numeral stat__value">2 мин</p>
+        <p class="micro-label stat__label">на запись о книге</p>
+      </div>
+      <div class="stat">
+        <p class="numeral stat__value">0 ₽</p>
+        <p class="micro-label stat__label">за дневник и статистику</p>
+      </div>
+      <div class="stat">
+        <p class="numeral stat__value" data-count="100" data-count-suffix="%">100%</p>
+        <p class="micro-label stat__label">ваши данные можно выгрузить</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">02 / Что внутри</p>
+      <hr class="rule">
+    </div>
+    <ul class="auto-grid list-clean">
+      <li class="card">
+        <h2 class="card__title">Полка</h2>
+        <p>Хочу, читаю, прочитал, бросил. Прогресс в страницах и процентах — без ручных таблиц.</p>
+      </li>
+      <li class="card">
+        <h2 class="card__title">Статистика</h2>
+        <p>Книги, страницы, серии дней и любимые жанры. Считается само, как только вы отмечаете чтение.</p>
+      </li>
+      <li class="card">
+        <h2 class="card__title">Книжный год</h2>
+        <p>Итог года одной картинкой, которой можно поделиться с друзьями.</p>
+      </li>
+      <li class="card">
+        <h2 class="card__title">Клубы</h2>
+        <p>Совместное чтение по главам. Спойлеры спрятаны от тех, кто ещё не дошёл.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="section section--dark">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label micro-label--amber">03 / Дневник, а не витрина</p>
+      <hr class="rule">
+    </div>
+    <div class="grid">
+      <div class="col-6">
+        <h2 class="section-head__title">Записи остаются вашими</h2>
+        <p class="hero__lead">
+          Дневник создан для читателей, а не для магазина. Оценки, цитаты и заметки
+          видны только вам, пока вы сами не решите поделиться.
+        </p>
+      </div>
+      <div class="col-6">
+        <div class="card card--dark">
+          <p class="micro-label micro-label--onDark">Принципы</p>
+          <ul class="stack list-bullets">
+            <li>Никаких полных текстов книг — только ваши заметки и короткие цитаты.</li>
+            <li>Экспорт всех данных одной кнопкой в настройках.</li>
+            <li>Удаление аккаунта обезличивает записи, а не оставляет их висеть.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="banner">
+  <div class="container banner__inner">
+    <p class="banner__title">Готовы вести дневник чтения?</p>
+    <a class="link-arrow" href="/registratsiya">Создать аккаунт за минуту →</a>
+  </div>
+</section>

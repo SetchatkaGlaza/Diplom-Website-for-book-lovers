@@ -1,0 +1,100 @@
+<section class="hero">
+  <div class="container hero__inner">
+    <p class="micro-label">Книжный год</p>
+    <h1 class="hero__title">Ваш год<br>в книгах —<br>одной картинкой.</h1>
+    <p class="hero__lead">
+      В декабре все подводят итоги в блокнотах и заметках. Здесь они считаются сами:
+      книги, страницы, серия дней, любимые жанры. Готовая карточка для сторис —
+      без рекламы и без чужих текстов.
+    </p>
+    <div class="hero__actions">
+      <% if (isLoggedIn) { %>
+        <a class="btn btn--primary" href="/knizhnyy-god">Открыть свой год ↗</a>
+        <a class="btn btn--ghost" href="/statistika">Моя статистика →</a>
+      <% } else { %>
+        <a class="btn btn--primary" href="/registratsiya">Собрать свой год ↗</a>
+        <a class="btn btn--ghost" href="/knigi">Сначала посмотреть каталог →</a>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Пример</p>
+      <hr class="rule">
+      <span class="micro-label">не чьи-то данные, а образец</span>
+    </div>
+
+    <div class="year-card-preview">
+      <p class="micro-label"><%= example.year %> / Книжный год</p>
+      <p class="numeral year-card-preview__main"><%= example.booksRead %></p>
+      <p class="year-card-preview__label">книг прочитано</p>
+
+      <div class="year-card-preview__row">
+        <div>
+          <p class="numeral year-card-preview__value"><%= example.pagesRead.toLocaleString('ru-RU') %></p>
+          <p class="micro-label">страниц</p>
+        </div>
+        <div>
+          <p class="numeral year-card-preview__value"><%= example.reviews %></p>
+          <p class="micro-label">рецензий</p>
+        </div>
+        <div>
+          <p class="numeral year-card-preview__value"><%= example.longestStreak %></p>
+          <p class="micro-label">дней подряд</p>
+        </div>
+      </div>
+
+      <ul class="list-clean year-card-preview__genres">
+        <% example.genres.forEach((genre) => { %>
+          <li class="plain-row">
+            <span><%= genre.name %></span>
+            <span class="micro-label"><%= genre.books %> книг</span>
+          </li>
+        <% }) %>
+      </ul>
+    </div>
+
+    <p class="lede">
+      Свою карточку можно скачать в двух размерах: 1080×1350 для сторис
+      и 1080×1080 для ленты. Внутри — только ваши числа и жанры: ни названий
+      книг, ни заметок, если вы сами не решите иначе.
+    </p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Как это работает</p>
+      <hr class="rule">
+    </div>
+    <ul class="auto-grid list-clean">
+      <li class="card">
+        <h2 class="card__title">1. Отмечайте чтение</h2>
+        <p>Добавили книгу на полку, отметили страницу — всё. Дневник считает сам, без таблиц и приложений.</p>
+      </li>
+      <li class="card">
+        <h2 class="card__title">2. В декабре — итоги</h2>
+        <p>Карточка собирается из ваших записей за год: книги, страницы, серия дней, жанры и лучшая книга.</p>
+      </li>
+      <li class="card">
+        <h2 class="card__title">3. Скачать и поделиться</h2>
+        <p>PNG без водяных знаков. Ссылку на каталог можно поставить в подпись, но это не обязательно.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="banner">
+  <div class="container banner__inner">
+    <p class="banner__title">Дневник бесплатный. Итоги — тоже.</p>
+    <% if (isLoggedIn) { %>
+      <a class="link-arrow" href="/knizhnyy-god">Открыть свой год →</a>
+    <% } else { %>
+      <a class="link-arrow" href="/registratsiya">Создать аккаунт за минуту →</a>
+    <% } %>
+  </div>
+</section>
