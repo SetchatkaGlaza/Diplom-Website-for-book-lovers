@@ -20,6 +20,7 @@ public/uploads/
 *.db
 # Локальная база PGlite (запуск через start.bat / start.sh)
 .data/
+.preview-data/
 
 # OS files
 .DS_Store
