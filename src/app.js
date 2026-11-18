@@ -235,7 +235,7 @@ function createApp(options = {}) {
   app.use(csrfProtection());
 
   // --- маршруты ---
-  app.use('/', require('./routes/home')());
+  app.use('/', require('./routes/home')({ models }));
   app.use('/', require('./routes/auth')({ models, services, auth }));
   app.use('/', require('./routes/account')({ models, services, auth }));
   app.use('/', require('./routes/catalog')({ models, services, auth }));
@@ -249,6 +249,9 @@ function createApp(options = {}) {
   app.use('/', require('./routes/discover')({ models, services }));
   app.use('/', require('./routes/launch')({ models, services, auth }));
   app.use('/', require('./routes/journal')({ services }));
+  // Картинки рисуем на сервере: обложки, аватары, портреты авторов.
+  // Отдаём PNG, а не SVG: SVG может содержать скрипт и исполнится на нашем домене.
+  app.use('/', require('./routes/images')({ models, services }));
   app.use('/', require('./routes/digest')({ models, services, auth }));
   app.use('/', require('./routes/seo')({ models, services }));
   /**

@@ -37,6 +37,8 @@
       <% mine.forEach((club) => { %>
         <li class="club-card">
           <a class="club-card__link" href="/kluby/<%= club.slug %>">
+            <img class="club-card__cover" src="/kartinki/klub/<%= club.slug %>"
+                 alt="" width="1200" height="420" loading="lazy" decoding="async">
             <span class="club-card__name"><%= club.name %></span>
             <span class="club-card__description"><%= club.description %></span>
           </a>
@@ -73,6 +75,8 @@
         <% clubs.forEach((club) => { %>
           <li class="club-card">
             <a class="club-card__link" href="/kluby/<%= club.slug %>">
+              <img class="club-card__cover" src="/kartinki/klub/<%= club.slug %>"
+                   alt="" width="1200" height="420" loading="lazy" decoding="async">
               <span class="club-card__name"><%= club.name %></span>
               <span class="club-card__description"><%= club.description %></span>
             </a>

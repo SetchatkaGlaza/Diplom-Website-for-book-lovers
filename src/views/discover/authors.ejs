@@ -23,7 +23,9 @@
       <ul class="list-clean">
         <% authors.forEach((author) => { %>
           <li class="author-row">
-            <div>
+            <img class="author-row__portrait" src="/kartinki/avtor/<%= author.slug %>"
+                 alt="" width="64" height="64" loading="lazy">
+            <div class="author-row__body">
               <p class="author-row__name"><a href="/avtory/<%= author.slug %>"><%= author.name %></a></p>
               <% if (author.years) { %><p class="micro-label"><%= author.years %></p><% } %>
             </div>

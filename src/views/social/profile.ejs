@@ -5,7 +5,8 @@
     </nav>
 
     <div class="profile-head">
-      <span class="avatar avatar--xl" aria-hidden="true"><%= String(person.name || 'Ч').slice(0, 1) %></span>
+      <img class="avatar avatar--xl avatar--img" src="/kartinki/avatar/<%= person.id %>"
+           alt="" width="88" height="88" loading="lazy">
       <div class="profile-head__body">
         <h1 class="profile-head__name"><%= person.name %></h1>
         <% if (person.bio) { %><p class="profile-head__bio"><%= person.bio %></p><% } %>

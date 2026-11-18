@@ -10,6 +10,18 @@
       <a class="btn btn--primary" href="/registratsiya">Начать читать ↗</a>
       <a class="btn btn--ghost" href="/knigi">Смотреть каталог →</a>
     </div>
+
+    <% if (typeof shelf !== 'undefined' && shelf && shelf.length) { %>
+      <%# Живая полка: настоящие обложки из каталога, лёгкий наклон.
+          Это чистая декорация, поэтому aria-hidden — скринридеру она не нужна. %>
+      <div class="hero-shelf" aria-hidden="true">
+        <% shelf.forEach((item, index) => { %>
+          <img class="hero-shelf__item hero-shelf__item--<%= index + 1 %>"
+               src="/kartinki/oblozhka/<%= item.slug %>" alt="" width="600" height="900"
+               loading="<%= index < 3 ? 'eager' : 'lazy' %>" decoding="async">
+        <% }) %>
+      </div>
+    <% } %>
   </div>
 </section>
 
@@ -17,7 +29,7 @@
   <div class="container">
     <div class="stat-strip">
       <div class="stat">
-        <p class="numeral stat__value">4</p>
+        <p class="numeral stat__value" data-count="4">4</p>
         <p class="micro-label stat__label">полки: хочу, читаю, прочитал, бросил</p>
       </div>
       <div class="stat">
@@ -29,7 +41,7 @@
         <p class="micro-label stat__label">за дневник и статистику</p>
       </div>
       <div class="stat">
-        <p class="numeral stat__value">100%</p>
+        <p class="numeral stat__value" data-count="100" data-count-suffix="%">100%</p>
         <p class="micro-label stat__label">ваши данные можно выгрузить</p>
       </div>
     </div>

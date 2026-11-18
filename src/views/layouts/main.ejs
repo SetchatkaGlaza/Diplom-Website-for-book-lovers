@@ -29,6 +29,11 @@
   <meta name="twitter:title" content="<%= pageTitle %>">
   <meta name="twitter:description" content="<%= description %>">
   <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/img/brand/mark.svg">
+  <meta property="og:image" content="<%= seoBase %>/kartinki/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:image" content="<%= seoBase %>/kartinki/og.png">
   <link rel="stylesheet" href="/assets/css/base.css">
 </head>
 <body class="<%= bodyClass || '' %>">
@@ -36,7 +41,10 @@
 
   <header class="site-header">
     <div class="container site-header__inner">
-      <a class="logo" href="/" aria-label="<%= siteName %> — на главную">Книгоманы<span aria-hidden="true">.</span></a>
+      <a class="logo" href="/" aria-label="<%= siteName %> — на главную">
+        <img class="logo__mark" src="/assets/img/brand/mark.svg" alt="" width="32" height="32">
+        <span class="logo__text">Книгоманы<span aria-hidden="true">.</span></span>
+      </a>
 
       <nav class="site-nav" id="site-nav" aria-label="Основная навигация">
         <a href="/knigi" <%- isActive('/knigi') ? 'aria-current="page"' : '' %>>Каталог</a>
@@ -71,7 +79,8 @@
             <span class="sr-only">Сообщения</span>
           </a>
           <a class="site-header__user" href="/nastroyki" title="Настройки">
-            <span class="avatar" aria-hidden="true"><%= String(currentUser.name || '?').trim().slice(0, 1) %></span>
+            <img class="avatar avatar--img" src="/kartinki/avatar/<%= currentUser.id %>"
+                 alt="" width="32" height="32" loading="lazy">
             <span><%= currentUser.name %></span>
           </a>
           <form method="post" action="/vyhod" class="inline-form">
@@ -139,6 +148,7 @@
     </nav>
   <% } %>
 
+  <script src="/assets/js/motion.js" defer></script>
   <script src="/assets/js/theme.js" defer></script>
   <script src="/assets/js/shelf.js" defer></script>
   <script src="/assets/js/likes.js" defer></script>

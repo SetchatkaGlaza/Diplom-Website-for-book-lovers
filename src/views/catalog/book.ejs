@@ -24,10 +24,9 @@
 
     <div class="book-page">
       <div class="book-page__cover">
-        <div class="book-cover" role="img" aria-label="Обложка: <%= book.title %>">
-          <span class="book-cover__title"><%= book.title %></span>
-          <span class="book-cover__author"><%= book.author %></span>
-        </div>
+        <img class="book-cover__image" src="/kartinki/oblozhka/<%= book.slug %>?size=large"
+             alt="Обложка: <%= book.title %> — <%= book.author %>"
+             width="900" height="1350" fetchpriority="high">
       </div>
 
       <div class="book-page__info">
@@ -153,7 +152,8 @@
         <% reviews.items.forEach((review) => { %>
           <li class="review" id="review-<%= review.id %>">
             <div class="review__head">
-              <span class="avatar" aria-hidden="true"><%= String(review.user.name || 'Ч').slice(0, 1) %></span>
+              <img class="avatar avatar--img" src="/kartinki/avatar/<%= review.user.id %>"
+                   alt="" width="32" height="32" loading="lazy">
               <span class="review__user"><%= review.user.name %></span>
               <span class="review__rating" aria-label="Оценка <%= review.rating %> из 5"><%= review.rating %> ★</span>
               <span class="review__date"><%= t.formatDate(review.createdAt) %></span>
