@@ -1,0 +1,42 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">02 / Подборки</p>
+      <hr class="rule">
+      <a class="micro-label" href="/podborki">← все подборки</a>
+    </div>
+
+    <h1 class="page-title"><%= collection.title %></h1>
+    <p class="lede"><%= collection.description %></p>
+    <p class="micro-label"><%= books.length %> <%= t.plural(books.length, ['книга', 'книги', 'книг']) %></p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <ul class="book-grid list-clean">
+      <% books.forEach((book) => { %>
+        <%- include('../partials/book-card', { book }) %>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+
+<% if (others.length) { %>
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Ещё подборки</p>
+      <hr class="rule">
+    </div>
+    <ul class="list-clean">
+      <% others.forEach((item) => { %>
+        <li class="plain-row">
+          <a href="/podborki/<%= item.slug %>"><%= item.title %></a>
+          <span class="micro-label"><%= item.booksCount %> книг</span>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+<% } %>

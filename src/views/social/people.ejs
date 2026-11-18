@@ -1,0 +1,46 @@
+<section class="section section--tight">
+  <div class="container container--narrow">
+    <div class="catalog-head">
+      <div>
+        <p class="micro-label">01 / Люди</p>
+        <h1 class="catalog-head__title">Читатели</h1>
+        <p class="catalog-head__count">
+          У вас <%= counts.following %> <%= t.plural(counts.following, ['подписка', 'подписки', 'подписок']) %>,
+          <%= counts.followers %> <%= t.plural(counts.followers, ['подписчик', 'подписчика', 'подписчиков']) %>
+        </p>
+      </div>
+      <a class="btn btn--ghost" href="/lenta">Моя лента →</a>
+    </div>
+
+    <form class="search-form" method="get" action="/chitateli" role="search">
+      <div class="field">
+        <label class="field__label" for="q">Поиск по имени</label>
+        <input class="field__input" id="q" name="q" type="search" value="<%= query %>"
+               placeholder="Например, Анна" autocomplete="off">
+      </div>
+      <button class="btn btn--primary" type="submit">Найти</button>
+    </form>
+
+    <% if (!people.length) { %>
+      <div class="empty-state">
+        <h2 class="empty-state__title">Никого не нашлось</h2>
+        <p class="empty-state__text">Попробуйте другое имя или посмотрите весь список — начните с чистого поиска.</p>
+        <div class="empty-state__actions"><a class="btn btn--primary" href="/chitateli">Показать всех</a></div>
+      </div>
+    <% } else { %>
+      <ul class="people-list list-clean">
+        <% people.forEach((person) => { %>
+          <li class="people-item">
+            <img class="avatar avatar--lg avatar--img" src="/kartinki/avatar/<%= person.id %>"
+                 alt="" width="56" height="56" loading="lazy">
+            <div class="people-item__body">
+              <a class="people-item__name" href="/chitateli/<%= person.id %>"><%= person.name %></a>
+              <% if (person.bio) { %><p class="people-item__bio"><%= person.bio %></p><% } %>
+            </div>
+            <a class="btn btn--ghost btn--sm" href="/chitateli/<%= person.id %>">Профиль</a>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>

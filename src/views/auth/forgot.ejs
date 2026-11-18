@@ -1,0 +1,25 @@
+<section class="auth">
+  <div class="container auth__inner">
+    <div class="auth__intro">
+      <p class="micro-label">Восстановление</p>
+      <h1 class="auth__title">Забыли пароль</h1>
+      <p class="auth__lead">Укажите e-mail — пришлём ссылку для смены пароля. Ссылка действует один час.</p>
+    </div>
+
+    <form class="auth__form card" method="post" action="/vosstanovit-parol" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <%- include('../partials/field', {
+        name: 'email',
+        label: 'E-mail',
+        type: 'email',
+        value: formData.email || '',
+        error: errors.email,
+        autocomplete: 'email'
+      }) %>
+
+      <button class="btn btn--primary btn--block" type="submit">Отправить ссылку</button>
+      <p class="auth__foot"><a href="/vhod">Вернуться ко входу</a></p>
+    </form>
+  </div>
+</section>

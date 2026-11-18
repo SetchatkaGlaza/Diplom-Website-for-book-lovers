@@ -1,0 +1,41 @@
+[
+ {
+  "slug": "klassika-po-sredam",
+  "name": "Классика по средам",
+  "description": "Читаем по одной главе в неделю и обсуждаем в четверг вечером. Без литературоведения: что зацепило, что раздражает, что осталось после последней страницы.",
+  "ownerEmail": "anna@example.com",
+  "isPrivate": false,
+  "currentBookSlug": "",
+  "schedule": [
+   { "chapter": 1, "inDays": 3, "note": "Первые главы: знакомство с героями и первое впечатление" },
+   { "chapter": 2, "inDays": 10, "note": "Середина: где книга начинает цеплять" },
+   { "chapter": 3, "inDays": 17, "note": "Финал и разговор о том, что осталось" }
+  ]
+ },
+ {
+  "slug": "fantastika-bez-granits",
+  "name": "Фантастика без границ",
+  "description": "От Стругацких до Симмонса: что было и что будет. Клуб для тех, кто читает фантастику не за пришельцев, а за вопросы, которые она задаёт.",
+  "ownerEmail": "boris@example.com",
+  "isPrivate": false,
+  "currentBookSlug": "arkadiy-i-boris-strugackie-piknik-na-obochine",
+  "schedule": [
+   { "chapter": 1, "inDays": 5, "note": "Зона и её правила: как устроен мир" },
+   { "chapter": 2, "inDays": 12, "note": "Что человек просит у Зоны и что получает" },
+   { "chapter": 3, "inDays": 19, "note": "Финальный разговор: это книга о пришельцах или о нас" }
+  ]
+ },
+ {
+  "slug": "non-fikshn-klub",
+  "name": "Нон-фикшн клуб",
+  "description": "Психология, экономика, наука — по делу и без воды. Каждую книгу разбираем по одному вопросу: что из неё можно применить в понедельник.",
+  "ownerEmail": "vera@example.com",
+  "isPrivate": false,
+  "currentBookSlug": "",
+  "schedule": [
+   { "chapter": 1, "inDays": 7, "note": "Главная мысль книги одним абзацем" },
+   { "chapter": 2, "inDays": 14, "note": "Что в книге вызывает сомнения" },
+   { "chapter": 3, "inDays": 21, "note": "Что забираем с собой" }
+  ]
+ }
+]

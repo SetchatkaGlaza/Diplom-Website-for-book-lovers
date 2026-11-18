@@ -1,0 +1,45 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Админка / Партнёрства</p>
+      <hr class="rule">
+      <a class="micro-label" href="/admin/svodka">сводка →</a>
+      <a class="micro-label" href="/admin/obratnaya-svyaz">обратная связь →</a>
+    </div>
+
+    <h1 class="page-title">Заявки от клубов и библиотек</h1>
+    <p class="lede">
+      Здесь то, что приходит с <a href="/klubam-i-bibliotekam">страницы для партнёров</a>.
+      Отдельно от обратной связи: такие письма требуют ответа и договорённости,
+      а не исправления бага.
+    </p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <% if (!items.length) { %>
+      <div class="empty-state">
+        <p class="empty-state__title">Заявок пока нет</p>
+        <p class="empty-state__text">
+          Это нормально до первых писем библиотекам. Ссылка на страницу для партнёров —
+          <a href="/klubam-i-bibliotekam">/klubam-i-bibliotekam</a>
+        </p>
+        <div class="empty-state__actions"><a class="btn" href="/admin/obratnaya-svyaz">Обратная связь</a></div>
+      </div>
+    <% } else { %>
+      <ul class="list-clean">
+        <% items.forEach((item) => { %>
+          <li class="card">
+            <p class="micro-label">
+              № <%= item.id %> · <%= item.kind %> · <%= new Date(item.createdAt).toISOString().slice(0, 16).replace('T', ' ') %>
+            </p>
+            <p class="card__title"><%= item.organization %></p>
+            <p class="hint-text"><strong><%= item.name %></strong> · <a href="mailto:<%= item.email %>"><%= item.email %></a></p>
+            <p class="hint-text"><%= item.text %></p>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>

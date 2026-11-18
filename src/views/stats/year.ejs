@@ -1,0 +1,168 @@
+<% const maxMonth = Math.max(1, ...data.months.map((m) => m.count)); %>
+<% const goalShare = data.goal && data.goal.target ? Math.min(20, Math.round((data.goal.finished / data.goal.target) * 20)) : 0; %>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Книжный год / <%= data.year %></p>
+      <hr class="rule">
+      <form class="inline-form" method="get" action="/knizhnyy-god">
+        <label class="micro-label" for="god">Год</label>
+        <select class="field__input field__input--inline" id="god" name="god">
+          <% years.forEach((option) => { %>
+            <option value="<%= option %>" <%= option === data.year ? 'selected' : '' %>><%= option %></option>
+          <% }) %>
+        </select>
+        <button class="btn btn--ghost btn--small" type="submit">Показать</button>
+      </form>
+    </div>
+
+    <h1 class="page-title">Ваш книжный год</h1>
+    <p class="lead">
+      <%= data.totals.booksRead %> <%= t.plural(data.totals.booksRead, ['книга', 'книги', 'книг']) %>,
+      <%= data.totals.pagesRead %> страниц, <%= data.totals.reviews %>
+      <%= t.plural(data.totals.reviews, ['рецензия', 'рецензии', 'рецензий']) %>.
+    </p>
+
+    <div class="year-hero">
+      <div class="year-hero__card">
+        <p class="micro-label">Год</p>
+        <p class="year-hero__year"><%= data.year %></p>
+        <p class="year-hero__name"><%= person.name %></p>
+      </div>
+
+      <div class="year-hero__body">
+        <div class="stat-grid stat-grid--compact">
+          <div class="stat-card stat-card--accent">
+            <p class="stat-card__value"><%= data.totals.booksRead %></p>
+            <p class="stat-card__label">книг</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-card__value"><%= data.totals.pagesRead %></p>
+            <p class="stat-card__label">страниц</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-card__value"><%= data.totals.longestStreak %></p>
+            <p class="stat-card__label">дней подряд</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-card__value"><%= data.totals.daysActive %></p>
+            <p class="stat-card__label">дней с книгой</p>
+          </div>
+        </div>
+
+        <% if (data.goal) { %>
+          <div class="goal-line">
+            <p class="goal-line__text">
+              Цель: <%= data.goal.target %> <%= t.plural(data.goal.target, ['книга', 'книги', 'книг']) %>.
+              Закрыто <%= data.goal.finished %>.
+            </p>
+            <div class="progress" role="img" aria-label="Цель выполнена на <%= Math.round((data.goal.finished / data.goal.target) * 100) %>%">
+              <div class="progress__bar progress__bar--step<%= goalShare %>"></div>
+            </div>
+          </div>
+        <% } %>
+
+        <div class="cluster year-hero__actions">
+          <a class="btn btn--primary" href="/knizhnyy-god/kartinka?god=<%= data.year %>&format=story"
+             download="knizhnyy-god-<%= data.year %>.png">Скачать для сторис 1080×1350</a>
+          <a class="btn btn--ghost" href="/knizhnyy-god/kartinka?god=<%= data.year %>&format=square"
+             download="knizhnyy-god-<%= data.year %>-kvadrat.png">Квадрат 1080×1080</a>
+        </div>
+        <p class="field__hint">Картинка собирается на сервере: без водяных знаков и внешних сервисов.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight section--warm">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">02 / Жанры года</p>
+      <hr class="rule">
+    </div>
+
+    <% if (!data.genres.length) { %>
+      <p class="empty-state__text">Жанры появятся, когда будут закрытые книги за этот год.</p>
+    <% } else { %>
+      <ul class="genre-bars list-clean">
+        <% data.genres.forEach((genre, index) => { %>
+          <li class="genre-bar">
+            <span class="genre-bar__name"><a href="/knigi?zhanr=<%= genre.slug %>"><%= genre.name %></a></span>
+            <span class="genre-bar__track">
+              <span class="genre-bar__fill<%= index === 0 ? ' genre-bar__fill--amber' : '' %> progress__bar--step<%= Math.max(1, Math.round((genre.count / data.genres[0].count) * 20)) %>"></span>
+            </span>
+            <span class="genre-bar__count"><%= genre.count %></span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">03 / Ритм</p>
+      <hr class="rule">
+      <span class="micro-label">книг по месяцам</span>
+    </div>
+    <ul class="month-bars list-clean" aria-label="Книги по месяцам">
+      <% data.months.forEach((month) => { %>
+        <li class="month-bar">
+          <span class="month-bar__column">
+            <span class="month-bar__fill progress__bar--i<%= Math.round((month.count / maxMonth) * 20) %>"></span>
+          </span>
+          <span class="month-bar__label"><%= month.label %></span>
+          <span class="sr-only"><%= month.count %> книг</span>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+
+<section class="section section--tight section--warm">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">04 / Что прочитано</p>
+      <hr class="rule">
+      <span class="micro-label"><%= data.books.length %> книг</span>
+    </div>
+
+    <% if (!data.books.length) { %>
+      <p class="empty-state__text">За <%= data.year %> год пока пусто. Начните с полки — отметка «прочитал» всё посчитает.</p>
+    <% } else { %>
+      <ol class="year-books list-clean">
+        <% data.books.forEach((book) => { %>
+          <li class="year-books__item">
+            <span class="year-books__title"><%= book.title %></span>
+            <span class="year-books__author"><%= book.author %></span>
+            <span class="year-books__pages"><%= book.pages %> стр.</span>
+          </li>
+        <% }) %>
+      </ol>
+    <% } %>
+  </div>
+</section>
+
+<% if (achievements.length) { %>
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">05 / Достижения</p>
+      <hr class="rule">
+      <span class="micro-label"><%= achievements.filter((a) => a.unlocked).length %> из <%= achievements.length %></span>
+    </div>
+
+    <ul class="badge-grid list-clean">
+      <% achievements.forEach((achievement) => { %>
+        <li class="badge-card<%= achievement.unlocked ? ' badge-card--on' : '' %>">
+          <span class="badge-card__mark" aria-hidden="true"><%= achievement.unlocked ? '★' : '·' %></span>
+          <span class="badge-card__title"><%= achievement.title %></span>
+          <span class="badge-card__hint"><%= achievement.hint %></span>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+<% } %>

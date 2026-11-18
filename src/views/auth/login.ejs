@@ -1,0 +1,41 @@
+<section class="auth">
+  <div class="container auth__inner">
+    <div class="auth__intro">
+      <p class="micro-label">Вход</p>
+      <h1 class="auth__title">С возвращением</h1>
+      <p class="auth__lead">Ваши книги, прогресс и статистика ждут на месте.</p>
+    </div>
+
+    <form class="auth__form card" method="post" action="/vhod" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <% if (errors.form) { %><p class="form-error" role="alert"><%= errors.form %></p><% } %>
+
+      <%- include('../partials/field', {
+        name: 'email',
+        label: 'E-mail',
+        type: 'email',
+        value: formData.email || '',
+        error: errors.email,
+        autocomplete: 'email'
+      }) %>
+
+      <%- include('../partials/field', {
+        name: 'password',
+        label: 'Пароль',
+        type: 'password',
+        error: errors.password,
+        autocomplete: 'current-password'
+      }) %>
+
+      <button class="btn btn--primary btn--block" type="submit">Войти</button>
+
+      <p class="auth__foot">
+        <a href="/vosstanovit-parol">Забыли пароль?</a>
+      </p>
+      <p class="auth__foot">
+        Нет аккаунта? <a href="/registratsiya">Зарегистрироваться</a>
+      </p>
+    </form>
+  </div>
+</section>

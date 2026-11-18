@@ -1,0 +1,56 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Админка / Люди</p>
+      <hr class="rule">
+      <a class="micro-label" href="/admin/zhaloby">← к жалобам</a>
+    </div>
+
+    <h1 class="page-title">Пользователи</h1>
+
+    <form class="search-form" method="get" action="/admin/polzovateli" role="search">
+      <label class="sr-only" for="q">Поиск по имени</label>
+      <input class="field__input" id="q" name="q" type="search" value="<%= search %>" placeholder="Имя">
+      <button class="btn btn--ghost" type="submit">Искать</button>
+    </form>
+
+    <ul class="list-clean admin-users">
+      <% users.forEach((user) => { %>
+        <li class="admin-user">
+          <div class="admin-user__body">
+            <p class="admin-user__name">
+              <a href="/chitateli/<%= user.id %>"><%= user.name %></a>
+              <% if (user.role !== 'user') { %><span class="pill pill--amber"><%= user.role %></span><% } %>
+              <% if (user.isBlocked) { %><span class="pill pill--danger">заблокирован</span><% } %>
+            </p>
+            <p class="micro-label">
+              <%= user.email %> · уровень: <%= (levels[user.trustLevel] || levels[0]).label %>
+              <% if (user.blockedUntil) { %> · до <%= t.formatDate(user.blockedUntil) %><% } %>
+            </p>
+          </div>
+
+          <div class="admin-user__actions">
+            <% if (user.isBlocked) { %>
+              <form method="post" action="/admin/polzovateli/<%= user.id %>/blokirovka">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="unblock" value="1">
+                <button class="btn btn--ghost btn--small" type="submit">Разблокировать</button>
+              </form>
+            <% } else if (!['admin', 'moderator'].includes(user.role)) { %>
+              <form class="inline-form" method="post" action="/admin/polzovateli/<%= user.id %>/blokirovka">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input class="field__input field__input--inline" name="days" type="number" min="1" max="3650"
+                       value="7" aria-label="Дней блокировки">
+                <input class="field__input field__input--inline" name="reason" maxlength="500"
+                       placeholder="Причина" aria-label="Причина">
+                <button class="btn btn--ghost btn--small" type="submit">Блокировать</button>
+              </form>
+            <% } else { %>
+              <span class="micro-label">защищённая роль</span>
+            <% } %>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>

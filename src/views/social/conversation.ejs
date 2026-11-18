@@ -1,0 +1,35 @@
+<section class="section section--tight">
+  <div class="container container--narrow">
+    <nav class="breadcrumb" aria-label="Хлебные крошки">
+      <a href="/soobshcheniya">Сообщения</a> <span aria-hidden="true">/</span> <span><%= conversation.other.name %></span>
+    </nav>
+
+    <div class="catalog-head">
+      <h1 class="catalog-head__title"><%= conversation.other.name %></h1>
+      <a class="btn btn--ghost btn--sm" href="/chitateli/<%= conversation.other.id %>">Профиль →</a>
+    </div>
+
+    <ol class="message-list list-clean" id="messages">
+      <% if (!messages.length) { %>
+        <li class="message-list__empty">Сообщений пока нет — напишите первым.</li>
+      <% } %>
+      <% messages.forEach((message) => { %>
+        <li class="message<%= message.isOwn ? ' message--own' : '' %>">
+          <div class="message__bubble"><%= message.body %></div>
+          <p class="message__meta">
+            <%= t.timeAgo(message.createdAt) %>
+            <% if (message.isOwn) { %>· <%= message.readAt ? 'прочитано' : 'отправлено' %><% } %>
+          </p>
+        </li>
+      <% }) %>
+    </ol>
+
+    <form class="message-form" method="post" action="/soobshcheniya/<%= conversation.id %>">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label class="sr-only" for="body">Сообщение</label>
+      <textarea class="field__input field__input--area" id="body" name="body" maxlength="4000"
+                placeholder="Напишите сообщение" required></textarea>
+      <button class="btn btn--primary" type="submit">Отправить</button>
+    </form>
+  </div>
+</section>

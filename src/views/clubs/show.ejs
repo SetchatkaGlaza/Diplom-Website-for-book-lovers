@@ -1,0 +1,288 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">
+        01 / Клуб<% if (club.isPrivate) { %> · закрытый<% } %>
+      </p>
+      <hr class="rule">
+      <a class="micro-label" href="/kluby">← все клубы</a>
+    </div>
+
+    <div class="club-head">
+      <img class="club-head__cover" src="/kartinki/klub/<%= club.slug %>"
+           alt="Клуб «<%= club.name %>»" width="1200" height="420" fetchpriority="high">
+      <div class="club-head__body">
+        <h1 class="page-title"><%= club.name %></h1>
+        <p class="lead"><%= club.description %></p>
+        <p class="micro-label">
+          <%= club.membersCount %> <%= t.plural(club.membersCount, ['участник', 'участника', 'участников']) %>
+          · <%= club.postsCount %> <%= t.plural(club.postsCount, ['сообщение', 'сообщения', 'сообщений']) %>
+          · владелец: <%= owner ? owner.name : '—' %>
+        </p>
+      </div>
+
+      <div class="club-head__actions">
+        <% if (!currentUser) { %>
+          <a class="btn btn--primary" href="/vhod">Войти, чтобы вступить</a>
+        <% } else if (rights.canLeave) { %>
+          <form method="post" action="/kluby/<%= club.slug %>/vyyti">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn--ghost" type="submit">Выйти из клуба</button>
+          </form>
+        <% } else if (rights.isOwner) { %>
+          <span class="pill pill--amber">Вы владелец</span>
+        <% } else if (rights.canRequest) { %>
+          <form class="inline-form" method="post" action="/kluby/<%= club.slug %>/vstupit">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input class="field__input field__input--inline" name="message" maxlength="300"
+                   placeholder="Пара слов владельцу" aria-label="Сообщение к заявке">
+            <button class="btn btn--primary" type="submit">Подать заявку</button>
+          </form>
+        <% } else if (rights.canJoin) { %>
+          <form method="post" action="/kluby/<%= club.slug %>/vstupit">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn--primary" type="submit">Вступить</button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<% if (currentBook) { %>
+<section class="section section--tight section--warm">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">02 / Книга месяца</p>
+      <hr class="rule">
+      <span class="micro-label">Читаем сейчас</span>
+    </div>
+
+    <article class="club-book">
+      <div>
+        <h2 class="club-book__title"><a href="/knigi/<%= currentBook.slug %>"><%= currentBook.title %></a></h2>
+        <p class="club-book__author"><%= currentBook.author %> · <%= currentBook.pages %> стр.</p>
+      </div>
+      <a class="btn btn--ghost" href="/knigi/<%= currentBook.slug %>">К книге</a>
+    </article>
+  </div>
+</section>
+<% } %>
+
+<% if (rights.canEdit) { %>
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">03 / Управление</p>
+      <hr class="rule">
+      <span class="micro-label">видно только владельцу и модераторам</span>
+    </div>
+
+    <div class="club-admin">
+      <form class="card" method="post" action="/kluby/<%= club.slug %>/redaktirovat">
+        <h2 class="settings__title">Настройки клуба</h2>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <div class="field">
+          <label class="field__label" for="club-name">Название</label>
+          <input class="field__input" id="club-name" name="name" type="text" maxlength="120" value="<%= club.name %>">
+        </div>
+        <div class="field">
+          <label class="field__label" for="club-description">Описание</label>
+          <textarea class="field__input field__input--area" id="club-description" name="description" rows="4"
+                    maxlength="2000"><%= club.description %></textarea>
+        </div>
+        <div class="field">
+          <label class="field__label" for="club-book">Книга месяца (адрес книги в каталоге)</label>
+          <input class="field__input" id="club-book" name="currentBookId" type="number" min="1"
+                 value="<%= club.currentBookId || '' %>" placeholder="id книги">
+          <p class="field__hint">Откройте книгу в каталоге — номер видно в адресе страницы.</p>
+        </div>
+        <label class="field__check">
+          <input type="checkbox" name="isPrivate" value="1" <%= club.isPrivate ? 'checked' : '' %>>
+          <span>Закрытый клуб</span>
+        </label>
+        <button class="btn btn--ghost" type="submit">Сохранить</button>
+      </form>
+
+      <div class="card">
+        <h2 class="settings__title">Расписание по главам</h2>
+        <% if (schedule.length) { %>
+          <ul class="list-clean club-schedule">
+            <% schedule.forEach((item) => { %>
+              <li class="club-schedule__item">
+                <span class="pill pill--amber">гл. <%= item.chapter %></span>
+                <span><%= t.formatDate(item.discussionOn) %></span>
+                <% if (item.note) { %><span class="club-schedule__note"><%= item.note %></span><% } %>
+              </li>
+            <% }) %>
+          </ul>
+        <% } else { %>
+          <p class="field__hint">Пока пусто. Добавьте первую главу — участники увидят, к какому числу читать.</p>
+        <% } %>
+
+        <form class="inline-form" method="post" action="/kluby/<%= club.slug %>/raspisanie">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input class="field__input field__input--inline" name="chapter" type="number" min="1" max="2000"
+                 placeholder="Глава" aria-label="Глава" required>
+          <input class="field__input field__input--inline" name="discussionOn" type="date" aria-label="Дата обсуждения" required>
+          <input class="field__input field__input--inline" name="note" maxlength="300" placeholder="Заметка" aria-label="Заметка">
+          <button class="btn btn--ghost btn--small" type="submit">Добавить</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 class="settings__title">Приглашение по ссылке</h2>
+        <p class="field__hint">Одноразовая ссылка сработает один раз. Для открытых клубов хватит и обычной страницы.</p>
+        <form class="inline-form" method="post" action="/kluby/<%= club.slug %>/priglashenie">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input class="field__input field__input--inline" name="maxUses" type="number" min="1" max="100" value="1"
+                 aria-label="Сколько раз можно использовать">
+          <input class="field__input field__input--inline" name="days" type="number" min="1" max="365" value="14"
+                 aria-label="Срок в днях">
+          <button class="btn btn--ghost btn--small" type="submit">Создать ссылку</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<% if (rights.canEdit && pendingRequests.length) { %>
+<section class="section section--tight section--warm">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">04 / Заявки</p>
+      <hr class="rule">
+      <span class="micro-label"><%= pendingRequests.length %> ждут ответа</span>
+    </div>
+
+    <ul class="list-clean club-requests">
+      <% pendingRequests.forEach((request) => { %>
+        <li class="club-request">
+          <div>
+            <p class="club-request__name"><%= request.user.name %></p>
+            <% if (request.message) { %><p class="club-request__message"><%= request.message %></p><% } %>
+          </div>
+          <div class="cluster">
+            <form method="post" action="/kluby/<%= club.slug %>/zayavka/<%= request.id %>">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="decision" value="accept">
+              <button class="btn btn--primary btn--small" type="submit">Принять</button>
+            </form>
+            <form method="post" action="/kluby/<%= club.slug %>/zayavka/<%= request.id %>">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="decision" value="reject">
+              <button class="btn btn--ghost btn--small" type="submit">Отклонить</button>
+            </form>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+<% } %>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">05 / Обсуждение</p>
+      <hr class="rule">
+      <span class="micro-label">до главы — без спойлеров</span>
+    </div>
+
+    <% if (posts.length) { %>
+      <ul class="list-clean club-posts">
+        <% posts.forEach((post) => { %>
+          <li class="club-post">
+            <p class="club-post__meta micro-label">
+              <%= post.user.name %>
+              <% if (post.chapter) { %> · глава <%= post.chapter %><% } %>
+              · <%= t.timeAgo(post.createdAt) %>
+              <% if (post.hasSpoilers) { %><span class="pill pill--danger">спойлер</span><% } %>
+            </p>
+
+            <% if (post.blockedByChapter) { %>
+              <div class="spoiler-note">
+                <p>Спойлер к главе <%= post.blockedByChapter %>. Откроется, когда дойдёте до неё.</p>
+                <form method="get" action="/kluby/<%= club.slug %>">
+                  <input type="hidden" name="glava" value="<%= post.blockedByChapter %>">
+                  <button class="btn btn--ghost btn--small" type="submit">Я уже на этой главе</button>
+                </form>
+              </div>
+            <% } else { %>
+              <p class="club-post__body"><%= post.body %></p>
+            <% } %>
+
+            <% if (rights.canModerate) { %>
+              <form class="inline-form" method="post" action="/kluby/<%= club.slug %>/post/<%= post.id %>/skryt">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button class="btn btn--ghost btn--small" type="submit">Скрыть</button>
+              </form>
+            <% } %>
+          </li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p class="empty-state__text">Обсуждение ещё не началось. Напишите первым — коротко и без спойлеров.</p>
+    <% } %>
+
+    <% if (rights.canPost) { %>
+      <form class="card comment-form" method="post" action="/kluby/<%= club.slug %>/obsuzhdenie">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="field">
+          <label class="field__label" for="post-body">Ваше сообщение</label>
+          <textarea class="field__input field__input--area" id="post-body" name="body" rows="4"
+                    minlength="2" maxlength="8000" required
+                    placeholder="Впечатления, мысли, вопросы к главе"></textarea>
+        </div>
+        <div class="cluster">
+          <input class="field__input field__input--inline" name="chapter" type="number" min="1" max="2000"
+                 placeholder="Глава" aria-label="Глава">
+          <label class="field__check">
+            <input type="checkbox" name="hasSpoilers" value="1">
+            <span>Есть спойлер — показывать только тем, кто дошёл до этой главы</span>
+          </label>
+          <button class="btn btn--primary" type="submit">Отправить</button>
+        </div>
+      </form>
+    <% } else if (!currentUser) { %>
+      <p class="empty-state__text"><a href="/vhod">Войдите</a>, чтобы участвовать в обсуждении.</p>
+    <% } %>
+  </div>
+</section>
+
+<section class="section section--tight section--warm">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">06 / Участники</p>
+      <hr class="rule">
+      <span class="micro-label"><%= members.length %></span>
+    </div>
+
+    <ul class="people-list list-clean">
+      <% members.forEach((member) => { %>
+        <li class="people-item">
+          <div class="people-item__body">
+            <a class="people-item__name" href="/chitateli/<%= member.user.id %>"><%= member.user.name %></a>
+            <p class="people-item__bio">
+              <%= member.role === 'owner' ? 'владелец' : member.role === 'moderator' || member.role === 'lead' ? 'модератор' : 'участник' %>
+            </p>
+          </div>
+
+          <% if (rights.canManageRoles && member.role !== 'owner') { %>
+            <form class="inline-form" method="post" action="/kluby/<%= club.slug %>/rol">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="userId" value="<%= member.user.id %>">
+              <select class="field__input field__input--inline" name="role" aria-label="Роль">
+                <option value="member" <%= member.role === 'member' ? 'selected' : '' %>>участник</option>
+                <option value="moderator" <%= member.role === 'moderator' ? 'selected' : '' %>>модератор</option>
+              </select>
+              <button class="btn btn--ghost btn--small" type="submit">Сохранить</button>
+            </form>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>

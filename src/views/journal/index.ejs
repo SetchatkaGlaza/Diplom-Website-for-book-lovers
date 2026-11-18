@@ -1,0 +1,79 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">04 / Журнал</p>
+      <hr class="rule">
+      <a class="micro-label" href="/podborki">подборки →</a>
+    </div>
+
+    <h1 class="page-title">Журнал</h1>
+    <p class="lede">Тексты о том, как читать: без «десяти книг, которые изменят жизнь». Что делать с недочитанным, как вести дневник, что взять в дорогу и что ответить тому, кто говорит «я не читаю».</p>
+    <% if (stats.count) { %>
+      <p class="micro-label"><%= stats.count %> <%= t.plural(stats.count, ['статья', 'статьи', 'статей']) %> · <%= stats.topics %> <%= t.plural(stats.topics, ['тема', 'темы', 'тем']) %></p>
+    <% } %>
+  </div>
+</section>
+
+<% if (!isReady) { %>
+<section class="section section--tight">
+  <div class="container">
+    <div class="empty-state">
+      <h2 class="empty-state__title">Журнал временно закрыт</h2>
+      <p class="empty-state__text">В текстах нашлась ошибка разметки. Мы уже чиним — каталог и полка работают как обычно.</p>
+      <div class="empty-state__actions"><a class="btn btn--primary" href="/knigi">В каталог</a></div>
+    </div>
+  </div>
+</section>
+<% } else { %>
+
+<section class="section section--tight">
+  <div class="container">
+    <nav class="journal-topics" aria-label="Темы журнала">
+      <a class="journal-topic <%= !activeTopic ? 'journal-topic--active' : '' %>" href="/zhurnal">все</a>
+      <% topics.forEach((topic) => { %>
+        <a class="journal-topic <%= activeTopic === topic.name ? 'journal-topic--active' : '' %>"
+           href="/zhurnal?tema=<%= encodeURIComponent(topic.name) %>"><%= topic.name %> <span class="journal-topic__count"><%= topic.count %></span></a>
+      <% }) %>
+    </nav>
+  </div>
+</section>
+
+<% groups.forEach((group) => { %>
+  <% if (!group.articles.length) return; %>
+  <section class="section section--tight">
+    <div class="container">
+      <div class="section-head">
+        <p class="micro-label"><%= group.name %></p>
+        <hr class="rule">
+        <p class="micro-label"><%= group.articles.length %> <%= t.plural(group.articles.length, ['текст', 'текста', 'текстов']) %></p>
+      </div>
+
+      <ul class="journal-list list-clean">
+        <% group.articles.forEach((article) => { %>
+          <li class="journal-item">
+            <a class="journal-item__link" href="/zhurnal/<%= article.slug %>">
+              <div class="journal-item__meta">
+                <span class="micro-label"><%= article.datePublished ? article.datePublished.split('-').reverse().join('.') : '' %></span>
+                <span class="micro-label"><%= article.readingMinutes %> <%= t.plural(article.readingMinutes, ['минута', 'минуты', 'минут']) %></span>
+              </div>
+              <h2 class="journal-item__title"><%= article.title %></h2>
+              <p class="journal-item__text"><%= article.description %></p>
+            </a>
+          </li>
+        <% }) %>
+      </ul>
+    </div>
+  </section>
+<% }) %>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Дальше</p>
+      <hr class="rule">
+    </div>
+    <p class="lede">Статьи объясняют, зачем вести дневник. Дневник — это полка, оценки и статистика, которые собираются сами.</p>
+    <p><a class="btn btn--primary" href="/registratsiya">Начать дневник</a> <a class="btn" href="/podborki">Посмотреть подборки</a></p>
+  </div>
+</section>
+<% } %>

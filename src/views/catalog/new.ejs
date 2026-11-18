@@ -1,0 +1,107 @@
+<section class="section section--tight">
+  <div class="container container--narrow">
+    <nav class="breadcrumb" aria-label="Хлебные крошки">
+      <a href="/">Главная</a> <span aria-hidden="true">/</span>
+      <a href="/knigi">Каталог</a> <span aria-hidden="true">/</span>
+      <span>Новая книга</span>
+    </nav>
+    <p class="micro-label">Добавление</p>
+    <h1>Новая книга</h1>
+    <p class="book-page__description">
+      Если книги нет в каталоге — добавьте её сами. Название и автор обязательны,
+      остальное можно заполнить позже. Полные тексты книг мы не публикуем.
+    </p>
+
+    <form class="card" method="post" action="/knigi" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <% if (errors.form) { %><p class="form-error" role="alert"><%= errors.form %></p><% } %>
+
+      <%- include('../partials/field', {
+        name: 'title',
+        label: 'Название',
+        value: formData.title || '',
+        error: errors.title,
+        autocomplete: 'off'
+      }) %>
+
+      <%- include('../partials/field', {
+        name: 'author',
+        label: 'Автор',
+        value: formData.author || '',
+        error: errors.author,
+        autocomplete: 'off',
+        hint: 'Если авторов двое, пишите через «и»: Аркадий и Борис Стругацкие'
+      }) %>
+
+      <div class="form-grid">
+        <%- include('../partials/field', {
+          name: 'year',
+          label: 'Год издания',
+          type: 'number',
+          value: formData.year || '',
+          error: errors.year,
+          required: false,
+          autocomplete: 'off'
+        }) %>
+        <%- include('../partials/field', {
+          name: 'pages',
+          label: 'Страниц',
+          type: 'number',
+          value: formData.pages || '',
+          error: errors.pages,
+          required: false,
+          autocomplete: 'off'
+        }) %>
+      </div>
+
+      <div class="field <%= errors.genres ? 'field--invalid' : '' %>">
+        <span class="field__label" id="genres-label">Жанры (можно несколько)</span>
+        <div class="check-grid" role="group" aria-labelledby="genres-label" <%= errors.genres ? 'aria-describedby="err-genres"' : '' %>>
+          <% const chosen = Array.isArray(formData.genres) ? formData.genres.map(String) : []; %>
+          <% genres.forEach((genre) => { %>
+            <label class="check">
+              <input type="checkbox" name="genres" value="<%= genre.id %>" <%= chosen.includes(String(genre.id)) ? 'checked' : '' %>>
+              <span><%= genre.name %></span>
+            </label>
+          <% }) %>
+        </div>
+        <% if (errors.genres) { %><p class="field__error" id="err-genres"><%= errors.genres %></p><% } %>
+      </div>
+
+      <%- include('../partials/field', {
+        name: 'publisher',
+        label: 'Издательство',
+        value: formData.publisher || '',
+        error: errors.publisher,
+        required: false,
+        autocomplete: 'off'
+      }) %>
+
+      <%- include('../partials/field', {
+        name: 'isbn',
+        label: 'ISBN',
+        value: formData.isbn || '',
+        error: errors.isbn,
+        required: false,
+        autocomplete: 'off',
+        hint: 'Необязательно. Пригодится, чтобы не задваивать книги'
+      }) %>
+
+      <div class="field<%= errors.description ? ' field--invalid' : '' %>">
+        <label class="field__label" for="description">О книге</label>
+        <textarea class="field__input field__input--area" id="description" name="description" maxlength="4000"
+                  <%= errors.description ? 'aria-invalid="true" aria-describedby="err-description"' : '' %>><%= formData.description || '' %></textarea>
+        <% if (errors.description) { %>
+          <p class="field__error" id="err-description"><%= errors.description %></p>
+        <% } else { %>
+          <p class="field__hint">Своими словами, без пересказа всего сюжета и без спойлеров.</p>
+        <% } %>
+      </div>
+
+      <div class="cluster">
+        <button class="btn btn--primary" type="submit">Добавить книгу</button>
+        <a class="btn btn--ghost" href="/knigi">Отмена</a>
+      </div>
+    </form>
+  </div>
+</section>
