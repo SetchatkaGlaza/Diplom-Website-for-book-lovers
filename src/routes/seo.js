@@ -61,7 +61,8 @@ module.exports = function seoRoutes({ models, services }) {
         { loc: '/soglashenie', priority: '0.3', changefreq: 'monthly' },
         { loc: '/konfidentsialnost', priority: '0.3', changefreq: 'monthly' },
         { loc: '/pravoobladatelyam', priority: '0.4', changefreq: 'monthly' },
-        { loc: '/o-proekte', priority: '0.4', changefreq: 'monthly' }
+        { loc: '/o-proekte', priority: '0.4', changefreq: 'monthly' },
+        { loc: '/klubam-i-bibliotekam', priority: '0.5', changefreq: 'monthly' }
       ];
 
       // Статьи журнала: единственная часть сайта, которая растёт без
