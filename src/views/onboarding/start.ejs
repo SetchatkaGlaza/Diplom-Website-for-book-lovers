@@ -1,0 +1,93 @@
+<section class="section">
+  <div class="container container--narrow">
+    <div class="section-head">
+      <p class="micro-label">Шаг <%= steps.find((item) => item.key === step).number %> из <%= steps.length %></p>
+      <hr class="rule">
+      <a class="micro-label" href="/polka">пропустить и к полке</a>
+    </div>
+
+    <h1 class="page-title"><%= steps.find((item) => item.key === step).title %></h1>
+
+    <ol class="step-dots list-clean" aria-label="Шаги настройки">
+      <% steps.forEach((item) => { %>
+        <li class="step-dots__item<%= item.key === step ? ' step-dots__item--current' : '' %>">
+          <span class="step-dots__number"><%= item.number %></span>
+          <span class="step-dots__label"><%= item.title %></span>
+        </li>
+      <% }) %>
+    </ol>
+
+    <% if (step === 'zhanry') { %>
+      <p class="lead">Выберите, что вам близко. Покажем книги этих жанров — можно добавить три на полку сразу.</p>
+      <% if (errors.genres) { %><p class="form-error" role="alert"><%= errors.genres %></p><% } %>
+
+      <form method="post" action="/start/zhanry">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <fieldset class="genre-choices">
+          <legend class="sr-only">Жанры</legend>
+          <% genres.forEach((genre) => { %>
+            <label class="chip">
+              <input type="checkbox" name="zhanry" value="<%= genre.id %>"
+                     <%= selected.includes(genre.id) ? 'checked' : '' %>>
+              <span><%= genre.name %></span>
+            </label>
+          <% }) %>
+        </fieldset>
+        <button class="btn btn--primary" type="submit">Дальше: книги</button>
+      </form>
+    <% } %>
+
+    <% if (step === 'knigi') { %>
+      <p class="lead">Три книги — хорошее начало. Возьмите те, что давно хотели прочитать.</p>
+      <% if (errors.books) { %><p class="form-error" role="alert"><%= errors.books %></p><% } %>
+
+      <% if (!books.length) { %>
+        <div class="empty-state">
+          <p class="empty-state__text">По этим жанрам пока нет свободных книг. <a href="/knigi">Откройте каталог</a> и добавьте вручную.</p>
+        </div>
+      <% } else { %>
+        <form method="post" action="/start/knigi">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="zhanry" value="<%= selected.join(',') %>">
+
+          <ul class="suggest-list list-clean">
+            <% books.forEach((book) => { %>
+              <li class="suggest-item">
+                <label class="suggest-item__label">
+                  <input type="checkbox" name="bookIds" value="<%= book.id %>">
+                  <span class="suggest-item__title"><%= book.title %></span>
+                </label>
+                <p class="suggest-item__meta micro-label">
+                  <%= book.author %>
+                  <% if (book.pages) { %> · <%= book.pages %> стр.<% } %>
+                  <% if (book.genres.length) { %> · <%= book.genres.join(', ') %><% } %>
+                </p>
+              </li>
+            <% }) %>
+          </ul>
+
+          <div class="cluster">
+            <button class="btn btn--primary" type="submit">Дальше: цель</button>
+            <a class="btn btn--ghost" href="/knigi">Выбрать из каталога</a>
+          </div>
+        </form>
+      <% } %>
+    <% } %>
+
+    <% if (step === 'tsel') { %>
+      <p class="lead">Сколько книг хотите прочитать за год? Цель можно поменять в любой момент — это ориентир, а не экзамен.</p>
+      <% if (errors.target) { %><p class="form-error" role="alert"><%= errors.target %></p><% } %>
+
+      <form class="card auth-form" method="post" action="/start/tsel">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="field">
+          <label class="field__label" for="target">Книг за год</label>
+          <input class="field__input" id="target" name="target" type="number" min="1" max="1000"
+                 value="<%= formData.target || 12 %>" required>
+          <p class="field__hint">Для ориентира: 12 — это одна книга в месяц, 24 — две.</p>
+        </div>
+        <button class="btn btn--primary" type="submit">Готово, к полке</button>
+      </form>
+    <% } %>
+  </div>
+</section>

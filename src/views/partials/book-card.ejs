@@ -1,0 +1,22 @@
+<%# Карточка книги: используется в каталоге, подборках и на странице автора.
+    book — книга, badge — необязательная подпись сверху (например, «в подборке №4»). %>
+<li>
+  <a class="book-card" href="/knigi/<%= book.slug %>">
+    <div class="book-card__cover">
+      <div class="book-card__fallback" aria-hidden="true">
+        <span class="book-card__fallback-title"><%= book.title %></span>
+        <span class="book-card__fallback-author"><%= book.author %></span>
+      </div>
+    </div>
+    <p class="book-card__title"><%= book.title %></p>
+    <p class="book-card__author"><%= book.author %></p>
+    <p class="book-card__meta">
+      <% if (book.rating) { %>
+        <span class="book-card__rating"><%= book.rating %> ★</span>
+      <% } else { %>
+        <span>без оценки</span>
+      <% } %>
+      <% if (book.year) { %><span>· <%= book.year %></span><% } %>
+    </p>
+  </a>
+</li>

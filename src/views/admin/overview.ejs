@@ -1,0 +1,224 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Админка / Сводка</p>
+      <hr class="rule">
+      <a class="micro-label" href="/admin/zhaloby">жалобы →</a>
+      <a class="micro-label" href="/admin/polzovateli">пользователи →</a>
+    </div>
+
+    <h1 class="page-title">Что происходит на сайте</h1>
+    <p class="lede">Цифры на <%= new Date().toISOString().slice(0, 10) %>. Обновляются при каждом открытии страницы, ничего не кэшируется.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card stat-card--accent">
+        <p class="stat-card__value"><%= data.users.total %></p>
+        <p class="stat-card__label">читателей всего</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-card__value"><%= data.users.activeWeek %></p>
+        <p class="stat-card__label">были за неделю</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-card__value"><%= data.users.newWeek %></p>
+        <p class="stat-card__label">новых за неделю</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-card__value"><%= data.users.retentionWeek %>%</p>
+        <p class="stat-card__label">вернулись</p>
+      </div>
+    </div>
+
+    <p class="lede">
+      Возврат считается честно: человек зарегистрировался раньше недели и был на сайте
+      за последние 7 дней. Накрутить его регистрацией нельзя — поэтому это главная цифра.
+    </p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Воронка за <%= funnel.days %> дней</p>
+      <hr class="rule">
+      <span class="micro-label">где люди останавливаются</span>
+    </div>
+
+    <p class="lede">
+      Регистрация сама по себе ничего не значит: важно, дошёл ли человек до первой книги.
+      Доля считается от предыдущего шага — именно она показывает, где провал.
+    </p>
+
+    <% if (!funnel.registered) { %>
+      <div class="empty-state">
+        <p class="empty-state__title">За этот период никто не зарегистрировался</p>
+        <p class="empty-state__text">Воронка пустая, потому что регистраций нет. Это не ошибка расчёта.</p>
+      </div>
+    <% } else { %>
+      <table class="data-table">
+        <caption class="sr-only">Воронка активации за <%= funnel.days %> дней</caption>
+        <thead>
+          <tr>
+            <th scope="col">шаг</th>
+            <th scope="col">человек</th>
+            <th scope="col">от прошлого шага</th>
+            <th scope="col">от регистрации</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% funnel.steps.forEach((step) => { %>
+            <tr>
+              <th scope="row"><%= step.title %></th>
+              <td><%= step.count %></td>
+              <td>
+                <%- include('./partials/funnel-bar', { percent: step.fromPrevious }) %>
+              </td>
+              <td><%= step.fromStart %>%</td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+
+    <p class="micro-label">
+      Провал между шагами — это и есть задача: не «привести больше людей», а понять,
+      что происходит после предыдущего шага.
+    </p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Где уходят</p>
+      <hr class="rule">
+      <span class="micro-label">молчат дольше <%= dropoff.silentForDays %> дней · зарегистрированы за <%= dropoff.days %> дней</span>
+    </div>
+
+    <% if (!dropoff.total) { %>
+      <div class="empty-state">
+        <p class="empty-state__title">Никто не ушёл</p>
+        <p class="empty-state__text">Все, кто зарегистрировался за этот период, были на сайте за последнюю неделю.</p>
+      </div>
+    <% } else { %>
+      <ul class="list-clean">
+        <% dropoff.steps.forEach((step) => { %>
+          <li class="card">
+            <p class="micro-label"><%= step.count %> <%= t.plural(step.count, ['человек', 'человека', 'человек']) %> · <%= step.share %>% от ушедших</p>
+            <p class="card__title"><%= step.title %></p>
+            <p class="hint-text"><%= step.hint %></p>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">14 дней</p>
+      <hr class="rule">
+      <span class="micro-label">регистрации · полка · рецензии</span>
+    </div>
+
+    <table class="data-table">
+      <caption class="sr-only">Активность по дням за две недели</caption>
+      <thead>
+        <tr>
+          <th scope="col">день</th>
+          <th scope="col">регистрации</th>
+          <th scope="col">на полку</th>
+          <th scope="col">рецензии</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% data.series.registrations.forEach((day, index) => { %>
+          <tr>
+            <th scope="row"><%= day.day.slice(5) %></th>
+            <td><%= day.count %></td>
+            <td><%= data.series.entries[index] ? data.series.entries[index].count : 0 %></td>
+            <td><%= data.series.reviews[index] ? data.series.reviews[index].count : 0 %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Читают</p>
+      <hr class="rule">
+      <span class="micro-label">топ-10 книг по полкам</span>
+    </div>
+
+    <% if (!data.topBooks.length) { %>
+      <div class="empty-state">
+        <p class="empty-state__title">Пока пусто</p>
+        <p class="empty-state__text">Ни одной книги на полках. Стоит добавить первые — или залить демо-данные.</p>
+      </div>
+    <% } else { %>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">книга</th>
+            <th scope="col">на полке</th>
+            <th scope="col">дочитали</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% data.topBooks.forEach((book) => { %>
+            <tr>
+              <th scope="row"><%= book.title %><br><span class="micro-label"><%= book.author %></span></th>
+              <td><%= book.readers %></td>
+              <td><%= book.finished %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+
+    <div class="section-head">
+      <p class="micro-label">Жанры</p>
+      <hr class="rule">
+    </div>
+    <ul class="list-clean">
+      <% data.genreShare.forEach((genre) => { %>
+        <li class="plain-row">
+          <span><%= genre.name %></span>
+          <span class="micro-label"><%= genre.readers %> на полке</span>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Что поправить</p>
+      <hr class="rule">
+      <span class="micro-label">проверяется само</span>
+    </div>
+
+    <% if (!checklist.length) { %>
+      <div class="empty-state">
+        <p class="empty-state__title">Всё в порядке</p>
+        <p class="empty-state__text">Проверки пройдены: почта настроена, адресов хватает, описания на месте.</p>
+      </div>
+    <% } else { %>
+      <ul class="list-clean">
+        <% checklist.forEach((item) => { %>
+          <li class="card">
+            <p class="micro-label"><%= item.level === 'error' ? 'важно' : item.level === 'warn' ? 'стоит сделать' : 'для роста' %></p>
+            <p class="card__title"><%= item.title %></p>
+            <p class="hint-text"><%= item.hint %></p>
+            <p class="micro-label">что: <%= item.action %></p>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>

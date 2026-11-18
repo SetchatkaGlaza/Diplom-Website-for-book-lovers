@@ -1,0 +1,322 @@
+<script type="application/ld+json" nonce="<%= cspNonce %>"><%- structuredBook(book) %></script>
+<% if (reviews && reviews.items && reviews.items.length) { %>
+  <% reviews.items.slice(0, 10).forEach((review) => { %>
+    <script type="application/ld+json" nonce="<%= cspNonce %>"><%- structuredReview({
+      bookTitle: book.title,
+      rating: review.rating,
+      authorName: review.user ? review.user.name : '',
+      body: review.body || review.excerpt,
+      createdAt: review.createdAt
+    }) %></script>
+  <% }) %>
+<% } %>
+
+<section class="section section--tight">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Хлебные крошки">
+      <a href="/">Главная</a> <span aria-hidden="true">/</span>
+      <a href="/knigi">Каталог</a>
+      <% if (genres.length) { %>
+        <span aria-hidden="true">/</span>
+        <a href="/knigi?zhanr=<%= genres[0].slug %>"><%= genres[0].name %></a>
+      <% } %>
+    </nav>
+
+    <div class="book-page">
+      <div class="book-page__cover">
+        <div class="book-cover" role="img" aria-label="Обложка: <%= book.title %>">
+          <span class="book-cover__title"><%= book.title %></span>
+          <span class="book-cover__author"><%= book.author %></span>
+        </div>
+      </div>
+
+      <div class="book-page__info">
+        <p class="micro-label">Карточка книги</p>
+        <h1><%= book.title %></h1>
+        <p class="book-page__author"><%= book.author %></p>
+
+        <% if (inCollections && inCollections.length) { %>
+          <p class="micro-label">
+            в подборках:
+            <% inCollections.forEach((item, index) => { %><% if (index) { %>, <% } %><a href="/podborki/<%= item.slug %>"><%= item.title %></a><% }) %>
+          </p>
+        <% } %>
+
+        <div class="cluster">
+          <% if (book.rating) { %>
+            <span class="pill pill--amber"><%= book.rating %> из 5 ★</span>
+            <span class="micro-label"><%= book.ratingsCount %> <%= t.plural(book.ratingsCount, ['оценка', 'оценки', 'оценок']) %></span>
+          <% } else { %>
+            <span class="pill">Пока без оценок</span>
+          <% } %>
+          <% genres.forEach((genre) => { %>
+            <a class="pill" href="/knigi?zhanr=<%= genre.slug %>"><%= genre.name %></a>
+          <% }) %>
+        </div>
+
+        <dl class="facts">
+          <% if (book.year) { %><div class="facts__row"><dt>Год</dt><dd><%= book.year %></dd></div><% } %>
+          <% if (book.pages) { %><div class="facts__row"><dt>Страниц</dt><dd><%= book.pages %></dd></div><% } %>
+          <% if (book.publisher) { %><div class="facts__row"><dt>Издательство</dt><dd><%= book.publisher %></dd></div><% } %>
+          <% if (book.isbn) { %><div class="facts__row"><dt>ISBN</dt><dd><%= book.isbn %></dd></div><% } %>
+          <div class="facts__row"><dt>Читают</dt><dd><%= counts.reading %> сейчас, <%= counts.read %> <%= t.plural(counts.read, ['прочитал', 'прочитали', 'прочитали']) %></dd></div>
+          <% if (counts.want) { %><div class="facts__row"><dt>Хотят</dt><dd><%= counts.want %></dd></div><% } %>
+        </dl>
+
+        <% if (book.description) { %>
+          <p class="book-page__description"><%= book.description %></p>
+        <% } %>
+
+        <% if (currentUser) { %>
+          <div class="review-cta">
+            <% if (ownReview) { %>
+              <a class="btn btn--primary" href="/knigi/<%= book.slug %>/retsenziya">Изменить рецензию ↗</a>
+              <span class="micro-label">Ваша оценка: <%= ownReview.rating %> ★</span>
+            <% } else { %>
+              <a class="btn btn--primary" href="/knigi/<%= book.slug %>/retsenziya">Написать рецензию ↗</a>
+            <% } %>
+          </div>
+
+          <form class="shelf-form" method="post" action="/polka/<%= book.slug %>/status">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="return_to" value="/knigi/<%= book.slug %>">
+            <p class="micro-label">Моя полка</p>
+            <div class="shelf-form__buttons">
+              <% shelfStatuses.forEach((status) => { %>
+                <button class="btn <%= onShelf && onShelf.status === status.key ? 'btn--solid' : 'btn--ghost' %>"
+                        type="submit" name="status" value="<%= status.key %>"
+                        aria-pressed="<%= onShelf && onShelf.status === status.key ? 'true' : 'false' %>">
+                  <%= status.label %>
+                </button>
+              <% }) %>
+            </div>
+          </form>
+          <% if (onShelf) { %>
+            <div class="cluster">
+              <form class="inline-form" method="post" action="/polka/<%= book.slug %>/remove">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="return_to" value="/knigi/<%= book.slug %>">
+                <button class="btn btn--ghost btn--sm" type="submit">Убрать с полки</button>
+              </form>
+              <a class="link-arrow" href="/polka">Вся моя полка →</a>
+              <span class="micro-label">На полке: <%= onShelfLabel %></span>
+            </div>
+            <% if (onShelf.status === 'reading' || onShelf.status === 'read' || onShelf.status === 'dnf') { %>
+              <form class="progress-form progress-form--card" method="post" action="/polka/<%= book.slug %>/progress" data-progress-form>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="return_to" value="/knigi/<%= book.slug %>">
+                <label class="field__label" for="pages-card">Где вы остановились</label>
+                <div class="cluster">
+                  <input class="field__input field__input--inline" id="pages-card" name="pages" type="number"
+                         min="0" max="<%= onShelf.progressPages !== undefined && book.pages ? book.pages : 100000 %>"
+                         value="<%= onShelf.progressPages || 0 %>" inputmode="numeric">
+                  <button class="btn btn--ghost btn--sm" type="submit">Отметить</button>
+                </div>
+              </form>
+            <% } %>
+          <% } %>
+        <% } else { %>
+          <div class="cluster">
+            <a class="btn btn--primary" href="/registratsiya">Начать дневник ↗</a>
+            <a class="btn btn--ghost" href="/vhod">Уже есть аккаунт</a>
+          </div>
+          <p class="auth__foot">Чтобы положить книгу на полку, нужен аккаунт — это минута.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">02 / Рецензии</p>
+      <hr class="rule">
+      <a class="micro-label" href="/knigi/<%= book.slug %>#retsenzii"><%= t.reviews(reviews.total) %></a>
+    </div>
+
+    <% if (!reviews.items.length) { %>
+      <div class="empty-state">
+        <h2 class="empty-state__title">Рецензий пока нет</h2>
+        <p class="empty-state__text">Будьте первым: расскажите, что думаете об этой книге, и поставьте оценку.</p>
+        <div class="empty-state__actions">
+          <% if (currentUser) { %>
+            <a class="btn btn--primary" href="/knigi/<%= book.slug %>/retsenziya">Написать рецензию ↗</a>
+          <% } else { %>
+            <a class="btn btn--primary" href="/vhod">Войти и написать ↗</a>
+          <% } %>
+          <a class="btn btn--ghost" href="/knigi">Вернуться в каталог</a>
+        </div>
+      </div>
+    <% } else { %>
+      <ul class="review-list list-clean" id="retsenzii">
+        <% reviews.items.forEach((review) => { %>
+          <li class="review" id="review-<%= review.id %>">
+            <div class="review__head">
+              <span class="avatar" aria-hidden="true"><%= String(review.user.name || 'Ч').slice(0, 1) %></span>
+              <span class="review__user"><%= review.user.name %></span>
+              <span class="review__rating" aria-label="Оценка <%= review.rating %> из 5"><%= review.rating %> ★</span>
+              <span class="review__date"><%= t.formatDate(review.createdAt) %></span>
+            </div>
+            <% if (review.title) { %><h3 class="review__title"><%= review.title %></h3><% } %>
+
+            <p class="review__body"><%= review.body %></p>
+            <% if (review.hasSpoilers && review.spoilerRest) { %>
+              <details class="spoiler">
+                <summary>Дальше спойлеры — показать</summary>
+                <p class="review__body"><%= review.spoilerRest %></p>
+              </details>
+            <% } %>
+
+            <div class="review__actions">
+              <form class="like-form" method="post" action="/retsenziya/<%= review.id %>/like" data-like-form>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="return_to" value="/knigi/<%= book.slug %>#review-<%= review.id %>">
+                <button class="btn btn--ghost btn--sm" type="submit"
+                        aria-pressed="<%= review.liked ? 'true' : 'false' %>"
+                        <%= currentUser ? '' : 'disabled' %>>
+                  ♥ <span data-likes-count><%= review.likesCount %></span>
+                </button>
+              </form>
+              <span class="micro-label"><%= t.plural(review.commentsCount, ['комментарий', 'комментария', 'комментариев']) %></span>
+
+              <% if (currentUser && !review.isOwn) { %>
+                <details class="report-inline">
+                  <summary class="micro-label">Пожаловаться</summary>
+                  <form class="inline-form" method="post" action="/zhaloba">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="subjectType" value="review">
+                    <input type="hidden" name="subjectId" value="<%= review.id %>">
+                    <input type="hidden" name="back" value="/knigi/<%= book.slug %>#review-<%= review.id %>">
+                    <input class="field__input field__input--inline" name="reason" maxlength="500" required
+                           placeholder="Что не так" aria-label="Причина жалобы">
+                    <button class="btn btn--ghost btn--sm" type="submit">Отправить</button>
+                  </form>
+                </details>
+              <% } %>
+
+              <% if (review.isOwn) { %>
+                <form class="inline-form" method="post" action="/retsenziya/<%= review.id %>/udalit">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="btn btn--ghost btn--sm" type="submit">Удалить</button>
+                </form>
+              <% } %>
+            </div>
+
+            <% const comments = commentsByReview[review.id] || []; %>
+            <% if (comments.length) { %>
+              <ul class="comment-list list-clean">
+                <% comments.forEach((comment) => { %>
+                  <li class="comment">
+                    <span class="comment__author"><%= comment.user.name %></span>
+                    <span class="comment__body"><%= comment.body %></span>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } %>
+
+            <% if (currentUser) { %>
+              <form class="comment-form" method="post" action="/retsenziya/<%= review.id %>/komment">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="return_to" value="/knigi/<%= book.slug %>#review-<%= review.id %>">
+                <label class="sr-only" for="comment-<%= review.id %>">Комментарий к рецензии</label>
+                <input class="field__input field__input--inline-wide" id="comment-<%= review.id %>" name="body"
+                       type="text" maxlength="4000" placeholder="Ваш комментарий" required>
+                <button class="btn btn--ghost btn--sm" type="submit">Отправить</button>
+              </form>
+            <% } %>
+          </li>
+        <% }) %>
+      </ul>
+
+      <% if (reviews.pages > 1) { %>
+        <nav class="pager" aria-label="Страницы рецензий">
+          <% if (reviews.page > 1) { %>
+            <a class="pager__link" href="/knigi/<%= book.slug %>?stranitsa=<%= reviews.page - 1 %>#retsenzii" rel="prev">← Новее</a>
+          <% } else { %><span class="pager__link pager__link--off">← Новее</span><% } %>
+          <span class="pager__info">Страница <%= reviews.page %> из <%= reviews.pages %></span>
+          <% if (reviews.page < reviews.pages) { %>
+            <a class="pager__link" href="/knigi/<%= book.slug %>?stranitsa=<%= reviews.page + 1 %>#retsenzii" rel="next">Старее →</a>
+          <% } else { %><span class="pager__link pager__link--off">Старее →</span><% } %>
+        </nav>
+      <% } %>
+    <% } %>
+  </div>
+</section>
+
+<section class="section section--tight section--warm" id="tsitaty">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">03 / Цитаты</p>
+      <hr class="rule">
+      <span class="micro-label">до 300 знаков</span>
+    </div>
+
+    <% if (!quotes.length) { %>
+      <p class="empty-state__text">Цитат пока нет. Можно сохранить одну — короткую, до 300 знаков, с указанием книги.</p>
+    <% } else { %>
+      <ul class="quote-list list-clean">
+        <% quotes.forEach((quote) => { %>
+          <li class="quote-item">
+            <blockquote class="quote-item__text"><%= quote.body %></blockquote>
+            <p class="micro-label">
+              <%= quote.user.name %><% if (quote.page) { %> · стр. <%= quote.page %><% } %>
+              · <%= t.formatDate(quote.createdAt) %>
+            </p>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <% if (currentUser) { %>
+      <form class="quote-form" method="post" action="/knigi/<%= book.slug %>/tsitata">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="field">
+          <label class="field__label" for="quote-body">Своя цитата</label>
+          <textarea class="field__input field__input--area" id="quote-body" name="body" maxlength="300"
+                    placeholder="Короткая цитата, до 300 знаков" required></textarea>
+          <p class="field__hint">Мы не публикуем полные тексты книг — только короткие цитаты.</p>
+        </div>
+        <div class="cluster">
+          <input class="field__input field__input--inline" name="page" type="number" min="1"
+                 max="20000" placeholder="Стр." aria-label="Страница">
+          <button class="btn btn--ghost" type="submit">Сохранить цитату</button>
+        </div>
+      </form>
+    <% } %>
+  </div>
+</section>
+
+<% if (similar.byAuthor.length || similar.byGenre.length) { %>
+  <section class="section section--warm">
+    <div class="container">
+      <% const shelves = [
+        { label: '03 / Ещё этого автора', items: similar.byAuthor },
+        { label: '04 / Похоже по жанру', items: similar.byGenre }
+      ].filter((shelf) => shelf.items.length); %>
+
+      <% shelves.forEach((shelf, index) => { %>
+        <div class="section-head<%= index > 0 ? ' section-head--spaced' : '' %>">
+          <p class="micro-label"><%= shelf.label %></p>
+          <hr class="rule">
+        </div>
+        <ul class="book-grid book-grid--compact list-clean">
+          <% shelf.items.forEach((item) => { %>
+            <li>
+              <a class="book-card" href="/knigi/<%= item.slug %>">
+                <div class="book-card__cover">
+                  <div class="book-card__fallback" aria-hidden="true">
+                    <span class="book-card__fallback-title"><%= item.title %></span>
+                    <span class="book-card__fallback-author"><%= item.author %></span>
+                  </div>
+                </div>
+                <p class="book-card__title"><%= item.title %></p>
+                <p class="book-card__author"><%= item.author %></p>
+              </a>
+            </li>
+          <% }) %>
+        </ul>
+      <% }) %>
+    </div>
+  </section>
+<% } %>

@@ -1,0 +1,34 @@
+<%#
+  Поле формы с подписью и сообщением об ошибке.
+  Ожидает: name, label, type (по умолчанию text), value, error, hint, required, autocomplete.
+%>
+<%
+  const fieldType = typeof type !== 'undefined' && type ? type : 'text';
+  // include вызывается с разными наборами переменных — подстраховываемся
+  // значениями по умолчанию, чтобы форма не падала с 500
+  const fieldValue = typeof value !== 'undefined' && value ? value : '';
+  const fieldError = typeof error !== 'undefined' ? error : null;
+  const fieldHint = typeof hint !== 'undefined' ? hint : null;
+  const isRequired = typeof required !== 'undefined' ? required : true;
+  const auto = typeof autocomplete !== 'undefined' ? autocomplete : 'off';
+  const errorId = `err-${name}`;
+%>
+<div class="field<%= fieldError ? ' field--invalid' : '' %>">
+  <label class="field__label" for="<%= name %>"><%= label %></label>
+  <input
+    class="field__input"
+    id="<%= name %>"
+    name="<%= name %>"
+    type="<%= fieldType %>"
+    value="<%= fieldValue %>"
+    <%= isRequired ? 'required' : '' %>
+    autocomplete="<%= auto %>"
+    <%= fieldError ? `aria-invalid="true" aria-describedby="${errorId}"` : '' %>
+    <%= fieldHint && !fieldError ? `aria-describedby="hint-${name}"` : '' %>
+  >
+  <% if (fieldError) { %>
+    <p class="field__error" id="<%= errorId %>"><%= fieldError %></p>
+  <% } else if (fieldHint) { %>
+    <p class="field__hint" id="hint-<%= name %>"><%= fieldHint %></p>
+  <% } %>
+</div>

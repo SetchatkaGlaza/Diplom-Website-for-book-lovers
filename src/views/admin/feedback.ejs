@@ -1,0 +1,40 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Админка / Обратная связь</p>
+      <hr class="rule">
+      <a class="micro-label" href="/admin/svodka">сводка →</a>
+      <a class="micro-label" href="/admin/zhaloby">жалобы →</a>
+    </div>
+
+    <h1 class="page-title">Что пишут читатели</h1>
+    <p class="lede">
+      Это не жалобы на нарушителей, а сообщения о том, где неудобно.
+      На старте такие сообщения важнее статистики: они показывают, где люди бросают.
+    </p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <% if (!items.length) { %>
+      <div class="empty-state">
+        <p class="empty-state__title">Пока пусто</p>
+        <p class="empty-state__text">Сообщений нет. Ссылка на форму — в подвале сайта: <a href="/obratnaya-svyaz">/obratnaya-svyaz</a></p>
+      </div>
+    <% } else { %>
+      <ul class="list-clean">
+        <% items.forEach((item) => { %>
+          <li class="card">
+            <p class="micro-label">
+              № <%= item.id %> · <%= item.kind || 'другое' %> · <%= new Date(item.createdAt).toISOString().slice(0, 16).replace('T', ' ') %>
+            </p>
+            <p class="card__title"><%= item.name || 'Аноним' %><% if (item.email) { %> · <a href="mailto:<%= item.email %>"><%= item.email %></a><% } %></p>
+            <p class="hint-text"><%= item.text %></p>
+            <% if (item.page) { %><p class="micro-label">страница: <a href="<%= item.page %>"><%= item.page %></a></p><% } %>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>

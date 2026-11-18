@@ -1,0 +1,110 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Админка / Жалобы</p>
+      <hr class="rule">
+      <a class="micro-label" href="/admin/polzovateli">пользователи →</a>
+    </div>
+
+    <h1 class="page-title">Очередь жалоб</h1>
+
+    <div class="stat-grid stat-grid--compact">
+      <div class="stat-card stat-card--accent">
+        <p class="stat-card__value"><%= statistics.open %></p>
+        <p class="stat-card__label">в очереди</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-card__value"><%= statistics.resolved %></p>
+        <p class="stat-card__label">рассмотрено</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-card__value"><%= statistics.blocked %></p>
+        <p class="stat-card__label">заблокировано</p>
+      </div>
+    </div>
+
+    <nav class="tabs" aria-label="Фильтр жалоб">
+      <a class="pill<%= state === 'open' ? ' pill--amber' : '' %>" href="/admin/zhaloby">Открытые</a>
+      <a class="pill<%= state === 'resolved' ? ' pill--amber' : '' %>" href="/admin/zhaloby?sostoyanie=resolved">Рассмотренные</a>
+      <a class="pill<%= state === 'rejected' ? ' pill--amber' : '' %>" href="/admin/zhaloby?sostoyanie=rejected">Отклонённые</a>
+    </nav>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <% if (!items.length) { %>
+      <div class="empty-state">
+        <p class="empty-state__text">Очередь пуста. Хорошая новость.</p>
+      </div>
+    <% } else { %>
+      <ul class="list-clean report-list">
+        <% items.forEach((item) => { %>
+          <li class="report-card">
+            <div class="report-card__head">
+              <p class="micro-label">
+                № <%= item.id %> · <%= item.subjectType %> · <%= t.timeAgo(item.createdAt) %>
+              </p>
+              <p class="report-card__reporter">пожаловался: <%= item.reporter ? item.reporter.name : 'удалённый аккаунт' %></p>
+            </div>
+
+            <p class="report-card__reason"><%= item.reason %></p>
+
+            <% if (item.subject) { %>
+              <blockquote class="report-card__subject">
+                <p class="micro-label"><%= item.subject.title %> · автор: <%= item.subject.author %></p>
+                <p><%= item.subject.text %></p>
+                <% if (item.subject.url) { %>
+                  <a class="micro-label" href="<%= item.subject.url %>">открыть на сайте →</a>
+                <% } %>
+              </blockquote>
+            <% } else { %>
+              <p class="field__hint">Объект удалён автором.</p>
+            <% } %>
+
+            <% if (item.state === 'open') { %>
+              <form class="report-card__actions" method="post" action="/admin/zhaloby/<%= item.id %>">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input class="field__input field__input--inline" name="note" maxlength="500"
+                       placeholder="Заметка для журнала" aria-label="Заметка">
+                <button class="btn btn--ghost btn--small" type="submit" name="action" value="hide">Скрыть</button>
+                <button class="btn btn--danger btn--small" type="submit" name="action" value="block">Скрыть и блокировать</button>
+                <button class="btn btn--ghost btn--small" type="submit" name="action" value="reject">Отклонить</button>
+              </form>
+            <% } else { %>
+              <p class="field__hint">
+                Решение: <%= item.state === 'resolved' ? 'жалоба подтверждена' : 'жалоба отклонена' %>
+                <% if (item.resolutionNote) { %> · <%= item.resolutionNote %><% } %>
+              </p>
+            <% } %>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>
+
+<section class="section section--tight section--warm">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Журнал</p>
+      <hr class="rule">
+      <span class="micro-label">последние 20 действий</span>
+    </div>
+
+    <% if (!journal.length) { %>
+      <p class="empty-state__text">Журнал пуст: действий модерации ещё не было.</p>
+    <% } else { %>
+      <ul class="list-clean journal">
+        <% journal.forEach((row) => { %>
+          <li class="journal__row">
+            <span class="journal__time"><%= t.formatShortDate(row.createdAt) %></span>
+            <span class="journal__actor"><%= row.actorName %></span>
+            <span class="journal__action"><%= row.action %></span>
+            <span class="journal__note"><%= row.note %></span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>

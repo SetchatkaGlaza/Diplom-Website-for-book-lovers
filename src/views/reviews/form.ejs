@@ -1,0 +1,72 @@
+<section class="section section--tight">
+  <div class="container container--narrow">
+    <nav class="breadcrumb" aria-label="Хлебные крошки">
+      <a href="/knigi">Каталог</a> <span aria-hidden="true">/</span>
+      <a href="/knigi/<%= book.slug %>"><%= book.title %></a> <span aria-hidden="true">/</span>
+      <span>Рецензия</span>
+    </nav>
+
+    <p class="micro-label"><%= own ? 'Правка рецензии' : 'Новая рецензия' %></p>
+    <h1><%= book.title %></h1>
+    <p class="book-page__author"><%= book.author %></p>
+
+    <form class="card review-form" method="post" action="/knigi/<%= book.slug %>/retsenziya" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <% if (errors.form) { %><p class="form-error" role="alert"><%= errors.form %></p><% } %>
+
+      <div class="field<%= errors.rating ? ' field--invalid' : '' %>">
+        <label class="field__label" for="rating">Оценка</label>
+        <select class="field__input" id="rating" name="rating"
+                <%= errors.rating ? 'aria-invalid="true" aria-describedby="err-rating"' : '' %>>
+          <% [5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1].forEach((value) => { %>
+            <option value="<%= value %>" <%= Number(formData.rating) === value ? 'selected' : '' %>>
+              <%= value %> <%= value === 1 ? 'звезда' : (value < 5 && value > 1 ? 'звезды' : 'звёзд') %>
+            </option>
+          <% }) %>
+        </select>
+        <% if (errors.rating) { %><p class="field__error" id="err-rating"><%= errors.rating %></p><% } %>
+      </div>
+
+      <%- include('../partials/field', {
+        name: 'title',
+        label: 'Заголовок (необязательно)',
+        value: formData.title || '',
+        error: errors.title,
+        required: false,
+        autocomplete: 'off',
+        hint: 'Одна фраза, по которой понятно ваше впечатление'
+      }) %>
+
+      <div class="field<%= errors.body ? ' field--invalid' : '' %>">
+        <label class="field__label" for="body">Рецензия</label>
+        <textarea class="field__input field__input--area field__input--tall" id="body" name="body"
+                  maxlength="20000" required
+                  <%= errors.body ? 'aria-invalid="true" aria-describedby="err-body"' : '' %>><%= formData.body || '' %></textarea>
+        <% if (errors.body) { %>
+          <p class="field__error" id="err-body"><%= errors.body %></p>
+        <% } else { %>
+          <p class="field__hint">От 20 знаков. Своими словами: что понравилось, что нет, кому подойдёт.</p>
+        <% } %>
+      </div>
+
+      <label class="field__check">
+        <input type="checkbox" name="hasSpoilers" value="1" <%= formData.hasSpoilers ? 'checked' : '' %>>
+        <span>В тексте есть спойлеры — спрячем их до нажатия «показать»</span>
+      </label>
+
+      <div class="cluster review-form__actions">
+        <button class="btn btn--primary" type="submit"><%= own ? 'Сохранить изменения' : 'Опубликовать' %></button>
+        <a class="btn btn--ghost" href="/knigi/<%= book.slug %>">Отмена</a>
+      </div>
+
+      <% if (own) { %>
+        <p class="field__hint">Рецензия уже есть — новая версия заменит старую. Оценку можно поменять.</p>
+      <% } %>
+    </form>
+
+    <p class="auth__foot">
+      Полные тексты книг мы не публикуем. Короткие цитаты — можно, в пределах 300 знаков.
+    </p>
+  </div>
+</section>

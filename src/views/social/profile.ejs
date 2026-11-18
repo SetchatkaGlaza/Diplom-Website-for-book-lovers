@@ -1,0 +1,107 @@
+<section class="section section--tight">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Хлебные крошки">
+      <a href="/chitateli">Читатели</a> <span aria-hidden="true">/</span> <span><%= person.name %></span>
+    </nav>
+
+    <div class="profile-head">
+      <span class="avatar avatar--xl" aria-hidden="true"><%= String(person.name || 'Ч').slice(0, 1) %></span>
+      <div class="profile-head__body">
+        <h1 class="profile-head__name"><%= person.name %></h1>
+        <% if (person.bio) { %><p class="profile-head__bio"><%= person.bio %></p><% } %>
+        <p class="micro-label">
+          <%= counts.followers %> <%= t.plural(counts.followers, ['подписчик', 'подписчика', 'подписчиков']) %>
+          · <%= counts.following %> <%= t.plural(counts.following, ['подписка', 'подписки', 'подписок']) %>
+          <% if (person.isPrivate) { %>· закрытый профиль<% } %>
+        </p>
+      </div>
+
+      <div class="cluster">
+        <% if (isSelf) { %>
+          <a class="btn btn--ghost" href="/nastroyki">Настройки</a>
+          <a class="btn btn--ghost" href="/polka">Моя полка</a>
+        <% } else { %>
+          <form class="inline-form" method="post" action="/chitateli/<%= person.id %>/podpiska">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn <%= following ? 'btn--ghost' : 'btn--primary' %>" type="submit">
+              <%= following ? 'Вы подписаны — отписаться' : 'Подписаться' %>
+            </button>
+          </form>
+          <form class="inline-form" method="post" action="/soobshcheniya">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="recipient" value="<%= person.id %>">
+            <input type="hidden" name="body" value="Привет! Что читаете сейчас?">
+            <button class="btn btn--ghost" type="submit">Написать</button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (!canSeeShelf) { %>
+      <div class="empty-state">
+        <h2 class="empty-state__title">Профиль закрыт</h2>
+        <p class="empty-state__text">
+          <%= person.name %> показывает полку только подписчикам. Подпишитесь, чтобы видеть,
+          что человек читает и что думает о книгах.
+        </p>
+        <div class="empty-state__actions">
+          <form method="post" action="/chitateli/<%= person.id %>/podpiska">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn--primary" type="submit">Подписаться ↗</button>
+          </form>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="section-head section-head--spaced">
+        <p class="micro-label">02 / Полка</p>
+        <hr class="rule">
+        <% if (isSelf) { %><a class="micro-label" href="/polka">вся полка →</a><% } %>
+      </div>
+
+      <% if (!shelf.length) { %>
+        <div class="empty-state">
+          <h2 class="empty-state__title">Полка пока пустая</h2>
+          <p class="empty-state__text">Как только здесь появятся книги, они будут видны в этом списке.</p>
+        </div>
+      <% } else { %>
+        <ul class="book-grid book-grid--compact list-clean">
+          <% shelf.forEach((item) => { %>
+            <li>
+              <a class="book-card" href="/knigi/<%= item.book.slug %>">
+                <div class="book-card__cover">
+                  <div class="book-card__fallback" aria-hidden="true">
+                    <span class="book-card__fallback-title"><%= item.book.title %></span>
+                    <span class="book-card__fallback-author"><%= item.book.author %></span>
+                  </div>
+                </div>
+                <p class="book-card__title"><%= item.book.title %></p>
+                <p class="book-card__author"><%= item.statusLabel %><%= item.percent ? ` · ${item.percent}%` : '' %></p>
+              </a>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+      <% if (reviews.length) { %>
+        <div class="section-head section-head--spaced">
+          <p class="micro-label">03 / Рецензии</p>
+          <hr class="rule">
+        </div>
+        <ul class="review-list list-clean">
+          <% reviews.forEach((review) => { %>
+            <li class="review">
+              <div class="review__head">
+                <span class="review__rating"><%= review.rating %> ★</span>
+                <% if (review.book) { %>
+                  <a class="review__user" href="/knigi/<%= review.book.slug %>"><%= review.book.title %></a>
+                <% } %>
+              </div>
+              <% if (review.title) { %><h3 class="review__title"><%= review.title %></h3><% } %>
+              <p class="review__body"><%= review.body %></p>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    <% } %>
+  </div>
+</section>
