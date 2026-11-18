@@ -34,3 +34,5 @@ Thumbs.db
 *.temp
 tmp/
 temp/
+# Бэкапы
+backups/

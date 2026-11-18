@@ -1,0 +1,63 @@
+<section class="section">
+  <div class="container container--narrow">
+    <div class="section-head">
+      <p class="micro-label">Обратная связь</p>
+      <hr class="rule">
+      <a class="micro-label" href="/o-proekte">о проекте →</a>
+    </div>
+
+    <h1 class="page-title">Что не так?</h1>
+    <p class="lede">
+      Сайт молодой, и сейчас важнее всего узнать, где неудобно. Если что-то не работает,
+      сбивает с толку или просто раздражает — напишите. Читаю сам, отвечаю в течение пары дней.
+    </p>
+
+    <% if (sent) { %>
+      <div class="card card--success">
+        <h2 class="settings__title">Записал</h2>
+        <p>Спасибо. Если указали адрес — отвечу; если нет, всё равно прочитаю и учту.</p>
+        <p><a class="btn btn--ghost" href="/">Вернуться на главную</a></p>
+      </div>
+    <% } else { %>
+      <form class="card" method="post" action="/obratnaya-svyaz" novalidate>
+        <h2 class="settings__title">Сообщение</h2>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="page" value="<%= formData.page || '' %>">
+
+        <div class="field">
+          <label class="field__label" for="kind">О чём</label>
+          <select class="field__input" id="kind" name="kind">
+            <% kinds.forEach((item) => { %>
+              <option value="<%= item %>" <%= formData.kind === item ? 'selected' : '' %>><%= item %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="name">Как к вам обращаться</label>
+          <input class="field__input<%= errors.name ? ' field__input--invalid' : '' %>" id="name" name="name"
+                 type="text" maxlength="120" required value="<%= formData.name || '' %>">
+          <% if (errors.name) { %><p class="field__error"><%= errors.name %></p><% } %>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="email">E-mail — необязательно</label>
+          <input class="field__input<%= errors.email ? ' field__input--invalid' : '' %>" id="email" name="email"
+                 type="email" maxlength="254" value="<%= formData.email || '' %>">
+          <p class="field__hint">Нужен только чтобы ответить. Без него сообщение всё равно прочитают.</p>
+          <% if (errors.email) { %><p class="field__error"><%= errors.email %></p><% } %>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="text">Что случилось</label>
+          <textarea class="field__input<%= errors.text ? ' field__input--invalid' : '' %>" id="text" name="text"
+                    rows="6" maxlength="4000" required><%= formData.text || '' %></textarea>
+          <p class="field__hint">Если это ошибка — напишите, что делали и на какой странице.</p>
+          <% if (errors.text) { %><p class="field__error"><%= errors.text %></p><% } %>
+        </div>
+
+        <button class="btn btn--primary" type="submit">Отправить</button>
+      </form>
+    <% } %>
+  </div>
+</section>

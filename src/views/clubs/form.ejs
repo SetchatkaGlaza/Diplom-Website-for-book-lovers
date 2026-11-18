@@ -1,0 +1,45 @@
+<section class="section">
+  <div class="container container--narrow">
+    <div class="section-head">
+      <p class="micro-label">01 / Новый клуб</p>
+      <hr class="rule">
+      <a class="micro-label" href="/kluby">← все клубы</a>
+    </div>
+
+    <h1 class="page-title">Создать клуб</h1>
+    <p class="lead">Название и описание — это всё, что нужно на старте. Книгу месяца и расписание добавите внутри.</p>
+
+    <% if (errors.form) { %>
+      <p class="form-error" role="alert"><%= errors.form %></p>
+    <% } %>
+
+    <form class="card auth-form" method="post" action="/kluby" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="field">
+        <label class="field__label" for="name">Название</label>
+        <input class="field__input<%= errors.name ? ' field__input--invalid' : '' %>" id="name" name="name"
+               type="text" minlength="3" maxlength="120" required
+               value="<%= formData.name || '' %>">
+        <% if (errors.name) { %><p class="field__error"><%= errors.name %></p><% } %>
+        <p class="field__hint">Например: «Читаем «Дюну» по главам».</p>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="description">О чём клуб</label>
+        <textarea class="field__input field__input--area<%= errors.description ? ' field__input--invalid' : '' %>"
+                  id="description" name="description" minlength="10" maxlength="2000" required
+                  rows="6"><%= formData.description || '' %></textarea>
+        <% if (errors.description) { %><p class="field__error"><%= errors.description %></p><% } %>
+        <p class="field__hint">Коротко: какую книгу читаем, в каком темпе, кому подойдёт.</p>
+      </div>
+
+      <label class="field__check">
+        <input type="checkbox" name="isPrivate" value="1" <%= formData.isPrivate ? 'checked' : '' %>>
+        <span>Закрытый клуб: вступить можно только по заявке или приглашению</span>
+      </label>
+
+      <button class="btn btn--primary" type="submit">Создать клуб</button>
+    </form>
+  </div>
+</section>

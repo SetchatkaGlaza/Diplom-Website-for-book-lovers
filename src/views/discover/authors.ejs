@@ -1,0 +1,36 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">03 / Авторы</p>
+      <hr class="rule">
+      <a class="micro-label" href="/podborki">← подборки</a>
+    </div>
+
+    <h1 class="page-title">Авторы</h1>
+    <p class="lede">Короткая биография и все книги, которые есть в каталоге. Без энциклопедического тона: важно понять, стоит ли брать следующую книгу этого человека.</p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <% if (!authors.length) { %>
+      <div class="empty-state">
+        <h2 class="empty-state__title">Страниц авторов пока нет</h2>
+        <p class="empty-state__text">Появятся вместе с наполнением каталога.</p>
+        <div class="empty-state__actions"><a class="btn btn--primary" href="/knigi">В каталог</a></div>
+      </div>
+    <% } else { %>
+      <ul class="list-clean">
+        <% authors.forEach((author) => { %>
+          <li class="author-row">
+            <div>
+              <p class="author-row__name"><a href="/avtory/<%= author.slug %>"><%= author.name %></a></p>
+              <% if (author.years) { %><p class="micro-label"><%= author.years %></p><% } %>
+            </div>
+            <p class="micro-label"><%= author.booksCount %> <%= t.plural(author.booksCount, ['книга', 'книги', 'книг']) %> →</p>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>

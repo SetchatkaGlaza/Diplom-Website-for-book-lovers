@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<%
+  // Тема выбирается до отрисовки, чтобы не было вспышки белого экрана.
+  // Значение приходит из cookie; при первом заходе сервер отдаёт 'light'.
+  const theme = typeof themeMode !== 'undefined' && themeMode ? themeMode : 'light';
+  const nav = typeof currentPath !== 'undefined' ? currentPath : '/';
+  const isActive = (prefix) => (prefix === '/' ? nav === '/' : nav.startsWith(prefix));
+%>
+<html lang="ru" data-theme="<%= theme %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title ? `${title} — ${siteName}` : `${siteName} — читательский дневник` %></title>
+  <meta name="description" content="<%= description %>">
+  <meta name="theme-color" content="#121314">
+  <meta name="color-scheme" content="light dark">
+  <meta name="csrf-token" content="<%= csrfToken || '' %>">
+  <% const pageTitle = title ? `${title} — ${siteName}` : `${siteName} — читательский дневник`; %>
+  <% const canonicalUrl = typeof canonical !== 'undefined' && canonical ? canonical : null; %>
+  <link rel="canonical" href="<%= canonicalUrl || seoBase || '' %>">
+  <meta property="og:title" content="<%= pageTitle %>">
+  <meta property="og:description" content="<%= description %>">
+  <meta property="og:type" content="<%= typeof ogType !== 'undefined' && ogType ? ogType : 'website' %>">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="<%= siteName %>">
+  <% if (canonicalUrl) { %><meta property="og:url" content="<%= canonicalUrl %>"><% } %>
+  <% if (typeof robotsNoindex !== 'undefined' && robotsNoindex) { %><meta name="robots" content="noindex, nofollow"><% } %>
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= pageTitle %>">
+  <meta name="twitter:description" content="<%= description %>">
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/css/base.css">
+</head>
+<body class="<%= bodyClass || '' %>">
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="logo" href="/" aria-label="<%= siteName %> — на главную">Книгоманы<span aria-hidden="true">.</span></a>
+
+      <nav class="site-nav" id="site-nav" aria-label="Основная навигация">
+        <a href="/knigi" <%- isActive('/knigi') ? 'aria-current="page"' : '' %>>Каталог</a>
+        <a href="/podborki" <%- isActive('/podborki') ? 'aria-current="page"' : '' %>>Подборки</a>
+        <a href="/avtory" <%- isActive('/avtory') ? 'aria-current="page"' : '' %>>Авторы</a>
+        <a href="/zhurnal" <%- isActive('/zhurnal') ? 'aria-current="page"' : '' %>>Журнал</a>
+        <% if (currentUser) { %>
+          <a href="/polka" <%- isActive('/polka') ? 'aria-current="page"' : '' %>>Моя полка</a>
+          <a href="/statistika" <%- isActive('/statistika') ? 'aria-current="page"' : '' %>>Статистика</a>
+          <a href="/kluby" <%- isActive('/kluby') ? 'aria-current="page"' : '' %>>Клубы</a>
+          <a href="/lenta" <%- isActive('/lenta') ? 'aria-current="page"' : '' %>>Лента</a>
+          <a href="/chitateli" <%- isActive('/chitateli') ? 'aria-current="page"' : '' %>>Люди</a>
+        <% } %>
+      </nav>
+
+      <div class="site-header__actions">
+        <button class="icon-btn" type="button" id="theme-toggle"
+                aria-label="Сменить светлую и тёмную тему"
+                title="Светлая или тёмная тема">
+          <span id="theme-toggle-icon" aria-hidden="true"><%= theme === 'dark' ? '☀' : '☾' %></span>
+        </button>
+
+        <% if (currentUser) { %>
+          <a class="site-header__user" href="/uvedomleniya" title="Уведомления">
+            <span aria-hidden="true">◔</span>
+            <span class="badge<%= unreadCount ? '' : ' badge--hidden' %>"><%= unreadCount %></span>
+            <span class="sr-only">Уведомления</span>
+          </a>
+          <a class="site-header__user" href="/soobshcheniya" title="Сообщения">
+            <span aria-hidden="true">✉</span>
+            <span class="badge<%= newMessages ? '' : ' badge--hidden' %>"><%= newMessages %></span>
+            <span class="sr-only">Сообщения</span>
+          </a>
+          <a class="site-header__user" href="/nastroyki" title="Настройки">
+            <span class="avatar" aria-hidden="true"><%= String(currentUser.name || '?').trim().slice(0, 1) %></span>
+            <span><%= currentUser.name %></span>
+          </a>
+          <form method="post" action="/vyhod" class="inline-form">
+            <input type="hidden" name="_csrf" value="<%= csrfToken || '' %>">
+            <button type="submit" class="btn btn--ghost btn--sm">Выйти</button>
+          </form>
+        <% } else { %>
+          <a class="btn btn--ghost btn--sm" href="/vhod">Войти</a>
+        <% } %>
+
+        <button class="icon-btn nav-toggle" type="button" id="nav-toggle"
+                aria-expanded="false" aria-controls="site-nav" aria-label="Открыть меню">
+          <span aria-hidden="true">☰</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <% if (flash) { %>
+    <% const messages = [...(flash.error || []), ...(flash.info || []), ...(flash.success || [])]; %>
+    <% if (messages.length) { %>
+      <div class="container">
+        <div class="flash" role="status">
+          <% messages.forEach((message) => { %><p class="flash__item"><%= message %></p><% }); %>
+        </div>
+      </div>
+    <% } %>
+  <% } %>
+
+  <main id="main">
+    <%- body %>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p>© <%= year %> <%= siteName %>. Читательский дневник. Книги не продаём и полные тексты не публикуем.</p>
+      <nav aria-label="Документы">
+        <a href="/zhurnal">Журнал</a>
+        <a href="/pravila">Правила</a>
+        <a href="/soglashenie">Соглашение</a>
+        <a href="/konfidentsialnost">Конфиденциальность</a>
+        <a href="/pravoobladatelyam">Правообладателям</a>
+        <a href="/obratnaya-svyaz">Обратная связь</a>
+        <a href="/o-proekte">О проекте</a>
+        <a href="/stil">Витрина стилей</a>
+      </nav>
+    </div>
+  </footer>
+
+  <% if (currentUser) { %>
+    <nav class="tabbar" aria-label="Разделы">
+      <a href="/knigi" <%- isActive('/knigi') ? 'aria-current="page"' : '' %>>
+        <span class="tabbar__icon" aria-hidden="true">▤</span>Каталог
+      </a>
+      <a href="/polka" <%- isActive('/polka') ? 'aria-current="page"' : '' %>>
+        <span class="tabbar__icon" aria-hidden="true">▮</span>Полка
+      </a>
+      <a href="/statistika" <%- isActive('/statistika') ? 'aria-current="page"' : '' %>>
+        <span class="tabbar__icon" aria-hidden="true">◷</span>Итоги
+      </a>
+      <a href="/nastroyki" <%- isActive('/nastroyki') ? 'aria-current="page"' : '' %>>
+        <span class="tabbar__icon" aria-hidden="true">◯</span>Профиль
+      </a>
+    </nav>
+  <% } %>
+
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/shelf.js" defer></script>
+  <script src="/assets/js/likes.js" defer></script>
+</body>
+</html>

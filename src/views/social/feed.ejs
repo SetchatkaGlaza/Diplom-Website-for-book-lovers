@@ -1,0 +1,72 @@
+<section class="section section--tight">
+  <div class="container container--narrow">
+    <div class="catalog-head">
+      <div>
+        <p class="micro-label">01 / Лента</p>
+        <h1 class="catalog-head__title">Что читают рядом</h1>
+        <p class="catalog-head__count">
+          <%= result.total %> <%= t.plural(result.total, ['запись', 'записи', 'записей']) %>
+        </p>
+      </div>
+      <div class="cluster">
+        <a class="btn btn--ghost" href="/chitateli">Найти читателей</a>
+        <a class="btn btn--primary" href="/knigi">В каталог →</a>
+      </div>
+    </div>
+
+    <% if (!result.items.length) { %>
+      <div class="empty-state">
+        <h2 class="empty-state__title">Лента пока пустая</h2>
+        <p class="empty-state__text">
+          Здесь появятся книги, которые читают люди, на которых вы подписаны.
+          Подпишитесь на пару читателей — и лента оживёт.
+        </p>
+        <div class="empty-state__actions">
+          <a class="btn btn--primary" href="/chitateli">Найти читателей ↗</a>
+          <a class="btn btn--ghost" href="/knigi">Добавить книгу на полку</a>
+        </div>
+      </div>
+    <% } else { %>
+      <ul class="feed-list list-clean">
+        <% result.items.forEach((item) => { %>
+          <li class="feed-item">
+            <span class="avatar" aria-hidden="true"><%= String(item.user.name || 'Ч').slice(0, 1) %></span>
+            <div class="feed-item__body">
+              <p class="feed-item__text">
+                <a href="/chitateli/<%= item.user.id %>"><%= item.isOwn ? 'Вы' : item.user.name %></a>
+                <%= item.phrase %>
+              </p>
+              <% if (item.review) { %>
+                <div class="feed-item__review">
+                  <% if (item.review.title) { %><p class="feed-item__review-title"><%= item.review.title %></p><% } %>
+                  <p class="micro-label">
+                    Оценка: <%= item.review.rating %> ★
+                    <% if (item.review.hasSpoilers) { %>· есть спойлеры<% } %>
+                  </p>
+                  <% if (item.book) { %>
+                    <a class="link-arrow" href="/knigi/<%= item.book.slug %>#retsenzii">Читать рецензию →</a>
+                  <% } %>
+                </div>
+              <% } else if (item.book) { %>
+                <a class="link-arrow" href="/knigi/<%= item.book.slug %>"><%= item.book.author %> →</a>
+              <% } %>
+              <p class="feed-item__time"><%= t.timeAgo(item.createdAt) %></p>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+
+      <% if (result.pages > 1) { %>
+        <nav class="pager" aria-label="Страницы ленты">
+          <% if (result.page > 1) { %>
+            <a class="pager__link" href="/lenta?stranitsa=<%= result.page - 1 %>" rel="prev">← Новее</a>
+          <% } else { %><span class="pager__link pager__link--off">← Новее</span><% } %>
+          <span class="pager__info">Страница <%= result.page %> из <%= result.pages %></span>
+          <% if (result.page < result.pages) { %>
+            <a class="pager__link" href="/lenta?stranitsa=<%= result.page + 1 %>" rel="next">Старее →</a>
+          <% } else { %><span class="pager__link pager__link--off">Старее →</span><% } %>
+        </nav>
+      <% } %>
+    <% } %>
+  </div>
+</section>

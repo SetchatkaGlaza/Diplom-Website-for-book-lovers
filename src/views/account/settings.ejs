@@ -1,0 +1,152 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Аккаунт</p>
+      <hr class="rule">
+    </div>
+
+    <div class="settings">
+      <form class="card" method="post" action="/nastroyki/profil" novalidate>
+        <h2 class="settings__title">Профиль</h2>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <%- include('../partials/field', {
+          name: 'name',
+          label: 'Имя',
+          value: formData.name || profile.name,
+          error: errors.name,
+          autocomplete: 'nickname'
+        }) %>
+
+        <div class="field">
+          <label class="field__label" for="bio">О себе</label>
+          <textarea class="field__input field__input--area" id="bio" name="bio" rows="4" maxlength="500"><%= formData.bio || profile.bio %></textarea>
+          <% if (errors.bio) { %><p class="field__error"><%= errors.bio %></p><% } %>
+          <p class="field__hint">До 500 символов</p>
+        </div>
+
+        <button class="btn btn--primary" type="submit">Сохранить профиль</button>
+      </form>
+
+      <div class="card">
+        <h2 class="settings__title">Почта</h2>
+        <p class="settings__row"><%= email %></p>
+        <% if (emailVerified) { %>
+          <p class="settings__ok">Адрес подтверждён</p>
+        <% } else { %>
+          <p class="settings__warn">Адрес не подтверждён — восстановление пароля не сработает.</p>
+          <form method="post" action="/otpravit-podtverzhdenie">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn--ghost" type="submit">Отправить письмо ещё раз</button>
+          </form>
+        <% } %>
+      </div>
+
+      <form class="card" method="post" action="/nastroyki/privatnost">
+        <h2 class="settings__title">Приватность и уведомления</h2>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <label class="field__check">
+          <input type="checkbox" name="isPrivate" value="1" <%= privacy.isPrivate ? 'checked' : '' %>>
+          <span>Закрытый профиль: полку и рецензии видят только подписчики</span>
+        </label>
+
+        <p class="field__label settings__subhead">Присылать уведомления</p>
+        <label class="field__check">
+          <input type="checkbox" name="notifyFollows" value="1" <%= privacy.notifyFollows ? 'checked' : '' %>>
+          <span>О новых подписчиках</span>
+        </label>
+        <label class="field__check">
+          <input type="checkbox" name="notifyComments" value="1" <%= privacy.notifyComments ? 'checked' : '' %>>
+          <span>О комментариях к моим рецензиям</span>
+        </label>
+        <label class="field__check">
+          <input type="checkbox" name="notifyLikes" value="1" <%= privacy.notifyLikes ? 'checked' : '' %>>
+          <span>О лайках к моим рецензиям</span>
+        </label>
+        <label class="field__check">
+          <input type="checkbox" name="notifyMessages" value="1" <%= privacy.notifyMessages ? 'checked' : '' %>>
+          <span>О личных сообщениях</span>
+        </label>
+
+        <button class="btn btn--ghost" type="submit">Сохранить</button>
+      </form>
+
+      <form class="card" method="post" action="/nastroyki/rassylka">
+        <h2 class="settings__title">Письма на почту</h2>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <p class="hint-text">
+          Одно письмо в неделю: что вы дочитали и сколько осталось до цели.
+          Отписаться можно и по ссылке в самом письме — без входа в аккаунт.
+        </p>
+
+        <% if (!emailVerified) { %>
+          <p class="form-error">Сначала подтвердите адрес: письма уходят только на подтверждённую почту.</p>
+        <% } %>
+
+        <label class="field__check">
+          <input type="checkbox" name="notifyDigest" value="1" <%= notifyDigest ? 'checked' : '' %>>
+          <span>Присылать недельный дайджест</span>
+        </label>
+
+        <button class="btn btn--ghost" type="submit">Сохранить</button>
+      </form>
+
+      <form class="card" method="post" action="/nastroyki/parol" novalidate>
+        <h2 class="settings__title">Пароль</h2>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <%- include('../partials/field', {
+          name: 'current_password',
+          label: 'Текущий пароль',
+          type: 'password',
+          autocomplete: 'current-password'
+        }) %>
+        <%- include('../partials/field', {
+          name: 'password',
+          label: 'Новый пароль',
+          type: 'password',
+          autocomplete: 'new-password',
+          hint: 'Минимум 8 символов, буква и цифра'
+        }) %>
+        <%- include('../partials/field', {
+          name: 'password_confirm',
+          label: 'Повторите новый пароль',
+          type: 'password',
+          autocomplete: 'new-password'
+        }) %>
+
+        <button class="btn btn--primary" type="submit">Сменить пароль</button>
+      </form>
+
+      <div class="card">
+        <h2 class="settings__title">Мои данные</h2>
+        <p class="settings__row">Выгрузите полку и рецензии в JSON — файл ваш, можете забрать в любой момент.</p>
+        <a class="btn btn--ghost" href="/nastroyki/dannye.json">Скачать данные</a>
+      </div>
+
+      <form class="card card--danger" method="post" action="/nastroyki/udalit" novalidate>
+        <h2 class="settings__title">Удаление аккаунта</h2>
+        <p class="settings__row">
+          Аккаунт будет обезличен: имя, почта и пароль исчезнут, дневник перестанет быть доступен.
+          Восстановить его нельзя.
+        </p>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <%- include('../partials/field', {
+          name: 'current_password',
+          label: 'Пароль',
+          type: 'password',
+          autocomplete: 'current-password'
+        }) %>
+
+        <div class="field">
+          <label class="field__label" for="confirm">Введите слово УДАЛИТЬ</label>
+          <input class="field__input" id="confirm" name="confirm" type="text" autocomplete="off" required>
+        </div>
+
+        <button class="btn btn--danger" type="submit">Удалить аккаунт навсегда</button>
+      </form>
+    </div>
+  </div>
+</section>

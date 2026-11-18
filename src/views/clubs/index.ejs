@@ -1,0 +1,89 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">01 / Клубы</p>
+      <hr class="rule">
+      <span class="micro-label"><%= clubs.length %> открыто для вас</span>
+    </div>
+
+    <h1 class="page-title">Книжные клубы</h1>
+    <p class="lead">Читаем одну книгу вместе: расписание по главам, обсуждение без спойлеров, заявки в закрытые клубы.</p>
+
+    <div class="club-toolbar">
+      <form class="search-form" method="get" action="/kluby" role="search">
+        <label class="sr-only" for="q">Поиск клубов</label>
+        <input class="field__input" id="q" name="q" type="search" value="<%= search %>" placeholder="Название или описание">
+        <button class="btn btn--ghost" type="submit">Искать</button>
+      </form>
+
+      <% if (currentUser) { %>
+        <a class="btn btn--primary" href="/kluby/novyy">Создать клуб</a>
+      <% } else { %>
+        <a class="btn btn--primary" href="/vhod">Создать клуб</a>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<% if (mine.length) { %>
+<section class="section section--tight section--warm">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">02 / Мои клубы</p>
+      <hr class="rule">
+    </div>
+
+    <ul class="club-grid list-clean">
+      <% mine.forEach((club) => { %>
+        <li class="club-card">
+          <a class="club-card__link" href="/kluby/<%= club.slug %>">
+            <span class="club-card__name"><%= club.name %></span>
+            <span class="club-card__description"><%= club.description %></span>
+          </a>
+          <p class="club-card__meta micro-label">
+            <%= club.membersCount %> <%= t.plural(club.membersCount, ['участник', 'участника', 'участников']) %>
+            · ваша роль: <%= club.myRole === 'owner' ? 'владелец' : club.myRole === 'moderator' ? 'модератор' : 'участник' %>
+          </p>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+<% } %>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">03 / Все клубы</p>
+      <hr class="rule">
+    </div>
+
+    <% if (!clubs.length) { %>
+      <div class="empty-state">
+        <p class="empty-state__text">
+          <% if (search) { %>
+            По запросу «<%= search %>» ничего нет. Попробуйте другое слово.
+          <% } else { %>
+            Пока ни одного клуба. Начните первый — например, «Читаем «Дюну» по главам».
+          <% } %>
+        </p>
+      </div>
+    <% } else { %>
+      <ul class="club-grid list-clean">
+        <% clubs.forEach((club) => { %>
+          <li class="club-card">
+            <a class="club-card__link" href="/kluby/<%= club.slug %>">
+              <span class="club-card__name"><%= club.name %></span>
+              <span class="club-card__description"><%= club.description %></span>
+            </a>
+            <p class="club-card__meta micro-label">
+              <%= club.membersCount %> <%= t.plural(club.membersCount, ['участник', 'участника', 'участников']) %>
+              · <%= club.postsCount %> <%= t.plural(club.postsCount, ['сообщение', 'сообщения', 'сообщений']) %>
+              · владелец: <%= club.owner ? club.owner.name : '—' %>
+            </p>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>

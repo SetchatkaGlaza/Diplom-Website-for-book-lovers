@@ -1,0 +1,160 @@
+<% const maxMonth = Math.max(1, ...months.map((m) => m.count)); %>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">01 / Статистика</p>
+      <hr class="rule">
+      <form class="inline-form" method="get" action="/statistika">
+        <label class="micro-label" for="god">Год</label>
+        <select class="field__input field__input--inline" id="god" name="god">
+          <% [year, year - 1, year - 2].forEach((option) => { %>
+            <option value="<%= option %>" <%= option === year ? 'selected' : '' %>><%= option %></option>
+          <% }) %>
+        </select>
+        <button class="btn btn--ghost btn--small" type="submit">Показать</button>
+      </form>
+    </div>
+
+    <h1 class="page-title"><%= person.name %>, вот ваш <%= year %> год</h1>
+    <p class="lead">Считаем только то, что вы сами отметили. Ничего не додумываем.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <p class="stat-card__value"><%= totals.booksRead %></p>
+        <p class="stat-card__label">книг закрыто</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-card__value"><%= totals.pagesRead %></p>
+        <p class="stat-card__label">страниц прочитано</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-card__value"><%= totals.reviews %></p>
+        <p class="stat-card__label">рецензий написано</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-card__value"><%= String(totals.averageRating).replace('.', ',') %></p>
+        <p class="stat-card__label">средняя оценка</p>
+      </div>
+      <div class="stat-card stat-card--accent">
+        <p class="stat-card__value"><%= totals.currentStreak %></p>
+        <p class="stat-card__label">дней подряд сейчас</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-card__value"><%= totals.longestStreak %></p>
+        <p class="stat-card__label">самая длинная серия</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-card__value"><%= String(totals.pace).replace('.', ',') %></p>
+        <p class="stat-card__label">страниц в день</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-card__value"><%= totals.daysActive %></p>
+        <p class="stat-card__label">дней с чтением</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight section--warm">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">02 / Жанры</p>
+      <hr class="rule">
+      <span class="micro-label">топ-5</span>
+    </div>
+
+    <% if (!genres.length) { %>
+      <p class="empty-state__text">За <%= year %> год ещё нет закрытых книг с жанрами. Как только дочитаете первую — здесь появятся полоски.</p>
+    <% } else { %>
+      <ul class="genre-bars list-clean">
+        <% genres.forEach((genre, index) => { %>
+          <li class="genre-bar">
+            <span class="genre-bar__name"><%= genre.name %></span>
+            <span class="genre-bar__track">
+              <span class="genre-bar__fill<%= index === 0 ? ' genre-bar__fill--amber' : '' %> progress__bar--step<%= Math.max(1, Math.round((genre.count / genres[0].count) * 20)) %>"></span>
+            </span>
+            <span class="genre-bar__count"><%= genre.count %></span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">03 / По месяцам</p>
+      <hr class="rule">
+      <span class="micro-label">книг</span>
+    </div>
+
+    <ul class="month-bars list-clean" aria-label="Книги по месяцам">
+      <% months.forEach((month) => { %>
+        <li class="month-bar">
+          <span class="month-bar__column">
+            <span class="month-bar__fill progress__bar--i<%= Math.round((month.count / maxMonth) * 20) %>"></span>
+          </span>
+          <span class="month-bar__label"><%= month.label %></span>
+          <span class="sr-only"><%= month.count %> книг</span>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+
+<section class="section section--tight section--warm">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">04 / Карта года</p>
+      <hr class="rule">
+      <span class="micro-label"><%= map.total %> отметок</span>
+    </div>
+
+    <p class="lead">Каждая клетка — день. Тёмная пустая, светлая — был прогресс.</p>
+    <ul class="heatmap list-clean" aria-label="Карта активности за год">
+      <% map.days.forEach((day) => { %>
+        <li class="heatmap__day heatmap__day--level<%= day.level %>" title="<%= day.date %>: <%= day.count %>"></li>
+      <% }) %>
+    </ul>
+    <div class="heatmap-legend">
+      <span class="micro-label">меньше</span>
+      <span class="heatmap__day heatmap__day--level0"></span>
+      <span class="heatmap__day heatmap__day--level1"></span>
+      <span class="heatmap__day heatmap__day--level2"></span>
+      <span class="heatmap__day heatmap__day--level3"></span>
+      <span class="heatmap__day heatmap__day--level4"></span>
+      <span class="micro-label">больше</span>
+    </div>
+  </div>
+</section>
+
+<% if (achievements.length) { %>
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">05 / Достижения</p>
+      <hr class="rule">
+      <span class="micro-label"><%= achievements.filter((a) => a.unlocked).length %> из <%= achievements.length %></span>
+    </div>
+
+    <ul class="badge-grid list-clean">
+      <% achievements.forEach((achievement) => { %>
+        <li class="badge-card<%= achievement.unlocked ? ' badge-card--on' : '' %>">
+          <span class="badge-card__mark" aria-hidden="true"><%= achievement.unlocked ? '★' : '·' %></span>
+          <span class="badge-card__title"><%= achievement.title %></span>
+          <span class="badge-card__hint"><%= achievement.hint %></span>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+<% } %>
+
+<section class="section section--tight">
+  <div class="container cluster">
+    <a class="btn btn--primary" href="/knizhnyy-god?god=<%= year %>">Открыть «Книжный год»</a>
+    <a class="btn btn--ghost" href="/polka">К полке</a>
+  </div>
+</section>

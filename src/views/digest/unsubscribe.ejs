@@ -1,0 +1,30 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="micro-label">Письма</p>
+      <hr class="rule">
+    </div>
+
+    <% if (done) { %>
+      <h1 class="page-title">Отписались</h1>
+      <p class="lede">Больше не будем присылать письма на этот адрес. Полка, статистика и клубы остаются — они не зависят от писем.</p>
+      <p><a class="btn" href="/polka">Вернуться на полку</a> <a class="btn btn--ghost" href="/nastroyki">Настройки</a></p>
+    <% } else if (error) { %>
+      <h1 class="page-title">Ссылка не сработала</h1>
+      <p class="lede"><%= error %></p>
+      <p><a class="btn" href="/nastroyki">Отключить письма в настройках</a></p>
+    <% } else { %>
+      <h1 class="page-title">Отписаться от писем?</h1>
+      <p class="lede">Мы присылаем одно письмо в неделю: что вы дочитали и сколько осталось до цели. Если не нужно — отключим сразу и без вопросов.</p>
+
+      <form method="post" action="/otpiska" class="form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="e" value="<%= hash %>">
+        <button class="btn btn--primary" type="submit">Отписаться</button>
+        <a class="btn btn--ghost" href="/">Остаться</a>
+      </form>
+
+      <p class="micro-label">Отписка не удаляет аккаунт и не влияет на уведомления внутри сайта.</p>
+    <% } %>
+  </div>
+</section>

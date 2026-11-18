@@ -1,0 +1,40 @@
+<section class="section section--tight">
+  <div class="container container--narrow">
+    <div class="catalog-head">
+      <div>
+        <p class="micro-label">01 / Уведомления</p>
+        <h1 class="catalog-head__title">Что нового</h1>
+        <p class="catalog-head__count"><%= items.length %> <%= t.plural(items.length, ['запись', 'записи', 'записей']) %></p>
+      </div>
+      <form class="inline-form" method="post" action="/uvedomleniya/prochitat">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn--ghost" type="submit">Прочитать все</button>
+      </form>
+    </div>
+
+    <% if (!items.length) { %>
+      <div class="empty-state">
+        <h2 class="empty-state__title">Пока тихо</h2>
+        <p class="empty-state__text">Здесь появятся подписки, комментарии, лайки и сообщения — как только что-то произойдёт.</p>
+        <div class="empty-state__actions"><a class="btn btn--ghost" href="/lenta">Открыть ленту</a></div>
+      </div>
+    <% } else { %>
+      <ul class="feed-list list-clean">
+        <% items.forEach((item) => { %>
+          <li class="feed-item<%= item.isRead ? '' : ' feed-item--unread' %>">
+            <span class="avatar" aria-hidden="true"><%= item.type === 'follow' ? '♥' : item.type === 'message' ? '✉' : '·' %></span>
+            <div class="feed-item__body">
+              <p class="feed-item__text">
+                <% if (item.url) { %><a href="<%= item.url %>"><%= item.title %></a><% } else { %><%= item.title %><% } %>
+              </p>
+              <% if (item.body) { %><p class="feed-item__preview"><%= item.body %></p><% } %>
+              <p class="feed-item__time"><%= t.timeAgo(item.createdAt) %></p>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <p class="auth__foot">Какие уведомления получать — настраивается в <a href="/nastroyki">настройках</a>.</p>
+  </div>
+</section>

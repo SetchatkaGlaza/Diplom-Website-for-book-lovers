@@ -1,0 +1,61 @@
+<% const errors = locals.errors || {}; %>
+<section class="auth">
+  <div class="container auth__inner">
+    <div class="auth__intro">
+      <p class="micro-label">Аккаунт</p>
+      <h1 class="auth__title">Завести дневник чтения</h1>
+      <p class="auth__lead">Полка, прогресс, статистика и люди рядом. Бесплатно, без карты.</p>
+    </div>
+
+    <form class="auth__form card" method="post" action="/registratsiya" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <% if (errors.form) { %><p class="form-error" role="alert"><%= errors.form %></p><% } %>
+
+      <%- include('../partials/field', {
+        name: 'name',
+        label: 'Как вас зовут',
+        value: formData.name || '',
+        error: errors.name,
+        autocomplete: 'nickname',
+        hint: 'Так вас будут видеть другие читатели'
+      }) %>
+
+      <%- include('../partials/field', {
+        name: 'email',
+        label: 'E-mail',
+        type: 'email',
+        value: formData.email || '',
+        error: errors.email,
+        autocomplete: 'email',
+        hint: 'Пришлём письмо для подтверждения'
+      }) %>
+
+      <%- include('../partials/field', {
+        name: 'password',
+        label: 'Пароль',
+        type: 'password',
+        error: errors.password,
+        autocomplete: 'new-password',
+        hint: 'Минимум 8 символов, хотя бы одна буква и одна цифра'
+      }) %>
+
+      <%- include('../partials/field', {
+        name: 'password_confirm',
+        label: 'Пароль ещё раз',
+        type: 'password',
+        autocomplete: 'new-password'
+      }) %>
+
+      <button class="btn btn--primary btn--block" type="submit">Создать аккаунт</button>
+
+      <p class="auth__foot">
+        Уже есть аккаунт? <a href="/vhod">Войти</a>
+      </p>
+      <p class="auth__legal">
+        Создавая аккаунт, вы принимаете <a href="/pravila">правила</a>
+        и соглашаетесь с <a href="/konfidentsialnost">политикой конфиденциальности</a>.
+      </p>
+    </form>
+  </div>
+</section>

@@ -1,0 +1,33 @@
+<section class="section">
+  <div class="container container--narrow">
+    <div class="section-head">
+      <p class="micro-label">Приглашение</p>
+      <hr class="rule">
+      <a class="micro-label" href="/kluby">← все клубы</a>
+    </div>
+
+    <h1 class="page-title">Вас зовут в «<%= club.name %>»</h1>
+    <p class="lead"><%= club.description %></p>
+
+    <p class="micro-label">
+      <%= club.membersCount %> <%= t.plural(club.membersCount, ['участник', 'участника', 'участников']) %>
+      · использовано <%= invite.usesCount %> из <%= invite.maxUses %>
+    </p>
+
+    <% if (exhausted) { %>
+      <p class="form-error">Эта ссылка уже использована. Попросите владельца клуба новую.</p>
+    <% } else if (expired) { %>
+      <p class="form-error">Срок приглашения истёк. Попросите новую ссылку.</p>
+    <% } else if (currentUser) { %>
+      <form method="post" action="/priglashenie/<%= invite.code %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn--primary" type="submit">Вступить в клуб</button>
+      </form>
+    <% } else { %>
+      <div class="cluster">
+        <a class="btn btn--primary" href="/vhod">Войти и вступить</a>
+        <a class="btn btn--ghost" href="/registratsiya">Зарегистрироваться</a>
+      </div>
+    <% } %>
+  </div>
+</section>

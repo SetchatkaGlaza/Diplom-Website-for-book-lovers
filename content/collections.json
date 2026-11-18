@@ -1,0 +1,337 @@
+[
+ {
+  "slug": "chto-chitat-esli-davno-ne-chital",
+  "title": "Что читать, если давно не читал",
+  "description": "Короткие и цепляющие книги, после которых снова хочется читать по вечерам. Ни одной, где нужно продираться через первые сто страниц.",
+  "books": [
+   "dzhordzh-oruell-skotnyy-dvor",
+   "rey-bredberi-451-po-farengeytu",
+   "aleksandr-solzhenicyn-odin-den-ivana-denisovicha",
+   "anton-chehov-palata-6",
+   "lev-tolstoy-smert-ivana-ilicha",
+   "aleksandr-kuprin-granatovyy-braslet",
+   "zhan-pol-sartr-toshnota",
+   "alber-kamyu-postoronniy",
+   "venedikt-erofeev-moskva-petushki",
+   "arkadiy-i-boris-strugackie-piknik-na-obochine"
+  ]
+ },
+ {
+  "slug": "knigi-kotorye-luchshe-slushat",
+  "title": "Книги, которые лучше слушать",
+  "description": "Ритмичная проза, короткие главы и много диалогов: такие книги хорошо идут в наушниках по дороге на работу.",
+  "books": [
+   "arkadiy-i-boris-strugackie-ponedelnik-nachinaetsya-v-subbotu",
+   "ilya-ilf-evgeniy-petrov-dvenadcat-stulev",
+   "ilya-ilf-evgeniy-petrov-zolotoy-telenok",
+   "endi-veyer-marsianin",
+   "artur-konan-doyl-sherlok-holms-sobranie-rasskazov",
+   "helen-filding-dnevnik-bridzhit-dzhons",
+   "nina-lakur-my-v-poryadke",
+   "dzhon-tolkin-hobbit",
+   "ekaterina-okovitaya-tayna-staroy-biblioteki",
+   "olga-fadeeva-dva-tramvaya"
+  ]
+ },
+ {
+  "slug": "russkaya-klassika-bez-shkolnogo-straha",
+  "title": "Русская классика без школьного страха",
+  "description": "Тексты, которые в школе объяснили слишком быстро. Начните с рассказов и повестей — до больших романов дело дойдёт само.",
+  "books": [
+   "anton-chehov-dama-s-sobachkoy",
+   "nikolay-gogol-shinel",
+   "nikolay-gogol-nos",
+   "ivan-bunin-legkoe-dyhanie",
+   "aleksandr-kuprin-granatovyy-braslet",
+   "aleksandr-kuprin-olesya",
+   "mihail-bulgakov-sobache-serdce",
+   "ivan-turgenev-zapiski-ohotnika",
+   "lev-tolstoy-kreycerova-sonata",
+   "aleksandr-pushkin-kapitanskaya-dochka"
+  ]
+ },
+ {
+  "slug": "antiutopii-kotorye-sbyvayutsya-slishkom-tochno",
+  "title": "Антиутопии, которые сбываются слишком точно",
+  "description": "Не про лазеры и космос, а про то, как устроено давление: языком, комфортом, расписанием и хорошими новостями.",
+  "books": [
+   "dzhordzh-oruell-1984",
+   "evgeniy-zamyatin-my",
+   "oldos-haksli-o-divnyy-novyy-mir",
+   "rey-bredberi-451-po-farengeytu",
+   "dzhordzh-oruell-skotnyy-dvor",
+   "arkadiy-i-boris-strugackie-otyagoshchennye-zlom",
+   "arkadiy-i-boris-strugackie-grad-obrechennyy",
+   "andrey-platonov-kotlovan",
+   "kadzuo-isiguro-ne-otpuskay-menya",
+   "vladimir-sorokin-goluboe-salo"
+  ]
+ },
+ {
+  "slug": "chitat-na-noch-chtoby-usnut",
+  "title": "Читать на ночь, чтобы уснуть",
+  "description": "Медленная проза и короткие рассказы без резких поворотов: голова выключается сама.",
+  "books": [
+   "ivan-bunin-temnye-allei",
+   "dzheyms-dzhoys-dublincy",
+   "ivan-bunin-legkoe-dyhanie",
+   "olga-fadeeva-dva-tramvaya",
+   "aleksandr-kuprin-granatovyy-braslet",
+   "anton-chehov-palata-6",
+   "aleksandr-kuprin-olesya",
+   "marina-sokolova-pisma-k-sebe"
+  ]
+ },
+ {
+  "slug": "dlya-teh-kto-lyubit-dumat-o-dengah",
+  "title": "Для тех, кто любит думать о деньгах",
+  "description": "Не про «стань богатым за месяц», а про то, как устроены решения, риски и порядок в делах.",
+  "books": [
+   "erik-ris-lean-startup",
+   "piter-til-ot-nulya-k-edinice",
+   "nassim-taleb-chernyy-lebed",
+   "stiven-kovi-sem-navykov-vysokoeffektivnyh-lyudey",
+   "fil-nayt-prodavec-obuvi",
+   "uolter-ayzekson-korporaciya-geniev",
+   "daniel-kaneman-dumay-medlenno-reshay-bystro",
+   "mihay-chiksentmihayi-potok-psihologiya-optimalnogo-perezhivaniya",
+   "darrell-haff-kak-lgat-pri-pomoshchi-statistiki",
+   "dmitriy-smirnov-tvoy-pervyy-million"
+  ]
+ },
+ {
+  "slug": "nauka-bez-formul",
+  "title": "Наука без формул",
+  "description": "Книги, после которых становится понятно, как учёные вообще узнают то, что знают.",
+  "books": [
+   "stiven-hoking-kratkaya-istoriya-vremeni",
+   "karl-sagan-kosmos",
+   "brayan-grin-elegantnaya-vselennaya",
+   "bill-brayson-kratkaya-istoriya-pochti-vsego",
+   "richard-dokinz-egoistichnyy-gen",
+   "yuval-noy-harari-sapiens-kratkaya-istoriya-chelovechestva",
+   "mitio-kaku-fizika-nevozmozhnogo",
+   "peter-volleben-taynaya-zhizn-derevev",
+   "aleksandr-luriya-pomnit-vse",
+   "endi-veyer-proekt-ave-mariya"
+  ]
+ },
+ {
+  "slug": "fantastika-dlya-teh-kto-ee-ne-chitaet",
+  "title": "Фантастика для тех, кто её не читает",
+  "description": "Ни одной книги про космические сражения. Зато есть идеи, из-за которых неделю смотришь на мир иначе.",
+  "books": [
+   "stanislav-lem-solyaris",
+   "arkadiy-i-boris-strugackie-piknik-na-obochine",
+   "frenk-gerbert-dyuna",
+   "lyu-cysin-zadacha-treh-tel",
+   "ayzek-azimov-osnovanie",
+   "gerbert-uells-mashina-vremeni",
+   "endi-veyer-proekt-ave-mariya",
+   "endi-veyer-marsianin",
+   "kadzuo-isiguro-ne-otpuskay-menya",
+   "arkadiy-i-boris-strugackie-trudno-byt-bogom"
+  ]
+ },
+ {
+  "slug": "smeshno-vsluh",
+  "title": "Смешно вслух",
+  "description": "Книги, на которых люди в метро делают замечания. Проверено: смешные и через сто лет.",
+  "books": [
+   "ilya-ilf-evgeniy-petrov-dvenadcat-stulev",
+   "ilya-ilf-evgeniy-petrov-zolotoy-telenok",
+   "narine-abgaryan-manyunya",
+   "arkadiy-i-boris-strugackie-ponedelnik-nachinaetsya-v-subbotu",
+   "helen-filding-dnevnik-bridzhit-dzhons",
+   "dzhordzh-oruell-skotnyy-dvor",
+   "mihail-bulgakov-sobache-serdce",
+   "nikolay-nosov-neznayka-na-lune",
+   "dzherom-k-dzherom-troe-v-lodke-ne-schitaya-sobaki",
+   "dzherald-darrell-moya-semya-i-drugie-zveri"
+  ]
+ },
+ {
+  "slug": "knigi-o-knigah",
+  "title": "Книги о книгах",
+  "description": "Читать про чтение оказалось не менее интересно, чем читать сами книги. Здесь — те, после которых хочется вести дневник.",
+  "books": [
+   "mortimer-adler-kak-chitat-knigi",
+   "aleksey-oleynikov-chitat-kak-pisatel",
+   "elena-chizhova-kniga-pamyati",
+   "alberto-mangel-istoriya-chteniya",
+   "boris-sokolov-master-i-margarita-kommentariy",
+   "vladimir-nabokov-nabokov-lekcii-po-literature",
+   "rey-bredberi-451-po-farengeytu-esse",
+   "yuriy-polyakov-kniga-kotoroy-ne-bylo",
+   "olga-lavrenteva-bumazhnyy-dnevnik",
+   "rayner-mariya-rilke-pisma-k-molodomu-poetu"
+  ]
+ },
+ {
+  "slug": "detyam-8-12-let",
+  "title": "Детям 8–12 лет",
+  "description": "Книги, которые ребёнок прочитает сам, а потом попросит ещё. С проверенным эффектом «ещё одну главу».",
+  "books": [
+   "ekaterina-okovitaya-tayna-staroy-biblioteki",
+   "narine-abgaryan-manyunya",
+   "nikolay-nosov-neznayka-na-lune",
+   "astrid-lindgren-peppi-dlinnyychulok",
+   "astrid-lindgren-karlson-kotoryy-zhivet-na-kryshe",
+   "pamela-trevers-meri-poppins",
+   "lyuis-kerroll-alisa-v-strane-chudes",
+   "dzhon-tolkin-hobbit",
+   "olga-fadeeva-dva-tramvaya",
+   "ekaterina-murashova-moy-lev"
+  ]
+ },
+ {
+  "slug": "biografii-kotorye-chitayutsya-kak-roman",
+  "title": "Биографии, которые читаются как роман",
+  "description": "Люди, чьи жизни интереснее вымысла: с провалами, упрямством и неожиданными решениями.",
+  "books": [
+   "uolter-ayzekson-stiv-dzhobs",
+   "uolter-ayzekson-leonardo-da-vinchi",
+   "uolter-ayzekson-eynshteyn-ego-zhizn-i-vselennaya",
+   "fil-nayt-prodavec-obuvi",
+   "uolter-ayzekson-korporaciya-geniev",
+   "syuzen-kuinn-mariya-kyuri",
+   "irina-voynova-dnevnik-kak-sposob-zhit",
+   "aleksandr-blok-zapisnye-knizhki",
+   "marina-sokolova-pisma-k-sebe",
+   "anna-vereshchagina-vtoraya-zhizn"
+  ]
+ },
+ {
+  "slug": "poeziya-dlya-teh-kto-ee-boitsya",
+  "title": "Поэзия для тех, кто её боится",
+  "description": "Стихи, которые не нужно разбирать по строчкам: они работают, если читать вслух и не спешить.",
+  "books": [
+   "osip-mandelshtam-stihotvoreniya",
+   "marina-cvetaeva-stihotvoreniya-i-poemy",
+   "vladimir-mayakovskiy-izbrannoe",
+   "dmitriy-vodennikov-stihotvoreniya-o-prostom",
+   "aleksandr-pushkin-evgeniy-onegin",
+   "aleksandr-blok-dvenadcat-poema",
+   "neizvestnyy-avtor-slovo-o-polku-igoreve"
+  ]
+ },
+ {
+  "slug": "detektivy-na-odin-vecher",
+  "title": "Детективы на один вечер",
+  "description": "Загадка, ясный круг подозреваемых и развязка в конце. Ничего лишнего, кроме удовольствия разгадать.",
+  "books": [
+   "agata-kristi-ubiystvo-v-vostochnom-ekspresse",
+   "agata-kristi-desyat-negrityat",
+   "artur-konan-doyl-sherlok-holms-sobranie-rasskazov",
+   "tomas-harris-molchanie-yagnyat",
+   "stig-larsson-devushka-s-tatuirovkoy-drakona",
+   "styuart-terton-sem-smertey-eveliny-hardkasl",
+   "umberto-eko-imya-rozy",
+   "arkadiy-i-boris-strugackie-otel-u-pogibshego-alpinista",
+   "karlos-ruis-safon-ten-vetra",
+   "viktor-tochinov-delo-o-drakone"
+  ]
+ },
+ {
+  "slug": "o-lyubvi-bez-rozovyh-ochkov",
+  "title": "О любви без розовых очков",
+  "description": "Книги, где чувство — это работа, цена и выбор, а не только счастливый финал.",
+  "books": [
+   "gabriel-garsia-markes-lyubov-vo-vremya-chumy",
+   "devid-nikols-odin-den",
+   "erih-mariya-remark-tri-tovarishcha",
+   "dzheyn-ostin-gordost-i-predubezhdenie",
+   "emili-bronte-grozovoy-pereval",
+   "sharlotta-bronte-dzheyn-eyr",
+   "aleksandr-kuprin-olesya",
+   "anton-chehov-dama-s-sobachkoy",
+   "natalya-klyuchareva-osen-v-prigraniche",
+   "kolin-makkalou-poyushchie-v-ternovnike"
+  ]
+ },
+ {
+  "slug": "tolstye-knigi-na-kotorye-stoit-reshitsya",
+  "title": "Толстые книги, на которые стоит решиться",
+  "description": "Большие романы, где объём — это часть замысла: с ними живёшь месяц и потом скучаешь.",
+  "books": [
+   "lev-tolstoy-voyna-i-mir",
+   "lev-tolstoy-anna-karenina",
+   "mihail-sholohov-tihiy-don",
+   "aleksandr-dyuma-graf-monte-kristo",
+   "viktor-gyugo-otverzhennye",
+   "mariam-petrosyan-dom-v-kotorom",
+   "frenk-gerbert-dyuna",
+   "gregori-devid-roberts-shantaram",
+   "gabriel-garsia-markes-sto-let-odinochestva",
+   "aleksandr-solzhenicyn-arhipelag-gulag"
+  ]
+ },
+ {
+  "slug": "russkiy-xix-vek-chto-proishodit",
+  "title": "Русский XIX век: что происходит",
+  "description": "Не список в школьной программе, а эпоха: деньги, служба, любовь, споры о том, как жить дальше.",
+  "books": [
+   "aleksandr-pushkin-evgeniy-onegin",
+   "mihail-lermontov-geroy-nashego-vremeni",
+   "nikolay-gogol-mertvye-dushi",
+   "ivan-turgenev-otcy-i-deti",
+   "ivan-goncharov-oblomov",
+   "aleksandr-griboedov-gore-ot-uma",
+   "nikolay-gogol-revizor-pesa",
+   "aleksandr-gercen-kto-vinovat",
+   "ivan-turgenev-dvoryanskoe-gnezdo",
+   "ivan-goncharov-obyknovennaya-istoriya"
+  ]
+ },
+ {
+  "slug": "chitat-pered-poezdkoy",
+  "title": "Читать перед поездкой",
+  "description": "Книги, после которых город на фотографиях становится местом, где ты уже был.",
+  "books": [
+   "karlos-ruis-safon-ten-vetra",
+   "gregori-devid-roberts-shantaram",
+   "dzheyms-dzhoys-dublincy",
+   "viktor-gyugo-sobor-parizhskoy-bogomateri",
+   "aleksandr-dyuma-tri-mushketera",
+   "aleksandr-dyuma-koroleva-margo",
+   "gabriel-garsia-markes-sto-let-odinochestva",
+   "artur-golden-memuary-geyshi",
+   "donna-tartt-taynaya-istoriya",
+   "dzhonatan-harris-kratkaya-istoriya-vizantii"
+  ]
+ },
+ {
+  "slug": "uzhasy-dlya-ostorozhnyh",
+  "title": "Ужасы для осторожных",
+  "description": "Страшно, но не тошно: атмосфера и ожидание важнее, чем кровь. Для тех, кто хочет пощёкотать нервы и уснуть.",
+  "books": [
+   "stiven-king-siyanie",
+   "brem-stoker-drakula",
+   "meri-shelli-frankenshteyn",
+   "gaston-leru-prizrak-opery",
+   "olga-rodionova-ten-v-podvale",
+   "mariya-erofeeva-krasnaya-liniya",
+   "stiven-king-kladbishche-domashnih-zhivotnyh",
+   "stiven-king-doktor-son",
+   "stiven-king-ono",
+   "stiven-king-mizeri"
+  ]
+ },
+ {
+  "slug": "knigi-kotorye-nado-obsudit",
+  "title": "Книги, которые надо обсудить",
+  "description": "Для клуба: сюжет идёт в одну сторону, а разговор — в другую. Хорошие книги для спора.",
+  "books": [
+   "fedor-dostoevskiy-prestuplenie-i-nakazanie",
+   "fedor-dostoevskiy-idiot",
+   "fedor-dostoevskiy-besy",
+   "dzhordzh-oruell-1984",
+   "dzhordzh-oruell-skotnyy-dvor",
+   "franc-kafka-process",
+   "alber-kamyu-postoronniy",
+   "andrey-platonov-kotlovan",
+   "ivan-goncharov-oblomov",
+   "sergey-dovlatov-rok-n-roll-rasskazy"
+  ]
+ }
+]

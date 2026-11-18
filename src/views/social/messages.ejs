@@ -1,0 +1,38 @@
+<section class="section section--tight">
+  <div class="container container--narrow">
+    <div class="catalog-head">
+      <div>
+        <p class="micro-label">01 / Сообщения</p>
+        <h1 class="catalog-head__title">Переписка</h1>
+        <p class="catalog-head__count"><%= conversations.length %> <%= t.plural(conversations.length, ['диалог', 'диалога', 'диалогов']) %></p>
+      </div>
+      <a class="btn btn--ghost" href="/chitateli">Написать читателю →</a>
+    </div>
+
+    <% if (!conversations.length) { %>
+      <div class="empty-state">
+        <h2 class="empty-state__title">Переписки пока нет</h2>
+        <p class="empty-state__text">Откройте профиль читателя и нажмите «Написать» — здесь появится диалог.</p>
+        <div class="empty-state__actions"><a class="btn btn--primary" href="/chitateli">Найти читателей ↗</a></div>
+      </div>
+    <% } else { %>
+      <ul class="dialog-list list-clean">
+        <% conversations.forEach((dialog) => { %>
+          <li class="dialog-item">
+            <a class="dialog-item__link" href="/soobshcheniya/<%= dialog.id %>">
+              <span class="avatar" aria-hidden="true"><%= String(dialog.other.name || 'Ч').slice(0, 1) %></span>
+              <span class="dialog-item__body">
+                <span class="dialog-item__name"><%= dialog.other.name %></span>
+                <span class="dialog-item__preview"><%= dialog.preview || 'Диалог начат' %></span>
+              </span>
+              <span class="dialog-item__meta">
+                <% if (dialog.unread) { %><span class="pill pill--amber"><%= dialog.unread %></span><% } %>
+                <span class="micro-label"><%= dialog.lastMessageAt ? t.timeAgo(dialog.lastMessageAt) : '' %></span>
+              </span>
+            </a>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</section>
