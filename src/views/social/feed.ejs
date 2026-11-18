@@ -30,7 +30,8 @@
       <ul class="feed-list list-clean">
         <% result.items.forEach((item) => { %>
           <li class="feed-item">
-            <span class="avatar" aria-hidden="true"><%= String(item.user.name || 'Ч').slice(0, 1) %></span>
+            <img class="avatar avatar--img" src="/kartinki/avatar/<%= item.user.id %>"
+                 alt="" width="32" height="32" loading="lazy">
             <div class="feed-item__body">
               <p class="feed-item__text">
                 <a href="/chitateli/<%= item.user.id %>"><%= item.isOwn ? 'Вы' : item.user.name %></a>

@@ -31,7 +31,8 @@
       <ul class="people-list list-clean">
         <% people.forEach((person) => { %>
           <li class="people-item">
-            <span class="avatar avatar--lg" aria-hidden="true"><%= String(person.name || 'Ч').slice(0, 1) %></span>
+            <img class="avatar avatar--lg avatar--img" src="/kartinki/avatar/<%= person.id %>"
+                 alt="" width="56" height="56" loading="lazy">
             <div class="people-item__body">
               <a class="people-item__name" href="/chitateli/<%= person.id %>"><%= person.name %></a>
               <% if (person.bio) { %><p class="people-item__bio"><%= person.bio %></p><% } %>

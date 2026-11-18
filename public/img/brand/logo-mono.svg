@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="120" viewBox="0 0 560 120" role="img" aria-label="Книгоманы">
+  <title>Книгоманы — монохромный знак для печати</title>
+  <g transform="translate(12 14)" fill-rule="evenodd" fill="currentColor">
+    <path d="M20 0h52a20 20 0 0 1 20 20v52a20 20 0 0 1-20 20H20A20 20 0 0 1 0 72V20A20 20 0 0 1 20 0zm4 22h10v48H24V22zm17 0h10v48H41V22zm17 0h9v48h-9V22z"/>
+  </g>
+  <text x="124" y="72" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="42" font-weight="700"
+        fill="currentColor" letter-spacing="-1.2">Книгоманы</text>
+  <text x="124" y="96" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="14"
+        fill="currentColor" opacity="0.6" letter-spacing="3.2">ЧИТАТЕЛЬСКИЙ ДНЕВНИК</text>
+</svg>

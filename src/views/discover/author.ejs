@@ -6,9 +6,15 @@
       <a class="micro-label" href="/avtory">← все авторы</a>
     </div>
 
-    <h1 class="page-title"><%= author.name %></h1>
-    <% if (author.years) { %><p class="micro-label"><%= author.years %></p><% } %>
-    <% if (author.bio) { %><p class="lede"><%= author.bio %></p><% } %>
+    <div class="author-hero">
+      <img class="author-hero__portrait" src="/kartinki/avtor/<%= author.slug %>"
+           alt="Портрет: <%= author.name %>" width="480" height="480" loading="lazy">
+      <div class="author-hero__body">
+        <h1 class="page-title"><%= author.name %></h1>
+        <% if (author.years) { %><p class="micro-label"><%= author.years %></p><% } %>
+        <% if (author.bio) { %><p class="lede"><%= author.bio %></p><% } %>
+      </div>
+    </div>
   </div>
 </section>
 

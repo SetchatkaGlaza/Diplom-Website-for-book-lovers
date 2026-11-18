@@ -20,7 +20,8 @@
         <% conversations.forEach((dialog) => { %>
           <li class="dialog-item">
             <a class="dialog-item__link" href="/soobshcheniya/<%= dialog.id %>">
-              <span class="avatar" aria-hidden="true"><%= String(dialog.other.name || 'Ч').slice(0, 1) %></span>
+              <img class="avatar avatar--img" src="/kartinki/avatar/<%= dialog.other.id %>"
+                   alt="" width="32" height="32" loading="lazy">
               <span class="dialog-item__body">
                 <span class="dialog-item__name"><%= dialog.other.name %></span>
                 <span class="dialog-item__preview"><%= dialog.preview || 'Диалог начат' %></span>

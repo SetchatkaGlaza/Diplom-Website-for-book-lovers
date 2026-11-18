@@ -9,6 +9,8 @@
     </div>
 
     <div class="club-head">
+      <img class="club-head__cover" src="/kartinki/klub/<%= club.slug %>"
+           alt="Клуб «<%= club.name %>»" width="1200" height="420" fetchpriority="high">
       <div class="club-head__body">
         <h1 class="page-title"><%= club.name %></h1>
         <p class="lead"><%= club.description %></p>
