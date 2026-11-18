@@ -32,7 +32,16 @@ async function connectDatabase() {
 
   if (process.env.DB_DRIVER === 'pglite') {
     const { createPgliteSequelize } = require('./config/pglite');
-    const sequelize = await createPgliteSequelize({ logging: process.env.DB_LOGGING === 'true' });
+    // PGLITE_DATA_DIR задан — база лежит в папке и переживает перезапуск.
+    // Не задан — живёт в памяти: удобно для одноразовой проверки, но всё
+    // пропадёт после Ctrl+C, поэтому в журнал пишем честно.
+    const dataDir = process.env.PGLITE_DATA_DIR && process.env.PGLITE_DATA_DIR.trim()
+      ? path.resolve(process.env.PGLITE_DATA_DIR)
+      : null;
+    const sequelize = await createPgliteSequelize({
+      dataDir,
+      logging: process.env.DB_LOGGING === 'true'
+    });
     const models = defineModels(sequelize);
 
     if (process.env.DB_RESET === 'true') {
@@ -47,7 +56,11 @@ async function connectDatabase() {
       logger.info('демо-данные загружены', { books: result.books, genres: result.genres, users: result.users });
     }
 
-    logger.warn('режим разработки: БД в памяти (PGlite), данные не сохраняются после остановки');
+    if (dataDir) {
+      logger.info('режим разработки: PGlite в папке, данные сохраняются', { dataDir });
+    } else {
+      logger.warn('режим разработки: БД в памяти (PGlite), данные не сохраняются после остановки');
+    }
     return { sequelize, models, isPglite: true };
   }
 
