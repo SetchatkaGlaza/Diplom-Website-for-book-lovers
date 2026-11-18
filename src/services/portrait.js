@@ -101,10 +101,10 @@ function buildAuthorSvg({ name, years = '', size = 480, accent = '#c99a2e', pape
   <text x="50%" y="52%" text-anchor="middle" dominant-baseline="central"
         font-family="DejaVu Serif, Georgia, serif" font-size="${fontSize}" font-weight="700"
         fill="${ink}" letter-spacing="-2">${escapeXml(letters)}</text>
-  <text x="50%" y="${size - padding - Math.round(size * 0.06)}" text-anchor="middle"
+  <text x="50%" y="${size - padding - Math.round(size * 0.085)}" text-anchor="middle"
         font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="${Math.round(size * 0.052)}"
         fill="${ink}" opacity="0.55" letter-spacing="2">${escapeXml(String(name || '').toUpperCase())}</text>
-  ${years ? `<text x="50%" y="${size - padding - Math.round(size * 0.015)}" text-anchor="middle"
+  ${years ? `<text x="50%" y="${size - padding - Math.round(size * 0.022)}" text-anchor="middle"
         font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="${Math.round(size * 0.038)}"
         fill="${ink}" opacity="0.38" letter-spacing="2">${escapeXml(years)}</text>` : ''}
 </svg>`;
