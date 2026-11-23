@@ -1,41 +1,70 @@
 <section class="auth">
-  <div class="container auth__inner">
-    <div class="auth__intro">
-      <p class="micro-label">Вход</p>
-      <h1 class="auth__title">С возвращением</h1>
-      <p class="auth__lead">Ваши книги, прогресс и статистика ждут на месте.</p>
+  <div class="container auth__grid">
+    <%# Левая панель: не деколь на пустом месте, а «витрина» — обложки и три обещания %>
+    <aside class="auth__aside" aria-hidden="true">
+      <p class="micro-label micro-label--amber">Книгоманы</p>
+      <p class="auth__aside-title">Читай.<br>Считай.<br>Обсуждай.</p>
+      <p class="auth__aside-lead">Полка, прогресс и статистика — в одном месте. Без подписок и рекламы.</p>
+
+      <% if (typeof shelf !== 'undefined' && shelf && shelf.length) { %>
+        <div class="auth__shelf">
+          <% shelf.forEach((item, index) => { %>
+            <img class="auth__shelf-item auth__shelf-item--<%= index + 1 %>"
+                 src="/kartinki/oblozhka/<%= item.slug %>" alt="" width="600" height="900"
+                 loading="<%= index === 0 ? 'eager' : 'lazy' %>" decoding="async">
+          <% }) %>
+        </div>
+      <% } %>
+
+      <ul class="auth__points list-clean">
+        <li><span class="auth__point-mark" aria-hidden="true">▤</span>Полка: хочу, читаю, прочитал, бросил</li>
+        <li><span class="auth__point-mark" aria-hidden="true">◷</span>Статистика считается сама</li>
+        <li><span class="auth__point-mark" aria-hidden="true">◍</span>Клубы по главам, без спойлеров</li>
+      </ul>
+    </aside>
+
+    <div class="auth__panel">
+      <nav class="auth-tabs" aria-label="Вход или регистрация">
+        <a class="auth-tabs__link" href="/vhod" aria-current="page">Вход</a>
+        <a class="auth-tabs__link" href="/registratsiya">Регистрация</a>
+      </nav>
+
+      <div class="auth__intro">
+        <p class="micro-label">Вход</p>
+        <h1 class="auth__title">С возвращением</h1>
+        <p class="auth__lead">Ваши книги, прогресс и статистика ждут на месте.</p>
+      </div>
+
+      <form class="auth__form card" method="post" action="/vhod" novalidate>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <% if (errors.form) { %><p class="form-error" role="alert"><%= errors.form %></p><% } %>
+
+        <%- include('../partials/field', {
+          name: 'email',
+          label: 'E-mail',
+          type: 'email',
+          value: formData.email || '',
+          error: errors.email,
+          autocomplete: 'email'
+        }) %>
+
+        <%- include('../partials/field', {
+          name: 'password',
+          label: 'Пароль',
+          type: 'password',
+          error: errors.password,
+          autocomplete: 'current-password'
+        }) %>
+
+        <button class="btn btn--primary btn--block" type="submit">Войти</button>
+
+        <div class="auth__links">
+          <a href="/vosstanovit-parol">Забыли пароль?</a>
+          <span aria-hidden="true">·</span>
+          <a href="/registratsiya">Создать аккаунт</a>
+        </div>
+      </form>
     </div>
-
-    <form class="auth__form card" method="post" action="/vhod" novalidate>
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-
-      <% if (errors.form) { %><p class="form-error" role="alert"><%= errors.form %></p><% } %>
-
-      <%- include('../partials/field', {
-        name: 'email',
-        label: 'E-mail',
-        type: 'email',
-        value: formData.email || '',
-        error: errors.email,
-        autocomplete: 'email'
-      }) %>
-
-      <%- include('../partials/field', {
-        name: 'password',
-        label: 'Пароль',
-        type: 'password',
-        error: errors.password,
-        autocomplete: 'current-password'
-      }) %>
-
-      <button class="btn btn--primary btn--block" type="submit">Войти</button>
-
-      <p class="auth__foot">
-        <a href="/vosstanovit-parol">Забыли пароль?</a>
-      </p>
-      <p class="auth__foot">
-        Нет аккаунта? <a href="/registratsiya">Зарегистрироваться</a>
-      </p>
-    </form>
   </div>
 </section>

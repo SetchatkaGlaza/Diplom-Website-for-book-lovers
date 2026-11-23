@@ -2015,3 +2015,249 @@ select.field__input { appearance: none; background-image: none; cursor: pointer;
 @media (prefers-reduced-motion: reduce) {
   .hero-shelf__item { opacity: 1 !important; animation: none !important; }
 }
+
+/* ==========================================================================
+   ЭКРАНЫ ВХОДА И РЕГИСТРАЦИИ
+   Две панели: слева тёмная «витрина» с обложками и обещаниями, справа форма.
+   На планшете панель уходит наверх и становится компактной,
+   на телефоне остаётся только форма — без пустых полос.
+   ========================================================================== */
+.auth {
+  padding: clamp(20px, 4vw, 56px) 0 clamp(32px, 5vw, 64px);
+  background:
+    radial-gradient(50% 60% at 12% 0%, rgba(43, 80, 65, 0.07), transparent 60%),
+    var(--paper);
+}
+.auth__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(20px, 3vw, 40px);
+  align-items: stretch;
+}
+.auth__grid--single { grid-template-columns: minmax(0, 560px); justify-content: center; }
+
+/* --- левая панель --- */
+.auth__aside {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: clamp(24px, 3vw, 40px);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(70% 60% at 88% 6%, rgba(245, 185, 53, 0.22), transparent 62%),
+    radial-gradient(60% 70% at 4% 96%, rgba(43, 80, 65, 0.6), transparent 66%),
+    var(--ink);
+  color: #fff;
+}
+.auth__aside-title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(30px, 3.6vw, 46px);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+.auth__aside-lead { margin: 0; color: var(--muted-dark); font-size: 15px; max-width: 34ch; }
+
+/* Полка на панели: три обложки веером, ничего не вылезает за панель */
+.auth__shelf {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 6px 0;
+  padding: 0 4px;
+}
+.auth__shelf-item {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.45);
+  transform-origin: center bottom;
+  animation: auth-shelf-in 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.auth__shelf-item--1 { rotate: -4deg; translate: 0 6px; animation-delay: 60ms; }
+.auth__shelf-item--2 { rotate: 0deg;  translate: 0 -4px; animation-delay: 140ms; }
+.auth__shelf-item--3 { rotate: 4deg;  translate: 0 6px; animation-delay: 220ms; }
+@keyframes auth-shelf-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.95); }
+  to { opacity: 1; transform: none; }
+}
+.auth__points { display: grid; gap: 10px; margin: auto 0 0; font-size: 14.5px; color: rgba(255, 255, 255, 0.9); }
+.auth__points li { display: flex; gap: 10px; align-items: flex-start; }
+.auth__point-mark {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(245, 185, 53, 0.18);
+  color: var(--amber);
+  font-size: 12px;
+}
+
+/* --- правая панель с формой --- */
+.auth__panel { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.auth__panel--single { gap: 20px; }
+.auth__intro { display: grid; gap: 6px; }
+.auth__title {
+  margin: 0;
+  font-size: clamp(26px, 3.2vw, 38px);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+}
+.auth__lead { margin: 0; color: var(--muted); font-size: 15px; }
+
+/* Форма: аккуратные поля, ровные отступы, ничего не «прыгает» */
+.auth__form {
+  display: grid;
+  gap: 14px;
+  padding: clamp(18px, 2.4vw, 28px);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  min-width: 0;
+}
+.auth__form .field { margin: 0; }
+.auth__form .btn { margin-top: 4px; }
+.auth__form .form-error {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--danger-soft);
+  color: #8c2f26;
+  font-size: 14px;
+  border: 1px solid rgba(194, 69, 58, 0.25);
+}
+[data-theme="dark"] .auth__form .form-error { color: #f0b6ae; }
+.auth__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--muted);
+}
+.auth__links a { color: var(--green); font-weight: 600; text-decoration: none; }
+.auth__links a:hover { text-decoration: underline; }
+[data-theme="dark"] .auth__links a { color: var(--amber); }
+.auth__legal { margin: 0; font-size: 12px; line-height: 1.5; color: var(--muted); text-align: center; }
+.auth__legal a { color: inherit; }
+.auth__foot { margin: 0; font-size: 14px; color: var(--muted); }
+.auth__message-action { margin: 0; }
+
+/* --- телефон и планшет --- */
+@media (max-width: 900px) {
+  .auth__grid { grid-template-columns: 1fr; }
+  .auth__aside { gap: 12px; padding: 22px; }
+  /* на узком экране панель превращается в шапку: заголовок + маленькая полка в ряд */
+  .auth__aside-title { font-size: clamp(24px, 6vw, 32px); }
+  .auth__aside-title br { display: none; }
+  .auth__aside-lead { max-width: none; }
+  .auth__shelf {
+    grid-template-columns: repeat(3, minmax(0, 78px));
+    justify-content: start;
+    gap: 8px;
+    margin: 2px 0;
+  }
+  .auth__points { display: none; }
+}
+@media (max-width: 520px) {
+  .auth { padding-top: 12px; }
+  .auth__aside { display: none; }   /* на телефоне — сразу форма, без «шапки-витрины» */
+  .auth__form { padding: 16px; gap: 12px; }
+  .auth__links { justify-content: flex-start; }
+  .auth__legal { text-align: left; }
+}
+
+/* --- поля: иконка слева, кнопка «показать пароль» справа --- */
+.field { position: relative; display: grid; gap: 6px; }
+.field__label { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+.field__input {
+  min-height: 48px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--card);
+  font-size: 15px;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.field__input:hover { border-color: var(--muted); }
+.field__input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(43, 80, 65, 0.14);
+  outline: none;
+}
+.field--invalid .field__input { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(194, 69, 58, 0.12); }
+.field__hint { margin: 0; font-size: 12px; color: var(--muted); }
+.field__error { margin: 0; font-size: 12.5px; color: #a3382e; font-weight: 600; }
+[data-theme="dark"] .field__error { color: #f0b6ae; }
+.field--password .field__input { padding-right: 46px; }
+.field__toggle {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 40px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+}
+.field__toggle:hover { background: var(--paper-warm); color: var(--ink); }
+.field__toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
+
+/* --- запас прочности пароля: 4 деления --- */
+.pass-meter { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 2px; }
+.pass-meter__seg { height: 4px; border-radius: 999px; background: var(--line); transition: background 200ms ease; }
+.pass-meter__seg.is-1 { background: #d9534f; }
+.pass-meter__seg.is-2 { background: #e0a02a; }
+.pass-meter__seg.is-3 { background: #6f9c53; }
+.pass-meter__seg.is-4 { background: var(--green); }
+.pass-meter__text { margin: 0; font-size: 12px; color: var(--muted); }
+
+/* --- вкладки «Вход / Регистрация» --- */
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--paper-warm);
+  border: 1px solid var(--line);
+  margin-bottom: 2px;
+}
+.auth-tabs__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+  color: var(--muted);
+  transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+.auth-tabs__link:hover { color: var(--ink); }
+.auth-tabs__link[aria-current="page"] {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(18, 19, 20, 0.14);
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth__shelf-item { animation: none !important; opacity: 1 !important; }
+}
