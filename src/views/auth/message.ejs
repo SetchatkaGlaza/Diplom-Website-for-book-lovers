@@ -1,11 +1,15 @@
 <section class="auth">
-  <div class="container auth__inner">
-    <div class="auth__intro">
-      <p class="micro-label">Книгоманы</p>
-      <h1 class="auth__title"><%= heading %></h1>
-      <p class="auth__lead"><%= message %></p>
+  <div class="container auth__grid auth__grid--single">
+    <div class="auth__panel auth__panel--single">
+      <div class="auth__intro">
+        <p class="micro-label">Книгоманы</p>
+        <h1 class="auth__title"><%= heading %></h1>
+        <p class="auth__lead"><%= message %></p>
+      </div>
       <% if (typeof link !== 'undefined' && link) { %>
-        <p><a class="btn btn--ghost" href="<%= link.href %>"><%= link.label %></a></p>
+        <p class="auth__message-action">
+          <a class="btn btn--primary" href="<%= link.href %>"><%= link.label %></a>
+        </p>
       <% } %>
     </div>
   </div>

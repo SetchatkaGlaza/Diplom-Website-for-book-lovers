@@ -1,61 +1,91 @@
 <% const errors = locals.errors || {}; %>
 <section class="auth">
-  <div class="container auth__inner">
-    <div class="auth__intro">
-      <p class="micro-label">Аккаунт</p>
-      <h1 class="auth__title">Завести дневник чтения</h1>
-      <p class="auth__lead">Полка, прогресс, статистика и люди рядом. Бесплатно, без карты.</p>
+  <div class="container auth__grid">
+    <aside class="auth__aside" aria-hidden="true">
+      <p class="micro-label micro-label--amber">Книгоманы</p>
+      <p class="auth__aside-title">Дневник,<br>а не витрина.</p>
+      <p class="auth__aside-lead">Ваши записи видны только вам, пока вы сами не решите поделиться.</p>
+
+      <% if (typeof shelf !== 'undefined' && shelf && shelf.length) { %>
+        <div class="auth__shelf">
+          <% shelf.forEach((item, index) => { %>
+            <img class="auth__shelf-item auth__shelf-item--<%= index + 1 %>"
+                 src="/kartinki/oblozhka/<%= item.slug %>" alt="" width="600" height="900"
+                 loading="<%= index === 0 ? 'eager' : 'lazy' %>" decoding="async">
+          <% }) %>
+        </div>
+      <% } %>
+
+      <ul class="auth__points list-clean">
+        <li><span class="auth__point-mark" aria-hidden="true">✓</span>Бесплатно, без карты</li>
+        <li><span class="auth__point-mark" aria-hidden="true">✓</span>Полные тексты книг не публикуем</li>
+        <li><span class="auth__point-mark" aria-hidden="true">✓</span>Данные можно выгрузить одной кнопкой</li>
+      </ul>
+    </aside>
+
+    <div class="auth__panel">
+      <nav class="auth-tabs" aria-label="Вход или регистрация">
+        <a class="auth-tabs__link" href="/vhod">Вход</a>
+        <a class="auth-tabs__link" href="/registratsiya" aria-current="page">Регистрация</a>
+      </nav>
+
+      <div class="auth__intro">
+        <p class="micro-label">Аккаунт</p>
+        <h1 class="auth__title">Завести дневник</h1>
+        <p class="auth__lead">Полка, прогресс, статистика и люди рядом. Минута — и готово.</p>
+      </div>
+
+      <form class="auth__form card" method="post" action="/registratsiya" novalidate>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <% if (errors.form) { %><p class="form-error" role="alert"><%= errors.form %></p><% } %>
+
+        <%- include('../partials/field', {
+          name: 'name',
+          label: 'Как вас зовут',
+          value: formData.name || '',
+          error: errors.name,
+          autocomplete: 'nickname',
+          hint: 'Так вас будут видеть другие читатели'
+        }) %>
+
+        <%- include('../partials/field', {
+          name: 'email',
+          label: 'E-mail',
+          type: 'email',
+          value: formData.email || '',
+          error: errors.email,
+          autocomplete: 'email',
+          hint: 'Пришлём письмо для подтверждения'
+        }) %>
+
+        <%- include('../partials/field', {
+          name: 'password',
+          label: 'Пароль',
+          type: 'password',
+          error: errors.password,
+          autocomplete: 'new-password',
+          hint: 'Минимум 8 символов, хотя бы одна буква и одна цифра'
+        }) %>
+
+        <%- include('../partials/field', {
+          name: 'password_confirm',
+          label: 'Пароль ещё раз',
+          type: 'password',
+          autocomplete: 'new-password'
+        }) %>
+
+        <button class="btn btn--primary btn--block" type="submit">Создать аккаунт</button>
+
+        <p class="auth__legal">
+          Создавая аккаунт, вы принимаете <a href="/pravila">правила</a>
+          и соглашаетесь с <a href="/konfidentsialnost">политикой конфиденциальности</a>.
+        </p>
+        <div class="auth__links">
+          <span>Уже есть аккаунт?</span>
+          <a href="/vhod">Войти</a>
+        </div>
+      </form>
     </div>
-
-    <form class="auth__form card" method="post" action="/registratsiya" novalidate>
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-
-      <% if (errors.form) { %><p class="form-error" role="alert"><%= errors.form %></p><% } %>
-
-      <%- include('../partials/field', {
-        name: 'name',
-        label: 'Как вас зовут',
-        value: formData.name || '',
-        error: errors.name,
-        autocomplete: 'nickname',
-        hint: 'Так вас будут видеть другие читатели'
-      }) %>
-
-      <%- include('../partials/field', {
-        name: 'email',
-        label: 'E-mail',
-        type: 'email',
-        value: formData.email || '',
-        error: errors.email,
-        autocomplete: 'email',
-        hint: 'Пришлём письмо для подтверждения'
-      }) %>
-
-      <%- include('../partials/field', {
-        name: 'password',
-        label: 'Пароль',
-        type: 'password',
-        error: errors.password,
-        autocomplete: 'new-password',
-        hint: 'Минимум 8 символов, хотя бы одна буква и одна цифра'
-      }) %>
-
-      <%- include('../partials/field', {
-        name: 'password_confirm',
-        label: 'Пароль ещё раз',
-        type: 'password',
-        autocomplete: 'new-password'
-      }) %>
-
-      <button class="btn btn--primary btn--block" type="submit">Создать аккаунт</button>
-
-      <p class="auth__foot">
-        Уже есть аккаунт? <a href="/vhod">Войти</a>
-      </p>
-      <p class="auth__legal">
-        Создавая аккаунт, вы принимаете <a href="/pravila">правила</a>
-        и соглашаетесь с <a href="/konfidentsialnost">политикой конфиденциальности</a>.
-      </p>
-    </form>
   </div>
 </section>

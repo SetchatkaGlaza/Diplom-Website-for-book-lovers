@@ -1,6 +1,10 @@
 <%#
-  Поле формы с подписью и сообщением об ошибке.
+  Поле формы с подписью, подсказкой и сообщением об ошибке.
   Ожидает: name, label, type (по умолчанию text), value, error, hint, required, autocomplete.
+
+  Для пароля добавляется кнопка «показать/скрыть» и индикатор надёжности:
+  человек видит, что набрал, и не переспрашивает «а сколько там символов».
+  Скрипт — public/js/forms.js, обработчики не встроенные (CSP).
 %>
 <%
   const fieldType = typeof type !== 'undefined' && type ? type : 'text';
@@ -12,8 +16,10 @@
   const isRequired = typeof required !== 'undefined' ? required : true;
   const auto = typeof autocomplete !== 'undefined' ? autocomplete : 'off';
   const errorId = `err-${name}`;
+  const isPassword = fieldType === 'password';
+  const describedBy = fieldError ? errorId : (fieldHint ? `hint-${name}` : null);
 %>
-<div class="field<%= fieldError ? ' field--invalid' : '' %>">
+<div class="field<%= fieldError ? ' field--invalid' : '' %><%= isPassword ? ' field--password' : '' %>">
   <label class="field__label" for="<%= name %>"><%= label %></label>
   <input
     class="field__input"
@@ -23,9 +29,25 @@
     value="<%= fieldValue %>"
     <%= isRequired ? 'required' : '' %>
     autocomplete="<%= auto %>"
-    <%= fieldError ? `aria-invalid="true" aria-describedby="${errorId}"` : '' %>
-    <%= fieldHint && !fieldError ? `aria-describedby="hint-${name}"` : '' %>
+    <%= describedBy ? `aria-describedby="${describedBy}"` : '' %>
+    <%= fieldError ? 'aria-invalid="true"' : '' %>
+    <% if (isPassword) { %>data-password-input<% } %>
   >
+  <% if (isPassword) { %>
+    <button class="field__toggle" type="button" data-password-toggle data-target="<%= name %>"
+            aria-label="Показать пароль" aria-pressed="false" tabindex="0">
+      <span data-password-icon aria-hidden="true">◉</span>
+    </button>
+    <% if (auto === 'new-password') { %>
+      <div class="pass-meter" data-pass-meter aria-hidden="true">
+        <span class="pass-meter__seg"></span>
+        <span class="pass-meter__seg"></span>
+        <span class="pass-meter__seg"></span>
+        <span class="pass-meter__seg"></span>
+      </div>
+      <p class="pass-meter__text" data-pass-text>Надёжность пароля появится, когда начнёте вводить</p>
+    <% } %>
+  <% } %>
   <% if (fieldError) { %>
     <p class="field__error" id="<%= errorId %>"><%= fieldError %></p>
   <% } else if (fieldHint) { %>
