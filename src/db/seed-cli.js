@@ -14,29 +14,17 @@
 
 require('dotenv').config({ quiet: true });
 
-const path = require('node:path');
-const { Sequelize } = require('sequelize');
 const { loadContent, contentDir } = require('../config/content');
 const { validateContent } = require('../lib/content');
 const { plural } = require('../lib/text');
 
-async function openDatabase() {
-  if (process.env.DB_DRIVER === 'pglite') {
-    const { createPgliteSequelize } = require('../config/pglite');
-    const { defineModels } = require('../models');
-    const { migrateUp } = require('../db/migrator');
-    const sequelize = await createPgliteSequelize({ dataDir: process.env.PGLITE_DATA_DIR || null });
-    const models = defineModels(sequelize);
-    await migrateUp(sequelize, Sequelize, {
-      dir: path.join(__dirname, 'migrations'),
-      useTransactions: false
-    });
-    return { sequelize, models, owned: true };
-  }
-
-  const index = require('../models');
-  await index.sequelize.authenticate();
-  return { sequelize: index.sequelize, models: index, owned: false };
+/**
+ * База выбирается так же, как у сайта (src/config/db-driver.js): если
+ * Postgres не установлен, работает встроенная. Результат — { sequelize,
+ * models, close }: соединение закрываем в finally, иначе процесс висит.
+ */
+function openDatabase() {
+  return require('./open').openDatabase({ migrate: true });
 }
 
 async function main() {
@@ -63,8 +51,9 @@ async function main() {
 
   if (checkOnly) return;
 
-  const { sequelize, models, owned } = await openDatabase();
+  const db = await openDatabase();
   try {
+    const { sequelize, models } = db;
     const { createContentService } = require('../services/content');
     const service = createContentService({
       Book: models.Book,
@@ -92,9 +81,10 @@ async function main() {
     }
     console.log('[контент] в базе:', await service.stats());
   } finally {
-    if (owned) await sequelize.close();
-    else if (process.env.DB_DRIVER !== 'pglite') await sequelize.close();
+    await db.close();
   }
+  // см. migrate-cli: воркер PGlite не даёт процессу завершиться сам
+  process.exit(process.exitCode || 0);
 }
 
 main().catch((error) => {

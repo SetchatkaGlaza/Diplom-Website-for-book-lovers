@@ -8,6 +8,7 @@ const { logger } = require('./lib/logger');
 const { createPostgresSession, createMemorySession } = require('./lib/session');
 const { assertEnv, isProduction } = require('./config/env');
 const { assertMailReady } = require('./lib/mailer');
+const dbDriver = require('./config/db-driver');
 
 // Сначала окружение: без SESSION_SECRET и DATABASE_URL в продакшене
 // приложение стартовать не должно, и узнать об этом лучше сразу
@@ -19,10 +20,10 @@ const HOST = process.env.HOST || '0.0.0.0';
 /**
  * Подключение к БД.
  *
- * DB_DRIVER=pglite — локальная разработка без установки Postgres: база
- * поднимается в памяти процесса, схема накатывается миграциями, данные
- * заливаются сидом. DB_SEED=false отключает наполнение.
- * Иначе — настоящий Postgres по DATABASE_URL / DB_*.
+ * Какую базу брать — решает src/config/db-driver.js: если Postgres не
+ * установлен и DB_DRIVER не задан явно, поднимается встроенная база (PGlite)
+ * и проект запускается «из коробки». Схема накатывается миграциями, данные
+ * заливаются сидом; DB_SEED=false отключает наполнение.
  */
 async function connectDatabase() {
   const { Sequelize } = require('sequelize');
@@ -30,14 +31,14 @@ async function connectDatabase() {
   const { migrateUp } = require('./db/migrator');
   const MIGRATIONS = path.join(__dirname, 'db', 'migrations');
 
-  if (process.env.DB_DRIVER === 'pglite') {
+  const choice = await dbDriver.resolveDriver();
+  dbDriver.announce(choice);
+
+  if (choice.driver === 'pglite') {
     const { createPgliteSequelize } = require('./config/pglite');
-    // PGLITE_DATA_DIR задан — база лежит в папке и переживает перезапуск.
-    // Не задан — живёт в памяти: удобно для одноразовой проверки, но всё
-    // пропадёт после Ctrl+C, поэтому в журнал пишем честно.
-    const dataDir = process.env.PGLITE_DATA_DIR && process.env.PGLITE_DATA_DIR.trim()
-      ? path.resolve(process.env.PGLITE_DATA_DIR)
-      : null;
+    // База всегда лежит в папке (по умолчанию .data) и переживает
+    // перезапуск: иначе «поставил книгу на полку, перезапустил — пусто».
+    const dataDir = dbDriver.dataDir();
     const sequelize = await createPgliteSequelize({
       dataDir,
       logging: process.env.DB_LOGGING === 'true'
@@ -56,16 +57,22 @@ async function connectDatabase() {
       logger.info('демо-данные загружены', { books: result.books, genres: result.genres, users: result.users });
     }
 
-    if (dataDir) {
-      logger.info('режим разработки: PGlite в папке, данные сохраняются', { dataDir });
-    } else {
-      logger.warn('режим разработки: БД в памяти (PGlite), данные не сохраняются после остановки');
-    }
     return { sequelize, models, isPglite: true };
   }
 
   const index = require('./models');
-  await index.sequelize.authenticate();
+  try {
+    await index.sequelize.authenticate();
+  } catch (error) {
+    // Явно выбранный Postgres не отвечает: подменять базу молча нельзя,
+    // но и стектрейс на три экрана человеку не нужен — пишем, что делать.
+    const hint = dbDriver.errorHint(error);
+    logger.error('PostgreSQL недоступен', { hint, error: error.message });
+    logger.error('Варианты: запустить Postgres, создать базу '
+      + `«${process.env.DB_NAME || 'knigomany'}», указать DATABASE_URL `
+      + 'или запустить со встроенной базой: DB_DRIVER=pglite npm run dev');
+    throw error;
+  }
   // Письма: в продакшене проверяем транспорт до первого письма, а не после
   if (!assertMailReady({ logger })) {
     logger.warn('регистрация и сброс пароля будут работать только частично');
