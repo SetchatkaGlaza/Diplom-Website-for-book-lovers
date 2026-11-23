@@ -21,9 +21,38 @@ module.exports = function authRoutes({ models, services, auth }) {
   // Один адрес сайта на всё: письма, canonical и редиректы с www
   const baseUrl = () => publicUrl();
 
+  /**
+   * Обложки для «полки входа»: две-три книги из каталога, чтобы страница
+   * входа не была пустой формой на белом фоне. Считаем один раз в 10 минут
+   * и кэшируем: это декорация, свежесть не критична, а лишний запрос к базе
+   * на каждой странице входа не нужен.
+   */
+  let shelfCache = { at: 0, items: [] };
+  async function authShelf() {
+    const fresh = Date.now() - shelfCache.at < 10 * 60 * 1000;
+    if (fresh && shelfCache.items.length) return shelfCache.items;
+
+    try {
+      if (!models || !models.Book) return [];
+      const books = await models.Book.findAll({
+        where: { isPublished: true },
+        attributes: ['slug', 'title', 'author'],
+        order: [['ratingsCount', 'DESC'], ['id', 'ASC']],
+        limit: 3
+      });
+      const items = books.map((book) => ({ slug: book.slug, title: book.title }));
+      if (items.length) shelfCache = { at: Date.now(), items };
+      return items;
+    } catch (error) {
+      // Каталог недоступен — страница входа всё равно должна открыться
+      return [];
+    }
+  }
+
   // --- регистрация ---
-  router.get('/registratsiya', auth.guestOnly, (req, res) => {
+  router.get('/registratsiya', auth.guestOnly, async (req, res) => {
     res.render('auth/register', {
+      shelf: await authShelf(),
       title: 'Регистрация',
       description: 'Создайте аккаунт в Книгоманах: полка, прогресс чтения и статистика.',
       formData: {}
@@ -43,6 +72,7 @@ module.exports = function authRoutes({ models, services, auth }) {
 
       if (Object.keys(errors).length) {
         return res.status(422).render('auth/register', {
+          shelf: await authShelf(),
           title: 'Регистрация',
           description: 'Создайте аккаунт в Книгоманах.',
           errors,
@@ -59,6 +89,7 @@ module.exports = function authRoutes({ models, services, auth }) {
 
       if (result.error) {
         return res.status(422).render('auth/register', {
+          shelf: await authShelf(),
           title: 'Регистрация',
           description: 'Создайте аккаунт в Книгоманах.',
           errors: { email: result.error },
@@ -82,8 +113,9 @@ module.exports = function authRoutes({ models, services, auth }) {
   });
 
   // --- вход ---
-  router.get('/vhod', auth.guestOnly, (req, res) => {
+  router.get('/vhod', auth.guestOnly, async (req, res) => {
     res.render('auth/login', {
+      shelf: await authShelf(),
       title: 'Вход',
       description: 'Вход в Книгоманы: полка, прогресс чтения, статистика и клубы на одном экране.',
       formData: {},
@@ -98,6 +130,7 @@ module.exports = function authRoutes({ models, services, auth }) {
 
       if (email.error || !password) {
         return res.status(422).render('auth/login', {
+          shelf: await authShelf(),
           title: 'Вход',
           description: 'Вход в Книгоманы: полка, прогресс чтения, статистика и клубы на одном экране.',
           errors: { form: 'Проверьте e-mail и пароль' },
@@ -109,6 +142,7 @@ module.exports = function authRoutes({ models, services, auth }) {
 
       if (result.error === 'credentials') {
         return res.status(401).render('auth/login', {
+          shelf: await authShelf(),
           title: 'Вход',
           description: 'Вход в Книгоманы: полка, прогресс чтения, статистика и клубы на одном экране.',
           errors: { form: 'Неверный e-mail или пароль' },
@@ -118,6 +152,7 @@ module.exports = function authRoutes({ models, services, auth }) {
 
       if (result.error === 'blocked') {
         return res.status(403).render('auth/login', {
+          shelf: await authShelf(),
           title: 'Вход',
           description: 'Вход в Книгоманы: полка, прогресс чтения, статистика и клубы на одном экране.',
           errors: { form: 'Аккаунт заблокирован. Напишите на support@knigomany.ru' },

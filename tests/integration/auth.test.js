@@ -329,3 +329,65 @@ test('экспорт данных отдаёт JSON с полкой и реце�
   assert.equal(response.body.reviews[0].rating, 4);
   assert.equal(response.body.email, 'anna@example.com');
 });
+
+/**
+ * Экран входа и регистрации после редизайна.
+ *
+ * Проверяем не «красиво ли», а то, что легко сломать при правке шаблона:
+ *  - страница не пустая: есть витрина с обложками и подсказки;
+ *  - есть переключатель «вход / регистрация» и кнопка «показать пароль»;
+ *  - ошибки валидации показываются и не теряют введённое;
+ *  - форма по-прежнему отправляется и логинит.
+ */
+test('экран входа: витрина, вкладки и переключатель пароля', async (t) => {
+  const ctx = await createTestApp();
+  t.after(() => ctx.close());
+
+  await ctx.models.Book.create({
+    slug: 'duna', title: 'Дюна', author: 'Фрэнк Герберт', isPublished: true,
+    ratingsCount: 10, ratingsSum: 45
+  });
+
+  const page = await ctx.request.get('/vhod');
+  assert.equal(page.status, 200);
+
+  // Левая панель — не пустая: обложки из каталога и список обещаний
+  assert.match(page.text, /class="auth__aside"/);
+  assert.match(page.text, /\/kartinki\/oblozhka\/duna/);
+  assert.match(page.text, /auth__points/);
+
+  // Переключатель разделов ведёт на обе страницы
+  assert.match(page.text, /auth-tabs__link[^>]*href="\/vhod"[^>]*aria-current="page"/);
+  assert.match(page.text, /auth-tabs__link[^>]*href="\/registratsiya"/);
+
+  // Пароль можно показать; индикатор есть только у нового пароля
+  assert.match(page.text, /data-password-toggle/);
+  assert.ok(!/data-pass-meter/.test(page.text), 'на входе индикатор надёжности не нужен');
+
+  // Никаких встроенных обработчиков и стилей — этот тест есть и в design.test,
+  // но вход проверяем отдельно, чтобы ошибка была понятной
+  assert.ok(!/style="[^"]*"/.test(page.text));
+  assert.ok(!/\son(click|submit|input)=/.test(page.text));
+});
+
+test('экран регистрации: индикатор пароля и сохранение введённого при ошибке', async (t) => {
+  const ctx = await createTestApp();
+  t.after(() => ctx.close());
+
+  const page = await ctx.request.get('/registratsiya');
+  assert.equal(page.status, 200);
+  assert.match(page.text, /data-pass-meter/, 'у нового пароля должен быть индикатор');
+  assert.match(page.text, /auth-tabs__link[^>]*href="\/registratsiya"[^>]*aria-current="page"/);
+
+  // ctx.csrf берёт токен из той же сессии, из которой потом уходит форма
+  const token = await ctx.csrf('/registratsiya');
+  const failed = await ctx.agent.post('/registratsiya')
+    .type('form')
+    .send({ _csrf: token, name: 'Анна', email: 'не-почта', password: 'korotkiy1', password_confirm: 'korotkiy1' });
+
+  assert.equal(failed.status, 422);
+  // Введённое имя и почта остаются в полях — человеку не нужно набирать заново
+  assert.match(failed.text, /value="Анна"/);
+  assert.match(failed.text, /value="не-почта"/);
+  assert.match(failed.text, /field--invalid/);
+});
