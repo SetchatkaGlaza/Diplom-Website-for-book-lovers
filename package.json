@@ -27,7 +27,9 @@
     "content:check": "node src/db/seed-cli.js --check",
     "digest": "node src/db/digest-cli.js run",
     "digest:dry": "node src/db/digest-cli.js run --dry-run",
-    "digest:stats": "node src/db/digest-cli.js stats"
+    "digest:stats": "node src/db/digest-cli.js stats",
+    "doctor": "node scripts/doctor.js",
+    "db:reset": "node scripts/reset-db.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

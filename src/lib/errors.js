@@ -41,6 +41,28 @@ function wantsJson(req) {
   return req.path.startsWith('/api/') || (req.get('accept') || '').includes('application/json');
 }
 
+/**
+ * Понятное описание ошибки базы для страницы 500 в режиме разработки.
+ *
+ * Типовые случаи: Postgres не запущен, базы нет, нет таблиц (забыли миграции).
+ * Возвращает null, если ошибка не про базу — тогда покажем общий текст.
+ */
+function describeDatabaseError(error) {
+  const raw = String((error && (error.parent?.message || error.message)) || '');
+  if (!/ECONNREFUSED|3D000|does not exist|не существует|42P01|password authentication|ENOTFOUND|ETIMEDOUT/i.test(raw)) {
+    return null;
+  }
+  if (/42P01/.test(raw) || /relation .* does not exist/i.test(raw)) {
+    return 'В базе нет нужных таблиц — выполните npm run db:migrate (или npm run db:reset).';
+  }
+  if (/3D000/.test(raw) || /database .* does not exist/i.test(raw)) {
+    return 'База с таким именем не создана. Запустите встроенную: DB_DRIVER=pglite npm run dev, '
+      + 'или создайте базу и выполните npm run db:migrate.';
+  }
+  return 'Не удалось подключиться к PostgreSQL. Запустите Postgres или используйте встроенную базу: '
+    + 'DB_DRIVER=pglite npm run dev. Подсказка: npm run doctor';
+}
+
 function errorHandler(error, req, res, next) { // eslint-disable-line no-unused-vars
   // Ответ уже отправлен — отдаём управление стандартному обработчику Express
   if (res.headersSent) return next(error);
@@ -91,10 +113,17 @@ function errorHandler(error, req, res, next) { // eslint-disable-line no-unused-
     429: error.message
   };
 
-  // Внутренние детали наружу не отдаём: пользователю — общий текст
-  const message = isServerError
-    ? 'Мы уже записали ошибку и посмотрим, что случилось.'
-    : (messages[status] || error.message);
+  // Внутренние детали наружу не отдаём: пользователю — общий текст.
+  // Исключение — ошибка базы в разработке: без подсказки человек ищет
+  // причину в шаблонах, хотя дело в незапущенном Postgres.
+  const dbProblem = isServerError && process.env.NODE_ENV !== 'production'
+    ? describeDatabaseError(error)
+    : null;
+
+  const message = dbProblem
+    || (isServerError
+      ? 'Мы уже записали ошибку и посмотрим, что случилось.'
+      : (messages[status] || error.message));
 
   const viewData = {
     title: titles[status] || 'Что-то пошло не так',
@@ -112,4 +141,4 @@ function errorHandler(error, req, res, next) { // eslint-disable-line no-unused-
   });
 }
 
-module.exports = { HttpError, notFound, errorHandler };
+module.exports = { HttpError, notFound, errorHandler, describeDatabaseError };
