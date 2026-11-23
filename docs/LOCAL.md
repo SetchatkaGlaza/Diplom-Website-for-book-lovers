@@ -13,13 +13,16 @@ Studio ставить **не нужно** — база работает внут
 ## 0. Короткий путь (если не хочется ничего читать)
 
 ```bash
-git clone https://github.com/SetchatkaGlaza/Diplom-Website-for-book-lovers.git
-cd Diplom-Website-for-book-lovers
-./start.sh
+npm ci
+npm run dev
 ```
 
-Открой `http://localhost:3000`. Всё. Остальное ниже — если что-то пошло не так
-или нужен полный каталог, тесты и «как это проверить руками».
+Открой `http://localhost:3000`. Всё. Postgres и Docker ставить не нужно: если
+Postgres не найден, сайт автоматически поднимется на встроенной базе в папке
+`.data`, схема и демо-данные создадутся сами.
+
+В Windows то же самое — двойной щелчок по `start.bat`. Остальное ниже — если
+что-то пошло не так или нужен полный каталог, тесты и проверка руками.
 
 ---
 
@@ -57,15 +60,22 @@ npm ci
 ## 3. Запустить сайт
 
 ```bash
-./start.sh
+npm run dev
 ```
 
-Скрипт сам:
-- проверит Node,
-- поставит зависимости, если их нет,
-- поднимет базу в папке `.data`,
-- накатит схему и зальёт демо-данные (60 книг, 5 читателей, 3 клуба),
-- запустит сервер.
+Что произойдёт:
+- если Postgres не запущен — включится встроенная база (PGlite) в папке `.data`;
+- накатится схема и зальются демо-данные (60 книг, 5 читателей);
+- сервер поднимется на порту 3000.
+
+В журнале будет прямо написано, какая база используется:
+
+```
+{"message":"база: встроенная (PGlite)","meta":{"reason":"Postgres недоступен (…)"}}
+```
+
+То же самое одной командой (проверит Node, поставит зависимости, запустит):
+`./start.sh`, в Windows — `start.bat` двойным щелчком.
 
 В конце увидишь:
 
@@ -134,7 +144,7 @@ ls .data
 заливается отдельной командой:
 
 ```bash
-DB_DRIVER=pglite PGLITE_DATA_DIR="$PWD/.data" npm run content:load
+npm run content:load
 ```
 
 Ожидаемый вывод:
@@ -151,13 +161,13 @@ DB_DRIVER=pglite PGLITE_DATA_DIR="$PWD/.data" npm run content:load
 Проверить контент, ничего не записывая:
 
 ```bash
-DB_DRIVER=pglite PGLITE_DATA_DIR="$PWD/.data" npm run content:check
+npm run content:check
 ```
 
 Обновить описания и годы у уже залитых книг (после правки `content/books.json`):
 
 ```bash
-DB_DRIVER=pglite PGLITE_DATA_DIR="$PWD/.data" npm run content:load -- --update
+npm run content:load -- --update
 ```
 
 ---
@@ -258,9 +268,12 @@ npm run test:coverage      # плюс покрытие
 | `EADDRINUSE: port 3000` | уже запущен другой сайт. `PORT=3001 ./start.sh` и открыть `http://localhost:3001` |
 | Страница открылась, но «стили не грузятся» | открой `http://127.0.0.1:3000` вместо `localhost`, или очисти кэш (Ctrl+F5) |
 | Команда `content:load` «висит» | сайт запущен и держит базу — останови `Ctrl+C` и повтори |
-| После `Ctrl+C` пропали книги | запускал `npm start`, а не `./start.sh`: база была в памяти |
-| Всё сломалось, хочу как было | `./start.sh --reset` — пересоздаст базу с демо-данными |
-| Нужно обновить код после `git pull` | остановить, `npm ci` (если менялся `package.json`), `./start.sh` |
+| `database "knigomany" does not exist` | старая версия проекта искала настоящий Postgres. Обнови код: `git pull`, затем `npm run dev` — включится встроенная база |
+| `ECONNREFUSED 127.0.0.1:5432` | то же самое: Postgres не запущен. Запусти `DB_DRIVER=pglite npm run dev` или просто `npm run dev` на свежем коде |
+| `npm warn allow-scripts … bcrypt` | npm 11 не запустил установочный скрипт. Проверь: `npm run doctor`; если bcrypt «не загрузился» — `npm rebuild bcrypt` |
+| Ничего не понятно, что сломалось | `npm run doctor` — проверит Node, зависимости, bcrypt и базу, скажет, что делать |
+| Всё сломалось, хочу как было | `npm run db:reset` (или `./start.sh --reset`) — пересоздаст базу с демо-данными |
+| Нужно обновить код после `git pull` | остановить, `npm ci` (если менялся `package.json`), `npm run dev` |
 
 ---
 

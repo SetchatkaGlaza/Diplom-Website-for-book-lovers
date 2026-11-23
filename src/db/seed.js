@@ -118,17 +118,13 @@ function coverFor(index) {
  *   DATABASE_URL=... ADMIN_EMAIL=... node -e "require('./src/db/seed').seedAdmin()"
  */
 async function seedAdmin({ sequelize, models, email, password, name = 'Администратор', verbose = true } = {}) {
+  // core — открытое внутри соединение, чтобы закрыть его после работы
+  let core = null;
   if (!models) {
-    if (process.env.DB_DRIVER === 'pglite') {
-      const { createPgliteSequelize } = require('../config/pglite');
-      const { defineModels } = require('../models');
-      const pglite = await createPgliteSequelize({ dataDir: process.env.PGLITE_DATA_DIR || null });
-      models = defineModels(pglite);
-    } else {
-      const index = require('../models');
-      await index.sequelize.authenticate();
-      models = index;
-    }
+    const { openDatabase } = require('./open');
+    const db = await openDatabase({ migrate: true, silent: true });
+    models = db.models;
+    core = db;
   }
 
   const finalEmail = String(email || process.env.ADMIN_EMAIL || '').trim().toLowerCase();
@@ -137,6 +133,7 @@ async function seedAdmin({ sequelize, models, email, password, name = 'Адми�
   const existing = await models.User.findOne({ where: { email: finalEmail } });
   if (existing) {
     if (verbose) console.log(`администратор ${finalEmail} уже есть, ничего не меняю`);
+    if (core) await core.close();
     return { created: false, email: finalEmail };
   }
 
@@ -159,6 +156,7 @@ async function seedAdmin({ sequelize, models, email, password, name = 'Адми�
     console.log('Сохрани пароль и смени его в /nastroyki после входа.');
   }
 
+  if (core) await core.close();
   return { created: true, email: finalEmail, password: finalPassword };
 }
 
@@ -489,33 +487,26 @@ module.exports = { seed, seedAdmin, GENRES, BOOKS };
 
 if (require.main === module) {
   (async () => {
-    const { Sequelize } = require('sequelize');
-    let sequelize;
-    let models;
-    const { defineModels } = require('../models');
-    const { migrateUp } = require('./migrator');
+    const { openDatabase } = require('./open');
+    // migrate: true — команда должна работать и на чистой папке
+    const db = await openDatabase({ migrate: true });
 
-    if (process.env.DB_DRIVER === 'pglite') {
-      const { createPgliteSequelize } = require('../config/pglite');
-      sequelize = await createPgliteSequelize({ dataDir: process.env.PGLITE_DATA_DIR || null });
-      models = defineModels(sequelize);
-      const path = require('path');
-      await migrateUp(sequelize, Sequelize, {
-        dir: path.join(__dirname, 'migrations'),
-        useTransactions: false
-      });
-    } else {
-      const index = require('../models');
-      sequelize = index.sequelize;
-      models = index;
+    // Демо-данные поверх боевого каталога не нужны: если в базе уже
+    // 300+ книг из content/, человек запускает сид случайно.
+    const existing = await db.models.Book.count();
+    if (existing > 120) {
+      console.log(`В базе уже ${existing} книг — демо-данные не нужны, ничего не меняю.`);
+      await db.close();
+      process.exit(0);
     }
 
-    const result = await seed({ sequelize, models });
+    const result = await seed({ sequelize: db.sequelize, models: db.models });
     console.log('Готово:', result);
-    await sequelize.close();
-    if (process.env.DB_DRIVER !== 'pglite') process.exit(0);
+    console.log('Вход: anna@example.com / reader2026');
+    await db.close();
+    process.exit(0);
   })().catch((error) => {
     console.error('Сид упал:', error.message);
-    process.exitCode = 1;
+    process.exit(1);
   });
 }
